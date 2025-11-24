@@ -226,16 +226,18 @@ body {
 
 .crossword-grid {
     display: grid;
-    grid-template-columns: repeat(10, 32px);
-    grid-template-rows: repeat(10, 32px);
-    gap: 3px;
+    grid-template-columns: repeat(15, 32px);
+    grid-template-rows: repeat(15, 32px);
+    gap: 2px;
     justify-content: center;
     margin: 25px auto;
     background: linear-gradient(135deg, #ffe8f0 0%, #ffd9e8 100%);
-    padding: 18px;
+    padding: 15px;
     border-radius: 25px;
     box-shadow: 0 4px 20px rgba(255, 182, 193, 0.3);
     border: 2px solid rgba(255, 192, 203, 0.3);
+    max-width: 100%;
+    overflow-x: auto;
 }
 
 .cell {
@@ -382,7 +384,7 @@ body {
     }
     
     .game-container {
-        padding: 20px 15px;
+        padding: 20px 10px;
         border-radius: 25px;
         max-width: 100%;
     }
@@ -396,18 +398,19 @@ body {
     }
     
     .crossword-grid {
-        grid-template-columns: repeat(10, 30px);
-        grid-template-rows: repeat(10, 30px);
-        padding: 15px;
-        margin: 20px auto;
-        gap: 2px;
+        grid-template-columns: repeat(15, 22px);
+        grid-template-rows: repeat(15, 22px);
+        padding: 10px;
+        margin: 15px auto;
+        gap: 1px;
     }
     
     .cell {
-        width: 30px;
-        height: 30px;
-        font-size: 12px;
-        border-radius: 6px;
+        width: 22px;
+        height: 22px;
+        font-size: 10px;
+        border-radius: 4px;
+        border-width: 1px;
     }
     
     .play-button {
@@ -416,8 +419,8 @@ body {
     }
     
     .control-btn {
-        padding: 9px 15px;
-        font-size: 0.85rem;
+        padding: 8px 12px;
+        font-size: 0.8rem;
     }
     
     .clue-section {
@@ -437,14 +440,14 @@ body {
 
 @media (max-width: 400px) {
     .crossword-grid {
-        grid-template-columns: repeat(10, 26px);
-        grid-template-rows: repeat(10, 26px);
-        padding: 12px;
+        grid-template-columns: repeat(15, 18px);
+        grid-template-rows: repeat(15, 18px);
+        padding: 8px;
     }
     
     .cell {
-        width: 26px;
-        height: 26px;
-        font-size: 11px;
+        width: 18px;
+        height: 18px;
+        font-size: 9px;
     }
 }

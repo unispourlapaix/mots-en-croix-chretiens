@@ -1,9 +1,9 @@
 // Configuration globale du jeu
 const config = {
     // Paramètres de la grille
-    gridSize: 10,
-    cellSize: 40,
-    cellSizeMobile: 30,
+    gridSize: 15, // Augmenté pour accommoder les mots plus longs
+    cellSize: 32,
+    cellSizeMobile: 28,
     
     // Paramètres du jeu
     maxEncouragingWords: 7,
