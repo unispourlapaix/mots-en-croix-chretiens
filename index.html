@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mots En Croix Chrétiens</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🙏 Mots En Croix Chrétiens 🙏</h1>
+            <p>Trouve les mots d'encouragement et les mots bibliques</p>
+            <div id="languageSelector" class="language-selector"></div>
+        </div>
+
+        <div class="level-info">
+            <div>
+                <strong>Niveau: <span id="currentLevel">1</span>/8</strong>
+            </div>
+            <div class="score-display">
+                Score: <span id="score">0</span> points
+            </div>
+        </div>
+
+        <div id="startScreen">
+            <button class="play-button" id="playButton">
+                🎮 Jouer (<span id="clickCount">0</span>/7)
+            </button>
+            <div class="encouraging-words" id="encouragingWords"></div>
+        </div>
+
+        <div id="gameScreen" class="hidden">
+            <div class="crossword-grid" id="crosswordGrid"></div>
+            
+            <div class="word-clues">
+                <div class="clue-section">
+                    <h3>➡️ Horizontal</h3>
+                    <div id="horizontalClues"></div>
+                </div>
+                <div class="clue-section">
+                    <h3>⬇️ Vertical</h3>
+                    <div id="verticalClues"></div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn" id="checkButton">✅ Vérifier</button>
+                <button class="control-btn" id="hintButton">💡 Indice</button>
+                <button class="control-btn" id="nextLevelButton" style="display:none;">➡️ Niveau Suivant</button>
+                <button class="control-btn" id="resetButton">🔄 Recommencer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modules JavaScript -->
+    <script src="js/config.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/gameData.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>
