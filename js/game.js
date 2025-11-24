@@ -125,10 +125,10 @@ class ChristianCrosswordGame {
     setupLevel() {
         this.clearGrid();
         const levelData = gameDataManager.getLevelData(this.currentLevel);
-        
+
         if (levelData) {
             this.placeWords(levelData.words);
-            this.createGrid();
+            this.createGrid(levelData.words);
             this.displayClues(levelData.words);
             document.getElementById('currentLevel').textContent = this.currentLevel;
         }
@@ -142,14 +142,24 @@ class ChristianCrosswordGame {
 
     placeWords(words) {
         words.forEach(wordData => {
-            const { word, start, direction } = wordData;
-            const [row, col] = start;
-            
-            for (let i = 0; i < word.length; i++) {
-                if (direction === 'horizontal') {
-                    this.solution[row][col + i] = word[i];
-                } else {
-                    this.solution[row + i][col] = word[i];
+            const { word, path, start, direction } = wordData;
+
+            // Support des mots coudés avec path (nouveau système)
+            if (path && Array.isArray(path)) {
+                for (let i = 0; i < word.length && i < path.length; i++) {
+                    const [row, col] = path[i];
+                    this.solution[row][col] = word[i];
+                }
+            }
+            // Support des mots droits (ancien système pour compatibilité)
+            else if (start && direction) {
+                const [row, col] = start;
+                for (let i = 0; i < word.length; i++) {
+                    if (direction === 'horizontal') {
+                        this.solution[row][col + i] = word[i];
+                    } else {
+                        this.solution[row + i][col] = word[i];
+                    }
                 }
             }
         });
@@ -164,16 +174,38 @@ class ChristianCrosswordGame {
         }
     }
 
-    createGrid() {
+    createGrid(words) {
         const gridContainer = document.getElementById('crosswordGrid');
         gridContainer.innerHTML = '';
-        
-        // Ajouter des blasons décoratifs
-        const decorativeIcons = ['✝️', '🕊️', '🙏', '⛪', '📖', '💒', '🌈', '🕯️'];
-        gridContainer.dataset.decorTop = decorativeIcons[Math.floor(Math.random() * decorativeIcons.length)];
-        gridContainer.dataset.decorBottom = decorativeIcons[Math.floor(Math.random() * decorativeIcons.length)];
-        gridContainer.dataset.decorLeft = decorativeIcons[Math.floor(Math.random() * decorativeIcons.length)];
-        gridContainer.dataset.decorRight = decorativeIcons[Math.floor(Math.random() * decorativeIcons.length)];
+
+        // Ajouter des blasons et icônes décoratifs sur tous les bords
+        const decorativeIcons = ['✝️', '🕊️', '🙏', '⛪', '📖', '💒', '🌈', '🕯️', '👼', '⭐', '💫', '🔔', '🎺'];
+
+        // Coins
+        gridContainer.dataset.decorTopLeft = decorativeIcons[Math.floor(Math.random() * decorativeIcons.length)];
+        gridContainer.dataset.decorBottomRight = decorativeIcons[Math.floor(Math.random() * decorativeIcons.length)];
+
+        // Créer les décorations sur les 4 côtés
+        const positions = ['top', 'bottom', 'left', 'right'];
+        positions.forEach(pos => {
+            const decor = document.createElement('div');
+            decor.className = `grid-decoration ${pos}`;
+            decor.textContent = decorativeIcons[Math.floor(Math.random() * decorativeIcons.length)];
+            decor.style.animationDelay = `${Math.random() * 2}s`;
+            gridContainer.appendChild(decor);
+        });
+
+        // Créer un map des positions de départ pour ajouter les icônes
+        const startPositions = new Map();
+        words.forEach((wordData, index) => {
+            // Support des mots coudés (path) et mots droits (start)
+            const [row, col] = wordData.path ? wordData.path[0] : wordData.start;
+            const key = `${row}-${col}`;
+            if (!startPositions.has(key)) {
+                startPositions.set(key, []);
+            }
+            startPositions.get(key).push({ index, direction: wordData.direction || 'bent' });
+        });
 
         for (let i = 0; i < config.gridSize; i++) {
             for (let j = 0; j < config.gridSize; j++) {
@@ -185,9 +217,32 @@ class ChristianCrosswordGame {
                 if (this.blocked[i][j]) {
                     cell.classList.add('blocked');
                 } else {
-                    cell.contentEditable = true;
-                    cell.addEventListener('input', (e) => this.handleCellInput(e, i, j));
-                    cell.addEventListener('keydown', (e) => this.handleKeyNavigation(e, i, j));
+                    // Ajouter l'icône si c'est une case de départ
+                    const key = `${i}-${j}`;
+                    if (startPositions.has(key)) {
+                        const wordIcons = this.getWordIcons();
+                        const startInfo = startPositions.get(key);
+                        const iconSpan = document.createElement('span');
+                        iconSpan.className = 'cell-icon';
+                        iconSpan.textContent = startInfo.map(info => wordIcons[info.index]).join('');
+                        cell.appendChild(iconSpan);
+                    }
+
+                    // Créer un span pour la lettre
+                    const letterSpan = document.createElement('span');
+                    letterSpan.className = 'cell-letter';
+                    cell.appendChild(letterSpan);
+
+                    // Rendre la cellule focusable
+                    cell.tabIndex = 0;
+
+                    // Focus au clic
+                    cell.addEventListener('click', () => {
+                        cell.focus();
+                    });
+
+                    // Gérer toute la saisie clavier
+                    cell.addEventListener('keydown', (e) => this.handleCellKeydown(e, i, j));
                 }
 
                 gridContainer.appendChild(cell);
@@ -195,64 +250,181 @@ class ChristianCrosswordGame {
         }
     }
 
-    handleCellInput(event, row, col) {
-        const value = event.target.textContent.toUpperCase();
-        if (value.length > 1) {
-            event.target.textContent = value.slice(-1);
-        }
-        this.grid[row][col] = event.target.textContent.toUpperCase();
-        
-        if (this.grid[row][col] === this.solution[row][col]) {
-            event.target.classList.add('correct');
-        }
+    getWordIcons() {
+        // Chiffres simples en gras pour une meilleure lisibilité
+        return ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'];
     }
 
-    handleKeyNavigation(event, row, col) {
+    handleCellKeydown(event, row, col) {
         const key = event.key;
-        let newRow = row, newCol = col;
+        const cell = event.target;
+        const letterSpan = cell.querySelector('.cell-letter');
 
-        switch(key) {
-            case 'ArrowUp': newRow = Math.max(0, row - 1); break;
-            case 'ArrowDown': newRow = Math.min(config.gridSize - 1, row + 1); break;
-            case 'ArrowLeft': newCol = Math.max(0, col - 1); break;
-            case 'ArrowRight': newCol = Math.min(config.gridSize - 1, col + 1); break;
-            default: return;
+        // Gestion des lettres A-Z
+        if (key.length === 1 && /[a-zA-Z]/.test(key)) {
+            event.preventDefault();
+
+            const letter = key.toUpperCase();
+
+            // Mettre à jour le span de la lettre
+            if (letterSpan) {
+                letterSpan.textContent = letter;
+            }
+
+            // Mettre à jour le modèle
+            this.grid[row][col] = letter;
+
+            // Vérifier si c'est correct
+            if (letter === this.solution[row][col]) {
+                cell.classList.add('correct');
+            } else {
+                cell.classList.remove('correct');
+            }
+
+            // Auto-avance
+            setTimeout(() => {
+                this.moveToNextCell(row, col);
+            }, 50);
+            return;
         }
 
-        event.preventDefault();
+        // Gestion du Backspace/Delete
+        if (key === 'Backspace' || key === 'Delete') {
+            event.preventDefault();
+
+            // Effacer la lettre
+            if (letterSpan) {
+                letterSpan.textContent = '';
+            }
+
+            this.grid[row][col] = '';
+            cell.classList.remove('correct');
+
+            // Si la cellule était vide, revenir en arrière
+            if (!currentValue || currentValue === '') {
+                this.moveToPreviousCell(row, col);
+            }
+            return;
+        }
+
+        // Gestion des flèches directionnelles
+        let newRow = row, newCol = col;
+        switch(key) {
+            case 'ArrowUp':
+                newRow = Math.max(0, row - 1);
+                event.preventDefault();
+                break;
+            case 'ArrowDown':
+                newRow = Math.min(config.gridSize - 1, row + 1);
+                event.preventDefault();
+                break;
+            case 'ArrowLeft':
+                newCol = Math.max(0, col - 1);
+                event.preventDefault();
+                break;
+            case 'ArrowRight':
+                newCol = Math.min(config.gridSize - 1, col + 1);
+                event.preventDefault();
+                break;
+            default:
+                return;
+        }
+
+        // Déplacer vers la nouvelle cellule
         const nextCell = document.querySelector(`[data-row="${newRow}"][data-col="${newCol}"]`);
         if (nextCell && !this.blocked[newRow][newCol]) {
             nextCell.focus();
         }
     }
 
+    moveToNextCell(row, col) {
+        // Essayer d'abord à droite (horizontal)
+        if (col + 1 < config.gridSize && !this.blocked[row][col + 1]) {
+            const nextCell = document.querySelector(`[data-row="${row}"][data-col="${col + 1}"]`);
+            if (nextCell) {
+                nextCell.focus();
+                return;
+            }
+        }
+
+        // Sinon essayer en bas (vertical)
+        if (row + 1 < config.gridSize && !this.blocked[row + 1][col]) {
+            const nextCell = document.querySelector(`[data-row="${row + 1}"][data-col="${col}"]`);
+            if (nextCell) {
+                nextCell.focus();
+                return;
+            }
+        }
+
+        // Chercher la prochaine cellule non bloquée
+        for (let i = row; i < config.gridSize; i++) {
+            for (let j = (i === row ? col + 1 : 0); j < config.gridSize; j++) {
+                if (!this.blocked[i][j]) {
+                    const nextCell = document.querySelector(`[data-row="${i}"][data-col="${j}"]`);
+                    if (nextCell) {
+                        nextCell.focus();
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    moveToPreviousCell(row, col) {
+        // Essayer d'abord à gauche (horizontal)
+        if (col - 1 >= 0 && !this.blocked[row][col - 1]) {
+            const prevCell = document.querySelector(`[data-row="${row}"][data-col="${col - 1}"]`);
+            if (prevCell) {
+                prevCell.focus();
+                return;
+            }
+        }
+
+        // Sinon essayer en haut (vertical)
+        if (row - 1 >= 0 && !this.blocked[row - 1][col]) {
+            const prevCell = document.querySelector(`[data-row="${row - 1}"][data-col="${col}"]`);
+            if (prevCell) {
+                prevCell.focus();
+                return;
+            }
+        }
+
+        // Si aucune cellule précédente n'est disponible, chercher la cellule non bloquée précédente
+        for (let i = row; i >= 0; i--) {
+            for (let j = (i === row ? col - 1 : config.gridSize - 1); j >= 0; j--) {
+                if (!this.blocked[i][j]) {
+                    const prevCell = document.querySelector(`[data-row="${i}"][data-col="${j}"]`);
+                    if (prevCell) {
+                        prevCell.focus();
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
     displayClues(words) {
         const horizontalClues = document.getElementById('horizontalClues');
         const verticalClues = document.getElementById('verticalClues');
-        
-        // Icônes kawaii pour les indices
-        const icons = ['💝', '🌸', '✨', '🌟', '💕', '🦋', '🌺', '🎀'];
-        
+
+        const wordIcons = this.getWordIcons();
+
         horizontalClues.innerHTML = '';
         verticalClues.innerHTML = '';
 
-        let hIndex = 0;
-        let vIndex = 0;
-        
-        words.forEach((wordData) => {
+        words.forEach((wordData, index) => {
             const clueElement = document.createElement('div');
             clueElement.className = 'clue';
-            
+
+            // Icône numérique pour identifier le mot
+            const numberIcon = wordIcons[index];
+
             if (wordData.direction === 'horizontal') {
-                const icon = icons[hIndex % icons.length];
-                clueElement.innerHTML = `<span class="clue-icon">${icon}</span> ${wordData.clue} <span class="clue-length">(${wordData.word.length})</span>`;
+                clueElement.innerHTML = `<span class="clue-icon">${numberIcon}</span> ${wordData.clue} <span class="clue-length">(${wordData.word.length})</span>`;
                 horizontalClues.appendChild(clueElement);
-                hIndex++;
             } else {
-                const icon = icons[vIndex % icons.length];
-                clueElement.innerHTML = `<span class="clue-icon">${icon}</span> ${wordData.clue} <span class="clue-length">(${wordData.word.length})</span>`;
+                clueElement.innerHTML = `<span class="clue-icon">${numberIcon}</span> ${wordData.clue} <span class="clue-length">(${wordData.word.length})</span>`;
                 verticalClues.appendChild(clueElement);
-                vIndex++;
             }
         });
     }
@@ -299,7 +471,17 @@ class ChristianCrosswordGame {
             const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
             const [row, col] = randomCell;
             const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-            cell.textContent = this.solution[row][col];
+
+            // Sauvegarder l'icône si elle existe
+            const iconSpan = cell.querySelector('.cell-icon');
+
+            // Mettre à jour le contenu
+            cell.textContent = '';
+            if (iconSpan) {
+                cell.appendChild(iconSpan);
+            }
+            cell.appendChild(document.createTextNode(this.solution[row][col]));
+
             cell.classList.add('correct');
             this.grid[row][col] = this.solution[row][col];
             this.score -= config.hintPenalty;
