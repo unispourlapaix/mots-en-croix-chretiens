@@ -167,6 +167,13 @@ class ChristianCrosswordGame {
     createGrid() {
         const gridContainer = document.getElementById('crosswordGrid');
         gridContainer.innerHTML = '';
+        
+        // Ajouter des blasons décoratifs
+        const decorativeIcons = ['✝️', '🕊️', '🙏', '⛪', '📖', '💒', '🌈', '🕯️'];
+        gridContainer.dataset.decorTop = decorativeIcons[Math.floor(Math.random() * decorativeIcons.length)];
+        gridContainer.dataset.decorBottom = decorativeIcons[Math.floor(Math.random() * decorativeIcons.length)];
+        gridContainer.dataset.decorLeft = decorativeIcons[Math.floor(Math.random() * decorativeIcons.length)];
+        gridContainer.dataset.decorRight = decorativeIcons[Math.floor(Math.random() * decorativeIcons.length)];
 
         for (let i = 0; i < config.gridSize; i++) {
             for (let j = 0; j < config.gridSize; j++) {
@@ -223,18 +230,29 @@ class ChristianCrosswordGame {
         const horizontalClues = document.getElementById('horizontalClues');
         const verticalClues = document.getElementById('verticalClues');
         
+        // Icônes kawaii pour les indices
+        const icons = ['💝', '🌸', '✨', '🌟', '💕', '🦋', '🌺', '🎀'];
+        
         horizontalClues.innerHTML = '';
         verticalClues.innerHTML = '';
 
-        words.forEach((wordData, index) => {
+        let hIndex = 0;
+        let vIndex = 0;
+        
+        words.forEach((wordData) => {
             const clueElement = document.createElement('div');
             clueElement.className = 'clue';
-            clueElement.innerHTML = `<strong>${index + 1}.</strong> ${wordData.clue} (${wordData.word.length} ${i18n.t('letters')})`;
             
             if (wordData.direction === 'horizontal') {
+                const icon = icons[hIndex % icons.length];
+                clueElement.innerHTML = `<span class="clue-icon">${icon}</span> ${wordData.clue} <span class="clue-length">(${wordData.word.length})</span>`;
                 horizontalClues.appendChild(clueElement);
+                hIndex++;
             } else {
+                const icon = icons[vIndex % icons.length];
+                clueElement.innerHTML = `<span class="clue-icon">${icon}</span> ${wordData.clue} <span class="clue-length">(${wordData.word.length})</span>`;
                 verticalClues.appendChild(clueElement);
+                vIndex++;
             }
         });
     }

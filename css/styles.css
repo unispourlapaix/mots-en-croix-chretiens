@@ -238,6 +238,27 @@ body {
     border: 2px solid rgba(255, 192, 203, 0.3);
     max-width: 100%;
     overflow-x: auto;
+    position: relative;
+}
+
+.crossword-grid::before {
+    content: attr(data-decor-top) ' ' attr(data-decor-left);
+    position: absolute;
+    top: -30px;
+    left: -30px;
+    font-size: 24px;
+    opacity: 0.7;
+    animation: kawaii-pulse 2s ease-in-out infinite;
+}
+
+.crossword-grid::after {
+    content: attr(data-decor-bottom) ' ' attr(data-decor-right);
+    position: absolute;
+    bottom: -30px;
+    right: -30px;
+    font-size: 24px;
+    opacity: 0.7;
+    animation: kawaii-pulse 2s ease-in-out infinite 1s;
 }
 
 .cell {
@@ -328,6 +349,22 @@ body {
     font-size: 0.9rem;
     box-shadow: 0 2px 6px rgba(255, 192, 203, 0.15);
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.clue .clue-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    animation: sparkle 3s ease-in-out infinite;
+}
+
+.clue .clue-length {
+    color: #ff85c1;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-left: auto;
 }
 
 .clue:hover {
