@@ -1,10 +1,18 @@
-@echo off@echo off
-
-echo 🚀 Demarrage du serveur de developpement FaithChronicles...taskkill /f /im node.exe >nul 2>&1
-
-echo.timeout /t 1 /nobreak >nul
-
-echo 📍 URL: http://localhost:3000npm start
-echo 🔑 Supabase: Configure dans .env
+@echo off
+echo 🚀 Demarrage du serveur de developpement - Mots En Croix Chretiens...
 echo.
-npm start
+
+REM Tuer les processus Python existants sur le port 8000
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr :8000') do taskkill /F /PID %%a 2>nul
+
+echo 📍 URL: http://localhost:8000
+echo 💡 Service Worker actif uniquement sur HTTPS ou localhost
+echo 🎨 Design: Rose Kawaii - Mobile HD Portrait
+echo.
+
+REM Démarrer le serveur Python
+cd /d "%~dp0"
+python -m http.server 8000
+
+pause
+

@@ -1,10 +1,170 @@
-# 🙏 Mots En Croix Chrétiens
+# 💕 Mots En Croix Chrétiens - PWA
 
-Un jeu de mots croisés bibliques interactif et gratuit, créé pour encourager et inspirer à travers la Parole de Dieu.
+> Jeu de mots croisés chrétiens avec un design kawaii rose élégant, optimisé pour mobile HD portrait et installable en tant qu'application web progressive.
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
-![Platform](https://img.shields.io/badge/platform-web-orange.svg)
+![Version](https://img.shields.io/badge/version-1.0.0-ff69b4)
+![PWA](https://img.shields.io/badge/PWA-ready-success)
+![License](https://img.shields.io/badge/license-MIT-blue)
+
+## ✨ Fonctionnalités
+
+- 🎮 **8 Niveaux** de difficulté croissante
+- 🌍 **3 Langues** : Français, English, Español
+- 💕 **Design Rose Kawaii** élégant et moderne
+- 📱 **Optimisé Mobile HD** en mode portrait
+- 🔌 **Mode Offline** avec Service Worker
+- 📲 **Installable** comme application native
+- ✨ **Animations** douces et ludiques
+- 🎯 **Système de Score** avec indices
+- ⌨️ **Navigation Clavier** supportée
+
+## 🚀 Installation Rapide
+
+### Option 1: Télécharger et Ouvrir
+1. Télécharger le projet
+2. Ouvrir `index.html` dans un navigateur
+
+### Option 2: Serveur Local (Recommandé pour PWA)
+
+**Avec Python:**
+```bash
+python -m http.server 8000
+# Ou double-cliquer sur dev.bat
+```
+
+**Avec Node.js:**
+```bash
+npx http-server -p 8000
+# Ou double-cliquer sur dev-node.bat
+```
+
+Puis ouvrir: http://localhost:8000
+
+### Option 3: Déployer en Ligne
+
+**GitHub Pages:**
+```bash
+git push origin master
+# Activer Pages dans Settings
+```
+
+**Netlify/Vercel:** Connecter le repo et déployer
+
+## 📱 Installer l'Application
+
+### Android
+1. Ouvrir sur Chrome mobile
+2. Cliquer "📱 Installer l'Application"
+3. Ou Menu > "Ajouter à l'écran d'accueil"
+
+### iOS
+1. Ouvrir sur Safari
+2. Bouton Partage ⬆️
+3. "Sur l'écran d'accueil"
+
+### Desktop
+1. Icône d'installation dans la barre d'adresse
+2. Ou cliquer le bouton "📱 Installer l'Application"
+
+## 🎨 Design
+
+- **Palette**: Roses pastels (#ff69b4, #ff85c1, #ffb6d9)
+- **Background**: Gradient blanc rosé
+- **Animations**: Sparkle ✨ et Heartbeat 💕
+- **Responsive**: 3 breakpoints (desktop, mobile, petit mobile)
+- **Grille**: Adaptative 32px → 30px → 26px
+
+## 🏗️ Structure du Projet
+
+```
+mots-en-croix-chretiens/
+├── index.html              # Page principale
+├── manifest.json           # Manifeste PWA
+├── service-worker.js       # Service Worker
+├── css/
+│   └── styles.css         # Styles rose kawaii
+├── js/
+│   ├── config.js          # Configuration
+│   ├── i18n.js            # Traductions
+│   ├── gameData.js        # Niveaux et mots
+│   └── game.js            # Logique du jeu
+├── icons/                 # Icônes PWA (à générer)
+├── screenshots/           # Captures d'écran
+├── STRUCTURE.md           # Documentation structure
+├── DESIGN.md              # Documentation design
+└── PWA-INSTALL.md         # Guide installation PWA
+```
+
+## 🌍 Ajouter une Langue
+
+1. **Dans `js/i18n.js`**: Ajouter les traductions UI
+2. **Dans `js/gameData.js`**: Ajouter les niveaux traduits
+3. Le sélecteur de langue s'ajoutera automatiquement
+
+## 🎯 Configuration PWA
+
+### Générer les Icônes
+1. Ouvrir `icon-generator.html`
+2. Télécharger les SVG
+3. Convertir en PNG (72, 96, 128, 144, 152, 180, 192, 384, 512px)
+4. Placer dans `/icons/`
+
+### Vérifier l'Installation
+- Chrome DevTools > Application > Manifest
+- Chrome DevTools > Application > Service Workers
+- Lighthouse > Progressive Web App (score > 90)
+
+## 🔧 Technologies
+
+- **HTML5** - Structure
+- **CSS3** - Styles et animations
+- **JavaScript Vanilla** - Logique
+- **Service Worker** - Mode offline
+- **PWA Manifest** - Installabilité
+
+## 📚 Documentation
+
+- [STRUCTURE.md](STRUCTURE.md) - Architecture modulaire
+- [DESIGN.md](DESIGN.md) - Guide du design rose kawaii
+- [PWA-INSTALL.md](PWA-INSTALL.md) - Configuration PWA complète
+
+## 🤝 Contribution
+
+Les contributions sont bienvenues!
+- Nouvelles langues
+- Nouveaux niveaux
+- Améliorations du design
+- Corrections de bugs
+
+## 📜 Licence
+
+Ce projet est sous licence **MIT** - voir le fichier [LICENSE](LICENSE) pour plus de détails.
+
+Tu es libre de :
+- ✅ Utiliser ce code dans tes projets
+- ✅ Modifier le code comme tu veux
+- ✅ Distribuer le code
+- ✅ Utiliser ce code commercialement
+
+**Seule condition** : Mentionner Emmanuel.gallery comme source originale.
+
+## 💝 Crédits
+
+- **Créé par** : [Emmanuel.gallery](https://emmanuel.gallery)
+- **Concept** : Jeu de mots croisés bibliques pour encourager la foi
+- **But** : Promouvoir l'amour, la paix et l'unité à travers la Parole de Dieu
+
+## 📧 Contact
+
+Pour toute question ou suggestion :
+- 🌐 Site web : [emmanuel.gallery](https://emmanuel.gallery)
+- 📧 Email : emmanuelpayet888@gmail.com
+
+---
+
+*"Que la Parole de Christ habite en vous avec richesse" - Colossiens 3:16*
+
+🙏 **Made with 💕 by Dream** 🙏
 
 ## ✨ Fonctionnalités
 
