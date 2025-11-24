@@ -141,10 +141,19 @@ class I18n {
     t(key, replacements = {}) {
         const translation = this.translations[this.currentLanguage]?.[key] || key;
         
-        // Remplacer les variables dans la chaîne (ex: {score}, {percent})
-        return translation.replace(/\{(\w+)\}/g, (match, variable) => {
-            return replacements[variable] !== undefined ? replacements[variable] : match;
-        });
+        // Si c'est un tableau, le retourner directement
+        if (Array.isArray(translation)) {
+            return translation;
+        }
+        
+        // Si c'est une chaîne, remplacer les variables (ex: {score}, {percent})
+        if (typeof translation === 'string') {
+            return translation.replace(/\{(\w+)\}/g, (match, variable) => {
+                return replacements[variable] !== undefined ? replacements[variable] : match;
+            });
+        }
+        
+        return translation;
     }
     
     getAvailableLanguages() {
