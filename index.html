@@ -26,6 +26,23 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+    <!-- Fond animé avec lignes ondulées -->
+    <div class="background-waves">
+        <div class="wave wave-1"></div>
+        <div class="wave wave-2"></div>
+        <div class="wave wave-3"></div>
+        <div class="wave wave-4"></div>
+    </div>
+
+    <!-- Étoiles scintillantes -->
+    <div class="background-stars">
+        <div class="star s1"></div>
+        <div class="star s2"></div>
+        <div class="star s3"></div>
+        <div class="star s4"></div>
+        <div class="star s5"></div>
+    </div>
+
     <div class="game-container">
         <div class="header">
             <h1>🙏 Mots En Croix Chrétiens 🙏</h1>
@@ -57,11 +74,11 @@
             
             <div class="word-clues">
                 <div class="clue-section">
-                    <h3>➡️ Horizontal</h3>
+                    <h3><span class="arrow-icon arrow-right"></span></h3>
                     <div id="horizontalClues"></div>
                 </div>
                 <div class="clue-section">
-                    <h3>⬇️ Vertical</h3>
+                    <h3><span class="arrow-icon arrow-down"></span></h3>
                     <div id="verticalClues"></div>
                 </div>
             </div>

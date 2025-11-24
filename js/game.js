@@ -75,12 +75,7 @@ class ChristianCrosswordGame {
         document.getElementById('nextLevelButton').textContent = i18n.t('nextLevel');
         document.getElementById('resetButton').textContent = i18n.t('reset');
         
-        // Mettre à jour les titres des sections
-        const horizontalTitle = document.querySelector('#horizontalClues').previousElementSibling;
-        if (horizontalTitle) horizontalTitle.textContent = i18n.t('horizontal');
-        
-        const verticalTitle = document.querySelector('#verticalClues').previousElementSibling;
-        if (verticalTitle) verticalTitle.textContent = i18n.t('vertical');
+        // Les flèches sont maintenant géométriques, pas besoin de mettre à jour le texte
         
         // Mettre à jour les labels
         document.querySelector('.level-info div:first-child strong').innerHTML = 
@@ -92,12 +87,15 @@ class ChristianCrosswordGame {
     handlePlayButtonClick() {
         this.clickCount++;
         document.getElementById('clickCount').textContent = this.clickCount;
-        
+
         if (this.clickCount <= config.maxEncouragingWords) {
             this.showEncouragingWord(this.clickCount - 1);
         }
-        
+
         if (this.clickCount === config.maxEncouragingWords) {
+            // Cacher le bouton jouer
+            document.getElementById('playButton').style.display = 'none';
+
             setTimeout(() => {
                 this.startGame();
             }, config.levelTransitionDelay);
@@ -178,22 +176,63 @@ class ChristianCrosswordGame {
         const gridContainer = document.getElementById('crosswordGrid');
         gridContainer.innerHTML = '';
 
+        // Ajouter des traits décoratifs animés roses
+        const lineTop = document.createElement('div');
+        lineTop.className = 'decorative-line line-top';
+        gridContainer.appendChild(lineTop);
+
+        const lineBottom = document.createElement('div');
+        lineBottom.className = 'decorative-line line-bottom';
+        gridContainer.appendChild(lineBottom);
+
+        const lineLeft = document.createElement('div');
+        lineLeft.className = 'decorative-line line-left';
+        gridContainer.appendChild(lineLeft);
+
+        const lineRight = document.createElement('div');
+        lineRight.className = 'decorative-line line-right';
+        gridContainer.appendChild(lineRight);
+
         // Ajouter des blasons et icônes décoratifs sur tous les bords
         const decorativeIcons = ['✝️', '🕊️', '🙏', '⛪', '📖', '💒', '🌈', '🕯️', '👼', '⭐', '💫', '🔔', '🎺'];
 
-        // Coins
+        // Coins avec positions aléatoires
         gridContainer.dataset.decorTopLeft = decorativeIcons[Math.floor(Math.random() * decorativeIcons.length)];
         gridContainer.dataset.decorBottomRight = decorativeIcons[Math.floor(Math.random() * decorativeIcons.length)];
 
-        // Créer les décorations sur les 4 côtés
-        const positions = ['top', 'bottom', 'left', 'right'];
-        positions.forEach(pos => {
+        // Créer 4-6 décorations aléatoires sur les bords
+        const numDecorations = 4 + Math.floor(Math.random() * 3); // 4 à 6 emojis
+        for (let i = 0; i < numDecorations; i++) {
             const decor = document.createElement('div');
-            decor.className = `grid-decoration ${pos}`;
+            decor.className = 'grid-decoration random';
             decor.textContent = decorativeIcons[Math.floor(Math.random() * decorativeIcons.length)];
             decor.style.animationDelay = `${Math.random() * 2}s`;
+
+            // Choisir un bord aléatoire
+            const side = Math.floor(Math.random() * 4); // 0=top, 1=right, 2=bottom, 3=left
+            const position = 15 + Math.random() * 70; // Position entre 15% et 85% du bord
+
+            switch(side) {
+                case 0: // top
+                    decor.style.top = '-35px';
+                    decor.style.left = `${position}%`;
+                    break;
+                case 1: // right
+                    decor.style.right = '-35px';
+                    decor.style.top = `${position}%`;
+                    break;
+                case 2: // bottom
+                    decor.style.bottom = '-35px';
+                    decor.style.left = `${position}%`;
+                    break;
+                case 3: // left
+                    decor.style.left = '-35px';
+                    decor.style.top = `${position}%`;
+                    break;
+            }
+
             gridContainer.appendChild(decor);
-        });
+        }
 
         // Créer un map des positions de départ pour ajouter les icônes
         const startPositions = new Map();
@@ -228,21 +267,81 @@ class ChristianCrosswordGame {
                         cell.appendChild(iconSpan);
                     }
 
-                    // Créer un span pour la lettre
+                    // Créer un span visible pour afficher la lettre
                     const letterSpan = document.createElement('span');
                     letterSpan.className = 'cell-letter';
                     cell.appendChild(letterSpan);
 
-                    // Rendre la cellule focusable
-                    cell.tabIndex = 0;
+                    // Créer un input transparent pour la saisie
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.maxLength = 1;
+                    input.className = 'cell-input';
+                    input.autocomplete = 'off';
+                    input.autocorrect = 'off';
+                    input.autocapitalize = 'characters';
+                    cell.appendChild(input);
 
-                    // Focus au clic
-                    cell.addEventListener('click', () => {
-                        cell.focus();
+                    // Gérer le focus
+                    input.addEventListener('focus', () => {
+                        document.querySelectorAll('.cell.focused').forEach(c => c.classList.remove('focused'));
+                        cell.classList.add('focused');
                     });
 
-                    // Gérer toute la saisie clavier
-                    cell.addEventListener('keydown', (e) => this.handleCellKeydown(e, i, j));
+                    input.addEventListener('blur', () => {
+                        cell.classList.remove('focused');
+                    });
+
+                    // Gérer l'input
+                    input.addEventListener('input', (e) => {
+                        const letter = e.target.value.toUpperCase();
+                        if (letter && /[A-Z]/.test(letter)) {
+                            letterSpan.textContent = letter;
+                            this.grid[i][j] = letter;
+
+                            // Vérifier si correct
+                            if (letter === this.solution[i][j]) {
+                                cell.classList.add('correct');
+                            } else {
+                                cell.classList.remove('correct');
+                            }
+
+                            // Vider l'input et avancer
+                            input.value = '';
+                            setTimeout(() => {
+                                this.moveToNextCell(i, j);
+                            }, 50);
+                        }
+                    });
+
+                    // Gérer les touches spéciales
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Backspace' || e.key === 'Delete') {
+                            e.preventDefault();
+                            const currentValue = this.grid[i][j];
+
+                            letterSpan.textContent = '';
+                            this.grid[i][j] = '';
+                            cell.classList.remove('correct');
+                            input.value = '';
+
+                            if (!currentValue) {
+                                this.moveToPreviousCell(i, j);
+                            }
+                        } else if (e.key === 'ArrowUp') {
+                            e.preventDefault();
+                            this.moveTo(Math.max(0, i - 1), j);
+                        } else if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            this.moveTo(Math.min(config.gridSize - 1, i + 1), j);
+                        } else if (e.key === 'ArrowLeft') {
+                            e.preventDefault();
+                            this.moveTo(i, Math.max(0, j - 1));
+                        } else if (e.key === 'ArrowRight') {
+                            e.preventDefault();
+                            this.moveTo(i, Math.min(config.gridSize - 1, j + 1));
+                        }
+                    });
                 }
 
                 gridContainer.appendChild(cell);
@@ -255,116 +354,39 @@ class ChristianCrosswordGame {
         return ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'];
     }
 
-    handleCellKeydown(event, row, col) {
-        const key = event.key;
-        const cell = event.target;
-        const letterSpan = cell.querySelector('.cell-letter');
+    moveTo(row, col) {
+        if (this.blocked[row][col]) return;
 
-        // Gestion des lettres A-Z
-        if (key.length === 1 && /[a-zA-Z]/.test(key)) {
-            event.preventDefault();
-
-            const letter = key.toUpperCase();
-
-            // Mettre à jour le span de la lettre
-            if (letterSpan) {
-                letterSpan.textContent = letter;
+        const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+        if (cell) {
+            const input = cell.querySelector('.cell-input');
+            if (input) {
+                document.querySelectorAll('.cell.focused').forEach(c => c.classList.remove('focused'));
+                cell.classList.add('focused');
+                input.focus();
             }
-
-            // Mettre à jour le modèle
-            this.grid[row][col] = letter;
-
-            // Vérifier si c'est correct
-            if (letter === this.solution[row][col]) {
-                cell.classList.add('correct');
-            } else {
-                cell.classList.remove('correct');
-            }
-
-            // Auto-avance
-            setTimeout(() => {
-                this.moveToNextCell(row, col);
-            }, 50);
-            return;
-        }
-
-        // Gestion du Backspace/Delete
-        if (key === 'Backspace' || key === 'Delete') {
-            event.preventDefault();
-
-            // Effacer la lettre
-            if (letterSpan) {
-                letterSpan.textContent = '';
-            }
-
-            this.grid[row][col] = '';
-            cell.classList.remove('correct');
-
-            // Si la cellule était vide, revenir en arrière
-            if (!currentValue || currentValue === '') {
-                this.moveToPreviousCell(row, col);
-            }
-            return;
-        }
-
-        // Gestion des flèches directionnelles
-        let newRow = row, newCol = col;
-        switch(key) {
-            case 'ArrowUp':
-                newRow = Math.max(0, row - 1);
-                event.preventDefault();
-                break;
-            case 'ArrowDown':
-                newRow = Math.min(config.gridSize - 1, row + 1);
-                event.preventDefault();
-                break;
-            case 'ArrowLeft':
-                newCol = Math.max(0, col - 1);
-                event.preventDefault();
-                break;
-            case 'ArrowRight':
-                newCol = Math.min(config.gridSize - 1, col + 1);
-                event.preventDefault();
-                break;
-            default:
-                return;
-        }
-
-        // Déplacer vers la nouvelle cellule
-        const nextCell = document.querySelector(`[data-row="${newRow}"][data-col="${newCol}"]`);
-        if (nextCell && !this.blocked[newRow][newCol]) {
-            nextCell.focus();
         }
     }
 
     moveToNextCell(row, col) {
         // Essayer d'abord à droite (horizontal)
         if (col + 1 < config.gridSize && !this.blocked[row][col + 1]) {
-            const nextCell = document.querySelector(`[data-row="${row}"][data-col="${col + 1}"]`);
-            if (nextCell) {
-                nextCell.focus();
-                return;
-            }
+            this.moveTo(row, col + 1);
+            return;
         }
 
         // Sinon essayer en bas (vertical)
         if (row + 1 < config.gridSize && !this.blocked[row + 1][col]) {
-            const nextCell = document.querySelector(`[data-row="${row + 1}"][data-col="${col}"]`);
-            if (nextCell) {
-                nextCell.focus();
-                return;
-            }
+            this.moveTo(row + 1, col);
+            return;
         }
 
         // Chercher la prochaine cellule non bloquée
         for (let i = row; i < config.gridSize; i++) {
             for (let j = (i === row ? col + 1 : 0); j < config.gridSize; j++) {
                 if (!this.blocked[i][j]) {
-                    const nextCell = document.querySelector(`[data-row="${i}"][data-col="${j}"]`);
-                    if (nextCell) {
-                        nextCell.focus();
-                        return;
-                    }
+                    this.moveTo(i, j);
+                    return;
                 }
             }
         }
@@ -373,31 +395,22 @@ class ChristianCrosswordGame {
     moveToPreviousCell(row, col) {
         // Essayer d'abord à gauche (horizontal)
         if (col - 1 >= 0 && !this.blocked[row][col - 1]) {
-            const prevCell = document.querySelector(`[data-row="${row}"][data-col="${col - 1}"]`);
-            if (prevCell) {
-                prevCell.focus();
-                return;
-            }
+            this.moveTo(row, col - 1);
+            return;
         }
 
         // Sinon essayer en haut (vertical)
         if (row - 1 >= 0 && !this.blocked[row - 1][col]) {
-            const prevCell = document.querySelector(`[data-row="${row - 1}"][data-col="${col}"]`);
-            if (prevCell) {
-                prevCell.focus();
-                return;
-            }
+            this.moveTo(row - 1, col);
+            return;
         }
 
         // Si aucune cellule précédente n'est disponible, chercher la cellule non bloquée précédente
         for (let i = row; i >= 0; i--) {
             for (let j = (i === row ? col - 1 : config.gridSize - 1); j >= 0; j--) {
                 if (!this.blocked[i][j]) {
-                    const prevCell = document.querySelector(`[data-row="${i}"][data-col="${j}"]`);
-                    if (prevCell) {
-                        prevCell.focus();
-                        return;
-                    }
+                    this.moveTo(i, j);
+                    return;
                 }
             }
         }
@@ -420,10 +433,18 @@ class ChristianCrosswordGame {
             const numberIcon = wordIcons[index];
 
             if (wordData.direction === 'horizontal') {
-                clueElement.innerHTML = `<span class="clue-icon">${numberIcon}</span> ${wordData.clue} <span class="clue-length">(${wordData.word.length})</span>`;
+                clueElement.innerHTML = `
+                    <span class="clue-icon">${numberIcon}</span>
+                    <span class="clue-text">${wordData.clue}</span>
+                    <span class="clue-length">${wordData.word.length}</span>
+                `;
                 horizontalClues.appendChild(clueElement);
             } else {
-                clueElement.innerHTML = `<span class="clue-icon">${numberIcon}</span> ${wordData.clue} <span class="clue-length">(${wordData.word.length})</span>`;
+                clueElement.innerHTML = `
+                    <span class="clue-icon">${numberIcon}</span>
+                    <span class="clue-text">${wordData.clue}</span>
+                    <span class="clue-length">${wordData.word.length}</span>
+                `;
                 verticalClues.appendChild(clueElement);
             }
         });
@@ -472,15 +493,11 @@ class ChristianCrosswordGame {
             const [row, col] = randomCell;
             const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
 
-            // Sauvegarder l'icône si elle existe
-            const iconSpan = cell.querySelector('.cell-icon');
-
-            // Mettre à jour le contenu
-            cell.textContent = '';
-            if (iconSpan) {
-                cell.appendChild(iconSpan);
+            // Mettre à jour uniquement le span de la lettre
+            const letterSpan = cell.querySelector('.cell-letter');
+            if (letterSpan) {
+                letterSpan.textContent = this.solution[row][col];
             }
-            cell.appendChild(document.createTextNode(this.solution[row][col]));
 
             cell.classList.add('correct');
             this.grid[row][col] = this.solution[row][col];
@@ -510,6 +527,7 @@ class ChristianCrosswordGame {
         document.getElementById('startScreen').classList.remove('hidden');
         document.getElementById('gameScreen').classList.add('hidden');
         document.getElementById('nextLevelButton').style.display = 'none';
+        document.getElementById('playButton').style.display = 'inline-block';
         this.updateUIText();
     }
 }
