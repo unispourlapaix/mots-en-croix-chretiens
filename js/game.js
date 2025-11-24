@@ -111,7 +111,7 @@ class ChristianCrosswordGame {
             const wordElement = document.createElement('div');
             wordElement.className = 'word-float';
             wordElement.textContent = encouragingWords[index];
-            wordElement.style.animationDelay = `${index * config.animationDelay}s`;
+            wordElement.style.animationDelay = `${index * 0.15}s`;
             wordsContainer.appendChild(wordElement);
         }
     }
