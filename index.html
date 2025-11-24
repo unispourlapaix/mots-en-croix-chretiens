@@ -6,16 +6,33 @@
     <meta name="theme-color" content="#ff69b4">
     <meta name="description" content="Jeu de mots croisés chrétiens avec un design kawaii rose élégant">
     <title>💕 Mots En Croix Chrétiens 💕</title>
-    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- PWA -->
     <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff69b4">
+    
+    <!-- iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Mots Croix">
+    <link rel="apple-touch-icon" href="icons/icon-152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div class="game-container">
         <div class="header">
             <h1>🙏 Mots En Croix Chrétiens 🙏</h1>
             <p>Trouve les mots d'encouragement et les mots bibliques</p>
+            <button id="installButton" class="install-button hidden">
+                📱 Installer l'Application
+            </button>
             <div id="languageSelector" class="language-selector"></div>
         </div>
 
@@ -63,5 +80,76 @@
     <script src="js/i18n.js"></script>
     <script src="js/gameData.js"></script>
     <script src="js/game.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        // Enregistrer le Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then((registration) => {
+                        console.log('✅ Service Worker enregistré:', registration.scope);
+                        
+                        // Vérifier les mises à jour
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // Nouvelle version disponible
+                                    if (confirm('🎉 Nouvelle version disponible ! Voulez-vous mettre à jour ?')) {
+                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch((error) => {
+                        console.log('❌ Erreur Service Worker:', error);
+                    });
+            });
+
+            // Gérer les mises à jour du Service Worker
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    window.location.reload();
+                }
+            });
+        }
+
+        // Gérer l'événement d'installation de la PWA
+        let deferredPrompt;
+        const installButton = document.getElementById('installButton');
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Afficher le bouton d'installation
+            if (installButton) {
+                installButton.classList.remove('hidden');
+                installButton.addEventListener('click', async () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        console.log(`Installation: ${outcome}`);
+                        deferredPrompt = null;
+                        installButton.classList.add('hidden');
+                    }
+                });
+            }
+        });
+
+        // Détecter quand l'app est installée
+        window.addEventListener('appinstalled', () => {
+            console.log('🎉 Application installée avec succès!');
+            if (installButton) {
+                installButton.classList.add('hidden');
+            }
+            deferredPrompt = null;
+        });
+    </script>
 </body>
 </html>

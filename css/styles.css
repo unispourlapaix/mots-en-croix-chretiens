@@ -46,6 +46,26 @@ body {
     font-weight: 500;
 }
 
+.install-button {
+    background: linear-gradient(135deg, #ffc0dd 0%, #ffb6d9 100%);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin: 12px 0 8px 0;
+    box-shadow: 0 3px 12px rgba(255, 105, 180, 0.3);
+}
+
+.install-button:hover {
+    background: linear-gradient(135deg, #ff85c1 0%, #ff69b4 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 18px rgba(255, 105, 180, 0.4);
+}
+
 .language-selector {
     margin: 15px 0;
     display: flex;
