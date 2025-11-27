@@ -535,6 +535,54 @@ body {
     }
 }
 
+/* Animation pour les mots bonus - tombent du haut de manière centrée */
+.bonus-word-float {
+    background: linear-gradient(135deg, #ff69b4 0%, #ff85c1 50%, #ffa5d8 100%);
+    color: white;
+    padding: 15px 30px;
+    border-radius: 15px;
+    font-weight: 700;
+    opacity: 0;
+    transform: translateY(-400px) scale(0.3);
+    animation: bonusFallCentered 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    box-shadow: 0 15px 40px rgba(255, 105, 180, 0.6),
+                0 0 30px rgba(255, 105, 180, 0.4),
+                inset 0 -3px 15px rgba(0, 0, 0, 0.1);
+    border: 3px solid rgba(255, 255, 255, 0.5);
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    position: relative;
+    z-index: 2;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    margin: 8px auto;
+    display: block;
+    width: fit-content;
+}
+
+@keyframes bonusFallCentered {
+    0% {
+        opacity: 0;
+        transform: translateY(-400px) scale(0.3) rotate(0deg);
+    }
+    30% {
+        opacity: 1;
+        transform: translateY(-50px) scale(1.2) rotate(2deg);
+    }
+    50% {
+        transform: translateY(10px) scale(0.95) rotate(-1deg);
+    }
+    65% {
+        transform: translateY(-5px) scale(1.05) rotate(0.5deg);
+    }
+    80% {
+        transform: translateY(2px) scale(0.98) rotate(-0.2deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1) rotate(0deg);
+    }
+}
+
 @keyframes heartBeat {
     0%, 100% {
         transform: rotate(180deg) scale(1);
@@ -1045,6 +1093,216 @@ body {
     max-width: 100%;
 }
 
+/* Modal Kawaii */
+.kawaii-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.kawaii-modal.hidden {
+    display: none;
+}
+
+.kawaii-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.kawaii-modal-content {
+    position: relative;
+    background: linear-gradient(135deg, #fff 0%, #ffe8f0 100%);
+    border-radius: 30px;
+    padding: 30px;
+    box-shadow: 0 20px 60px rgba(255, 105, 180, 0.4),
+                0 0 0 3px rgba(255, 192, 203, 0.3),
+                inset 0 -5px 20px rgba(255, 182, 193, 0.2);
+    max-width: 90%;
+    width: 400px;
+    text-align: center;
+    animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    border: 3px solid rgba(255, 192, 203, 0.5);
+}
+
+.kawaii-modal-header {
+    margin-bottom: 20px;
+}
+
+.kawaii-modal-icon {
+    font-size: 3.5rem;
+    display: inline-block;
+    animation: sparkle 1.5s ease-in-out infinite;
+}
+
+.kawaii-modal-body {
+    margin-bottom: 25px;
+}
+
+.kawaii-modal-body p {
+    font-size: 1.2rem;
+    color: #4a4a4a;
+    line-height: 1.6;
+    margin: 0;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(255, 192, 203, 0.2);
+}
+
+.kawaii-modal-footer {
+    display: flex;
+    justify-content: center;
+}
+
+.kawaii-modal-button {
+    background: linear-gradient(135deg, #ff69b4 0%, #ff85c1 100%);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 12px 40px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(255, 105, 180, 0.4),
+                inset 0 -2px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.5px;
+}
+
+.kawaii-modal-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px rgba(255, 105, 180, 0.5),
+                inset 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.kawaii-modal-button:active {
+    transform: translateY(0);
+    box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3),
+                inset 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.kawaii-modal-button.secondary {
+    background: linear-gradient(135deg, #d3d3d3 0%, #e0e0e0 100%);
+    color: #4a4a4a;
+    margin-left: 10px;
+}
+
+.kawaii-modal-button.secondary:hover {
+    background: linear-gradient(135deg, #c0c0c0 0%, #d3d3d3 100%);
+}
+
+#scoreForm {
+    margin: 15px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+#scoreForm input {
+    padding: 12px 20px;
+    border: 2px solid rgba(255, 192, 203, 0.5);
+    border-radius: 15px;
+    font-size: 1rem;
+    background: white;
+    color: #4a4a4a;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+#scoreForm input:focus {
+    border-color: #ff69b4;
+    box-shadow: 0 0 10px rgba(255, 105, 180, 0.3);
+}
+
+#scoreForm input::placeholder {
+    color: #999;
+}
+
+.cloud-connect-btn {
+    background: linear-gradient(135deg, #87ceeb 0%, #4a9fd8 100%);
+    color: white;
+    border: none;
+    border-radius: 15px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(74, 159, 216, 0.3);
+    transition: all 0.3s ease;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    margin-left: 10px;
+}
+
+.cloud-connect-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(74, 159, 216, 0.4);
+}
+
+.cloud-connect-btn.connected {
+    background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.cloud-connect-btn.connected:hover {
+    box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3) translateY(-50px);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05) translateY(0);
+    }
+    70% {
+        transform: scale(0.95);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes sparkle {
+    0%, 100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+    25% {
+        transform: scale(1.2) rotate(-10deg);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.1) rotate(10deg);
+        opacity: 1;
+    }
+    75% {
+        transform: scale(1.15) rotate(-5deg);
+        opacity: 0.9;
+    }
+}
+
 @media (max-width: 768px) {
     body {
         padding: 0;
@@ -1202,6 +1460,12 @@ body {
         font-size: 0.8rem;
     }
 
+    .bonus-word-float {
+        padding: 12px 24px;
+        font-size: 0.95rem;
+        letter-spacing: 0.8px;
+    }
+
     .install-button {
         padding: 8px 16px;
         font-size: 0.8rem;
@@ -1210,6 +1474,30 @@ body {
 
     .score-display {
         font-size: 1rem;
+    }
+
+    .kawaii-modal-content {
+        width: 350px;
+        padding: 25px;
+    }
+
+    .kawaii-modal-icon {
+        font-size: 3rem;
+    }
+
+    .kawaii-modal-body p {
+        font-size: 1.1rem;
+    }
+
+    .kawaii-modal-button {
+        padding: 10px 35px;
+        font-size: 1rem;
+    }
+
+    .cloud-connect-btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        margin-left: 8px;
     }
 }
 
@@ -1354,6 +1642,12 @@ body {
         font-size: 0.7rem;
     }
 
+    .bonus-word-float {
+        padding: 10px 20px;
+        font-size: 0.85rem;
+        letter-spacing: 0.6px;
+    }
+
     .install-button {
         padding: 7px 14px;
         font-size: 0.75rem;
@@ -1362,5 +1656,353 @@ body {
 
     .score-display {
         font-size: 0.9rem;
+    }
+
+    .kawaii-modal-content {
+        width: 300px;
+        padding: 20px;
+    }
+
+    .kawaii-modal-icon {
+        font-size: 2.5rem;
+    }
+
+    .kawaii-modal-body p {
+        font-size: 1rem;
+    }
+
+    .kawaii-modal-button {
+        padding: 10px 30px;
+        font-size: 0.95rem;
+    }
+
+    .cloud-connect-btn {
+        padding: 5px 10px;
+        font-size: 0.7rem;
+        margin-left: 5px;
+    }
+}
+
+/* Menu button */
+.menu-button {
+    background: white;
+    color: #ff69b4;
+    border: none;
+    padding: 8px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 700;
+    font-size: 0.85rem;
+    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.4);
+    margin: 12px auto 0 auto;
+    position: relative;
+    z-index: 1;
+    width: 90%;
+    max-width: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.menu-button::before,
+.menu-button::after {
+    content: '∼ ♥ ∼ ✧ ∼ ♥ ∼ ✧ ∼ ♥ ∼ ✧ ∼ ♥ ∼';
+    flex: 1;
+    font-size: 0.6rem;
+    color: #ff69b4;
+    opacity: 0.5;
+    letter-spacing: 2px;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    height: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.menu-button::before {
+    justify-content: flex-end;
+}
+
+.menu-button::after {
+    justify-content: flex-start;
+}
+
+.menu-button:hover {
+    background: rgba(255, 255, 255, 0.95);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.5);
+}
+
+.menu-button:hover::before,
+.menu-button:hover::after {
+    opacity: 0.7;
+    color: #ff85c1;
+}
+
+/* Menu modal */
+.menu-modal-content {
+    max-width: 400px;
+    width: 85%;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(255, 192, 203, 0.3);
+}
+
+.menu-header h2 {
+    color: #ff69b4;
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+.close-menu-btn {
+    background: linear-gradient(135deg, #d3d3d3 0%, #e0e0e0 100%);
+    color: #4a4a4a;
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.close-menu-btn:hover {
+    background: linear-gradient(135deg, #c0c0c0 0%, #d3d3d3 100%);
+    transform: scale(1.1);
+}
+
+.menu-section {
+    margin-bottom: 25px;
+    padding: 15px;
+    background: rgba(255, 192, 203, 0.1);
+    border-radius: 15px;
+    border: 2px solid rgba(255, 192, 203, 0.2);
+}
+
+.menu-section h3 {
+    color: #ff69b4;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0 0 12px 0;
+}
+
+.menu-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin: 8px 0 0 0;
+    font-style: italic;
+}
+
+/* Menu cloud button */
+.menu-cloud-btn {
+    background: linear-gradient(135deg, #87ceeb 0%, #4a9fd8 100%);
+    color: white;
+    border: none;
+    border-radius: 15px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(74, 159, 216, 0.3);
+    transition: all 0.3s ease;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    width: 100%;
+}
+
+.menu-cloud-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(74, 159, 216, 0.4);
+}
+
+.menu-cloud-btn.connected {
+    background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.menu-cloud-btn.connected:hover {
+    box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+}
+
+/* Menu language selector */
+.menu-language-selector {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.menu-language-selector .language-btn {
+    flex: 1;
+    min-width: 120px;
+}
+
+/* Audio controls */
+.audio-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.audio-control-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.audio-control-item label {
+    font-weight: 600;
+    color: #4a4a4a;
+    min-width: 140px;
+}
+
+.audio-control-item input[type="range"] {
+    flex: 1;
+    height: 8px;
+    border-radius: 5px;
+    background: linear-gradient(135deg, #ffc0dd 0%, #ffb6d9 100%);
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.audio-control-item input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff69b4 0%, #ff85c1 100%);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(255, 105, 180, 0.4);
+    transition: all 0.2s ease;
+}
+
+.audio-control-item input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 3px 12px rgba(255, 105, 180, 0.5);
+}
+
+.audio-control-item input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff69b4 0%, #ff85c1 100%);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 8px rgba(255, 105, 180, 0.4);
+    transition: all 0.2s ease;
+}
+
+.audio-control-item input[type="range"]::-moz-range-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 3px 12px rgba(255, 105, 180, 0.5);
+}
+
+.audio-control-item span {
+    font-weight: 700;
+    color: #ff69b4;
+    min-width: 45px;
+    text-align: right;
+}
+
+/* About section */
+.about-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.about-item {
+    margin: 0;
+    padding: 8px 0;
+    font-size: 0.9rem;
+    color: #4a4a4a;
+    line-height: 1.6;
+}
+
+.about-item strong {
+    color: #ff69b4;
+    display: inline-block;
+    min-width: 100px;
+}
+
+.info-link {
+    color: #87ceeb;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    padding: 2px 8px;
+    border-radius: 5px;
+    background: rgba(135, 206, 235, 0.1);
+}
+
+.info-link:hover {
+    color: #4a9fd8;
+    background: rgba(135, 206, 235, 0.2);
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .menu-button {
+        padding: 7px 0;
+        font-size: 0.75rem;
+        margin: 10px auto 0 auto;
+        width: 85%;
+    }
+
+    .menu-modal-content {
+        max-width: 90%;
+        width: 90%;
+    }
+
+    .menu-header h2 {
+        font-size: 1.2rem;
+    }
+
+    .audio-control-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .audio-control-item label {
+        min-width: auto;
+    }
+
+    .audio-control-item input[type="range"] {
+        width: 100%;
+    }
+}
+
+@media (max-width: 400px) {
+    .menu-button {
+        padding: 6px 0;
+        font-size: 0.7rem;
+        margin: 8px auto 0 auto;
+        width: 80%;
+    }
+
+    .menu-section {
+        padding: 12px;
+    }
+
+    .menu-section h3 {
+        font-size: 1rem;
     }
 }

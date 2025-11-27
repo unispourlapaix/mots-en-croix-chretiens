@@ -7,15 +7,53 @@ class ChristianCrosswordGame {
         this.grid = Array(config.gridSize).fill().map(() => Array(config.gridSize).fill(''));
         this.solution = Array(config.gridSize).fill().map(() => Array(config.gridSize).fill(''));
         this.blocked = Array(config.gridSize).fill().map(() => Array(config.gridSize).fill(false));
-        
+
+        // Connexion cloud
+        this.cloudConnected = false;
+        this.cloudUser = null;
+
+        // Charger la sauvegarde
+        this.loadGame();
+        this.loadCloudConnection();
+        this.loadAudioSettings();
+
         this.initializeEventListeners();
-        this.setupLanguageSelector();
+        this.setupMenuLanguageSelector();
         this.updateUIText();
-        
+        this.updateMenuCloudButton();
+
         // Écouter les changements de langue
         window.addEventListener('languageChanged', () => {
             this.onLanguageChange();
         });
+    }
+
+    saveGame() {
+        const saveData = {
+            currentLevel: this.currentLevel,
+            score: this.score,
+            clickCount: this.clickCount,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('christianCrosswordSave', JSON.stringify(saveData));
+    }
+
+    loadGame() {
+        const savedData = localStorage.getItem('christianCrosswordSave');
+        if (savedData) {
+            try {
+                const data = JSON.parse(savedData);
+                this.currentLevel = data.currentLevel || 1;
+                this.score = data.score || 0;
+                this.clickCount = data.clickCount || 0;
+            } catch (e) {
+                console.error('Erreur lors du chargement de la sauvegarde:', e);
+            }
+        }
+    }
+
+    clearSave() {
+        localStorage.removeItem('christianCrosswordSave');
     }
 
     initializeEventListeners() {
@@ -24,25 +62,255 @@ class ChristianCrosswordGame {
         document.getElementById('hintButton').addEventListener('click', () => this.showHint());
         document.getElementById('nextLevelButton').addEventListener('click', () => this.nextLevel());
         document.getElementById('resetButton').addEventListener('click', () => this.resetGame());
+
+        // Modal kawaii
+        document.getElementById('kawaiiModalBtn').addEventListener('click', () => this.closeKawaiiModal());
+        document.querySelector('.kawaii-modal-overlay').addEventListener('click', () => this.closeKawaiiModal());
+
+        // Modal de score
+        document.getElementById('saveScoreBtn').addEventListener('click', () => this.handleSaveScore());
+        document.getElementById('skipScoreBtn').addEventListener('click', () => this.closeScoreModal());
+
+        // Permettre de fermer le modal de score en cliquant sur l'overlay
+        const scoreOverlay = document.querySelector('#scoreModal .kawaii-modal-overlay');
+        if (scoreOverlay) {
+            scoreOverlay.addEventListener('click', () => this.closeScoreModal());
+        }
+
+        // Modal de connexion cloud
+        document.getElementById('cloudConnectSubmitBtn').addEventListener('click', () => this.handleCloudConnect());
+        document.getElementById('cloudCancelBtn').addEventListener('click', () => this.closeCloudModal());
+
+        // Permettre de fermer le modal cloud en cliquant sur l'overlay
+        const cloudOverlay = document.querySelector('#cloudModal .kawaii-modal-overlay');
+        if (cloudOverlay) {
+            cloudOverlay.addEventListener('click', () => this.closeCloudModal());
+        }
+
+        // Menu modal
+        document.getElementById('menuButton').addEventListener('click', () => this.openMenu());
+        document.getElementById('closeMenuBtn').addEventListener('click', () => this.closeMenu());
+
+        // Permettre de fermer le menu en cliquant sur l'overlay
+        const menuOverlay = document.querySelector('#menuModal .kawaii-modal-overlay');
+        if (menuOverlay) {
+            menuOverlay.addEventListener('click', () => this.closeMenu());
+        }
+
+        // Menu cloud button
+        document.getElementById('menuCloudBtn').addEventListener('click', () => this.handleMenuCloudButton());
+
+        // Audio sliders
+        document.getElementById('musicVolume').addEventListener('input', (e) => this.handleMusicVolumeChange(e));
+        document.getElementById('soundVolume').addEventListener('input', (e) => this.handleSoundVolumeChange(e));
+
+        // Artist link
+        document.getElementById('artistLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            this.openArtistModule();
+        });
     }
 
-    setupLanguageSelector() {
-        const container = document.getElementById('languageSelector');
+    showKawaiiModal(message, icon = '✨') {
+        const modal = document.getElementById('kawaiiModal');
+        const messageEl = document.getElementById('kawaiiModalMessage');
+        const iconEl = document.querySelector('.kawaii-modal-icon');
+
+        messageEl.textContent = message;
+        iconEl.textContent = icon;
+        modal.classList.remove('hidden');
+
+        return new Promise((resolve) => {
+            this.kawaiiModalResolve = resolve;
+        });
+    }
+
+    closeKawaiiModal() {
+        const modal = document.getElementById('kawaiiModal');
+        modal.classList.add('hidden');
+
+        if (this.kawaiiModalResolve) {
+            this.kawaiiModalResolve();
+            this.kawaiiModalResolve = null;
+        }
+    }
+
+    showScoreModal(score) {
+        const modal = document.getElementById('scoreModal');
+        const scoreDisplay = document.getElementById('finalScoreDisplay');
+        scoreDisplay.textContent = score;
+
+        // Réinitialiser le formulaire
+        document.getElementById('scoreForm').reset();
+
+        modal.classList.remove('hidden');
+    }
+
+    closeScoreModal() {
+        const modal = document.getElementById('scoreModal');
+        modal.classList.add('hidden');
+    }
+
+    async handleSaveScore() {
+        const name = document.getElementById('playerName').value.trim();
+        const email = document.getElementById('playerEmail').value.trim();
+
+        if (!name || !email) {
+            await this.showKawaiiModal('Veuillez remplir tous les champs', '⚠️');
+            return;
+        }
+
+        // Vérifier si Supabase est configuré
+        if (!supabaseScoreManager.isConfigured()) {
+            await this.showKawaiiModal('Le système de score en ligne n\'est pas encore configuré', '⚠️');
+            this.closeScoreModal();
+            return;
+        }
+
+        this.closeScoreModal();
+        await this.showKawaiiModal('Sauvegarde du score en cours...', '💾');
+
+        const result = await supabaseScoreManager.saveScore(name, email, this.score);
+
+        if (result.success) {
+            await this.showKawaiiModal('Score sauvegardé avec succès ! 🎉', '✅');
+        } else {
+            await this.showKawaiiModal('Erreur lors de la sauvegarde du score', '❌');
+        }
+    }
+
+    loadCloudConnection() {
+        const cloudData = localStorage.getItem('cloudConnection');
+        if (cloudData) {
+            try {
+                const data = JSON.parse(cloudData);
+                this.cloudConnected = true;
+                this.cloudUser = data;
+            } catch (e) {
+                console.error('Erreur chargement connexion cloud:', e);
+            }
+        }
+    }
+
+    saveCloudConnection(name, email) {
+        const cloudData = { name, email, connectedAt: Date.now() };
+        localStorage.setItem('cloudConnection', JSON.stringify(cloudData));
+        this.cloudConnected = true;
+        this.cloudUser = cloudData;
+    }
+
+    disconnectCloud() {
+        localStorage.removeItem('cloudConnection');
+        this.cloudConnected = false;
+        this.cloudUser = null;
+    }
+
+    updateMenuCloudButton() {
+        const btn = document.getElementById('menuCloudBtn');
+        if (this.cloudConnected && this.cloudUser) {
+            btn.textContent = `✅ Connecté: ${this.cloudUser.name}`;
+            btn.classList.add('connected');
+        } else {
+            btn.textContent = '☁️ Connexion Cloud';
+            btn.classList.remove('connected');
+        }
+    }
+
+    async showCloudDisconnectMenu() {
+        await this.showKawaiiModal(
+            `Connecté en tant que ${this.cloudUser.name}\n\nVos scores sont sauvegardés automatiquement.`,
+            '☁️'
+        );
+    }
+
+    showCloudModal() {
+        const modal = document.getElementById('cloudModal');
+        document.getElementById('cloudForm').reset();
+        modal.classList.remove('hidden');
+    }
+
+    closeCloudModal() {
+        const modal = document.getElementById('cloudModal');
+        modal.classList.add('hidden');
+    }
+
+    async handleCloudConnect() {
+        const name = document.getElementById('cloudPlayerName').value.trim();
+        const email = document.getElementById('cloudPlayerEmail').value.trim();
+
+        if (!name || !email) {
+            await this.showKawaiiModal('Veuillez remplir tous les champs', '⚠️');
+            return;
+        }
+
+        // Vérifier si Supabase est configuré
+        if (!supabaseScoreManager.isConfigured()) {
+            await this.showKawaiiModal('Le système de score en ligne n\'est pas encore configuré', '⚠️');
+            this.closeCloudModal();
+            return;
+        }
+
+        this.closeCloudModal();
+        await this.showKawaiiModal('Connexion au cloud en cours...', '☁️');
+
+        // Sauvegarder la connexion
+        this.saveCloudConnection(name, email);
+        this.updateMenuCloudButton();
+
+        await this.showKawaiiModal(`Connecté avec succès !\n\nVos scores seront automatiquement sauvegardés en ligne.`, '✅');
+    }
+
+    async saveScoreToCloud() {
+        if (!this.cloudConnected || !this.cloudUser) {
+            return;
+        }
+
+        if (!supabaseScoreManager.isConfigured()) {
+            return;
+        }
+
+        try {
+            const result = await supabaseScoreManager.saveScore(
+                this.cloudUser.name,
+                this.cloudUser.email,
+                this.score
+            );
+
+            if (result.success) {
+                console.log('✅ Score sauvegardé automatiquement sur le cloud');
+            }
+        } catch (error) {
+            console.error('❌ Erreur sauvegarde cloud:', error);
+        }
+    }
+
+    setupMenuLanguageSelector() {
+        const container = document.getElementById('menuLanguageSelector');
         if (!container) return;
-        
+
         const languages = i18n.getAvailableLanguages();
         languages.forEach(lang => {
             const btn = document.createElement('button');
             btn.className = 'language-btn';
             btn.textContent = i18n.getLanguageName(lang);
             btn.dataset.lang = lang;
-            
+
             if (lang === i18n.getLanguage()) {
                 btn.classList.add('active');
             }
-            
-            btn.addEventListener('click', () => this.changeLanguage(lang));
+
+            btn.addEventListener('click', () => {
+                this.changeLanguage(lang);
+                this.updateMenuLanguageButtons();
+            });
             container.appendChild(btn);
+        });
+    }
+
+    updateMenuLanguageButtons() {
+        const currentLang = i18n.getLanguage();
+        document.querySelectorAll('#menuLanguageSelector .language-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.lang === currentLang);
         });
     }
 
@@ -74,22 +342,155 @@ class ChristianCrosswordGame {
         document.getElementById('hintButton').textContent = i18n.t('hint');
         document.getElementById('nextLevelButton').textContent = i18n.t('nextLevel');
         document.getElementById('resetButton').textContent = i18n.t('reset');
-        
+
         // Les flèches sont maintenant géométriques, pas besoin de mettre à jour le texte
-        
+
         // Mettre à jour les labels
-        document.querySelector('.level-info div:first-child strong').innerHTML = 
+        document.querySelector('.level-info div:first-child strong').innerHTML =
             `${i18n.t('level')}: <span id="currentLevel">${this.currentLevel}</span>/${gameDataManager.getTotalLevels()}`;
-        document.querySelector('.score-display').innerHTML = 
+        document.querySelector('.score-display').innerHTML =
             `${i18n.t('score')}: <span id="score">${this.score}</span> ${i18n.t('points')}`;
+
+        // Mettre à jour les boutons de l'en-tête
+        const installBtn = document.getElementById('installButton');
+        if (installBtn) installBtn.textContent = i18n.t('installButton');
+        const menuBtn = document.getElementById('menuButton');
+        if (menuBtn) menuBtn.textContent = i18n.t('menuButton');
+
+        // Mettre à jour les textes du menu
+        this.updateMenuText();
+
+        // Mettre à jour les textes des modaux
+        this.updateModalsText();
+    }
+
+    updateMenuText() {
+        // Titre du menu
+        const menuHeader = document.querySelector('.menu-header h2');
+        if (menuHeader) menuHeader.textContent = i18n.t('menuSettings');
+
+        // Section Cloud
+        const cloudTitle = document.querySelector('.menu-section h3');
+        if (cloudTitle) cloudTitle.textContent = i18n.t('menuCloudTitle');
+        const cloudBtn = document.getElementById('menuCloudBtn');
+        if (cloudBtn) cloudBtn.textContent = i18n.t('menuCloudButton');
+        const cloudDesc = document.querySelector('.menu-description');
+        if (cloudDesc) cloudDesc.textContent = i18n.t('menuCloudDescription');
+
+        // Section Langue
+        const sections = document.querySelectorAll('.menu-section');
+        if (sections[1]) {
+            const langTitle = sections[1].querySelector('h3');
+            if (langTitle) langTitle.textContent = i18n.t('menuLanguageTitle');
+        }
+
+        // Section Audio
+        if (sections[2]) {
+            const audioTitle = sections[2].querySelector('h3');
+            if (audioTitle) audioTitle.textContent = i18n.t('menuAudioTitle');
+            const musicLabel = sections[2].querySelector('label[for="musicVolume"]');
+            if (musicLabel) musicLabel.textContent = i18n.t('menuMusicLabel');
+            const soundLabel = sections[2].querySelector('label[for="soundVolume"]');
+            if (soundLabel) soundLabel.textContent = i18n.t('menuSoundLabel');
+        }
+
+        // Section À propos
+        if (sections[3]) {
+            const aboutTitle = sections[3].querySelector('h3');
+            if (aboutTitle) aboutTitle.textContent = i18n.t('menuAboutTitle');
+
+            const aboutItems = sections[3].querySelectorAll('.about-item strong');
+            if (aboutItems[0]) aboutItems[0].textContent = i18n.t('menuArtistLabel');
+            if (aboutItems[1]) aboutItems[1].textContent = i18n.t('menuCreationLabel');
+            if (aboutItems[2]) aboutItems[2].textContent = i18n.t('menuCodingLabel');
+
+            const artistLink = document.getElementById('artistLink');
+            if (artistLink) artistLink.textContent = i18n.t('menuArtistLink');
+
+            const creationText = sections[3].querySelectorAll('.about-item')[1];
+            if (creationText) {
+                const textNode = Array.from(creationText.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+                if (textNode) textNode.textContent = ' ' + i18n.t('menuCreationText');
+            }
+
+            const codingText = sections[3].querySelectorAll('.about-item')[2];
+            if (codingText) {
+                const textNode = Array.from(codingText.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+                if (textNode) textNode.textContent = ' ' + i18n.t('menuCodingText');
+            }
+        }
+    }
+
+    updateModalsText() {
+        // Modal de score
+        const scoreModal = document.querySelector('#scoreModal .kawaii-modal-body');
+        if (scoreModal) {
+            const paragraphs = scoreModal.querySelectorAll('p');
+            if (paragraphs[0]) {
+                paragraphs[0].innerHTML = `<strong>${i18n.t('modalCongratulations')}</strong>`;
+            }
+            if (paragraphs[1]) {
+                const scoreValue = document.getElementById('finalScoreDisplay').textContent;
+                paragraphs[1].innerHTML = `${i18n.t('modalYourScore')} <span id="finalScoreDisplay">${scoreValue}</span> ${i18n.t('points')}`;
+            }
+            if (paragraphs[2]) {
+                paragraphs[2].textContent = i18n.t('modalSaveOnline');
+            }
+        }
+
+        // Placeholders et boutons du modal de score
+        const playerNameInput = document.getElementById('playerName');
+        if (playerNameInput) playerNameInput.placeholder = i18n.t('modalNamePlaceholder');
+
+        const playerEmailInput = document.getElementById('playerEmail');
+        if (playerEmailInput) playerEmailInput.placeholder = i18n.t('modalEmailPlaceholder');
+
+        const saveScoreBtn = document.getElementById('saveScoreBtn');
+        if (saveScoreBtn) saveScoreBtn.textContent = i18n.t('modalSaveButton');
+
+        const skipScoreBtn = document.getElementById('skipScoreBtn');
+        if (skipScoreBtn) skipScoreBtn.textContent = i18n.t('modalSkipButton');
+
+        // Modal cloud
+        const cloudModal = document.querySelector('#cloudModal .kawaii-modal-body');
+        if (cloudModal) {
+            const paragraphs = cloudModal.querySelectorAll('p');
+            if (paragraphs[0]) {
+                paragraphs[0].innerHTML = `<strong>${i18n.t('modalCloudTitle')}</strong>`;
+            }
+            if (paragraphs[1]) {
+                paragraphs[1].textContent = i18n.t('modalCloudDescription');
+            }
+        }
+
+        // Placeholders et boutons du modal cloud
+        const cloudPlayerNameInput = document.getElementById('cloudPlayerName');
+        if (cloudPlayerNameInput) cloudPlayerNameInput.placeholder = i18n.t('modalNamePlaceholder');
+
+        const cloudPlayerEmailInput = document.getElementById('cloudPlayerEmail');
+        if (cloudPlayerEmailInput) cloudPlayerEmailInput.placeholder = i18n.t('modalEmailPlaceholder');
+
+        const cloudConnectBtn = document.getElementById('cloudConnectSubmitBtn');
+        if (cloudConnectBtn) cloudConnectBtn.textContent = i18n.t('modalConnectButton');
+
+        const cloudCancelBtn = document.getElementById('cloudCancelBtn');
+        if (cloudCancelBtn) cloudCancelBtn.textContent = i18n.t('modalCancelButton');
     }
 
     handlePlayButtonClick() {
         this.clickCount++;
         document.getElementById('clickCount').textContent = this.clickCount;
 
+        // Vérifier si c'est un niveau bonus
+        const nextLevelData = gameDataManager.getLevelData(this.currentLevel);
+        const isBonusLevel = nextLevelData && nextLevelData.bonusWords;
+
         if (this.clickCount <= config.maxEncouragingWords) {
-            this.showEncouragingWord(this.clickCount - 1);
+            if (isBonusLevel) {
+                this.showBonusWord(this.clickCount - 1, nextLevelData.bonusWords);
+            } else {
+                this.showEncouragingWord(this.clickCount - 1);
+            }
         }
 
         if (this.clickCount === config.maxEncouragingWords) {
@@ -100,6 +501,9 @@ class ChristianCrosswordGame {
                 this.startGame();
             }, config.levelTransitionDelay);
         }
+
+        // Sauvegarder le progrès
+        this.saveGame();
     }
 
     showEncouragingWord(index) {
@@ -110,6 +514,17 @@ class ChristianCrosswordGame {
             wordElement.className = 'word-float';
             wordElement.textContent = encouragingWords[index];
             wordElement.style.animationDelay = `${index * 0.15}s`;
+            wordsContainer.appendChild(wordElement);
+        }
+    }
+
+    showBonusWord(index, bonusWords) {
+        if (index < bonusWords.length) {
+            const wordsContainer = document.getElementById('encouragingWords');
+            const wordElement = document.createElement('div');
+            wordElement.className = 'bonus-word-float';
+            wordElement.textContent = bonusWords[index];
+            wordElement.style.animationDelay = `${index * 0.2}s`;
             wordsContainer.appendChild(wordElement);
         }
     }
@@ -310,6 +725,8 @@ class ChristianCrosswordGame {
                             input.value = '';
                             setTimeout(() => {
                                 this.moveToNextCell(i, j);
+                                // Vérifier si le niveau est complet après le déplacement
+                                this.checkIfLevelComplete();
                             }, 50);
                         }
                     });
@@ -450,7 +867,7 @@ class ChristianCrosswordGame {
         });
     }
 
-    checkAnswers() {
+    async checkAnswers() {
         let correctCells = 0;
         let totalCells = 0;
 
@@ -469,12 +886,154 @@ class ChristianCrosswordGame {
         this.score += Math.round(percentage * this.currentLevel * config.basePointsMultiplier);
         document.getElementById('score').textContent = this.score;
 
+        // Sauvegarder le progrès
+        this.saveGame();
+
         if (percentage === 100) {
-            alert(i18n.t('congratulations'));
+            await this.showKawaiiModal(i18n.t('congratulations'), '🎉');
             document.getElementById('nextLevelButton').style.display = 'inline-block';
         } else {
-            alert(i18n.t('progress', { percent: Math.round(percentage) }));
+            await this.showKawaiiModal(i18n.t('progress', { percent: Math.round(percentage) }), '💪');
         }
+    }
+
+    async checkIfLevelComplete() {
+        // Vérifier si toutes les cellules sont correctement remplies
+        let allCorrect = true;
+        let totalCells = 0;
+
+        for (let i = 0; i < config.gridSize; i++) {
+            for (let j = 0; j < config.gridSize; j++) {
+                if (!this.blocked[i][j]) {
+                    totalCells++;
+                    // Vérifier si la cellule est remplie et correcte
+                    if (this.grid[i][j] === '' || this.grid[i][j] !== this.solution[i][j]) {
+                        allCorrect = false;
+                        break;
+                    }
+                }
+            }
+            if (!allCorrect) break;
+        }
+
+        // Si tout est correct, passer au niveau suivant automatiquement
+        if (allCorrect && totalCells > 0) {
+            // Ajouter les points du niveau
+            this.score += Math.round(100 * this.currentLevel * config.basePointsMultiplier);
+            document.getElementById('score').textContent = this.score;
+
+            // Sauvegarder automatiquement sur le cloud si connecté
+            await this.saveScoreToCloud();
+
+            // Attendre un peu pour montrer l'animation de complétion
+            setTimeout(async () => {
+                const totalLevels = gameDataManager.getTotalLevels();
+                if (this.currentLevel < totalLevels) {
+                    // Afficher un message de félicitations rapide
+                    await this.showKawaiiModal(i18n.t('congratulations') + '\n' + i18n.t('nextLevel'), '🎉');
+                    this.currentLevel++;
+                    this.setupLevel();
+                    // Sauvegarder le progrès
+                    this.saveGame();
+                } else {
+                    // Fin du jeu
+                    if (this.cloudConnected) {
+                        // Si connecté au cloud, juste afficher un message de félicitations
+                        await this.showKawaiiModal(
+                            `🎉 Félicitations ! Vous avez terminé tous les niveaux !\n\nScore final: ${this.score} points\n\n✅ Score sauvegardé automatiquement sur le cloud`,
+                            '🏆'
+                        );
+                    } else {
+                        // Sinon, proposer de sauvegarder le score
+                        this.showScoreModal(this.score);
+                    }
+                    // Effacer la sauvegarde car le jeu est terminé
+                    this.clearSave();
+                }
+            }, 500);
+        }
+    }
+
+    // Menu functions
+    openMenu() {
+        const modal = document.getElementById('menuModal');
+        modal.classList.remove('hidden');
+    }
+
+    closeMenu() {
+        const modal = document.getElementById('menuModal');
+        modal.classList.add('hidden');
+    }
+
+    handleMenuCloudButton() {
+        if (this.cloudConnected) {
+            // Déjà connecté - proposer de se déconnecter
+            this.showCloudDisconnectMenu();
+        } else {
+            // Pas connecté - afficher le modal de connexion
+            this.closeMenu();
+            this.showCloudModal();
+        }
+    }
+
+    // Audio settings
+    loadAudioSettings() {
+        const audioData = localStorage.getItem('audioSettings');
+        if (audioData) {
+            try {
+                const data = JSON.parse(audioData);
+                this.musicVolume = data.musicVolume !== undefined ? data.musicVolume : 50;
+                this.soundVolume = data.soundVolume !== undefined ? data.soundVolume : 50;
+            } catch (e) {
+                console.error('Erreur chargement audio:', e);
+                this.musicVolume = 50;
+                this.soundVolume = 50;
+            }
+        } else {
+            this.musicVolume = 50;
+            this.soundVolume = 50;
+        }
+
+        // Mettre à jour les sliders
+        setTimeout(() => {
+            const musicSlider = document.getElementById('musicVolume');
+            const soundSlider = document.getElementById('soundVolume');
+            if (musicSlider) musicSlider.value = this.musicVolume;
+            if (soundSlider) soundSlider.value = this.soundVolume;
+            this.updateVolumeDisplays();
+        }, 100);
+    }
+
+    saveAudioSettings() {
+        const audioData = {
+            musicVolume: this.musicVolume,
+            soundVolume: this.soundVolume
+        };
+        localStorage.setItem('audioSettings', JSON.stringify(audioData));
+    }
+
+    handleMusicVolumeChange(e) {
+        this.musicVolume = parseInt(e.target.value);
+        this.updateVolumeDisplays();
+        this.saveAudioSettings();
+    }
+
+    handleSoundVolumeChange(e) {
+        this.soundVolume = parseInt(e.target.value);
+        this.updateVolumeDisplays();
+        this.saveAudioSettings();
+    }
+
+    updateVolumeDisplays() {
+        const musicDisplay = document.getElementById('musicVolumeValue');
+        const soundDisplay = document.getElementById('soundVolumeValue');
+        if (musicDisplay) musicDisplay.textContent = `${this.musicVolume}%`;
+        if (soundDisplay) soundDisplay.textContent = `${this.soundVolume}%`;
+    }
+
+    openArtistModule() {
+        // Ouvrir le module artiste Emmanuel dans un nouvel onglet
+        window.open('public/emmanuel-artist-module.html', '_blank');
     }
 
     showHint() {
@@ -503,17 +1062,39 @@ class ChristianCrosswordGame {
             this.grid[row][col] = this.solution[row][col];
             this.score -= config.hintPenalty;
             document.getElementById('score').textContent = Math.max(0, this.score);
+
+            // Sauvegarder le progrès
+            this.saveGame();
         }
     }
 
-    nextLevel() {
+    async nextLevel() {
         const totalLevels = gameDataManager.getTotalLevels();
         if (this.currentLevel < totalLevels) {
             this.currentLevel++;
             this.setupLevel();
             document.getElementById('nextLevelButton').style.display = 'none';
+            // Sauvegarder le progrès
+            this.saveGame();
+            // Sauvegarder automatiquement sur le cloud si connecté
+            await this.saveScoreToCloud();
         } else {
-            alert(i18n.t('finalScore', { score: this.score }));
+            // Fin du jeu
+            // Sauvegarder automatiquement sur le cloud si connecté
+            await this.saveScoreToCloud();
+
+            if (this.cloudConnected) {
+                // Si connecté au cloud, juste afficher un message de félicitations
+                await this.showKawaiiModal(
+                    `🎉 Félicitations ! Vous avez terminé tous les niveaux !\n\nScore final: ${this.score} points\n\n✅ Score sauvegardé automatiquement sur le cloud`,
+                    '🏆'
+                );
+            } else {
+                // Sinon, proposer de sauvegarder le score
+                this.showScoreModal(this.score);
+            }
+            // Effacer la sauvegarde car le jeu est terminé
+            this.clearSave();
         }
     }
 
@@ -529,6 +1110,9 @@ class ChristianCrosswordGame {
         document.getElementById('nextLevelButton').style.display = 'none';
         document.getElementById('playButton').style.display = 'inline-block';
         this.updateUIText();
+
+        // Effacer la sauvegarde
+        this.clearSave();
     }
 }
 

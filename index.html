@@ -50,12 +50,14 @@
             <button id="installButton" class="install-button hidden">
                 📱 Installer l'Application
             </button>
-            <div id="languageSelector" class="language-selector"></div>
+            <button id="menuButton" class="menu-button">
+                ☰ Menu
+            </button>
         </div>
 
         <div class="level-info">
             <div>
-                <strong>Niveau: <span id="currentLevel">1</span>/8</strong>
+                <strong>Niveau: <span id="currentLevel">1</span>/77</strong>
             </div>
             <div class="score-display">
                 Score: <span id="score">0</span> points
@@ -92,10 +94,128 @@
         </div>
     </div>
 
+    <!-- Modal Kawaii pour les notifications -->
+    <div id="kawaiiModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content">
+            <div class="kawaii-modal-header">
+                <span class="kawaii-modal-icon">✨</span>
+            </div>
+            <div class="kawaii-modal-body">
+                <p id="kawaiiModalMessage"></p>
+            </div>
+            <div class="kawaii-modal-footer">
+                <button id="kawaiiModalBtn" class="kawaii-modal-button">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour sauvegarder le score -->
+    <div id="scoreModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content">
+            <div class="kawaii-modal-header">
+                <span class="kawaii-modal-icon">🏆</span>
+            </div>
+            <div class="kawaii-modal-body">
+                <p><strong>Félicitations ! 🎉</strong></p>
+                <p>Votre score: <span id="finalScoreDisplay">0</span> points</p>
+                <p>Sauvegarder votre score en ligne:</p>
+                <form id="scoreForm">
+                    <input type="text" id="playerName" placeholder="Votre nom" required>
+                    <input type="email" id="playerEmail" placeholder="Votre email" required>
+                </form>
+            </div>
+            <div class="kawaii-modal-footer">
+                <button id="saveScoreBtn" class="kawaii-modal-button">💾 Sauvegarder</button>
+                <button id="skipScoreBtn" class="kawaii-modal-button secondary">Passer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de connexion cloud -->
+    <div id="cloudModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content">
+            <div class="kawaii-modal-header">
+                <span class="kawaii-modal-icon">☁️</span>
+            </div>
+            <div class="kawaii-modal-body">
+                <p><strong>Connexion Cloud</strong></p>
+                <p>Connectez-vous pour sauvegarder automatiquement vos scores en ligne</p>
+                <form id="cloudForm">
+                    <input type="text" id="cloudPlayerName" placeholder="Votre nom" required>
+                    <input type="email" id="cloudPlayerEmail" placeholder="Votre email" required>
+                </form>
+            </div>
+            <div class="kawaii-modal-footer">
+                <button id="cloudConnectSubmitBtn" class="kawaii-modal-button">✅ Se connecter</button>
+                <button id="cloudCancelBtn" class="kawaii-modal-button secondary">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de menu -->
+    <div id="menuModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content menu-modal-content">
+            <div class="menu-header">
+                <h2>⚙️ Paramètres</h2>
+                <button id="closeMenuBtn" class="close-menu-btn">✕</button>
+            </div>
+
+            <div class="menu-section">
+                <h3>☁️ Connexion Cloud</h3>
+                <button id="menuCloudBtn" class="menu-cloud-btn">
+                    ☁️ Connexion Cloud
+                </button>
+                <p class="menu-description">Sauvegardez vos scores automatiquement en ligne</p>
+            </div>
+
+            <div class="menu-section">
+                <h3>🌍 Langue / Language</h3>
+                <div id="menuLanguageSelector" class="menu-language-selector"></div>
+            </div>
+
+            <div class="menu-section">
+                <h3>🔊 Audio</h3>
+                <div class="audio-controls">
+                    <div class="audio-control-item">
+                        <label for="musicVolume">🎵 Musique</label>
+                        <input type="range" id="musicVolume" min="0" max="100" value="50">
+                        <span id="musicVolumeValue">50%</span>
+                    </div>
+                    <div class="audio-control-item">
+                        <label for="soundVolume">🔔 Effets sonores</label>
+                        <input type="range" id="soundVolume" min="0" max="100" value="50">
+                        <span id="soundVolumeValue">50%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="menu-section">
+                <h3>ℹ️ À propos</h3>
+                <div class="about-info">
+                    <p class="about-item">
+                        <strong>🎨 Artiste:</strong>
+                        <a href="#" id="artistLink" class="info-link">Voir le profil</a>
+                    </p>
+                    <p class="about-item">
+                        <strong>✨ Création:</strong> Jeu de mots croisés chrétiens avec design kawaii
+                    </p>
+                    <p class="about-item">
+                        <strong>💻 Codage:</strong> Développé avec Claude Code Pro
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modules JavaScript -->
     <script src="js/config.js"></script>
     <script src="js/i18n.js"></script>
     <script src="js/gameData.js"></script>
+    <script src="js/supabase.js"></script>
     <script src="js/game.js"></script>
     
     <!-- Service Worker Registration -->
