@@ -51,7 +51,7 @@
 - Adaptation culturelle des indices
 - Vocabulaire chrétien approprié
 
-**Anglais (en)**: 10/77 niveaux (13%) ✓
+**Anglais (en)**: 20/77 niveaux (26%) ✓
 1. **Introduction**: Jesus, Love, Peace, Faith, Life
 2. **Christian Virtues**: Hope, Grace, Prayer, Love, Faith
 3. **Mysteries of Faith**: Eternity, Glory, Saint, Heaven, Angel
@@ -62,6 +62,16 @@
 8. **Acts of Worship**: Praise, Worship, Prayer, Song, Offering
 9. **Words of Jesus**: Follow, Believe, Abide, Trust, Come
 10. **The Church**: Church, Fellowship, Unity, Serve, Witness
+11. **Cardinal Virtues**: Temperance, Prudence, Truth
+12. **Spiritual Gifts**: Discernment, Compassion, Assurance
+13. **Words of Life**: Pardon, Tenderness, Charity, Worship
+14. **Spiritual Path**: Transformation, Perseverance
+15. **Light and Darkness**: Light, Liberation, Purity, Consolation
+16. **Faithfulness and Commitment**: Fidelity, Covenant, Consecration, Devotion
+17. **Spiritual Riches**: Benediction, Abundance, Heritage
+18. **Divine Protection**: Refuge, Stronghold, Shield, Security
+19. **Renewal**: Renaissance, Regeneration, Hope
+20. **Final Glory**: Resurrection, Glorification, Fullness
 
 **Autres langues**: 0/77 niveaux
 - Interface complète traduite

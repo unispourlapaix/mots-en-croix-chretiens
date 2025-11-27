@@ -2276,201 +2276,6 @@ const gameData = {
     en: {
         levels: [
             {
-                words: [
-                    { word: "JESUS", clue: "Our Savior", start: [5, 3], direction: "horizontal" },
-                    { word: "LOVE", clue: "God is...", start: [3, 5], direction: "vertical" },
-                    { word: "PEACE", clue: "What Jesus gives", start: [5, 5], direction: "vertical" },
-                    { word: "JOY", clue: "Fruit of the Spirit", start: [7, 3], direction: "horizontal" },
-                    { word: "LIFE", clue: "Jesus gives...", start: [9, 5], direction: "horizontal" },
-                    { word: "FAITH", clue: "Believe without seeing", start: [5, 8], direction: "vertical" },
-                    { word: "GOD", clue: "Our Heavenly Father", start: [3, 10], direction: "vertical" },
-                    { word: "CROSS", clue: "Symbol of sacrifice", start: [11, 3], direction: "horizontal" }
-                ]
-            },
-            {
-                words: [
-                    { word: "HOPE", clue: "Theological virtue", start: [4, 2], direction: "horizontal" },
-                    { word: "GRACE", clue: "Divine favor", start: [2, 4], direction: "vertical" },
-                    { word: "PRAYER", clue: "Talk with God", start: [4, 6], direction: "vertical" },
-                    { word: "PRAISE", clue: "Worship God", start: [6, 2], direction: "horizontal" },
-                    { word: "FORGIVE", clue: "Divine mercy", start: [2, 10], direction: "vertical" },
-                    { word: "SERVE", clue: "Help others", start: [8, 4], direction: "horizontal" },
-                    { word: "LISTEN", clue: "Hear the Word", start: [10, 2], direction: "horizontal" },
-                    { word: "GIVE", clue: "Share with joy", start: [4, 12], direction: "vertical" }
-                ]
-            },
-            {
-                words: [
-                    { word: "RESURRECTION", clue: "Victory over death", start: [3, 1], direction: "horizontal" },
-                    { word: "ETERNITY", clue: "Endless life", start: [1, 5], direction: "vertical" },
-                    { word: "SAINT", clue: "Pure and sanctified", start: [3, 8], direction: "vertical" },
-                    { word: "GLORY", clue: "Honor to God", start: [7, 3], direction: "horizontal" },
-                    { word: "HEAVEN", clue: "God's dwelling", start: [5, 1], direction: "horizontal" },
-                    { word: "ANGEL", clue: "Heavenly messenger", start: [9, 5], direction: "horizontal" },
-                    { word: "LIGHT", clue: "God is...", start: [3, 12], direction: "vertical" },
-                    { word: "TRUTH", clue: "Jesus is the...", start: [5, 10], direction: "vertical" }
-                ]
-            },
-            {
-                words: [
-                    { word: "BLESSING", clue: "Divine favor", start: [2, 2], direction: "horizontal" },
-                    { word: "MIRACLE", clue: "Supernatural work", start: [1, 6], direction: "vertical" },
-                    { word: "PROPHET", clue: "Messenger of God", start: [4, 1], direction: "horizontal" },
-                    { word: "COVENANT", clue: "Pact with God", start: [2, 10], direction: "vertical" },
-                    { word: "HEALING", clue: "Restoration", start: [6, 3], direction: "horizontal" },
-                    { word: "DELIVER", clue: "Set free", start: [8, 1], direction: "horizontal" },
-                    { word: "PROMISE", clue: "God's faithful word", start: [4, 5], direction: "vertical" },
-                    { word: "VICTORY", clue: "Triumph in Christ", start: [10, 4], direction: "horizontal" }
-                ]
-            },
-            {
-                words: [
-                    { word: "PERSEVERANCE", clue: "Standing firm", start: [2, 1], direction: "horizontal" },
-                    { word: "WISDOM", clue: "Divine knowledge", start: [1, 4], direction: "vertical" },
-                    { word: "REDEMPTION", clue: "Bought by blood", start: [4, 2], direction: "horizontal" },
-                    { word: "SPIRIT", clue: "Holy Spirit", start: [2, 9], direction: "vertical" },
-                    { word: "PATIENCE", clue: "Wait with faith", start: [6, 1], direction: "horizontal" },
-                    { word: "HUMILITY", clue: "Christian modesty", start: [8, 4], direction: "horizontal" },
-                    { word: "COURAGE", clue: "Strength in adversity", start: [4, 11], direction: "vertical" },
-                    { word: "KINDNESS", clue: "Quality of heart", start: [6, 7], direction: "vertical" }
-                ]
-            },
-            {
-                words: [
-                    { word: "TRANSFORMATION", clue: "Change by Spirit", start: [1, 1], direction: "horizontal" },
-                    { word: "REVELATION", clue: "Truth revealed", start: [1, 6], direction: "vertical" },
-                    { word: "SANCTIFICATION", clue: "Process of holiness", start: [3, 2], direction: "horizontal" },
-                    { word: "COMMUNION", clue: "Union with God", start: [1, 12], direction: "vertical" },
-                    { word: "REPENTANCE", clue: "Turn from sin", start: [5, 1], direction: "horizontal" },
-                    { word: "CONVERSION", clue: "Change direction", start: [7, 4], direction: "horizontal" },
-                    { word: "PURIFICATION", clue: "Made pure", start: [9, 1], direction: "horizontal" }
-                ]
-            },
-            {
-                words: [
-                    { word: "OMNIPOTENCE", clue: "All-powerful", start: [2, 2], direction: "horizontal" },
-                    { word: "MERCY", clue: "Infinite compassion", start: [1, 6], direction: "vertical" },
-                    { word: "PROVIDENCE", clue: "Divine care", start: [4, 1], direction: "horizontal" },
-                    { word: "JUSTICE", clue: "Perfect righteousness", start: [2, 10], direction: "vertical" },
-                    { word: "SOVEREIGNTY", clue: "Supreme authority", start: [6, 3], direction: "horizontal" },
-                    { word: "OMNISCIENCE", clue: "Total knowledge", start: [8, 1], direction: "horizontal" },
-                    { word: "MAJESTY", clue: "Divine grandeur", start: [10, 4], direction: "horizontal" }
-                ]
-            },
-            {
-                words: [
-                    { word: "TRANSFIGURATION", clue: "Revelation of glory", start: [1, 1], direction: "horizontal" },
-                    { word: "RECONCILIATION", clue: "Restoration of unity", start: [1, 9], direction: "vertical" },
-                    { word: "JUSTIFICATION", clue: "Declaration of righteousness", start: [3, 2], direction: "horizontal" },
-                    { word: "PROPITIATION", clue: "Atonement for sins", start: [5, 1], direction: "horizontal" },
-                    { word: "INTERCESSION", clue: "Prayer for others", start: [7, 4], direction: "horizontal" },
-                    { word: "GLORIFICATION", clue: "Final elevation", start: [3, 11], direction: "vertical" },
-                    { word: "CONSECRATION", clue: "Dedicated to God", start: [9, 2], direction: "horizontal" }
-                ]
-            }
-        ]
-    },
-    
-    es: {
-        levels: [
-            {
-                words: [
-                    { word: "JESUS", clue: "Nuestro Salvador", start: [5, 3], direction: "horizontal" },
-                    { word: "AMOR", clue: "Dios es...", start: [3, 5], direction: "vertical" },
-                    { word: "PAZ", clue: "Lo que Jesús da", start: [5, 5], direction: "vertical" },
-                    { word: "FE", clue: "Creer sin ver", start: [7, 3], direction: "horizontal" },
-                    { word: "VIDA", clue: "Jesús da la...", start: [9, 5], direction: "horizontal" },
-                    { word: "GOZO", clue: "Fruto del Espíritu", start: [5, 8], direction: "vertical" },
-                    { word: "DIOS", clue: "Nuestro Padre celestial", start: [3, 10], direction: "vertical" },
-                    { word: "CRUZ", clue: "Símbolo del sacrificio", start: [11, 3], direction: "horizontal" }
-                ]
-            },
-            {
-                words: [
-                    { word: "ESPERANZA", clue: "Virtud teologal", start: [4, 2], direction: "horizontal" },
-                    { word: "GRACIA", clue: "Favor divino", start: [2, 4], direction: "vertical" },
-                    { word: "ORACION", clue: "Hablar con Dios", start: [4, 6], direction: "vertical" },
-                    { word: "ALABANZA", clue: "Adorar a Dios", start: [6, 2], direction: "horizontal" },
-                    { word: "PERDON", clue: "Misericordia divina", start: [2, 10], direction: "vertical" },
-                    { word: "SERVIR", clue: "Ayudar a otros", start: [8, 4], direction: "horizontal" },
-                    { word: "ESCUCHAR", clue: "Oír la Palabra", start: [10, 2], direction: "horizontal" },
-                    { word: "DAR", clue: "Compartir con alegría", start: [4, 12], direction: "vertical" }
-                ]
-            },
-            {
-                words: [
-                    { word: "RESURRECCION", clue: "Victoria sobre muerte", start: [3, 1], direction: "horizontal" },
-                    { word: "ETERNIDAD", clue: "Vida sin fin", start: [1, 5], direction: "vertical" },
-                    { word: "SANTO", clue: "Puro y santificado", start: [3, 8], direction: "vertical" },
-                    { word: "GLORIA", clue: "Honor a Dios", start: [7, 3], direction: "horizontal" },
-                    { word: "CIELO", clue: "Morada de Dios", start: [5, 1], direction: "horizontal" },
-                    { word: "ANGEL", clue: "Mensajero celestial", start: [9, 5], direction: "horizontal" },
-                    { word: "LUZ", clue: "Dios es...", start: [3, 12], direction: "vertical" },
-                    { word: "VERDAD", clue: "Jesús es la...", start: [5, 10], direction: "vertical" }
-                ]
-            },
-            {
-                words: [
-                    { word: "BENDICION", clue: "Favor divino", start: [2, 2], direction: "horizontal" },
-                    { word: "MILAGRO", clue: "Obra sobrenatural", start: [1, 6], direction: "vertical" },
-                    { word: "PROFETA", clue: "Mensajero de Dios", start: [4, 1], direction: "horizontal" },
-                    { word: "ALIANZA", clue: "Pacto con Dios", start: [2, 10], direction: "vertical" },
-                    { word: "SANIDAD", clue: "Restauración", start: [6, 3], direction: "horizontal" },
-                    { word: "LIBERTAR", clue: "Liberar", start: [8, 1], direction: "horizontal" },
-                    { word: "PROMESA", clue: "Palabra fiel de Dios", start: [4, 5], direction: "vertical" },
-                    { word: "VICTORIA", clue: "Triunfo en Cristo", start: [10, 4], direction: "horizontal" }
-                ]
-            },
-            {
-                words: [
-                    { word: "PERSEVERANCIA", clue: "Mantenerse firme", start: [2, 1], direction: "horizontal" },
-                    { word: "SABIDURIA", clue: "Conocimiento divino", start: [1, 4], direction: "vertical" },
-                    { word: "REDENCION", clue: "Comprado por sangre", start: [4, 2], direction: "horizontal" },
-                    { word: "ESPIRITU", clue: "Espíritu Santo", start: [2, 9], direction: "vertical" },
-                    { word: "PACIENCIA", clue: "Esperar con fe", start: [6, 1], direction: "horizontal" },
-                    { word: "HUMILDAD", clue: "Modestia cristiana", start: [8, 4], direction: "horizontal" },
-                    { word: "VALOR", clue: "Fuerza ante adversidad", start: [4, 11], direction: "vertical" },
-                    { word: "BONDAD", clue: "Cualidad del corazón", start: [6, 7], direction: "vertical" }
-                ]
-            },
-            {
-                words: [
-                    { word: "TRANSFORMACION", clue: "Cambio por Espíritu", start: [1, 1], direction: "horizontal" },
-                    { word: "REVELACION", clue: "Verdad revelada", start: [1, 6], direction: "vertical" },
-                    { word: "SANTIFICACION", clue: "Proceso de santidad", start: [3, 2], direction: "horizontal" },
-                    { word: "COMUNION", clue: "Unión con Dios", start: [1, 12], direction: "vertical" },
-                    { word: "ARREPENTIR", clue: "Apartarse del pecado", start: [5, 1], direction: "horizontal" },
-                    { word: "CONVERSION", clue: "Cambio de dirección", start: [7, 4], direction: "horizontal" },
-                    { word: "PURIFICACION", clue: "Ser hecho puro", start: [9, 1], direction: "horizontal" }
-                ]
-            },
-            {
-                words: [
-                    { word: "OMNIPOTENCIA", clue: "Todo-poderoso", start: [2, 2], direction: "horizontal" },
-                    { word: "MISERICORDIA", clue: "Compasión infinita", start: [1, 6], direction: "vertical" },
-                    { word: "PROVIDENCIA", clue: "Cuidado divino", start: [4, 1], direction: "horizontal" },
-                    { word: "JUSTICIA", clue: "Rectitud perfecta", start: [2, 10], direction: "vertical" },
-                    { word: "SOBERANIA", clue: "Autoridad suprema", start: [6, 3], direction: "horizontal" },
-                    { word: "OMNISCIENCIA", clue: "Conocimiento total", start: [8, 1], direction: "horizontal" },
-                    { word: "MAJESTAD", clue: "Grandeza divina", start: [10, 4], direction: "horizontal" }
-                ]
-            },
-            {
-                words: [
-                    { word: "TRANSFIGURACION", clue: "Revelación de gloria", start: [1, 1], direction: "horizontal" },
-                    { word: "RECONCILIACION", clue: "Restauración unidad", start: [1, 9], direction: "vertical" },
-                    { word: "JUSTIFICACION", clue: "Declaración justicia", start: [3, 2], direction: "horizontal" },
-                    { word: "PROPICIACION", clue: "Expiación pecados", start: [5, 1], direction: "horizontal" },
-                    { word: "INTERCESION", clue: "Oración por otros", start: [7, 4], direction: "horizontal" },
-                    { word: "GLORIFICACION", clue: "Elevación final", start: [3, 11], direction: "vertical" },
-                    { word: "CONSAGRACION", clue: "Dedicado a Dios", start: [9, 2], direction: "horizontal" }
-                ]
-            }
-        ]
-    },
-    en: {
-        levels: [
-            {
                 // Level 1 - Introduction with crosswords (10x10 grid)
                 words: [
                     {
@@ -2823,6 +2628,254 @@ const gameData = {
                         clue: "Tell others of the good news",
                         path: [[8,1], [8,2], [8,3], [8,4], [8,5], [8,6], [8,7]],
                         direction: "horizontal"
+                    }
+                ]
+            },
+            {
+                // Level 11 - Cardinal Virtues (10x10 grid)
+                words: [
+                    {
+                        word: "TEMPERANCE",
+                        clue: "Wise balance that cultivates inner harmony",
+                        path: [[0,3], [1,3], [2,3], [3,3], [4,3], [4,4], [4,5], [4,6], [4,7], [4,8]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "PRUDENCE",
+                        clue: "Discernment that illuminates choices with wisdom",
+                        path: [[2,0], [2,1], [2,2], [2,3], [3,3], [4,3], [5,3], [6,3]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "TRUTH",
+                        clue: "Light that reveals reality in its purity",
+                        path: [[6,5], [6,6], [7,6], [8,6], [9,6]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 12 - Spiritual Gifts (10x10 grid)
+                words: [
+                    {
+                        word: "DISCERNMENT",
+                        clue: "Spiritual vision that distinguishes truth from illusion",
+                        path: [[0,2], [0,3], [0,4], [1,4], [2,4], [3,4], [4,4], [5,4], [6,4], [7,4], [8,4]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "COMPASSION",
+                        clue: "Deep empathy that shares the suffering of others",
+                        path: [[2,6], [2,7], [3,7], [4,7], [5,7], [6,7], [7,7], [8,7], [9,7], [9,8]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "ASSURANCE",
+                        clue: "Living certainty of a radiant future in love",
+                        path: [[5,0], [5,1], [5,2], [5,3], [5,4], [6,4], [7,4], [8,4], [9,4]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 13 - Words of Life (10x10 grid)
+                words: [
+                    {
+                        word: "PARDON",
+                        clue: "Grace that liberates and heals all wounds",
+                        path: [[1,2], [2,2], [3,2], [4,2], [5,2], [6,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "TENDERNESS",
+                        clue: "Infinite gentleness that welcomes without condition",
+                        path: [[3,4], [3,5], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6], [9,7]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "CHARITY",
+                        clue: "Love in action that transforms the world",
+                        path: [[0,7], [1,7], [2,7], [3,7], [4,7], [5,7], [6,7]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "WORSHIP",
+                        clue: "Song of gratitude rising to the heavens",
+                        path: [[7,0], [7,1], [7,2], [7,3], [7,4], [7,5], [7,6]],
+                        direction: "horizontal"
+                    }
+                ]
+            },
+            {
+                // Level 14 - Spiritual Path (10x10 grid)
+                words: [
+                    {
+                        word: "TRANSFORMATION",
+                        clue: "Divine metamorphosis that births a new creation",
+                        path: [[0,1], [0,2], [0,3], [1,3], [2,3], [3,3], [4,3], [5,3], [6,3], [7,3], [8,3], [9,3], [9,4], [9,5]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "PERSEVERANCE",
+                        clue: "Quiet strength that never abandons hope",
+                        path: [[2,6], [2,7], [2,8], [3,8], [4,8], [5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 15 - Light and Darkness (10x10 grid)
+                words: [
+                    {
+                        word: "LIGHT",
+                        clue: "Divine clarity that dispels all shadows",
+                        path: [[2,1], [2,2], [2,3], [2,4], [2,5]],
+                        direction: "horizontal"
+                    },
+                    {
+                        word: "LIBERATION",
+                        clue: "Salvation that opens the gates of eternal freedom",
+                        path: [[0,4], [1,4], [2,4], [3,4], [4,4], [5,4], [6,4], [7,4], [8,4], [9,4]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "PURITY",
+                        clue: "Restored innocence reflecting original beauty",
+                        path: [[4,6], [5,6], [6,6], [7,6], [8,6], [9,6]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "CONSOLATION",
+                        clue: "Comfort that dries tears and soothes sorrows",
+                        path: [[6,0], [6,1], [6,2], [7,2], [8,2], [9,2], [9,3], [9,4], [9,5], [9,6], [9,7]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 16 - Faithfulness and Commitment (10x10 grid)
+                words: [
+                    {
+                        word: "FIDELITY",
+                        clue: "Constancy of heart that endures through all seasons",
+                        path: [[1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "COVENANT",
+                        clue: "Sacred promise that unites souls for eternity",
+                        path: [[3,4], [3,5], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "CONSECRATION",
+                        clue: "Total gift of self reflecting absolute love",
+                        path: [[5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6], [9,5], [9,4], [9,3], [9,2], [9,1]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "DEVOTION",
+                        clue: "Attachment of heart that nurtures the spiritual flame",
+                        path: [[0,5], [1,5], [2,5], [3,5], [4,5], [5,5], [6,5], [7,5]],
+                        direction: "vertical"
+                    }
+                ]
+            },
+            {
+                // Level 17 - Spiritual Riches (10x10 grid)
+                words: [
+                    {
+                        word: "BENEDICTION",
+                        clue: "Heavenly favor enriching the soul with infinite grace",
+                        path: [[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2], [9,3]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "ABUNDANCE",
+                        clue: "Divine fullness that fills beyond all measure",
+                        path: [[2,5], [2,6], [2,7], [3,7], [4,7], [5,7], [6,7], [7,7], [8,7]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "HERITAGE",
+                        clue: "Eternal treasure passed to children of light",
+                        path: [[5,0], [5,1], [5,2], [6,2], [7,2], [8,2], [9,2], [9,3]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 18 - Divine Protection (10x10 grid)
+                words: [
+                    {
+                        word: "REFUGE",
+                        clue: "Sacred shelter where the soul finds rest and safety",
+                        path: [[2,2], [3,2], [4,2], [5,2], [6,2], [7,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "STRONGHOLD",
+                        clue: "Unshakable rampart protecting from every storm",
+                        path: [[1,4], [1,5], [1,6], [2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "SHIELD",
+                        clue: "Heavenly defense that turns away all evil",
+                        path: [[3,8], [4,8], [5,8], [6,8], [7,8], [8,8]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "SECURITY",
+                        clue: "Peaceful confidence in divine providence",
+                        path: [[8,0], [8,1], [8,2], [8,3], [8,4], [8,5], [8,6], [8,7]],
+                        direction: "horizontal"
+                    }
+                ]
+            },
+            {
+                // Level 19 - Renewal (10x10 grid)
+                words: [
+                    {
+                        word: "RENAISSANCE",
+                        clue: "New beginning that makes eternal hope blossom",
+                        path: [[0,3], [1,3], [2,3], [3,3], [4,3], [5,3], [6,3], [7,3], [8,3], [9,3], [9,4]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "REGENERATION",
+                        clue: "Deep transformation restoring original life",
+                        path: [[2,5], [2,6], [2,7], [3,7], [4,7], [5,7], [6,7], [7,7], [8,7], [9,7], [9,6], [9,5]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "HOPE",
+                        clue: "Light that never fades in the loving heart",
+                        path: [[5,0], [5,1], [5,2], [5,3]],
+                        direction: "horizontal"
+                    }
+                ]
+            },
+            {
+                // Level 20 - Final Glory (10x10 grid) - Ultimate challenge!
+                words: [
+                    {
+                        word: "RESURRECTION",
+                        clue: "Radiant victory of life over eternal death",
+                        path: [[0,1], [0,2], [0,3], [1,3], [2,3], [3,3], [4,3], [5,3], [6,3], [7,3], [8,3], [9,3]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "GLORIFICATION",
+                        clue: "Supreme elevation toward the fullness of divine love",
+                        path: [[2,5], [2,6], [2,7], [3,7], [4,7], [5,7], [6,7], [7,7], [8,7], [9,7], [9,6], [9,5], [9,4]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "FULLNESS",
+                        clue: "Perfect fulfillment of all heavenly promises",
+                        path: [[4,0], [5,0], [6,0], [7,0], [8,0], [9,0], [9,1], [9,2]],
+                        direction: "bent"
                     }
                 ]
             }

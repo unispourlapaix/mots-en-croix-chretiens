@@ -6,7 +6,7 @@
 ### ✅ Complété
 - **Français (fr)**: 77 niveaux - 100% ✓
 - **Espagnol (es)**: 77 niveaux - 100% ✓
-- **Anglais (en)**: 10 niveaux - 13%
+- **Anglais (en)**: 20 niveaux - 26%
 
 ### 🔨 En Attente
 - Allemand (de): 0/77 - 0%
@@ -186,7 +186,17 @@ Les 77 niveaux suivent une progression thématique:
 | 8 | Adoration | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 9 | Paroles | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 10 | Église | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
-| 11-77 | ... | ✓ |  | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 11 | Vertus cardinales | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 12 | Dons spirituels | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 13 | Paroles de vie | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 14 | Chemin spirituel | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 15 | Lumière | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 16 | Fidélité | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 17 | Richesses | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 18 | Protection | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 19 | Renouveau | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 20 | Gloire finale | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 21-77 | ... | ✓ |  | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 
 ---
 
