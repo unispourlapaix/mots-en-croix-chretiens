@@ -2878,6 +2878,155 @@ const gameData = {
                         direction: "bent"
                     }
                 ]
+            },
+            {
+                // BONUS LEVEL 1 - Divine Grace (10x10 grid)
+                words: [
+                    {
+                        word: "GRACE",
+                        clue: "Heavenly gift that beautifies our lives with kindness",
+                        path: [[2,3], [3,3], [4,3], [5,3], [6,3]],
+                        direction: "vertical",
+                        bonus: true
+                    },
+                    {
+                        word: "TOLERANCE",
+                        clue: "Benevolent acceptance that unites us in our differences",
+                        path: [[3,5], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6], [9,7], [9,8]],
+                        direction: "bent",
+                        bonus: true
+                    },
+                    {
+                        word: "BENEVOLENCE",
+                        clue: "Loving gaze that sees the best in everyone",
+                        path: [[1,0], [1,1], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2], [9,1], [9,0]],
+                        direction: "bent",
+                        bonus: true
+                    }
+                ],
+                bonusWords: ["GRACE", "TOLERANCE", "BENEVOLENCE"]
+            },
+            {
+                // BONUS LEVEL 2 - Universal Love (10x10 grid)
+                words: [
+                    {
+                        word: "MERCY",
+                        clue: "Infinite forgiveness that embraces all human frailties",
+                        path: [[0,3], [1,3], [2,3], [3,3], [4,3]],
+                        direction: "vertical",
+                        bonus: true
+                    },
+                    {
+                        word: "COMPASSION",
+                        clue: "Heart that feels another's pain as its own",
+                        path: [[2,6], [2,7], [3,7], [4,7], [5,7], [6,7], [7,7], [8,7], [9,7], [9,8]],
+                        direction: "bent",
+                        bonus: true
+                    },
+                    {
+                        word: "TENDERNESS",
+                        clue: "Gentle warmth that envelops and comforts souls",
+                        path: [[4,0], [5,0], [6,0], [7,0], [8,0], [9,0], [9,1], [9,2], [9,3]],
+                        direction: "bent",
+                        bonus: true
+                    }
+                ],
+                bonusWords: ["MERCY", "COMPASSION", "TENDERNESS"]
+            },
+            {
+                // BONUS LEVEL 3 - Brotherhood (10x10 grid)
+                words: [
+                    {
+                        word: "BROTHERHOOD",
+                        clue: "Sacred bond that makes all humanity one family",
+                        path: [[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2], [9,1]],
+                        direction: "bent",
+                        bonus: true
+                    },
+                    {
+                        word: "SOLIDARITY",
+                        clue: "Collective strength that lifts and supports each one",
+                        path: [[2,4], [2,5], [2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6], [9,7]],
+                        direction: "bent",
+                        bonus: true
+                    },
+                    {
+                        word: "SHARING",
+                        clue: "Gesture that multiplies joy by dividing it",
+                        path: [[5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6]],
+                        direction: "bent",
+                        bonus: true
+                    },
+                    {
+                        word: "UNITY",
+                        clue: "Harmony born from reconciled diversity",
+                        path: [[1,5], [2,5], [3,5], [4,5], [5,5]],
+                        direction: "vertical",
+                        bonus: true
+                    }
+                ],
+                bonusWords: ["BROTHERHOOD", "SOLIDARITY", "SHARING", "UNITY"]
+            },
+            {
+                // BONUS LEVEL 4 - Overcoming Division (10x10 grid)
+                words: [
+                    {
+                        word: "RECONCILIATION",
+                        clue: "Divine bridge that mends what hatred has torn",
+                        path: [[0,4], [1,4], [2,4], [3,4], [4,4], [5,4], [6,4], [7,4], [8,4], [9,4], [9,3], [9,2], [9,1]],
+                        direction: "bent",
+                        bonus: true
+                    },
+                    {
+                        word: "ACCEPTANCE",
+                        clue: "Opening of the heart that welcomes the different",
+                        path: [[2,6], [2,7], [3,7], [4,7], [5,7], [6,7], [7,7], [8,7], [9,7], [9,8]],
+                        direction: "bent",
+                        bonus: true
+                    },
+                    {
+                        word: "HEALING",
+                        clue: "Gentle balm that soothes the wounds of the soul",
+                        path: [[4,0], [5,0], [6,0], [7,0], [8,0], [9,0], [9,1]],
+                        direction: "bent",
+                        bonus: true
+                    }
+                ],
+                bonusWords: ["RECONCILIATION", "ACCEPTANCE", "HEALING"]
+            },
+            {
+                // BONUS LEVEL 5 - Light vs Darkness (10x10 grid)
+                words: [
+                    {
+                        word: "TRUTH",
+                        clue: "Light that chases away the shadows of lies",
+                        path: [[0,3], [1,3], [2,3], [3,3], [4,3]],
+                        direction: "vertical",
+                        bonus: true
+                    },
+                    {
+                        word: "HUMILITY",
+                        clue: "Virtue that topples destructive pride",
+                        path: [[2,5], [2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6]],
+                        direction: "bent",
+                        bonus: true
+                    },
+                    {
+                        word: "GENEROSITY",
+                        clue: "Open hand that breaks the chains of greed",
+                        path: [[1,7], [2,7], [3,7], [4,7], [5,7], [6,7], [7,7], [8,7], [9,7], [9,8]],
+                        direction: "bent",
+                        bonus: true
+                    },
+                    {
+                        word: "PEACE",
+                        clue: "Divine harmony that extinguishes the flames of war",
+                        path: [[0,5], [1,5], [2,5], [3,5]],
+                        direction: "vertical",
+                        bonus: true
+                    }
+                ],
+                bonusWords: ["TRUTH", "HUMILITY", "GENEROSITY", "PEACE"]
             }
         ]
     }

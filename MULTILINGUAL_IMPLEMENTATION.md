@@ -51,7 +51,7 @@
 - Adaptation culturelle des indices
 - Vocabulaire chrétien approprié
 
-**Anglais (en)**: 20/77 niveaux (26%) ✓
+**Anglais (en)**: 25/77 niveaux (32%) ✓
 1. **Introduction**: Jesus, Love, Peace, Faith, Life
 2. **Christian Virtues**: Hope, Grace, Prayer, Love, Faith
 3. **Mysteries of Faith**: Eternity, Glory, Saint, Heaven, Angel
@@ -72,6 +72,11 @@
 18. **Divine Protection**: Refuge, Stronghold, Shield, Security
 19. **Renewal**: Renaissance, Regeneration, Hope
 20. **Final Glory**: Resurrection, Glorification, Fullness
+21. **BONUS 1 - Divine Grace**: Grace, Tolerance, Benevolence
+22. **BONUS 2 - Universal Love**: Mercy, Compassion, Tenderness
+23. **BONUS 3 - Brotherhood**: Brotherhood, Solidarity, Sharing, Unity
+24. **BONUS 4 - Overcoming Division**: Reconciliation, Acceptance, Healing
+25. **BONUS 5 - Light vs Darkness**: Truth, Humility, Generosity, Peace
 
 **Autres langues**: 0/77 niveaux
 - Interface complète traduite
@@ -240,8 +245,9 @@ de: {  // Allemand
 ## 🎯 Prochaines Étapes
 
 ### Priorité 1: Compléter les Traductions Anglaises
-- [ ] Niveaux 11-20 (Thèmes bibliques avancés)
-- [ ] Niveaux 21-30 (Niveaux bonus avec bonusWords)
+- [x] Niveaux 1-20 (Thèmes bibliques fondamentaux) ✓
+- [x] Niveaux 21-25 (Niveaux bonus avec bonusWords) ✓
+- [ ] Niveaux 26-30 (Niveaux bonus avancés)
 - [ ] Niveaux 31-40 (Paroles de sagesse)
 - [ ] ... jusqu'à 77
 
@@ -290,7 +296,7 @@ Langue sélectionnée → Langue française (fallback) → null
 gameData = {
     fr: { levels: [...] },  // 77 niveaux
     es: { levels: [...] },  // 77 niveaux
-    en: { levels: [...] },  // 10 niveaux
+    en: { levels: [...] },  // 25 niveaux
     de: { levels: [] },     // Vide = fallback vers fr
     // ... autres langues
 }
@@ -331,7 +337,7 @@ Co-Authored-By: Votre Nom <email@example.com>
 - Système multilingue: Claude Code Pro
 - Interface kawaii: Design original
 - Traductions FR/ES: Complètes
-- Traductions EN (1-10): Claude Code Pro
+- Traductions EN (1-25): Claude Code Pro
 
 **Infrastructure:**
 - Supabase: Cloud database
