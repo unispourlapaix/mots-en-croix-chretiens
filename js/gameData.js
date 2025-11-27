@@ -3167,6 +3167,139 @@ const gameData = {
                         direction: "horizontal"
                     }
                 ]
+            },
+            {
+                // Level 31 - Universal Call to Grace (10x10 grid)
+                words: [
+                    {
+                        word: "INVITATION",
+                        clue: "God calls the thief to return to Him",
+                        path: [[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "WELCOME",
+                        clue: "Open arms even for the hardened criminal",
+                        path: [[3,4], [3,5], [4,5], [5,5], [6,5], [7,5], [8,5]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "MERCY",
+                        clue: "Compassion that embraces the repentant liar",
+                        path: [[1,7], [2,7], [3,7], [4,7], [5,7]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "LOVE",
+                        clue: "God abandons no one to their past",
+                        path: [[5,0], [5,1], [5,2], [5,3]],
+                        direction: "horizontal"
+                    }
+                ]
+            },
+            {
+                // Level 32 - Restoration of the Murderer (10x10 grid)
+                words: [
+                    {
+                        word: "REHABILITATION",
+                        clue: "God rebuilds the one who has taken a life",
+                        path: [[0,1], [0,2], [0,3], [1,3], [2,3], [3,3], [4,3], [5,3], [6,3], [7,3], [8,3], [9,3], [9,4]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "DIGNITY",
+                        clue: "Worth restored even after the worst crime",
+                        path: [[2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "NEWNESS",
+                        clue: "Identity renewed by divine grace",
+                        path: [[4,8], [5,8], [6,8], [7,8], [8,8], [9,8], [9,7]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 33 - Forgiveness for the Liar (10x10 grid)
+                words: [
+                    {
+                        word: "TRUTH",
+                        clue: "Liberation of the liar through saving truth",
+                        path: [[2,2], [3,2], [4,2], [5,2], [6,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "SINCERITY",
+                        clue: "New path offered to the one who deceived",
+                        path: [[1,4], [2,4], [3,4], [4,4], [5,4], [6,4], [7,4], [8,4], [9,4]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "PURIFICATION",
+                        clue: "Cleansing of the tongue that has lied",
+                        path: [[3,6], [3,7], [4,7], [5,7], [6,7], [7,7], [8,7], [9,7], [9,8], [9,9], [9,6], [9,5]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "GRACE",
+                        clue: "Gift that erases all past lies",
+                        path: [[0,5], [1,5], [2,5], [3,5], [4,5]],
+                        direction: "vertical"
+                    }
+                ]
+            },
+            {
+                // Level 34 - Mercy for the Thief (10x10 grid)
+                words: [
+                    {
+                        word: "RESTITUTION",
+                        clue: "God helps the thief to repair and be reborn",
+                        path: [[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2], [9,3]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "GENEROSITY",
+                        clue: "Transformation of the thief into a generous giver",
+                        path: [[2,5], [2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6], [9,7]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "FORGIVENESS",
+                        clue: "Grace that frees the one who stole",
+                        path: [[4,8], [5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6], [9,5], [9,4], [9,3]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "LOVE",
+                        clue: "God sees beyond the theft and loves the person",
+                        path: [[5,0], [5,1], [5,2], [5,3]],
+                        direction: "horizontal"
+                    }
+                ]
+            },
+            {
+                // Level 35 - Unconditional Love (10x10 grid)
+                words: [
+                    {
+                        word: "UNCONDITIONAL",
+                        clue: "God's limitless love for all sinners",
+                        path: [[0,1], [0,2], [0,3], [1,3], [2,3], [3,3], [4,3], [5,3], [6,3], [7,3], [8,3], [9,3], [9,4]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "ACCEPTANCE",
+                        clue: "God welcomes even the one condemned by all",
+                        path: [[2,6], [2,7], [3,7], [4,7], [5,7], [6,7], [7,7], [8,7], [9,7], [9,8]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "GRACE",
+                        clue: "Unmerited favor for the repentant criminal",
+                        path: [[5,0], [5,1], [5,2], [5,3], [5,4]],
+                        direction: "horizontal"
+                    }
+                ]
             }
         ]
     }

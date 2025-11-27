@@ -6,7 +6,7 @@
 ### ✅ Complété
 - **Français (fr)**: 77 niveaux - 100% ✓
 - **Espagnol (es)**: 77 niveaux - 100% ✓
-- **Anglais (en)**: 30 niveaux - 39%
+- **Anglais (en)**: 35 niveaux - 45%
 
 ### 🔨 En Attente
 - Allemand (de): 0/77 - 0%
@@ -206,7 +206,12 @@ Les 77 niveaux suivent une progression thématique:
 | 28 | BONUS: Reconstruction | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 29 | Grâce pour tous | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 30 | Transformation | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
-| 31-77 | ... | ✓ |  | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 31 | Appel universel | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 32 | Restauration du meurtrier | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 33 | Pardon pour le menteur | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 34 | Miséricorde pour le voleur | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 35 | Amour inconditionnel | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 36-77 | ... | ✓ |  | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 
 ---
 

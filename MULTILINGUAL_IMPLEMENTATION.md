@@ -51,7 +51,7 @@
 - Adaptation culturelle des indices
 - Vocabulaire chrétien approprié
 
-**Anglais (en)**: 30/77 niveaux (39%) ✓
+**Anglais (en)**: 35/77 niveaux (45%) ✓
 1. **Introduction**: Jesus, Love, Peace, Faith, Life
 2. **Christian Virtues**: Hope, Grace, Prayer, Love, Faith
 3. **Mysteries of Faith**: Eternity, Glory, Saint, Heaven, Angel
@@ -82,6 +82,11 @@
 28. **BONUS 8 - Reconstruction**: Restoration, Forgiveness, Rebirth
 29. **Grace for All**: Redemption, Grace, Forgiveness, Love
 30. **Transformation of the Criminal Heart**: Change, Newlife, Hope
+31. **Universal Call to Grace**: Invitation, Welcome, Mercy, Love
+32. **Restoration of the Murderer**: Rehabilitation, Dignity, Newness
+33. **Forgiveness for the Liar**: Truth, Sincerity, Purification, Grace
+34. **Mercy for the Thief**: Restitution, Generosity, Forgiveness, Love
+35. **Unconditional Love**: Unconditional, Acceptance, Grace
 
 **Autres langues**: 0/77 niveaux
 - Interface complète traduite
@@ -253,7 +258,8 @@ de: {  // Allemand
 - [x] Niveaux 1-20 (Thèmes bibliques fondamentaux) ✓
 - [x] Niveaux 21-25 (Niveaux bonus - Grâce divine, Amour, Fraternité) ✓
 - [x] Niveaux 26-30 (Niveaux bonus avancés + Grâce pour tous) ✓
-- [ ] Niveaux 31-40 (Appel universel et réhabilitation)
+- [x] Niveaux 31-35 (Appel universel, réhabilitation, amour inconditionnel) ✓
+- [ ] Niveaux 36-40 (Seconde chance, compassion sans limite)
 - [ ] ... jusqu'à 77
 
 ### Priorité 2: Ajouter d'Autres Langues
@@ -301,7 +307,7 @@ Langue sélectionnée → Langue française (fallback) → null
 gameData = {
     fr: { levels: [...] },  // 77 niveaux
     es: { levels: [...] },  // 77 niveaux
-    en: { levels: [...] },  // 30 niveaux
+    en: { levels: [...] },  // 35 niveaux
     de: { levels: [] },     // Vide = fallback vers fr
     // ... autres langues
 }
@@ -342,7 +348,7 @@ Co-Authored-By: Votre Nom <email@example.com>
 - Système multilingue: Claude Code Pro
 - Interface kawaii: Design original
 - Traductions FR/ES: Complètes
-- Traductions EN (1-30): Claude Code Pro
+- Traductions EN (1-35): Claude Code Pro
 
 **Infrastructure:**
 - Supabase: Cloud database
