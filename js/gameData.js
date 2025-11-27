@@ -3439,6 +3439,151 @@ const gameData = {
                         direction: "vertical"
                     }
                 ]
+            },
+            {
+                // Level 41 - Inner Change (10x10 grid)
+                words: [
+                    {
+                        word: "INTROSPECTION",
+                        clue: "Deep gaze revealing where change is needed",
+                        path: [[0,1], [0,2], [0,3], [1,3], [2,3], [3,3], [4,3], [5,3], [6,3], [7,3], [8,3], [9,3], [9,4]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "MEDITATION",
+                        clue: "Silence where transformation takes root",
+                        path: [[2,6], [2,7], [3,7], [4,7], [5,7], [6,7], [7,7], [8,7], [9,7], [9,8]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "AWARENESS",
+                        clue: "Inner awakening preceding all change",
+                        path: [[5,0], [5,1], [5,2], [6,2], [7,2], [8,2], [9,2], [9,3], [9,4]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "RESOLVE",
+                        clue: "Firm decision to embrace transformation",
+                        path: [[1,5], [2,5], [3,5], [4,5], [5,5], [6,5], [7,5]],
+                        direction: "vertical"
+                    }
+                ]
+            },
+            {
+                // Level 42 - Courage of Change (10x10 grid)
+                words: [
+                    {
+                        word: "DARING",
+                        clue: "Boldness to leave the old for the new",
+                        path: [[2,2], [3,2], [4,2], [5,2], [6,2], [7,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "DETERMINATION",
+                        clue: "Firm resolve against resistance to change",
+                        path: [[0,4], [1,4], [2,4], [3,4], [4,4], [5,4], [6,4], [7,4], [8,4], [9,4], [9,5], [9,6], [9,7]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "RESILIENCE",
+                        clue: "Strength to bounce back through transitions",
+                        path: [[1,8], [2,8], [3,8], [4,8], [5,8], [6,8], [7,8], [8,8], [9,8], [9,7]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "BRAVERY",
+                        clue: "Valor facing the unknown with hope",
+                        path: [[5,0], [5,1], [5,2], [6,2], [7,2], [8,2], [9,2]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 43 - Constant Renewal (10x10 grid)
+                words: [
+                    {
+                        word: "PERPETUAL",
+                        clue: "Continuous change of the growing soul",
+                        path: [[1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "DYNAMISM",
+                        clue: "Living energy embracing each transition",
+                        path: [[0,4], [1,4], [2,4], [3,4], [4,4], [5,4], [6,4], [7,4]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "ADAPTATION",
+                        clue: "Flexibility dancing with life's seasons",
+                        path: [[2,6], [2,7], [3,7], [4,7], [5,7], [6,7], [7,7], [8,7], [9,7], [9,8]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "GROWTH",
+                        clue: "Infinite expansion of transformed spirit",
+                        path: [[4,0], [5,0], [6,0], [7,0], [8,0], [9,0]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "LIFE",
+                        clue: "Very essence of perpetual change",
+                        path: [[6,5], [7,5], [8,5], [9,5]],
+                        direction: "vertical"
+                    }
+                ]
+            },
+            {
+                // Level 44 - Breaking of the Heart (10x10 grid)
+                words: [
+                    {
+                        word: "BREAKING",
+                        clue: "Broken heart opening to divine transformation",
+                        path: [[1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "HUMILIATION",
+                        clue: "Lowering preparing for spiritual elevation",
+                        path: [[0,4], [1,4], [2,4], [3,4], [4,4], [5,4], [6,4], [7,4], [8,4], [9,4], [9,5]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "CONTRITION",
+                        clue: "Deep regret opening to redeeming grace",
+                        path: [[2,7], [2,8], [3,8], [4,8], [5,8], [6,8], [7,8], [8,8], [9,8], [9,7]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "ABANDON",
+                        clue: "Total release preceding renewal",
+                        path: [[5,0], [5,1], [6,1], [7,1], [8,1], [9,1], [9,2]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 45 - Renewal of the Spirit (10x10 grid)
+                words: [
+                    {
+                        word: "REVITALIZATION",
+                        clue: "Complete restoration of the inner being",
+                        path: [[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2], [9,3], [9,4], [9,5], [9,6]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "REGENERATION",
+                        clue: "New birth after the breaking",
+                        path: [[2,7], [2,8], [3,8], [4,8], [5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6], [9,5]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "FRESHNESS",
+                        clue: "Divine newness refreshing the broken soul",
+                        path: [[5,0], [5,1], [6,1], [7,1], [8,1], [9,1], [9,2], [9,3], [9,4]],
+                        direction: "bent"
+                    }
+                ]
             }
         ]
     }

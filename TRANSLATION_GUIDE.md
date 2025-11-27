@@ -6,7 +6,7 @@
 ### ✅ Complété
 - **Français (fr)**: 77 niveaux - 100% ✓
 - **Espagnol (es)**: 77 niveaux - 100% ✓
-- **Anglais (en)**: 40 niveaux - 52%
+- **Anglais (en)**: 45 niveaux - 58%
 
 ### 🔨 En Attente
 - Allemand (de): 0/77 - 0%
@@ -33,8 +33,8 @@ Le jeu utilise maintenant un système de fallback automatique:
 
 ### Exemple
 - Utilisateur choisit l'anglais (en)
-- Niveaux 1-40: Affichés en anglais ✓
-- Niveaux 41-77: Affichés en français (fallback automatique)
+- Niveaux 1-45: Affichés en anglais ✓
+- Niveaux 46-77: Affichés en français (fallback automatique)
 
 ---
 
@@ -216,7 +216,12 @@ Les 77 niveaux suivent une progression thématique:
 | 38 | Victoire de la grâce | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 39 | Transformation par changement | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 40 | Accepter le changement | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
-| 41-77 | ... | ✓ |  | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 41 | Changement intérieur | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 42 | Courage du changement | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 43 | Renouveau constant | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 44 | Brisement du cœur | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 45 | Renouvellement de l'esprit | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 46-77 | ... | ✓ |  | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 
 ---
 

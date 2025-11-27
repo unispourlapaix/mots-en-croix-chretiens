@@ -51,7 +51,7 @@
 - Adaptation culturelle des indices
 - Vocabulaire chrétien approprié
 
-**Anglais (en)**: 40/77 niveaux (52%) ✓
+**Anglais (en)**: 45/77 niveaux (58%) ✓
 1. **Introduction**: Jesus, Love, Peace, Faith, Life
 2. **Christian Virtues**: Hope, Grace, Prayer, Love, Faith
 3. **Mysteries of Faith**: Eternity, Glory, Saint, Heaven, Angel
@@ -92,6 +92,11 @@
 38. **Victory of Grace**: Triumph, Transformation, Liberation, Grace
 39. **Transformation through Change**: Metamorphosis, Evolution, Newness, Renewal
 40. **Accepting Change**: Acceptance, Surrender, Trust, Courage
+41. **Inner Change**: Introspection, Meditation, Awareness, Resolve
+42. **Courage of Change**: Daring, Determination, Resilience, Bravery
+43. **Constant Renewal**: Perpetual, Dynamism, Adaptation, Growth, Life
+44. **Breaking of the Heart**: Breaking, Humiliation, Contrition, Abandon
+45. **Renewal of the Spirit**: Revitalization, Regeneration, Freshness
 
 **Autres langues**: 0/77 niveaux
 - Interface complète traduite
@@ -265,7 +270,8 @@ de: {  // Allemand
 - [x] Niveaux 26-30 (Niveaux bonus avancés + Grâce pour tous) ✓
 - [x] Niveaux 31-35 (Appel universel, réhabilitation, amour inconditionnel) ✓
 - [x] Niveaux 36-40 (Seconde chance, transformation, acceptation du changement) ✓
-- [ ] Niveaux 41-45 (Changement intérieur, courage, renouveau constant)
+- [x] Niveaux 41-45 (Changement intérieur, courage, renouveau constant, brisement) ✓
+- [ ] Niveaux 46-50 (Recommencement, reconstruction, purification)
 - [ ] ... jusqu'à 77
 
 ### Priorité 2: Ajouter d'Autres Langues
@@ -313,7 +319,7 @@ Langue sélectionnée → Langue française (fallback) → null
 gameData = {
     fr: { levels: [...] },  // 77 niveaux
     es: { levels: [...] },  // 77 niveaux
-    en: { levels: [...] },  // 35 niveaux
+    en: { levels: [...] },  // 45 niveaux
     de: { levels: [] },     // Vide = fallback vers fr
     // ... autres langues
 }
@@ -354,7 +360,7 @@ Co-Authored-By: Votre Nom <email@example.com>
 - Système multilingue: Claude Code Pro
 - Interface kawaii: Design original
 - Traductions FR/ES: Complètes
-- Traductions EN (1-35): Claude Code Pro
+- Traductions EN (1-45): Claude Code Pro
 
 **Infrastructure:**
 - Supabase: Cloud database
