@@ -6,7 +6,7 @@
 ### ✅ Complété
 - **Français (fr)**: 77 niveaux - 100% ✓
 - **Espagnol (es)**: 77 niveaux - 100% ✓
-- **Anglais (en)**: 25 niveaux - 32%
+- **Anglais (en)**: 30 niveaux - 39%
 
 ### 🔨 En Attente
 - Allemand (de): 0/77 - 0%
@@ -201,7 +201,12 @@ Les 77 niveaux suivent une progression thématique:
 | 23 | BONUS: Fraternité | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 24 | BONUS: Division vaincue | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 25 | BONUS: Lumière/Ténèbres | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
-| 26-77 | ... | ✓ |  | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 26 | BONUS: Amour universel vs haine | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 27 | BONUS: Justice et Vérité | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 28 | BONUS: Reconstruction | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 29 | Grâce pour tous | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 30 | Transformation | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 31-77 | ... | ✓ |  | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 
 ---
 

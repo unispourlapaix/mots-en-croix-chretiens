@@ -51,7 +51,7 @@
 - Adaptation culturelle des indices
 - Vocabulaire chrétien approprié
 
-**Anglais (en)**: 25/77 niveaux (32%) ✓
+**Anglais (en)**: 30/77 niveaux (39%) ✓
 1. **Introduction**: Jesus, Love, Peace, Faith, Life
 2. **Christian Virtues**: Hope, Grace, Prayer, Love, Faith
 3. **Mysteries of Faith**: Eternity, Glory, Saint, Heaven, Angel
@@ -77,6 +77,11 @@
 23. **BONUS 3 - Brotherhood**: Brotherhood, Solidarity, Sharing, Unity
 24. **BONUS 4 - Overcoming Division**: Reconciliation, Acceptance, Healing
 25. **BONUS 5 - Light vs Darkness**: Truth, Humility, Generosity, Peace
+26. **BONUS 6 - Universal Love vs Hatred**: Inclusion, Respect, Equality, Love
+27. **BONUS 7 - Justice and Truth**: Sincerity, Judgment, Transparency
+28. **BONUS 8 - Reconstruction**: Restoration, Forgiveness, Rebirth
+29. **Grace for All**: Redemption, Grace, Forgiveness, Love
+30. **Transformation of the Criminal Heart**: Change, Newlife, Hope
 
 **Autres langues**: 0/77 niveaux
 - Interface complète traduite
@@ -246,9 +251,9 @@ de: {  // Allemand
 
 ### Priorité 1: Compléter les Traductions Anglaises
 - [x] Niveaux 1-20 (Thèmes bibliques fondamentaux) ✓
-- [x] Niveaux 21-25 (Niveaux bonus avec bonusWords) ✓
-- [ ] Niveaux 26-30 (Niveaux bonus avancés)
-- [ ] Niveaux 31-40 (Paroles de sagesse)
+- [x] Niveaux 21-25 (Niveaux bonus - Grâce divine, Amour, Fraternité) ✓
+- [x] Niveaux 26-30 (Niveaux bonus avancés + Grâce pour tous) ✓
+- [ ] Niveaux 31-40 (Appel universel et réhabilitation)
 - [ ] ... jusqu'à 77
 
 ### Priorité 2: Ajouter d'Autres Langues
@@ -296,7 +301,7 @@ Langue sélectionnée → Langue française (fallback) → null
 gameData = {
     fr: { levels: [...] },  // 77 niveaux
     es: { levels: [...] },  // 77 niveaux
-    en: { levels: [...] },  // 25 niveaux
+    en: { levels: [...] },  // 30 niveaux
     de: { levels: [] },     // Vide = fallback vers fr
     // ... autres langues
 }
@@ -337,7 +342,7 @@ Co-Authored-By: Votre Nom <email@example.com>
 - Système multilingue: Claude Code Pro
 - Interface kawaii: Design original
 - Traductions FR/ES: Complètes
-- Traductions EN (1-25): Claude Code Pro
+- Traductions EN (1-30): Claude Code Pro
 
 **Infrastructure:**
 - Supabase: Cloud database

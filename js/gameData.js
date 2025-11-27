@@ -3027,6 +3027,146 @@ const gameData = {
                     }
                 ],
                 bonusWords: ["TRUTH", "HUMILITY", "GENEROSITY", "PEACE"]
+            },
+            {
+                // BONUS LEVEL 6 - Universal Love vs Hatred (10x10 grid)
+                words: [
+                    {
+                        word: "INCLUSION",
+                        clue: "God loves all His children without exception or rejection",
+                        path: [[1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2]],
+                        direction: "vertical",
+                        bonus: true
+                    },
+                    {
+                        word: "RESPECT",
+                        clue: "Dignity of every person created in the divine image",
+                        path: [[3,4], [3,5], [4,5], [5,5], [6,5], [7,5], [8,5]],
+                        direction: "bent",
+                        bonus: true
+                    },
+                    {
+                        word: "EQUALITY",
+                        clue: "Justice that opposes all forms of discrimination",
+                        path: [[2,7], [3,7], [4,7], [5,7], [6,7], [7,7], [8,7], [9,7]],
+                        direction: "vertical",
+                        bonus: true
+                    },
+                    {
+                        word: "LOVE",
+                        clue: "God is love for everyone without prejudice",
+                        path: [[5,0], [5,1], [5,2], [5,3]],
+                        direction: "horizontal",
+                        bonus: true
+                    }
+                ],
+                bonusWords: ["INCLUSION", "RESPECT", "EQUALITY", "LOVE"]
+            },
+            {
+                // BONUS LEVEL 7 - Justice and Truth (10x10 grid)
+                words: [
+                    {
+                        word: "SINCERITY",
+                        clue: "Authenticity that unmasks deception",
+                        path: [[1,3], [2,3], [3,3], [4,3], [5,3], [6,3], [7,3], [8,3], [9,3]],
+                        direction: "vertical",
+                        bonus: true
+                    },
+                    {
+                        word: "JUDGMENT",
+                        clue: "Fair discernment free from condemnation",
+                        path: [[3,5], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6]],
+                        direction: "bent",
+                        bonus: true
+                    },
+                    {
+                        word: "TRANSPARENCY",
+                        clue: "Clarity that shatters the masks of hypocrisy",
+                        path: [[2,8], [2,9], [3,9], [4,9], [5,9], [6,9], [7,9], [8,9], [9,9], [9,8], [9,7], [9,6]],
+                        direction: "bent",
+                        bonus: true
+                    }
+                ],
+                bonusWords: ["SINCERITY", "JUDGMENT", "TRANSPARENCY"]
+            },
+            {
+                // BONUS LEVEL 8 - Reconstruction (10x10 grid)
+                words: [
+                    {
+                        word: "RESTORATION",
+                        clue: "Renewal that repairs what hatred has destroyed",
+                        path: [[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2], [9,3], [9,4]],
+                        direction: "bent",
+                        bonus: true
+                    },
+                    {
+                        word: "FORGIVENESS",
+                        clue: "Liberation that breaks the cycle of revenge",
+                        path: [[2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6], [9,7], [9,8], [9,9]],
+                        direction: "bent",
+                        bonus: true
+                    },
+                    {
+                        word: "REBIRTH",
+                        clue: "Fresh start that erases dissolution",
+                        path: [[5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6]],
+                        direction: "bent",
+                        bonus: true
+                    }
+                ],
+                bonusWords: ["RESTORATION", "FORGIVENESS", "REBIRTH"]
+            },
+            {
+                // Level 29 - Grace for All (10x10 grid)
+                words: [
+                    {
+                        word: "REDEMPTION",
+                        clue: "Salvation offered even to the repentant murderer",
+                        path: [[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "GRACE",
+                        clue: "Free gift that welcomes the penitent thief",
+                        path: [[3,4], [4,4], [5,4], [6,4], [7,4]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "FORGIVENESS",
+                        clue: "Mercy that frees the liar from their chains",
+                        path: [[2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6], [9,7], [9,8], [9,9]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "LOVE",
+                        clue: "God loves even those the world rejects",
+                        path: [[5,0], [5,1], [5,2], [5,3]],
+                        direction: "horizontal"
+                    }
+                ]
+            },
+            {
+                // Level 30 - Transformation of the Criminal Heart (10x10 grid)
+                words: [
+                    {
+                        word: "CHANGE",
+                        clue: "God transforms the murderer into a messenger of love",
+                        path: [[0,3], [1,3], [2,3], [3,3], [4,3], [5,3]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "NEWLIFE",
+                        clue: "Rebirth offered to the repentant criminal",
+                        path: [[2,5], [2,6], [2,7], [3,7], [4,7], [5,7], [6,7]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "HOPE",
+                        clue: "Future possible even for the worst of sinners",
+                        path: [[5,0], [5,1], [5,2], [5,3]],
+                        direction: "horizontal"
+                    }
+                ]
             }
         ]
     }
