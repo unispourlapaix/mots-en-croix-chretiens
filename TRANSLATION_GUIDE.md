@@ -6,7 +6,7 @@
 ### ✅ Complété
 - **Français (fr)**: 77 niveaux - 100% ✓
 - **Espagnol (es)**: 77 niveaux - 100% ✓
-- **Anglais (en)**: 45 niveaux - 58%
+- **Anglais (en)**: 50 niveaux - 65%
 
 ### 🔨 En Attente
 - Allemand (de): 0/77 - 0%
@@ -33,8 +33,8 @@ Le jeu utilise maintenant un système de fallback automatique:
 
 ### Exemple
 - Utilisateur choisit l'anglais (en)
-- Niveaux 1-45: Affichés en anglais ✓
-- Niveaux 46-77: Affichés en français (fallback automatique)
+- Niveaux 1-50: Affichés en anglais ✓
+- Niveaux 51-77: Affichés en français (fallback automatique)
 
 ---
 
@@ -221,7 +221,12 @@ Les 77 niveaux suivent une progression thématique:
 | 43 | Renouveau constant | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 44 | Brisement du cœur | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 45 | Renouvellement de l'esprit | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
-| 46-77 | ... | ✓ |  | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 46 | Recommencer après chute | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 47 | Reconstruction | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 48 | Purification | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 49 | Restauration divine | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 50 | Renaissance | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 51-77 | ... | ✓ |  | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 
 ---
 

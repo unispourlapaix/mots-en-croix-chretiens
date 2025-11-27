@@ -3584,6 +3584,139 @@ const gameData = {
                         direction: "bent"
                     }
                 ]
+            },
+            {
+                // Level 46 - Starting Over After the Fall (10x10 grid)
+                words: [
+                    {
+                        word: "RISING",
+                        clue: "Standing up again after falling into brokenness",
+                        path: [[0,2], [1,2], [2,2], [3,2], [4,2], [5,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "NEWBEGINNING",
+                        clue: "Fresh start offered after every fall",
+                        path: [[2,4], [2,5], [2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6], [9,7], [9,8]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "RESTART",
+                        clue: "Divine capacity to begin again from zero",
+                        path: [[4,0], [5,0], [6,0], [7,0], [8,0], [9,0], [9,1]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 47 - Reconstruction After Destruction (10x10 grid)
+                words: [
+                    {
+                        word: "RECONSTRUCTION",
+                        clue: "New building upon the ruins of the past",
+                        path: [[0,1], [0,2], [0,3], [1,3], [2,3], [3,3], [4,3], [5,3], [6,3], [7,3], [8,3], [9,3], [9,4]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "REBUILD",
+                        clue: "Restore what brokenness has destroyed",
+                        path: [[2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "REFOUNDATION",
+                        clue: "New foundations after total collapse",
+                        path: [[4,8], [5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6], [9,5], [9,4], [9,3], [9,2]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "HOPE",
+                        clue: "Light guiding the reconstruction",
+                        path: [[1,5], [2,5], [3,5], [4,5]],
+                        direction: "vertical"
+                    }
+                ]
+            },
+            {
+                // Level 48 - Purification by Fire (10x10 grid)
+                words: [
+                    {
+                        word: "PURIFICATION",
+                        clue: "Deep cleansing by the fire of brokenness",
+                        path: [[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2], [9,3], [9,4]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "REFINEMENT",
+                        clue: "Painful process revealing pure gold",
+                        path: [[2,5], [2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6], [9,7]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "PURGING",
+                        clue: "Removal of impurity through suffering",
+                        path: [[4,0], [5,0], [6,0], [7,0], [8,0], [9,0], [9,1]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "FIRE",
+                        clue: "Trial that consumes and transforms",
+                        path: [[1,4], [2,4], [3,4], [4,4]],
+                        direction: "vertical"
+                    }
+                ]
+            },
+            {
+                // Level 49 - Divine Restoration (10x10 grid)
+                words: [
+                    {
+                        word: "RESTORATION",
+                        clue: "God restores what brokenness has broken",
+                        path: [[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2], [9,3]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "HEALING",
+                        clue: "Cure of the soul's deep wounds",
+                        path: [[2,6], [2,7], [3,7], [4,7], [5,7], [6,7], [7,7]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "REINTEGRATION",
+                        clue: "Return to wholeness after fragmentation",
+                        path: [[4,0], [5,0], [6,0], [7,0], [8,0], [9,0], [9,1], [9,2], [9,3], [9,4], [9,5], [9,6], [9,7]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 50 - Rebirth After Death (10x10 grid)
+                words: [
+                    {
+                        word: "RESURRECTION",
+                        clue: "New life springing from the old self's death",
+                        path: [[0,1], [0,2], [0,3], [1,3], [2,3], [3,3], [4,3], [5,3], [6,3], [7,3], [8,3], [9,3]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "REBIRTH",
+                        clue: "Born anew after total brokenness",
+                        path: [[2,5], [2,6], [3,6], [4,6], [5,6], [6,6], [7,6]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "AWAKENING",
+                        clue: "Spiritual awakening after death's sleep",
+                        path: [[4,8], [5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6], [9,5]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "LIFE",
+                        clue: "Divine breath reviving the ashes",
+                        path: [[6,0], [7,0], [8,0], [9,0]],
+                        direction: "vertical"
+                    }
+                ]
             }
         ]
     }
