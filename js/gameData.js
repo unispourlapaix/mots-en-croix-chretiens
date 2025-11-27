@@ -3300,6 +3300,145 @@ const gameData = {
                         direction: "horizontal"
                     }
                 ]
+            },
+            {
+                // Level 36 - Divine Second Chance (10x10 grid)
+                words: [
+                    {
+                        word: "NEWBEGINNING",
+                        clue: "Fresh start offered to the murderer who weeps",
+                        path: [[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2], [9,3], [9,4]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "OPPORTUNITY",
+                        clue: "Divine chance for the repentant criminal",
+                        path: [[2,6], [2,7], [3,7], [4,7], [5,7], [6,7], [7,7], [8,7], [9,7], [9,8], [9,9]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "HOPE",
+                        clue: "Radiant future even after the darkest past",
+                        path: [[4,0], [5,0], [6,0], [7,0]],
+                        direction: "vertical"
+                    }
+                ]
+            },
+            {
+                // Level 37 - No One Too Far (10x10 grid)
+                words: [
+                    {
+                        word: "LIMITLESS",
+                        clue: "God's grace reaches even the most lost soul",
+                        path: [[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "PURSUIT",
+                        clue: "God chases the murderer to save them",
+                        path: [[2,5], [2,6], [3,6], [4,6], [5,6], [6,6], [7,6]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "COMPASSION",
+                        clue: "God's heart breaks for the lost criminal",
+                        path: [[4,8], [5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6], [9,5], [9,4]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "LOVE",
+                        clue: "God loves the sinner while hating the sin",
+                        path: [[5,0], [5,1], [5,2], [5,3]],
+                        direction: "horizontal"
+                    }
+                ]
+            },
+            {
+                // Level 38 - Victory of Grace (10x10 grid)
+                words: [
+                    {
+                        word: "TRIUMPH",
+                        clue: "Victory of love over criminal past",
+                        path: [[2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "TRANSFORMATION",
+                        clue: "Metamorphosis of murderer into witness of love",
+                        path: [[0,4], [0,5], [1,5], [2,5], [3,5], [4,5], [5,5], [6,5], [7,5], [8,5], [9,5], [9,6], [9,7], [9,8]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "LIBERATION",
+                        clue: "Complete freedom even for the worst criminal",
+                        path: [[4,0], [5,0], [6,0], [7,0], [8,0], [9,0], [9,1], [9,2], [9,3], [9,4]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "GRACE",
+                        clue: "Final gift that saves all who repent",
+                        path: [[1,7], [2,7], [3,7], [4,7], [5,7]],
+                        direction: "vertical"
+                    }
+                ]
+            },
+            {
+                // Level 39 - Transformation through Change (10x10 grid)
+                words: [
+                    {
+                        word: "METAMORPHOSIS",
+                        clue: "Deep change that reveals our true nature",
+                        path: [[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2], [9,3], [9,4], [9,5]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "EVOLUTION",
+                        clue: "Progressive growth toward fullness",
+                        path: [[2,5], [2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "NEWNESS",
+                        clue: "Divine freshness in every transformation",
+                        path: [[4,8], [5,8], [6,8], [7,8], [8,8], [9,8], [9,7]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "RENEWAL",
+                        clue: "Springtime of the soul embracing change",
+                        path: [[5,0], [5,1], [5,2], [5,3], [5,4], [6,4], [7,4]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 40 - Accepting Change (10x10 grid)
+                words: [
+                    {
+                        word: "ACCEPTANCE",
+                        clue: "Wisdom to embrace what must change",
+                        path: [[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "SURRENDER",
+                        clue: "Releasing the old to welcome the new",
+                        path: [[2,5], [2,6], [2,7], [3,7], [4,7], [5,7], [6,7], [7,7], [8,7]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "TRUST",
+                        clue: "Faith guiding through life's changes",
+                        path: [[4,0], [5,0], [6,0], [7,0], [8,0]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "COURAGE",
+                        clue: "Strength needed to dare to change",
+                        path: [[1,4], [2,4], [3,4], [4,4], [5,4], [6,4], [7,4]],
+                        direction: "vertical"
+                    }
+                ]
             }
         ]
     }

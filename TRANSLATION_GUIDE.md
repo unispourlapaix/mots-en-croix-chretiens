@@ -6,7 +6,7 @@
 ### ✅ Complété
 - **Français (fr)**: 77 niveaux - 100% ✓
 - **Espagnol (es)**: 77 niveaux - 100% ✓
-- **Anglais (en)**: 35 niveaux - 45%
+- **Anglais (en)**: 40 niveaux - 52%
 
 ### 🔨 En Attente
 - Allemand (de): 0/77 - 0%
@@ -33,8 +33,8 @@ Le jeu utilise maintenant un système de fallback automatique:
 
 ### Exemple
 - Utilisateur choisit l'anglais (en)
-- Niveaux 1-10: Affichés en anglais ✓
-- Niveaux 11-77: Affichés en français (fallback automatique)
+- Niveaux 1-40: Affichés en anglais ✓
+- Niveaux 41-77: Affichés en français (fallback automatique)
 
 ---
 
@@ -211,7 +211,12 @@ Les 77 niveaux suivent une progression thématique:
 | 33 | Pardon pour le menteur | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 34 | Miséricorde pour le voleur | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 35 | Amour inconditionnel | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
-| 36-77 | ... | ✓ |  | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 36 | Seconde chance divine | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 37 | Personne n'est trop loin | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 38 | Victoire de la grâce | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 39 | Transformation par changement | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 40 | Accepter le changement | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 41-77 | ... | ✓ |  | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 
 ---
 

@@ -51,7 +51,7 @@
 - Adaptation culturelle des indices
 - Vocabulaire chrétien approprié
 
-**Anglais (en)**: 35/77 niveaux (45%) ✓
+**Anglais (en)**: 40/77 niveaux (52%) ✓
 1. **Introduction**: Jesus, Love, Peace, Faith, Life
 2. **Christian Virtues**: Hope, Grace, Prayer, Love, Faith
 3. **Mysteries of Faith**: Eternity, Glory, Saint, Heaven, Angel
@@ -87,6 +87,11 @@
 33. **Forgiveness for the Liar**: Truth, Sincerity, Purification, Grace
 34. **Mercy for the Thief**: Restitution, Generosity, Forgiveness, Love
 35. **Unconditional Love**: Unconditional, Acceptance, Grace
+36. **Divine Second Chance**: Newbeginning, Opportunity, Hope
+37. **No One Too Far**: Limitless, Pursuit, Compassion, Love
+38. **Victory of Grace**: Triumph, Transformation, Liberation, Grace
+39. **Transformation through Change**: Metamorphosis, Evolution, Newness, Renewal
+40. **Accepting Change**: Acceptance, Surrender, Trust, Courage
 
 **Autres langues**: 0/77 niveaux
 - Interface complète traduite
@@ -259,7 +264,8 @@ de: {  // Allemand
 - [x] Niveaux 21-25 (Niveaux bonus - Grâce divine, Amour, Fraternité) ✓
 - [x] Niveaux 26-30 (Niveaux bonus avancés + Grâce pour tous) ✓
 - [x] Niveaux 31-35 (Appel universel, réhabilitation, amour inconditionnel) ✓
-- [ ] Niveaux 36-40 (Seconde chance, compassion sans limite)
+- [x] Niveaux 36-40 (Seconde chance, transformation, acceptation du changement) ✓
+- [ ] Niveaux 41-45 (Changement intérieur, courage, renouveau constant)
 - [ ] ... jusqu'à 77
 
 ### Priorité 2: Ajouter d'Autres Langues
