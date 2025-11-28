@@ -6,7 +6,7 @@
 ### ✅ Complété
 - **Français (fr)**: 77 niveaux - 100% ✓
 - **Espagnol (es)**: 77 niveaux - 100% ✓
-- **Anglais (en)**: 50 niveaux - 65%
+- **Anglais (en)**: 55 niveaux - 71%
 
 ### 🔨 En Attente
 - Allemand (de): 0/77 - 0%
@@ -33,8 +33,8 @@ Le jeu utilise maintenant un système de fallback automatique:
 
 ### Exemple
 - Utilisateur choisit l'anglais (en)
-- Niveaux 1-50: Affichés en anglais ✓
-- Niveaux 51-77: Affichés en français (fallback automatique)
+- Niveaux 1-55: Affichés en anglais ✓
+- Niveaux 56-77: Affichés en français (fallback automatique)
 
 ---
 
@@ -226,7 +226,12 @@ Les 77 niveaux suivent une progression thématique:
 | 48 | Nettoyage spirituel | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 49 | Restauration divine | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 50 | Renaissance | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
-| 51-77 | ... | ✓ |  | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 51 | Nouveau commencement | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 52 | Guérison | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 53 | Espérance | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 54 | Lâcher prise | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 55 | Briser les chaînes | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 56-77 | ... | ✓ |  | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 
 ---
 

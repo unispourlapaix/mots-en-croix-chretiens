@@ -3717,6 +3717,163 @@ const gameData = {
                         direction: "vertical"
                     }
                 ]
+            },
+            {
+                // Level 51 - New Beginning (10x10 grid)
+                words: [
+                    {
+                        word: "NEWBEGINNING",
+                        clue: "Solemn start of a fresh season of life",
+                        path: [[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2], [9,3], [9,4]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "NEWNESS",
+                        clue: "Divine freshness after the old is gone",
+                        path: [[2,5], [2,6], [3,6], [4,6], [5,6], [6,6], [7,6]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "BEGINNING",
+                        clue: "First step in a renewed existence",
+                        path: [[4,8], [5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6], [9,5]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "DAWN",
+                        clue: "Light following the night of brokenness",
+                        path: [[5,0], [6,0], [7,0], [8,0]],
+                        direction: "vertical"
+                    }
+                ]
+            },
+            {
+                // Level 52 - Healing of Wounds (10x10 grid)
+                words: [
+                    {
+                        word: "HEALING",
+                        clue: "Restoration of broken parts of the being",
+                        path: [[2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "SCARHEALING",
+                        clue: "Gentle process closing deep wounds",
+                        path: [[0,4], [1,4], [2,4], [3,4], [4,4], [5,4], [6,4], [7,4], [8,4], [9,4], [9,5]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "BANDAGE",
+                        clue: "Divine care upon heart's injuries",
+                        path: [[1,8], [2,8], [3,8], [4,8], [5,8], [6,8], [7,8]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "CARE",
+                        clue: "Tender attention of God for the broken",
+                        path: [[5,0], [6,0], [7,0], [8,0]],
+                        direction: "vertical"
+                    }
+                ]
+            },
+            {
+                // Level 53 - Hope of New Beginnings (10x10 grid)
+                words: [
+                    {
+                        word: "HOPE",
+                        clue: "Trust that everything can begin anew",
+                        path: [[1,2], [2,2], [3,2], [4,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "PROMISE",
+                        clue: "Divine commitment to make all things new",
+                        path: [[0,4], [1,4], [2,4], [3,4], [4,4], [5,4], [6,4]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "FUTURE",
+                        clue: "Bright tomorrow after broken yesterday",
+                        path: [[2,6], [3,6], [4,6], [5,6], [6,6], [7,6]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "RESTORATION",
+                        clue: "Certainty that God restores everything",
+                        path: [[4,8], [5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6], [9,5], [9,4], [9,3]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "JOY",
+                        clue: "Happiness found again after tears",
+                        path: [[8,0], [8,1], [8,2]],
+                        direction: "horizontal"
+                    }
+                ]
+            },
+            {
+                // Level 54 - Letting Go (10x10 grid)
+                words: [
+                    {
+                        word: "LETTINGGO",
+                        clue: "Release control to welcome grace",
+                        path: [[0,1], [1,1], [2,1], [3,1], [4,1], [5,1], [6,1], [7,1], [8,1]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "TRUST",
+                        clue: "Faith replacing fear of letting go",
+                        path: [[1,4], [2,4], [3,4], [4,4], [5,4]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "SURRENDER",
+                        clue: "Placing oneself entirely in divine hands",
+                        path: [[3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6], [9,7], [9,8]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "FREEDOM",
+                        clue: "Result of authentic letting go",
+                        path: [[5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 55 - Breaking the Chains (10x10 grid)
+                words: [
+                    {
+                        word: "CHAINS",
+                        clue: "Bonds imprisoning us that must be broken",
+                        path: [[1,1], [2,1], [3,1], [4,1], [5,1], [6,1]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "BREAK",
+                        clue: "Liberating action destroying bonds",
+                        path: [[0,3], [1,3], [2,3], [3,3], [4,3]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "DELIVERANCE",
+                        clue: "Total liberation from binding ties",
+                        path: [[3,5], [4,5], [5,5], [6,5], [7,5], [8,5], [9,5], [9,6], [9,7], [9,8], [8,8]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "POWER",
+                        clue: "Divine strength breaking every chain",
+                        path: [[5,7], [6,7], [7,7], [8,7], [9,7]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "FREE",
+                        clue: "State after chains are broken",
+                        path: [[2,9], [3,9], [4,9], [5,9]],
+                        direction: "vertical"
+                    }
+                ]
             }
         ]
     }
