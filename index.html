@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#ff69b4">
+    <meta name="description" content="Jeu de mots croisés chrétiens avec un design kawaii rose élégant">
+    <title>💕 Mots En Croix Chrétiens 💕</title>
+    
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff69b4">
+    
+    <!-- iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Mots Croix">
+    <link rel="apple-touch-icon" href="icons/icon-152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Fond animé avec lignes ondulées -->
+    <div class="background-waves">
+        <div class="wave wave-1"></div>
+        <div class="wave wave-2"></div>
+        <div class="wave wave-3"></div>
+        <div class="wave wave-4"></div>
+    </div>
+
+    <!-- Étoiles scintillantes -->
+    <div class="background-stars">
+        <div class="star s1"></div>
+        <div class="star s2"></div>
+        <div class="star s3"></div>
+        <div class="star s4"></div>
+        <div class="star s5"></div>
+    </div>
+
+    <div class="game-container">
+        <div class="header">
+            <h1>🙏 Mots En Croix Chrétiens 🙏</h1>
+            <p>Trouve les mots d'encouragement et les mots bibliques</p>
+            <button id="installButton" class="install-button hidden">
+                📱 Installer l'Application
+            </button>
+            <button id="menuButton" class="menu-button">
+                ☰ Menu
+            </button>
+        </div>
+
+        <div class="level-info">
+            <div>
+                <strong>Niveau: <span id="currentLevel">1</span>/77</strong>
+            </div>
+            <div class="score-display">
+                Score: <span id="score">0</span> points
+            </div>
+        </div>
+
+        <div id="startScreen">
+            <button class="play-button" id="playButton">
+                🎮 Jouer (<span id="clickCount">0</span>/7)
+            </button>
+            <div class="encouraging-words" id="encouragingWords"></div>
+        </div>
+
+        <div id="gameScreen" class="hidden">
+            <div class="crossword-grid" id="crosswordGrid"></div>
+            
+            <div class="word-clues">
+                <div class="clue-section">
+                    <h3><span class="arrow-icon arrow-right"></span></h3>
+                    <div id="horizontalClues"></div>
+                </div>
+                <div class="clue-section">
+                    <h3><span class="arrow-icon arrow-down"></span></h3>
+                    <div id="verticalClues"></div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn" id="checkButton">✅ Vérifier</button>
+                <button class="control-btn" id="hintButton">💡 Indice</button>
+                <button class="control-btn" id="nextLevelButton" style="display:none;">➡️ Niveau Suivant</button>
+                <button class="control-btn" id="resetButton">🔄 Recommencer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Kawaii pour les notifications -->
+    <div id="kawaiiModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content">
+            <div class="kawaii-modal-header">
+                <span class="kawaii-modal-icon">✨</span>
+            </div>
+            <div class="kawaii-modal-body">
+                <p id="kawaiiModalMessage"></p>
+            </div>
+            <div class="kawaii-modal-footer">
+                <button id="kawaiiModalBtn" class="kawaii-modal-button">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour sauvegarder le score -->
+    <div id="scoreModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content">
+            <div class="kawaii-modal-header">
+                <span class="kawaii-modal-icon">🏆</span>
+            </div>
+            <div class="kawaii-modal-body">
+                <p><strong>Félicitations ! 🎉</strong></p>
+                <p>Votre score: <span id="finalScoreDisplay">0</span> points</p>
+                <p>Sauvegarder votre score en ligne:</p>
+                <form id="scoreForm">
+                    <input type="text" id="playerName" placeholder="Votre nom" required>
+                    <input type="email" id="playerEmail" placeholder="Votre email" required>
+                </form>
+            </div>
+            <div class="kawaii-modal-footer">
+                <button id="saveScoreBtn" class="kawaii-modal-button">💾 Sauvegarder</button>
+                <button id="skipScoreBtn" class="kawaii-modal-button secondary">Passer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de connexion cloud -->
+    <div id="cloudModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content">
+            <div class="kawaii-modal-header">
+                <span class="kawaii-modal-icon">☁️</span>
+            </div>
+            <div class="kawaii-modal-body">
+                <p><strong>Connexion Cloud</strong></p>
+                <p>Connectez-vous pour sauvegarder automatiquement vos scores en ligne</p>
+                <form id="cloudForm">
+                    <input type="text" id="cloudPlayerName" placeholder="Votre nom" required>
+                    <input type="email" id="cloudPlayerEmail" placeholder="Votre email" required>
+                </form>
+            </div>
+            <div class="kawaii-modal-footer">
+                <button id="cloudConnectSubmitBtn" class="kawaii-modal-button">✅ Se connecter</button>
+                <button id="cloudCancelBtn" class="kawaii-modal-button secondary">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de menu -->
+    <div id="menuModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content menu-modal-content">
+            <div class="menu-header">
+                <h2>⚙️ Paramètres</h2>
+                <button id="closeMenuBtn" class="close-menu-btn">✕</button>
+            </div>
+
+            <div class="menu-section">
+                <h3>☁️ Connexion Cloud</h3>
+                <button id="menuCloudBtn" class="menu-cloud-btn">
+                    ☁️ Connexion Cloud
+                </button>
+                <p class="menu-description">Sauvegardez vos scores automatiquement en ligne</p>
+            </div>
+
+            <div class="menu-section">
+                <h3>🌍 Langue / Language</h3>
+                <div id="menuLanguageSelector" class="menu-language-selector"></div>
+            </div>
+
+            <div class="menu-section">
+                <h3>🔊 Audio</h3>
+                <div class="audio-controls">
+                    <div class="audio-control-item">
+                        <label for="musicVolume">🎵 Musique</label>
+                        <input type="range" id="musicVolume" min="0" max="100" value="50">
+                        <span id="musicVolumeValue">50%</span>
+                    </div>
+                    <div class="audio-control-item">
+                        <label for="soundVolume">🔔 Effets sonores</label>
+                        <input type="range" id="soundVolume" min="0" max="100" value="50">
+                        <span id="soundVolumeValue">50%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="menu-section">
+                <h3>ℹ️ À propos</h3>
+                <div class="about-info">
+                    <p class="about-item">
+                        <strong>🎨 Artiste:</strong>
+                        <a href="#" id="artistLink" class="info-link">Voir le profil</a>
+                    </p>
+                    <p class="about-item">
+                        <strong>✨ Création:</strong> Jeu de mots croisés chrétiens avec design kawaii
+                    </p>
+                    <p class="about-item">
+                        <strong>💻 Codage:</strong> Développé avec Claude Code Pro
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modules JavaScript -->
+    <script src="js/config.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/gameData.js"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/game.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        // Enregistrer le Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then((registration) => {
+                        console.log('✅ Service Worker enregistré:', registration.scope);
+                        
+                        // Vérifier les mises à jour
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // Nouvelle version disponible
+                                    if (confirm('🎉 Nouvelle version disponible ! Voulez-vous mettre à jour ?')) {
+                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch((error) => {
+                        console.log('❌ Erreur Service Worker:', error);
+                    });
+            });
+
+            // Gérer les mises à jour du Service Worker
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    window.location.reload();
+                }
+            });
+        }
+
+        // Gérer l'événement d'installation de la PWA
+        let deferredPrompt;
+        const installButton = document.getElementById('installButton');
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Afficher le bouton d'installation
+            if (installButton) {
+                installButton.classList.remove('hidden');
+                installButton.addEventListener('click', async () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        console.log(`Installation: ${outcome}`);
+                        deferredPrompt = null;
+                        installButton.classList.add('hidden');
+                    }
+                });
+            }
+        });
+
+        // Détecter quand l'app est installée
+        window.addEventListener('appinstalled', () => {
+            console.log('🎉 Application installée avec succès!');
+            if (installButton) {
+                installButton.classList.add('hidden');
+            }
+            deferredPrompt = null;
+        });
+    </script>
+</body>
+</html>
