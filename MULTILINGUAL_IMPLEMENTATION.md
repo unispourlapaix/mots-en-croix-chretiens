@@ -51,7 +51,7 @@
 - Adaptation culturelle des indices
 - Vocabulaire chrétien approprié
 
-**Anglais (en)**: 55/77 niveaux (71%) ✓
+**Anglais (en)**: 60/77 niveaux (78%) ✓
 1. **Introduction**: Jesus, Love, Peace, Faith, Life
 2. **Christian Virtues**: Hope, Grace, Prayer, Love, Faith
 3. **Mysteries of Faith**: Eternity, Glory, Saint, Heaven, Angel
@@ -107,6 +107,11 @@
 53. **Hope of New Beginnings**: Hope, Promise, Future, Restoration, Joy
 54. **Letting Go**: Lettinggo, Trust, Surrender, Freedom
 55. **Breaking the Chains**: Chains, Break, Deliverance, Power, Free
+56. **Liberation**: Liberation, Release, Emancipation, Exodus
+57. **Moving Forward**: Forward, Lookingahead, Forget, Progression, Future
+58. **Moving in Faith**: Moving, Movement, Dynamism, Action, Drive
+59. **Detachment**: Detachment, Separation, Renunciation, Release
+60. **Breaking Bonds**: Breaking, Bonds, Sever, Emancipation, Independence
 
 **Autres langues**: 0/77 niveaux
 - Interface complète traduite
@@ -283,7 +288,8 @@ de: {  // Allemand
 - [x] Niveaux 41-45 (Changement intérieur, courage, renouveau constant, brisement) ✓
 - [x] Niveaux 46-50 (Recommencement, reconstruction, purification, restauration, renaissance) ✓
 - [x] Niveaux 51-55 (Nouveau commencement, guérison, espérance, lâcher prise, briser les chaînes) ✓
-- [ ] Niveaux 56-60 (Libération, avancer, mouvement)
+- [x] Niveaux 56-60 (Libération, avancer, mouvement, détachement, rupture des liens) ✓
+- [ ] Niveaux 61-65 (Marcher vers l'avant, laisser partir, liberté nouvelle, armure de Dieu)
 - [ ] ... jusqu'à 77
 
 ### Priorité 2: Ajouter d'Autres Langues
@@ -331,7 +337,7 @@ Langue sélectionnée → Langue française (fallback) → null
 gameData = {
     fr: { levels: [...] },  // 77 niveaux
     es: { levels: [...] },  // 77 niveaux
-    en: { levels: [...] },  // 55 niveaux
+    en: { levels: [...] },  // 60 niveaux
     de: { levels: [] },     // Vide = fallback vers fr
     // ... autres langues
 }
@@ -372,7 +378,7 @@ Co-Authored-By: Votre Nom <email@example.com>
 - Système multilingue: Claude Code Pro
 - Interface kawaii: Design original
 - Traductions FR/ES: Complètes
-- Traductions EN (1-55): Claude Code Pro
+- Traductions EN (1-60): Claude Code Pro
 
 **Infrastructure:**
 - Supabase: Cloud database

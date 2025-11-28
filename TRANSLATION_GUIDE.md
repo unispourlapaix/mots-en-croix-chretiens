@@ -6,7 +6,7 @@
 ### ✅ Complété
 - **Français (fr)**: 77 niveaux - 100% ✓
 - **Espagnol (es)**: 77 niveaux - 100% ✓
-- **Anglais (en)**: 55 niveaux - 71%
+- **Anglais (en)**: 60 niveaux - 78%
 
 ### 🔨 En Attente
 - Allemand (de): 0/77 - 0%
@@ -33,8 +33,8 @@ Le jeu utilise maintenant un système de fallback automatique:
 
 ### Exemple
 - Utilisateur choisit l'anglais (en)
-- Niveaux 1-55: Affichés en anglais ✓
-- Niveaux 56-77: Affichés en français (fallback automatique)
+- Niveaux 1-60: Affichés en anglais ✓
+- Niveaux 61-77: Affichés en français (fallback automatique)
 
 ---
 
@@ -231,7 +231,12 @@ Les 77 niveaux suivent une progression thématique:
 | 53 | Espérance | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 54 | Lâcher prise | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 55 | Briser les chaînes | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
-| 56-77 | ... | ✓ |  | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 56 | Libération | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 57 | Avancer vers l'avant | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 58 | Bouger dans la foi | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 59 | Détachement | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 60 | Rupture des liens | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 61-77 | ... | ✓ |  |  |  |  |  |  |  |  |  |  |  |  |  |
 
 ---
 

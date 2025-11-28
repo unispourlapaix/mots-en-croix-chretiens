@@ -3874,6 +3874,169 @@ const gameData = {
                         direction: "vertical"
                     }
                 ]
+            },
+            {
+                // Level 56 - Liberation (10x10 grid)
+                words: [
+                    {
+                        word: "LIBERATION",
+                        clue: "Stepping out of captivity into new life",
+                        path: [[1,1], [2,1], [3,1], [4,1], [5,1], [6,1], [7,1], [8,1], [9,1], [9,2]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "RELEASE",
+                        clue: "Letting go of what held us captive",
+                        path: [[0,3], [1,3], [2,3], [3,3], [4,3], [5,3], [6,3]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "EMANCIPATION",
+                        clue: "Total freedom from all bondage",
+                        path: [[2,5], [3,5], [4,5], [5,5], [6,5], [7,5], [8,5], [9,5], [9,6], [9,7], [9,8], [8,8]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "EXODUS",
+                        clue: "Journey from slavery to freedom",
+                        path: [[4,7], [5,7], [6,7], [7,7], [8,7], [9,7]],
+                        direction: "horizontal"
+                    }
+                ]
+            },
+            {
+                // Level 57 - Moving Forward (10x10 grid)
+                words: [
+                    {
+                        word: "FORWARD",
+                        clue: "Walking toward the future without turning back",
+                        path: [[1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "LOOKINGAHEAD",
+                        clue: "Fixing eyes on what lies before us",
+                        path: [[0,4], [1,4], [2,4], [3,4], [4,4], [5,4], [6,4], [7,4], [8,4], [9,4], [9,5], [9,6]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "FORGET",
+                        clue: "Leaving behind what has passed",
+                        path: [[3,6], [4,6], [5,6], [6,6], [7,6], [8,6]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "PROGRESSION",
+                        clue: "Constant movement toward what's ahead",
+                        path: [[5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6], [9,5], [9,4], [9,3], [9,2]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "FUTURE",
+                        clue: "Direction of the gaze freed from the past",
+                        path: [[7,0], [7,1], [7,2], [7,3], [7,4], [7,5]],
+                        direction: "horizontal"
+                    }
+                ]
+            },
+            {
+                // Level 58 - Moving in Faith (10x10 grid)
+                words: [
+                    {
+                        word: "MOVING",
+                        clue: "Setting into motion through faith",
+                        path: [[1,2], [2,2], [3,2], [4,2], [5,2], [6,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "MOVEMENT",
+                        clue: "Action that breaks through stagnation",
+                        path: [[0,4], [1,4], [2,4], [3,4], [4,4], [5,4], [6,4], [7,4]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "DYNAMISM",
+                        clue: "Energy that propels us forward",
+                        path: [[2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "ACTION",
+                        clue: "Concrete manifestation of movement",
+                        path: [[4,8], [5,8], [6,8], [7,8], [8,8], [9,8]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "DRIVE",
+                        clue: "Impulse that sets us in motion",
+                        path: [[7,0], [7,1], [8,1], [9,1], [9,2]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 59 - Detachment (10x10 grid)
+                words: [
+                    {
+                        word: "DETACHMENT",
+                        clue: "Separation from what hinders freedom",
+                        path: [[0,1], [1,1], [2,1], [3,1], [4,1], [5,1], [6,1], [7,1], [8,1], [9,1]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "SEPARATION",
+                        clue: "Necessary break from the old",
+                        path: [[1,4], [2,4], [3,4], [4,4], [5,4], [6,4], [7,4], [8,4], [9,4], [9,5]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "RENUNCIATION",
+                        clue: "Voluntary abandonment of what holds back",
+                        path: [[3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6], [9,7], [9,8], [8,8], [7,8], [6,8]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "RELEASE",
+                        clue: "Loosening the grip on the past",
+                        path: [[5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 60 - Breaking Bonds (10x10 grid)
+                words: [
+                    {
+                        word: "BREAKING",
+                        clue: "Liberating fracture of toxic attachments",
+                        path: [[1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "BONDS",
+                        clue: "Attachments that must be severed",
+                        path: [[0,4], [1,4], [2,4], [3,4], [4,4]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "SEVER",
+                        clue: "Cutting action that brings freedom",
+                        path: [[2,6], [3,6], [4,6], [5,6], [6,6]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "EMANCIPATION",
+                        clue: "Complete freedom from all constraints",
+                        path: [[4,8], [5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6], [9,5], [9,4], [9,3], [9,2]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "INDEPENDENCE",
+                        clue: "State of one who has broken the chains",
+                        path: [[5,0], [6,0], [7,0], [8,0], [9,0], [9,1], [9,2], [9,3], [9,4], [9,5], [9,6], [9,7]],
+                        direction: "bent"
+                    }
+                ]
             }
         ]
     }
