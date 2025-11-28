@@ -13,9 +13,22 @@
 - ✅ Messages d'espoir, transformation et renaissance
 - ✅ Formulations douces et tendres, même pour les sujets difficiles
 
-**Exemple corrigé (Niveau 48):**
-- ❌ AVANT: "Purification par le feu" (alarmant)
-- ✅ APRÈS: "Gentle washing that renews the soul" (doux, encourageant)
+**Exemple corrigé (Niveau 48 - Français):**
+- ❌ AVANT: "Purification par le feu" + "Nettoyage profond par le feu du brisement" (alarmant)
+- ❌ AVANT: "Processus douloureux qui révèle l'or pur" (douloureux, alarmant)
+- ❌ AVANT: "Élimination de l'impur dans la souffrance" (souffrance, très alarmant)
+- ❌ AVANT: "FEU - Épreuve qui consume et transforme" (consume, effrayant)
+- ✅ APRÈS: "Nettoyage spirituel et renouveau" (titre doux)
+- ✅ APRÈS: "PURIFICATION - Doux lavage qui renouvelle l'âme" (doux, encourageant)
+- ✅ APRÈS: "RAFFINEMENT - Croissance qui révèle la beauté intérieure" (positif)
+- ✅ APRÈS: "RENOUVEAU - Nouveau départ avec espoir et paix" (encourageant)
+- ✅ APRÈS: "LUMIERE - Chaleur divine qui guide la transformation" (lumineux)
+
+**Exemple corrigé (Niveau 48 - Anglais):**
+- ✅ "CLEANSING - Gentle washing that renews the soul" (doux, encourageant)
+- ✅ "REFINEMENT - Growing process that reveals inner beauty" (positif)
+- ✅ "RENEWAL - Fresh beginning with hope and peace" (encourageant)
+- ✅ "LIGHT - Divine warmth that guides transformation" (lumineux)
 
 ### 2. **Rédemption Plutôt que Condamnation**
 - Focus sur la **transformation positive**

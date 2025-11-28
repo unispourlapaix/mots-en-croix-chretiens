@@ -1293,30 +1293,30 @@ const gameData = {
                 ]
             },
             {
-                // NIVEAU 48 - Purification par le feu (grille 10x10)
+                // NIVEAU 48 - Nettoyage spirituel et renouveau (grille 10x10)
                 words: [
                     {
                         word: "PURIFICATION",
-                        clue: "Nettoyage profond par le feu du brisement",
+                        clue: "Doux lavage qui renouvelle l'âme",
                         path: [[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2], [9,3], [9,4]], // Coudé
                         direction: "bent"
                     },
                     {
                         word: "RAFFINEMENT",
-                        clue: "Processus douloureux qui révèle l'or pur",
+                        clue: "Croissance qui révèle la beauté intérieure",
                         path: [[2,5], [2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6], [9,7], [9,8]], // Coudé
                         direction: "bent"
                     },
                     {
-                        word: "EPURATION",
-                        clue: "Élimination de l'impur dans la souffrance",
+                        word: "RENOUVEAU",
+                        clue: "Nouveau départ avec espoir et paix",
                         path: [[4,0], [5,0], [6,0], [7,0], [8,0], [9,0], [9,1], [9,2], [9,3]], // Coudé
                         direction: "bent"
                     },
                     {
-                        word: "FEU",
-                        clue: "Épreuve qui consume et transforme",
-                        path: [[1,4], [2,4], [3,4]], // Vertical
+                        word: "LUMIERE",
+                        clue: "Chaleur divine qui guide la transformation",
+                        path: [[1,4], [2,4], [3,4], [4,4], [5,4], [6,4], [7,4]], // Vertical
                         direction: "vertical"
                     }
                 ]
