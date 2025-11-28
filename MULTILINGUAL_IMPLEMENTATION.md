@@ -51,7 +51,7 @@
 - Adaptation culturelle des indices
 - Vocabulaire chrétien approprié
 
-**Anglais (en)**: 60/77 niveaux (78%) ✓
+**Anglais (en)**: 65/77 niveaux (84%) ✓
 1. **Introduction**: Jesus, Love, Peace, Faith, Life
 2. **Christian Virtues**: Hope, Grace, Prayer, Love, Faith
 3. **Mysteries of Faith**: Eternity, Glory, Saint, Heaven, Angel
@@ -112,6 +112,11 @@
 58. **Moving in Faith**: Moving, Movement, Dynamism, Action, Drive
 59. **Detachment**: Detachment, Separation, Renunciation, Release
 60. **Breaking Bonds**: Breaking, Bonds, Sever, Emancipation, Independence
+61. **Walking Forward**: Walking, Perseverance, Tenacity, Path, Ahead
+62. **Letting Go of the Past**: Releasepast, Pardon, Acceptance, Peace
+63. **New Freedom**: Freedom, Newfound, Victory, Soar, Rebirth
+64. **Armor of God - Belt of Truth**: Belt, Truth, Integrity, Sincerity, Honest
+65. **Armor of God - Breastplate of Righteousness**: Breastplate, Justice, Rightness, Purity, Holiness
 
 **Autres langues**: 0/77 niveaux
 - Interface complète traduite
@@ -289,7 +294,8 @@ de: {  // Allemand
 - [x] Niveaux 46-50 (Recommencement, reconstruction, purification, restauration, renaissance) ✓
 - [x] Niveaux 51-55 (Nouveau commencement, guérison, espérance, lâcher prise, briser les chaînes) ✓
 - [x] Niveaux 56-60 (Libération, avancer, mouvement, détachement, rupture des liens) ✓
-- [ ] Niveaux 61-65 (Marcher vers l'avant, laisser partir, liberté nouvelle, armure de Dieu)
+- [x] Niveaux 61-65 (Marcher vers l'avant, laisser partir, liberté nouvelle, armure de Dieu) ✓
+- [ ] Niveaux 66-70 (Armure de Dieu suite: chaussures, bouclier, casque)
 - [ ] ... jusqu'à 77
 
 ### Priorité 2: Ajouter d'Autres Langues
@@ -337,7 +343,7 @@ Langue sélectionnée → Langue française (fallback) → null
 gameData = {
     fr: { levels: [...] },  // 77 niveaux
     es: { levels: [...] },  // 77 niveaux
-    en: { levels: [...] },  // 60 niveaux
+    en: { levels: [...] },  // 65 niveaux
     de: { levels: [] },     // Vide = fallback vers fr
     // ... autres langues
 }
@@ -378,7 +384,7 @@ Co-Authored-By: Votre Nom <email@example.com>
 - Système multilingue: Claude Code Pro
 - Interface kawaii: Design original
 - Traductions FR/ES: Complètes
-- Traductions EN (1-60): Claude Code Pro
+- Traductions EN (1-65): Claude Code Pro
 
 **Infrastructure:**
 - Supabase: Cloud database

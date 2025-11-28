@@ -6,7 +6,7 @@
 ### ✅ Complété
 - **Français (fr)**: 77 niveaux - 100% ✓
 - **Espagnol (es)**: 77 niveaux - 100% ✓
-- **Anglais (en)**: 60 niveaux - 78%
+- **Anglais (en)**: 65 niveaux - 84%
 
 ### 🔨 En Attente
 - Allemand (de): 0/77 - 0%
@@ -33,8 +33,8 @@ Le jeu utilise maintenant un système de fallback automatique:
 
 ### Exemple
 - Utilisateur choisit l'anglais (en)
-- Niveaux 1-60: Affichés en anglais ✓
-- Niveaux 61-77: Affichés en français (fallback automatique)
+- Niveaux 1-65: Affichés en anglais ✓
+- Niveaux 66-77: Affichés en français (fallback automatique)
 
 ---
 
@@ -236,7 +236,12 @@ Les 77 niveaux suivent une progression thématique:
 | 58 | Bouger dans la foi | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 59 | Détachement | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 60 | Rupture des liens | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
-| 61-77 | ... | ✓ |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| 61 | Marcher vers l'avant | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 62 | Laisser partir | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 63 | Liberté nouvelle | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 64 | Armure: Ceinture vérité | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 65 | Armure: Cuirasse justice | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 66-77 | ... | ✓ |  |  |  |  |  |  |  |  |  |  |  |  |  |
 
 ---
 

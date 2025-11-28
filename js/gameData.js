@@ -4037,6 +4037,175 @@ const gameData = {
                         direction: "bent"
                     }
                 ]
+            },
+            {
+                // Level 61 - Walking Forward (10x10 grid)
+                words: [
+                    {
+                        word: "WALKING",
+                        clue: "Moving step by step toward the promise",
+                        path: [[1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "PERSEVERANCE",
+                        clue: "Continuing even when the path is difficult",
+                        path: [[0,4], [1,4], [2,4], [3,4], [4,4], [5,4], [6,4], [7,4], [8,4], [9,4], [9,5], [9,6]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "TENACITY",
+                        clue: "Determination never to turn back",
+                        path: [[3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6], [9,7]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "PATH",
+                        clue: "Road leading far from the past",
+                        path: [[5,8], [6,8], [7,8], [8,8]],
+                        direction: "horizontal"
+                    },
+                    {
+                        word: "AHEAD",
+                        clue: "Only direction for the liberated gaze",
+                        path: [[7,0], [7,1], [8,1], [9,1], [9,2]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 62 - Letting Go of the Past (10x10 grid)
+                words: [
+                    {
+                        word: "RELEASEPAST",
+                        clue: "Allowing yesterday to fly away",
+                        path: [[0,1], [1,1], [2,1], [3,1], [4,1], [5,1], [6,1], [7,1], [8,1], [9,1], [9,2]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "PARDON",
+                        clue: "Freeing ourselves by freeing others",
+                        path: [[1,4], [2,4], [3,4], [4,4], [5,4], [6,4]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "ACCEPTANCE",
+                        clue: "Welcoming that some things must depart",
+                        path: [[3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6], [9,7], [9,8], [8,8]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "PEACE",
+                        clue: "Tranquility after letting go",
+                        path: [[5,8], [6,8], [7,8], [8,8], [9,8]],
+                        direction: "horizontal"
+                    }
+                ]
+            },
+            {
+                // Level 63 - New Freedom (10x10 grid)
+                words: [
+                    {
+                        word: "FREEDOM",
+                        clue: "Glorious state of one who released all",
+                        path: [[1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "NEWFOUND",
+                        clue: "Fresh as a new beginning",
+                        path: [[0,4], [1,4], [2,4], [3,4], [4,4], [5,4], [6,4], [7,4]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "VICTORY",
+                        clue: "Triumph over the chains of the past",
+                        path: [[2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "SOAR",
+                        clue: "Rising free from all burdens",
+                        path: [[4,8], [5,8], [6,8], [7,8]],
+                        direction: "horizontal"
+                    },
+                    {
+                        word: "REBIRTH",
+                        clue: "New life after breaking the chains",
+                        path: [[5,0], [6,0], [7,0], [8,0], [9,0], [9,1], [9,2]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 64 - Armor of God: Belt of Truth (10x10 grid)
+                words: [
+                    {
+                        word: "BELT",
+                        clue: "First piece of armor holding everything together",
+                        path: [[1,2], [2,2], [3,2], [4,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "TRUTH",
+                        clue: "What girds the loins of the spiritual warrior",
+                        path: [[0,4], [1,4], [2,4], [3,4], [4,4]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "INTEGRITY",
+                        clue: "Quality of one who walks in truth",
+                        path: [[3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6], [9,7], [9,8]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "SINCERITY",
+                        clue: "Authenticity that supports all the armor",
+                        path: [[5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6], [9,5], [9,4]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "HONEST",
+                        clue: "Character of the one wearing the belt",
+                        path: [[7,0], [7,1], [8,1], [9,1], [9,2], [9,3]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 65 - Armor of God: Breastplate of Righteousness (10x10 grid)
+                words: [
+                    {
+                        word: "BREASTPLATE",
+                        clue: "Protection of the heart in spiritual battle",
+                        path: [[1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2], [9,3], [9,4]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "JUSTICE",
+                        clue: "Righteousness protecting the believer's heart",
+                        path: [[0,4], [1,4], [2,4], [3,4], [4,4], [5,4], [6,4]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "RIGHTNESS",
+                        clue: "Moral rectitude that shields the soul",
+                        path: [[2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6], [9,7]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "PURITY",
+                        clue: "Integrity that strengthens the heart",
+                        path: [[4,8], [5,8], [6,8], [7,8], [8,8], [9,8]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "HOLINESS",
+                        clue: "Consecration that reinforces protection",
+                        path: [[5,0], [6,0], [7,0], [8,0], [9,0], [9,1], [9,2], [9,3]],
+                        direction: "bent"
+                    }
+                ]
             }
         ]
     }
