@@ -4375,6 +4375,245 @@ const gameData = {
                         direction: "bent"
                     }
                 ]
+            },
+            {
+                // Level 71 - 1 Corinthians 13: Love is patient (10x10 grid)
+                words: [
+                    {
+                        word: "LOVE",
+                        clue: "Supreme gift that surpasses all",
+                        path: [[1,2], [2,2], [3,2], [4,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "PATIENT",
+                        clue: "First quality of true love",
+                        path: [[0,4], [1,4], [2,4], [3,4], [4,4], [5,4], [6,4]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "LONGSUFFERING",
+                        clue: "Capacity to endure without wearying",
+                        path: [[2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6], [9,7], [9,8], [8,8], [7,8], [6,8]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "WAITING",
+                        clue: "Wisdom of one who loves patiently",
+                        path: [[4,8], [5,8], [6,8], [7,8], [8,8], [9,8], [9,7]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "GENTLENESS",
+                        clue: "Tender attitude of patient love",
+                        path: [[6,0], [7,0], [8,0], [9,0], [9,1], [9,2], [9,3], [9,4], [9,5], [8,5]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 72 - 1 Corinthians 13: Love is kind (10x10 grid)
+                words: [
+                    {
+                        word: "KIND",
+                        clue: "Second quality of love that gives",
+                        path: [[1,2], [2,2], [3,2], [4,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "GOODNESS",
+                        clue: "Active benevolence toward others",
+                        path: [[0,4], [1,4], [2,4], [3,4], [4,4], [5,4], [6,4], [7,4]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "GENEROUS",
+                        clue: "Heart's disposition that loves to serve",
+                        path: [[2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "COMPASSION",
+                        clue: "Feeling that moves us to serve others",
+                        path: [[4,8], [5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6], [9,5], [9,4]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "GIFT",
+                        clue: "Natural act of kindness in love",
+                        path: [[7,0], [8,0], [9,0], [9,1]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 73 - 1 Corinthians 13: Love is not jealous (10x10 grid)
+                words: [
+                    {
+                        word: "JEALOUSY",
+                        clue: "What authentic love never knows",
+                        path: [[1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "ENVY",
+                        clue: "Unhealthy desire absent from true love",
+                        path: [[0,4], [1,4], [2,4], [3,4]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "CONTENTMENT",
+                        clue: "Satisfaction that replaces jealousy",
+                        path: [[2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6], [9,7], [9,8], [8,8]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "REJOICE",
+                        clue: "Love's response to another's joy",
+                        path: [[5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "CELEBRATE",
+                        clue: "Love honors the success of others",
+                        path: [[6,0], [7,0], [8,0], [9,0], [9,1], [9,2], [9,3], [9,4], [8,4]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 74 - 1 Corinthians 13: Love does not boast (10x10 grid)
+                words: [
+                    {
+                        word: "BOASTING",
+                        clue: "Attitude foreign to true love",
+                        path: [[1,1], [2,1], [3,1], [4,1], [5,1], [6,1], [7,1], [8,1]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "PRIDE",
+                        clue: "What love never puffs itself up with",
+                        path: [[0,4], [1,4], [2,4], [3,4], [4,4]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "HUMILITY",
+                        clue: "Virtue opposite to boasting",
+                        path: [[2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "MODESTY",
+                        clue: "Simplicity of one who truly loves",
+                        path: [[4,8], [5,8], [6,8], [7,8], [8,8], [9,8], [9,7]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "HUMBLE",
+                        clue: "Character of love that seeks no attention",
+                        path: [[6,0], [7,0], [8,0], [9,0], [9,1], [9,2]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 75 - 1 Corinthians 13: Love bears all things (10x10 grid)
+                words: [
+                    {
+                        word: "BEARSALL",
+                        clue: "Love covers every fault",
+                        path: [[0,1], [1,1], [2,1], [3,1], [4,1], [5,1], [6,1], [7,1]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "BELIEVESALL",
+                        clue: "Love trusts without limits",
+                        path: [[0,4], [1,4], [2,4], [3,4], [4,4], [5,4], [6,4], [7,4], [8,4], [9,4], [9,5]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "HOPESALL",
+                        clue: "Love keeps hope in every circumstance",
+                        path: [[3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6], [9,7]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "ENDURESALL",
+                        clue: "Love endures all things with patience",
+                        path: [[5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6], [9,5], [9,4], [9,3]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 76 - 1 Corinthians 13: Love never fails (10x10 grid)
+                words: [
+                    {
+                        word: "NEVER",
+                        clue: "Love's temporality - it does not end",
+                        path: [[1,2], [2,2], [3,2], [4,2], [5,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "ETERNAL",
+                        clue: "Timeless nature of true love",
+                        path: [[0,4], [1,4], [2,4], [3,4], [4,4], [5,4], [6,4]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "ABIDE",
+                        clue: "What faith, hope and love all do",
+                        path: [[2,6], [3,6], [4,6], [5,6], [6,6]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "ENDURING",
+                        clue: "Stable character of divine love",
+                        path: [[4,8], [5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "NEVERFAILS",
+                        clue: "Central affirmation: love never falls",
+                        path: [[5,0], [6,0], [7,0], [8,0], [9,0], [9,1], [9,2], [9,3], [9,4], [9,5]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 77 - 1 Corinthians 13: Love is the greatest (10x10 grid)
+                words: [
+                    {
+                        word: "GREATEST",
+                        clue: "Supremacy of love over all virtues",
+                        path: [[1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "FAITH",
+                        clue: "First of three virtues that remain",
+                        path: [[0,4], [1,4], [2,4], [3,4], [4,4]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "HOPE",
+                        clue: "Second of three virtues that remain",
+                        path: [[2,6], [3,6], [4,6], [5,6]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "LOVE",
+                        clue: "Third and greatest of virtues that remain",
+                        path: [[4,8], [5,8], [6,8], [7,8]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "EXCELLENCE",
+                        clue: "Supreme quality of agape love",
+                        path: [[5,0], [6,0], [7,0], [8,0], [9,0], [9,1], [9,2], [9,3], [9,4], [9,5]],
+                        direction: "bent"
+                    }
+                ]
             }
         ]
     }

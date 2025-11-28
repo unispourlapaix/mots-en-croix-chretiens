@@ -51,7 +51,7 @@
 - Adaptation culturelle des indices
 - Vocabulaire chrétien approprié
 
-**Anglais (en)**: 70/77 niveaux (91%) ✓
+**Anglais (en)**: 77/77 niveaux (100%) ✓
 1. **Introduction**: Jesus, Love, Peace, Faith, Life
 2. **Christian Virtues**: Hope, Grace, Prayer, Love, Faith
 3. **Mysteries of Faith**: Eternity, Glory, Saint, Heaven, Angel
@@ -122,6 +122,13 @@
 68. **Armor of God - Helmet of Salvation**: Helmet, Salvation, Hope, Thoughts, Redemption
 69. **Armor of God - Sword of the Spirit**: Sword, Spirit, Word, Scripture, Piercing
 70. **Armor of God - Spiritual Combat**: Fighting, Clothed, Standfast, Resist
+71. **1 Corinthians 13 - Love is Patient**: Love, Patient, Longsuffering, Waiting, Gentleness
+72. **1 Corinthians 13 - Love is Kind**: Kind, Goodness, Generous, Compassion, Gift
+73. **1 Corinthians 13 - Love is Not Jealous**: Jealousy, Envy, Contentment, Rejoice, Celebrate
+74. **1 Corinthians 13 - Love Does Not Boast**: Boasting, Pride, Humility, Modesty, Humble
+75. **1 Corinthians 13 - Love Bears All Things**: Bearsall, Believesall, Hopesall, Enduresall
+76. **1 Corinthians 13 - Love Never Fails**: Never, Eternal, Abide, Enduring, Neverfails
+77. **1 Corinthians 13 - Love is the Greatest**: Greatest, Faith, Hope, Love, Excellence
 
 **Autres langues**: 0/77 niveaux
 - Interface complète traduite
@@ -131,9 +138,9 @@
 
 ```javascript
 // Comment ça fonctionne:
-1. Utilisateur sélectionne une langue (ex: Anglais)
-2. Game charge les niveaux anglais disponibles (1-70)
-3. Pour les niveaux 71-77, fallback automatique vers français
+1. Utilisateur sélectionne une langue (ex: Allemand)
+2. Game charge les niveaux allemands disponibles (0 actuellement)
+3. Fallback automatique vers français pour tous les niveaux
 4. Expérience fluide sans interruption
 ```
 
@@ -241,7 +248,7 @@ CREATE TABLE mots_croix_scores (
 - logo-generator.html & social-media-kit.html (assets)
 
 **Fichiers modifiés:**
-- js/gameData.js (+437 lignes) - GameDataManager amélioré + 10 niveaux EN
+- js/gameData.js - GameDataManager amélioré + 77 niveaux EN (100% complete)
 - js/i18n.js - 14 langues complètes
 - js/game.js - Intégration menu multilingue
 - index.html - Structure menu
@@ -301,8 +308,7 @@ de: {  // Allemand
 - [x] Niveaux 56-60 (Libération, avancer, mouvement, détachement, rupture des liens) ✓
 - [x] Niveaux 61-65 (Marcher vers l'avant, laisser partir, liberté nouvelle, armure de Dieu) ✓
 - [x] Niveaux 66-70 (Armure de Dieu: chaussures, bouclier, casque, épée, combat) ✓
-- [ ] Niveaux 71-77 (1 Corinthiens 13: Amour patient, bienveillant...)
-- [ ] ... jusqu'à 77
+- [x] Niveaux 71-77 (1 Corinthiens 13: Amour patient, bienveillant, sans jalousie, humble, éternel, le plus grand) ✓ **COMPLET!**
 
 ### Priorité 2: Ajouter d'Autres Langues
 Langues avec grande population chrétienne:
@@ -347,9 +353,9 @@ Langue sélectionnée → Langue française (fallback) → null
 ### Structure de Données
 ```javascript
 gameData = {
-    fr: { levels: [...] },  // 77 niveaux
-    es: { levels: [...] },  // 77 niveaux
-    en: { levels: [...] },  // 70 niveaux
+    fr: { levels: [...] },  // 77 niveaux ✓
+    es: { levels: [...] },  // 77 niveaux ✓
+    en: { levels: [...] },  // 77 niveaux ✓ COMPLET!
     de: { levels: [] },     // Vide = fallback vers fr
     // ... autres langues
 }

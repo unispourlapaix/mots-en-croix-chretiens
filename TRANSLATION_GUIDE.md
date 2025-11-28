@@ -6,7 +6,7 @@
 ### ✅ Complété
 - **Français (fr)**: 77 niveaux - 100% ✓
 - **Espagnol (es)**: 77 niveaux - 100% ✓
-- **Anglais (en)**: 70 niveaux - 91%
+- **Anglais (en)**: 77 niveaux - 100% ✓
 
 ### 🔨 En Attente
 - Allemand (de): 0/77 - 0%
@@ -33,8 +33,10 @@ Le jeu utilise maintenant un système de fallback automatique:
 
 ### Exemple
 - Utilisateur choisit l'anglais (en)
-- Niveaux 1-70: Affichés en anglais ✓
-- Niveaux 71-77: Affichés en français (fallback automatique)
+- Niveaux 1-77: Affichés en anglais ✓
+
+- Utilisateur choisit l'allemand (de)
+- Niveaux 1-77: Affichés en français (fallback automatique)
 
 ---
 
@@ -246,7 +248,13 @@ Les 77 niveaux suivent une progression thématique:
 | 68 | Armure: Casque du salut | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 69 | Armure: Épée de l'Esprit | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 70 | Armure complète: Combat | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
-| 71-77 | ... | ✓ |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| 71 | 1 Cor 13: Amour patient | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 72 | 1 Cor 13: Amour serviable | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 73 | 1 Cor 13: Amour sans jalousie | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 74 | 1 Cor 13: Amour humble | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 75 | 1 Cor 13: Amour qui excuse tout | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 76 | 1 Cor 13: Amour éternel | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 77 | 1 Cor 13: Amour le plus grand | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 
 ---
 
