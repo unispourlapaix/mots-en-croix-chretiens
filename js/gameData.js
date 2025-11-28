@@ -3638,30 +3638,30 @@ const gameData = {
                 ]
             },
             {
-                // Level 48 - Purification by Fire (10x10 grid)
+                // Level 48 - Spiritual Cleansing and Renewal (10x10 grid)
                 words: [
                     {
-                        word: "PURIFICATION",
-                        clue: "Deep cleansing by the fire of brokenness",
-                        path: [[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2], [9,3], [9,4]],
-                        direction: "bent"
+                        word: "CLEANSING",
+                        clue: "Gentle washing that renews the soul",
+                        path: [[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2]],
+                        direction: "vertical"
                     },
                     {
                         word: "REFINEMENT",
-                        clue: "Painful process revealing pure gold",
+                        clue: "Growing process that reveals inner beauty",
                         path: [[2,5], [2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6], [9,7]],
                         direction: "bent"
                     },
                     {
-                        word: "PURGING",
-                        clue: "Removal of impurity through suffering",
+                        word: "RENEWAL",
+                        clue: "Fresh beginning with hope and peace",
                         path: [[4,0], [5,0], [6,0], [7,0], [8,0], [9,0], [9,1]],
                         direction: "bent"
                     },
                     {
-                        word: "FIRE",
-                        clue: "Trial that consumes and transforms",
-                        path: [[1,4], [2,4], [3,4], [4,4]],
+                        word: "LIGHT",
+                        clue: "Divine warmth that guides transformation",
+                        path: [[1,4], [2,4], [3,4], [4,4], [5,4]],
                         direction: "vertical"
                     }
                 ]

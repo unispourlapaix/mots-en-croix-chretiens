@@ -99,7 +99,7 @@
 45. **Renewal of the Spirit**: Revitalization, Regeneration, Freshness
 46. **Starting Over After the Fall**: Rising, Newbeginning, Restart
 47. **Reconstruction After Destruction**: Reconstruction, Rebuild, Refoundation, Hope
-48. **Purification by Fire**: Purification, Refinement, Purging, Fire
+48. **Spiritual Cleansing and Renewal**: Cleansing, Refinement, Renewal, Light
 49. **Divine Restoration**: Restoration, Healing, Reintegration
 50. **Rebirth After Death**: Resurrection, Rebirth, Awakening, Life
 

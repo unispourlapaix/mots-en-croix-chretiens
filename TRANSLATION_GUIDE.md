@@ -223,7 +223,7 @@ Les 77 niveaux suivent une progression thématique:
 | 45 | Renouvellement de l'esprit | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 46 | Recommencer après chute | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 47 | Reconstruction | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
-| 48 | Purification | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 48 | Nettoyage spirituel | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 49 | Restauration divine | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 50 | Renaissance | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 51-77 | ... | ✓ |  | ✓ |  |  |  |  |  |  |  |  |  |  |  |
