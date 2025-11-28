@@ -6,7 +6,7 @@
 ### ✅ Complété
 - **Français (fr)**: 77 niveaux - 100% ✓
 - **Espagnol (es)**: 77 niveaux - 100% ✓
-- **Anglais (en)**: 65 niveaux - 84%
+- **Anglais (en)**: 70 niveaux - 91%
 
 ### 🔨 En Attente
 - Allemand (de): 0/77 - 0%
@@ -33,8 +33,8 @@ Le jeu utilise maintenant un système de fallback automatique:
 
 ### Exemple
 - Utilisateur choisit l'anglais (en)
-- Niveaux 1-65: Affichés en anglais ✓
-- Niveaux 66-77: Affichés en français (fallback automatique)
+- Niveaux 1-70: Affichés en anglais ✓
+- Niveaux 71-77: Affichés en français (fallback automatique)
 
 ---
 
@@ -241,7 +241,12 @@ Les 77 niveaux suivent une progression thématique:
 | 63 | Liberté nouvelle | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 64 | Armure: Ceinture vérité | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 | 65 | Armure: Cuirasse justice | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
-| 66-77 | ... | ✓ |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| 66 | Armure: Chaussures évangile | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 67 | Armure: Bouclier de la foi | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 68 | Armure: Casque du salut | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 69 | Armure: Épée de l'Esprit | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 70 | Armure complète: Combat | ✓ | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |  |
+| 71-77 | ... | ✓ |  |  |  |  |  |  |  |  |  |  |  |  |  |
 
 ---
 

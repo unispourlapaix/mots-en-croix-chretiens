@@ -4206,6 +4206,175 @@ const gameData = {
                         direction: "bent"
                     }
                 ]
+            },
+            {
+                // Level 66 - Armor of God: Shoes of the Gospel (10x10 grid)
+                words: [
+                    {
+                        word: "SHOES",
+                        clue: "Footwear for those who proclaim good news",
+                        path: [[0,1], [1,1], [2,1], [3,1], [4,1]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "GOSPEL",
+                        clue: "Good news of peace we carry on our feet",
+                        path: [[1,4], [2,4], [3,4], [4,4], [5,4], [6,4]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "PEACE",
+                        clue: "Message our prepared steps bring to the world",
+                        path: [[3,6], [4,6], [5,6], [6,6], [7,6]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "PROCLAMATION",
+                        clue: "Action of those who wear gospel shoes",
+                        path: [[4,8], [5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6], [9,5], [9,4], [9,3], [9,2]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "PREPARATION",
+                        clue: "Readiness to walk wherever Christ sends",
+                        path: [[5,0], [6,0], [7,0], [8,0], [9,0], [9,1], [9,2], [9,3], [9,4], [9,5], [9,6]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 67 - Armor of God: Shield of Faith (10x10 grid)
+                words: [
+                    {
+                        word: "SHIELD",
+                        clue: "Mobile defense against flaming arrows",
+                        path: [[1,2], [2,2], [3,2], [4,2], [5,2], [6,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "FAITH",
+                        clue: "Trust that extinguishes the enemy's darts",
+                        path: [[0,4], [1,4], [2,4], [3,4], [4,4]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "TRUST",
+                        clue: "Confidence that repels every attack",
+                        path: [[2,6], [3,6], [4,6], [5,6], [6,6]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "PROTECTION",
+                        clue: "Defense provided by solid faith",
+                        path: [[4,8], [5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6], [9,5], [9,4]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "VICTORY",
+                        clue: "Outcome when the shield is raised",
+                        path: [[5,0], [6,0], [7,0], [8,0], [9,0], [9,1], [9,2]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 68 - Armor of God: Helmet of Salvation (10x10 grid)
+                words: [
+                    {
+                        word: "HELMET",
+                        clue: "Protection for the head and thoughts",
+                        path: [[1,2], [2,2], [3,2], [4,2], [5,2], [6,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "SALVATION",
+                        clue: "Hope that guards the warrior's mind",
+                        path: [[0,4], [1,4], [2,4], [3,4], [4,4], [5,4], [6,4], [7,4], [8,4]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "HOPE",
+                        clue: "Assurance that shields our thoughts",
+                        path: [[2,6], [3,6], [4,6], [5,6]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "THOUGHTS",
+                        clue: "What the helmet protects from despair",
+                        path: [[4,8], [5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "REDEMPTION",
+                        clue: "Reality that strengthens our spirit",
+                        path: [[5,0], [6,0], [7,0], [8,0], [9,0], [9,1], [9,2], [9,3], [9,4], [9,5]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 69 - Armor of God: Sword of the Spirit (10x10 grid)
+                words: [
+                    {
+                        word: "SWORD",
+                        clue: "Only offensive weapon in spiritual armor",
+                        path: [[1,2], [2,2], [3,2], [4,2], [5,2]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "SPIRIT",
+                        clue: "Who wields the word as a mighty blade",
+                        path: [[0,4], [1,4], [2,4], [3,4], [4,4], [5,4]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "WORD",
+                        clue: "Sharp blade that discerns all things",
+                        path: [[2,6], [3,6], [4,6], [5,6]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "SCRIPTURE",
+                        clue: "Powerful weapon of the spiritual warrior",
+                        path: [[4,8], [5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6], [9,5]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "PIERCING",
+                        clue: "Effectiveness of God's living word",
+                        path: [[5,0], [6,0], [7,0], [8,0], [9,0], [9,1], [9,2], [9,3]],
+                        direction: "bent"
+                    }
+                ]
+            },
+            {
+                // Level 70 - Complete Armor: Spiritual Combat (10x10 grid)
+                words: [
+                    {
+                        word: "FIGHTING",
+                        clue: "Active engagement in spiritual warfare",
+                        path: [[0,1], [1,1], [2,1], [3,1], [4,1], [5,1], [6,1], [7,1]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "CLOTHED",
+                        clue: "State of one wearing the full armor",
+                        path: [[1,4], [2,4], [3,4], [4,4], [5,4], [6,4], [7,4]],
+                        direction: "vertical"
+                    },
+                    {
+                        word: "STANDFAST",
+                        clue: "Posture of the warrior in full armor",
+                        path: [[3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6], [9,7], [9,8]],
+                        direction: "bent"
+                    },
+                    {
+                        word: "RESIST",
+                        clue: "Command for those who bear the armor",
+                        path: [[5,8], [6,8], [7,8], [8,8], [9,8], [9,7]],
+                        direction: "bent"
+                    }
+                ]
             }
         ]
     }

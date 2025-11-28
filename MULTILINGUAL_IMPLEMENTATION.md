@@ -51,7 +51,7 @@
 - Adaptation culturelle des indices
 - Vocabulaire chrétien approprié
 
-**Anglais (en)**: 65/77 niveaux (84%) ✓
+**Anglais (en)**: 70/77 niveaux (91%) ✓
 1. **Introduction**: Jesus, Love, Peace, Faith, Life
 2. **Christian Virtues**: Hope, Grace, Prayer, Love, Faith
 3. **Mysteries of Faith**: Eternity, Glory, Saint, Heaven, Angel
@@ -117,6 +117,11 @@
 63. **New Freedom**: Freedom, Newfound, Victory, Soar, Rebirth
 64. **Armor of God - Belt of Truth**: Belt, Truth, Integrity, Sincerity, Honest
 65. **Armor of God - Breastplate of Righteousness**: Breastplate, Justice, Rightness, Purity, Holiness
+66. **Armor of God - Shoes of the Gospel**: Shoes, Gospel, Peace, Proclamation, Preparation
+67. **Armor of God - Shield of Faith**: Shield, Faith, Trust, Protection, Victory
+68. **Armor of God - Helmet of Salvation**: Helmet, Salvation, Hope, Thoughts, Redemption
+69. **Armor of God - Sword of the Spirit**: Sword, Spirit, Word, Scripture, Piercing
+70. **Armor of God - Spiritual Combat**: Fighting, Clothed, Standfast, Resist
 
 **Autres langues**: 0/77 niveaux
 - Interface complète traduite
@@ -127,8 +132,8 @@
 ```javascript
 // Comment ça fonctionne:
 1. Utilisateur sélectionne une langue (ex: Anglais)
-2. Game charge les niveaux anglais disponibles (1-10)
-3. Pour les niveaux 11-77, fallback automatique vers français
+2. Game charge les niveaux anglais disponibles (1-70)
+3. Pour les niveaux 71-77, fallback automatique vers français
 4. Expérience fluide sans interruption
 ```
 
@@ -295,7 +300,8 @@ de: {  // Allemand
 - [x] Niveaux 51-55 (Nouveau commencement, guérison, espérance, lâcher prise, briser les chaînes) ✓
 - [x] Niveaux 56-60 (Libération, avancer, mouvement, détachement, rupture des liens) ✓
 - [x] Niveaux 61-65 (Marcher vers l'avant, laisser partir, liberté nouvelle, armure de Dieu) ✓
-- [ ] Niveaux 66-70 (Armure de Dieu suite: chaussures, bouclier, casque)
+- [x] Niveaux 66-70 (Armure de Dieu: chaussures, bouclier, casque, épée, combat) ✓
+- [ ] Niveaux 71-77 (1 Corinthiens 13: Amour patient, bienveillant...)
 - [ ] ... jusqu'à 77
 
 ### Priorité 2: Ajouter d'Autres Langues
@@ -343,7 +349,7 @@ Langue sélectionnée → Langue française (fallback) → null
 gameData = {
     fr: { levels: [...] },  // 77 niveaux
     es: { levels: [...] },  // 77 niveaux
-    en: { levels: [...] },  // 65 niveaux
+    en: { levels: [...] },  // 70 niveaux
     de: { levels: [] },     // Vide = fallback vers fr
     // ... autres langues
 }
@@ -384,7 +390,7 @@ Co-Authored-By: Votre Nom <email@example.com>
 - Système multilingue: Claude Code Pro
 - Interface kawaii: Design original
 - Traductions FR/ES: Complètes
-- Traductions EN (1-65): Claude Code Pro
+- Traductions EN (1-70): Claude Code Pro
 
 **Infrastructure:**
 - Supabase: Cloud database
