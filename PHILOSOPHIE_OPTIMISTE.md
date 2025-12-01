@@ -172,6 +172,28 @@ Le jeu affirme clairement que l'amour de Dieu est pour TOUS sans aucune exceptio
 - Dieu accueille TOUS (grâce)
 - Puis appelle à la transformation (vérité)
 
+**NIVEAU BONUS 9 - Accueil de l'étranger et des migrants (FR + EN):**
+
+✅ **HOSPITALITE / HOSPITALITY** :
+- 🇫🇷 "Accueillir l'étranger comme Jésus lui-même"
+- 🇬🇧 "Welcome the stranger as Jesus Himself"
+- Référence directe à Matthieu 25:35
+
+✅ **ETRANGER / STRANGER** :
+- 🇫🇷 "Celui qui vient d'ailleurs et mérite notre accueil"
+- 🇬🇧 "One who comes from elsewhere and deserves our welcome"
+- Dignité de l'immigrant/étranger affirmée
+
+✅ **REFUGE** :
+- 🇫🇷 "Protection offerte aux migrants et réfugiés"
+- 🇬🇧 "Protection offered to migrants and refugees"
+- Mention EXPLICITE des migrants et réfugiés
+
+✅ **ACCUEIL / WELCOME** :
+- 🇫🇷 "Dieu n'est pas anti-migrant il accueille tous"
+- 🇬🇧 "God is not anti-migrant He welcomes all"
+- Affirmation directe que Dieu n'est PAS anti-migrants
+
 🎯 **Principe biblique appliqué:**
 
 - **Galates 3:28** : "Il n'y a plus ni Juif ni Grec, ni esclave ni libre, ni homme ni femme; car tous vous êtes un en Jésus-Christ"

@@ -772,6 +772,40 @@ const gameData = {
                 bonusWords: ["RESTAURATION", "PARDON", "RENAISSANCE"]
             },
             {
+                // NIVEAU BONUS 9 - Accueil de l'étranger et des migrants (grille 10x10)
+                words: [
+                    {
+                        word: "HOSPITALITE",
+                        clue: "Accueillir l'étranger comme Jésus lui-même",
+                        path: [[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2], [9,3]], // Coudé
+                        direction: "bent",
+                        bonus: true
+                    },
+                    {
+                        word: "ETRANGER",
+                        clue: "Celui qui vient d'ailleurs et mérite notre accueil",
+                        path: [[2,5], [2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6]], // Coudé
+                        direction: "bent",
+                        bonus: true
+                    },
+                    {
+                        word: "REFUGE",
+                        clue: "Protection offerte aux migrants et réfugiés",
+                        path: [[4,8], [5,8], [6,8], [7,8], [8,8], [9,8], [9,7]], // Coudé
+                        direction: "bent",
+                        bonus: true
+                    },
+                    {
+                        word: "ACCUEIL",
+                        clue: "Dieu n'est pas anti-migrant il accueille tous",
+                        path: [[5,0], [6,0], [7,0], [8,0], [9,0], [9,1], [9,2]], // Coudé
+                        direction: "bent",
+                        bonus: true
+                    }
+                ],
+                bonusWords: ["HOSPITALITE", "ETRANGER", "REFUGE", "ACCUEIL"]
+            },
+            {
                 // NIVEAU 29 - Grâce pour tous (grille 10x10)
                 words: [
                     {
@@ -3115,6 +3149,40 @@ const gameData = {
                     }
                 ],
                 bonusWords: ["RESTORATION", "FORGIVENESS", "REBIRTH"]
+            },
+            {
+                // BONUS LEVEL 9 - Welcoming the Stranger and Migrants (10x10 grid)
+                words: [
+                    {
+                        word: "HOSPITALITY",
+                        clue: "Welcome the stranger as Jesus Himself",
+                        path: [[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2], [9,3]],
+                        direction: "bent",
+                        bonus: true
+                    },
+                    {
+                        word: "STRANGER",
+                        clue: "One who comes from elsewhere and deserves our welcome",
+                        path: [[2,5], [2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6]],
+                        direction: "bent",
+                        bonus: true
+                    },
+                    {
+                        word: "REFUGE",
+                        clue: "Protection offered to migrants and refugees",
+                        path: [[4,8], [5,8], [6,8], [7,8], [8,8], [9,8]],
+                        direction: "vertical",
+                        bonus: true
+                    },
+                    {
+                        word: "WELCOME",
+                        clue: "God is not anti-migrant He welcomes all",
+                        path: [[5,0], [6,0], [7,0], [8,0], [9,0], [9,1], [9,2]],
+                        direction: "bent",
+                        bonus: true
+                    }
+                ],
+                bonusWords: ["HOSPITALITY", "STRANGER", "REFUGE", "WELCOME"]
             },
             {
                 // Level 29 - Grace for All (10x10 grid)
