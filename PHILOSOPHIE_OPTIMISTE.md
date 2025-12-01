@@ -193,6 +193,37 @@ Le jeu affirme clairement que l'amour de Dieu est pour TOUS sans aucune exceptio
 - ✅ Dieu accueille pour transformer (grâce ET vérité)
 - ✅ Opposition claire à toute discrimination (racisme, homophobie, etc.)
 
+⚖️ **Équilibre GRÂCE ET VÉRITÉ maintenu dans l'inclusion :**
+
+**Question délicate :** Est-ce que "Dieu n'est pas homophobe" respecte l'équilibre grâce ET vérité ?
+
+**Réponse : OUI, voici pourquoi :**
+
+1. **Contexte différent du niveau 35 :**
+   - Niveau 35 ACCEPTANCE : Contexte du PÉCHÉ (criminel) → on a ajouté "pour te transformer"
+   - Niveau BONUS 6 AMOUR : Contexte de l'IDENTITÉ et DIGNITÉ → pas de péché à transformer
+   - "Dieu n'est pas homophobe" = "Dieu ne discrimine pas basé sur l'orientation"
+
+2. **Appel à la sainteté UNIVERSEL (pas ciblé) :**
+   - L'appel à la sainteté existe dans le jeu (Niveau 65 SAINTETE, Niveau 33 "arrête de mentir", etc.)
+   - Cet appel s'applique à TOUS de manière universelle (pas juste certains groupes)
+   - Si on ciblait l'appel à "changer" uniquement pour les LGBT+, ce serait discriminatoire
+
+3. **Deux vérités bibliques qui coexistent :**
+   - ✅ Dieu aime TOUTES les personnes sans discrimination (orientation, race, nationalité)
+   - ✅ Dieu appelle TOUS à la sainteté et à la transformation (Romains 3:23 "tous ont péché")
+   - Ces vérités s'appliquent en PARALLÈLE, pas l'une conditionnant l'autre
+
+4. **Jésus miséricordieux ET sage :**
+   - **MISÉRICORDIEUX** : Dieu aime et accueille TOUS sans discrimination d'identité
+   - **SAGE** : Dieu appelle TOUS à la sainteté (pas basé sur l'identité mais sur les actions)
+   - Exemple : Jésus avec Zachée (collecteur d'impôts haï) - l'accueille PUIS appelle à restitution
+
+**Conclusion :**
+- Le niveau BONUS 6 affirme l'INCLUSION (Dieu n'est pas homophobe/raciste)
+- D'autres niveaux affirment l'appel UNIVERSEL à la sainteté (pour TOUS)
+- L'équilibre grâce ET vérité est maintenu dans l'ENSEMBLE du jeu
+
 ### 4. **Progression Thématique Cohérente**
 Du simple au complexe, toujours avec espoir:
 1. **Fondamentaux** (Niveaux 1-10): Jésus, Amour, Paix, Foi, Vie
