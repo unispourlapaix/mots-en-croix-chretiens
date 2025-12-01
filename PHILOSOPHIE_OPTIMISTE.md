@@ -14,21 +14,28 @@
 - ✅ Formulations douces et tendres, même pour les sujets difficiles
 
 **Exemple corrigé (Niveau 48 - Français):**
-- ❌ AVANT: "Purification par le feu" + "Nettoyage profond par le feu du brisement" (alarmant)
-- ❌ AVANT: "Processus douloureux qui révèle l'or pur" (douloureux, alarmant)
-- ❌ AVANT: "Élimination de l'impur dans la souffrance" (souffrance, très alarmant)
-- ❌ AVANT: "FEU - Épreuve qui consume et transforme" (consume, effrayant)
-- ✅ APRÈS: "Nettoyage spirituel et renouveau" (titre doux)
-- ✅ APRÈS: "PURIFICATION - Doux lavage qui renouvelle l'âme" (doux, encourageant)
-- ✅ APRÈS: "RAFFINEMENT - Croissance qui révèle la beauté intérieure" (positif)
-- ✅ APRÈS: "RENOUVEAU - Nouveau départ avec espoir et paix" (encourageant)
-- ✅ APRÈS: "LUMIERE - Chaleur divine qui guide la transformation" (lumineux)
+- ❌ AVANT v1: "Purification par le feu" + "par le feu du brisement" (alarmant, effrayant)
+- ❌ AVANT v1: "Processus douloureux qui révèle l'or pur" (douloureux, négatif)
+- ❌ AVANT v1: "Élimination de l'impur dans la souffrance" (souffrance, très alarmant)
+- ❌ AVANT v1: "FEU - Épreuve qui consume et transforme" (consume, effrayant)
+- ⚠️ AVANT v2: "Doux lavage qui renouvelle l'âme" (trop vague, pas clair)
+- ⚠️ AVANT v2: "Croissance qui révèle la beauté intérieure" (trop abstrait)
+- ✅ **FINAL - Terre à terre et sage comme Jésus:**
+- ✅ "PURIFICATION - Dieu nettoie ton cœur et te rend pur" (simple, direct)
+- ✅ "RAFFINEMENT - Dieu te fait grandir et révèle ta vraie beauté" (concret, encourageant)
+- ✅ "RENOUVEAU - Tout peut recommencer à neuf avec Dieu" (espoir simple)
+- ✅ "LUMIERE - La lumière de Dieu montre le bon chemin" (image concrète)
 
 **Exemple corrigé (Niveau 48 - Anglais):**
-- ✅ "CLEANSING - Gentle washing that renews the soul" (doux, encourageant)
-- ✅ "REFINEMENT - Growing process that reveals inner beauty" (positif)
-- ✅ "RENEWAL - Fresh beginning with hope and peace" (encourageant)
-- ✅ "LIGHT - Divine warmth that guides transformation" (lumineux)
+- ❌ AVANT v1: "Gentle washing that renews the soul" (trop vague)
+- ❌ AVANT v1: "Growing process that reveals inner beauty" (trop abstrait)
+- ✅ **FINAL - Simple and wise like Jesus:**
+- ✅ "CLEANSING - God cleanses your heart and makes you pure" (simple, direct)
+- ✅ "REFINEMENT - God helps you grow and reveals your true beauty" (concrete, encouraging)
+- ✅ "RENEWAL - Everything can start new with God" (simple hope)
+- ✅ "LIGHT - God's light shows the right path" (concrete image)
+
+**Principe clé**: Jésus parlait simplement - "Tu dois naître de nouveau" (Jean 3:7), "Je suis la lumière du monde" (Jean 8:12). Pas de langage poétique abstrait, mais des images concrètes de la vie quotidienne que tout le monde peut comprendre.
 
 **Corrections de la répétition excessive de "brisement" (Niveaux 45-53):**
 
