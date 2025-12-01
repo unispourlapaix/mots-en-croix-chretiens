@@ -17,6 +17,7 @@
 - **Validation en temps réel** des réponses avec feedback visuel
 - **Icônes kawaii** remplaçant les numéros de définitions
 - **Animation cœur géométrique** pour les mots d'encouragement
+- **Partage de progression** : génération d'image avec citation biblique inspirante
 - **Niveaux thématiques** : vertus, fruits de l'Esprit, armure de Dieu, transformation spirituelle
 
 ### 🌍 Multilingue

@@ -60,6 +60,7 @@ class ChristianCrosswordGame {
         document.getElementById('playButton').addEventListener('click', () => this.handlePlayButtonClick());
         document.getElementById('checkButton').addEventListener('click', () => this.checkAnswers());
         document.getElementById('hintButton').addEventListener('click', () => this.showHint());
+        document.getElementById('shareButton').addEventListener('click', () => this.handleShare());
         document.getElementById('nextLevelButton').addEventListener('click', () => this.nextLevel());
         document.getElementById('resetButton').addEventListener('click', () => this.resetGame());
 
@@ -892,6 +893,7 @@ class ChristianCrosswordGame {
         if (percentage === 100) {
             await this.showKawaiiModal(i18n.t('congratulations'), '🎉');
             document.getElementById('nextLevelButton').style.display = 'inline-block';
+            document.getElementById('shareButton').style.display = 'inline-block';
         } else {
             await this.showKawaiiModal(i18n.t('progress', { percent: Math.round(percentage) }), '💪');
         }
@@ -1074,6 +1076,7 @@ class ChristianCrosswordGame {
             this.currentLevel++;
             this.setupLevel();
             document.getElementById('nextLevelButton').style.display = 'none';
+            document.getElementById('shareButton').style.display = 'none';
             // Sauvegarder le progrès
             this.saveGame();
             // Sauvegarder automatiquement sur le cloud si connecté
@@ -1108,11 +1111,24 @@ class ChristianCrosswordGame {
         document.getElementById('startScreen').classList.remove('hidden');
         document.getElementById('gameScreen').classList.add('hidden');
         document.getElementById('nextLevelButton').style.display = 'none';
+        document.getElementById('shareButton').style.display = 'none';
         document.getElementById('playButton').style.display = 'inline-block';
         this.updateUIText();
 
         // Effacer la sauvegarde
         this.clearSave();
+    }
+
+    async handleShare() {
+        try {
+            const success = await shareImageGenerator.shareImage(this.currentLevel);
+            if (success) {
+                await this.showKawaiiModal('Image partagée avec succès ! 📤', '✨');
+            }
+        } catch (error) {
+            console.error('Erreur lors du partage:', error);
+            await this.showKawaiiModal('Une erreur est survenue lors du partage', '❌');
+        }
     }
 }
 
