@@ -9,11 +9,15 @@
 ## ✨ Caractéristiques
 
 ### 🎮 Gameplay
-- **8 niveaux progressifs** avec mots bibliques
-- **7 messages d'encouragement** avant de commencer
-- **Système de points** et indices (coût : 5 points)
-- **Navigation clavier** avec flèches directionnelles
-- **Validation en temps réel** des réponses
+- **8 niveaux progressifs** avec mots bibliques soigneusement sélectionnés
+- **Grille 15×15** avec intersections intelligentes des mots
+- **7 messages d'encouragement** spirituels avant chaque partie
+- **Système de points** avec bonus de réussite
+- **Indices payants** disponibles (coût : 5 points par indice)
+- **Navigation clavier fluide** avec flèches directionnelles ⬆️⬇️⬅️➡️
+- **Validation en temps réel** des réponses avec feedback visuel
+- **Icônes kawaii** remplaçant les numéros de définitions
+- **Animation cœur géométrique** pour les mots d'encouragement
 
 ### 🌍 Multilingue
 - Français 🇫🇷
