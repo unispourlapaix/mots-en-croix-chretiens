@@ -30,6 +30,34 @@
 - ✅ "RENEWAL - Fresh beginning with hope and peace" (encourageant)
 - ✅ "LIGHT - Divine warmth that guides transformation" (lumineux)
 
+**Corrections de la répétition excessive de "brisement" (Niveaux 45-53):**
+
+❌ **AVANT** - Répétition lourde créant une atmosphère négative:
+- Niveau 45: "Naissance nouvelle après le brisement"
+- Niveau 45: "Nouveauté divine qui rafraîchit l'âme brisée"
+- Niveau 46: "Se relever après être tombé dans le brisement"
+- Niveau 47: "Reconstruire ce que le brisement a détruit"
+- Niveau 47: "Nouvelles bases après l'effondrement total"
+- Niveau 49: "Dieu restaure ce que le brisement a brisé"
+- Niveau 51: "Fraîcheur divine après l'ancien brisé"
+- Niveau 51: "Lumière qui suit la nuit du brisement"
+- Niveau 52: "Restauration des parties brisées de l'être"
+- Niveau 53: "Futur lumineux après le brisement passé"
+
+✅ **APRÈS** - Formulations variées et encourageantes:
+- Niveau 45: "Naissance nouvelle par la grâce transformatrice" (grâce, positif)
+- Niveau 45: "Nouveauté divine qui rafraîchit l'âme avec douceur" (douceur, tendre)
+- Niveau 46: "Se relever avec force et dignité retrouvée" (force, dignité)
+- Niveau 47: "Reconstruire avec espoir et confiance renouvelée" (espoir, confiance)
+- Niveau 47: "Nouvelles bases solides pour un nouveau départ" (solides, nouveau)
+- Niveau 49: "Dieu restaure et renouvelle avec tendresse" (tendresse, positif)
+- Niveau 51: "Fraîcheur divine d'un nouveau chapitre" (nouveau, positif)
+- Niveau 51: "Lumière joyeuse d'un nouveau jour qui commence" (joyeuse, lumineux)
+- Niveau 52: "Restauration douce et complète de l'être" (douce, complète)
+- Niveau 53: "Futur lumineux rempli d'espoir et de promesses" (lumineux, promesses)
+
+**Principe**: Bien que "brisement" soit un concept biblique légitime (Psaume 51:17), sa répétition excessive sur 10 niveaux consécutifs créait une atmosphère lourde et négative. Les corrections maintiennent le thème de transformation tout en utilisant un vocabulaire plus varié et encourageant.
+
 ### 2. **Rédemption Plutôt que Condamnation**
 - Focus sur la **transformation positive**
 - Personne n'est trop loin pour la grâce divine

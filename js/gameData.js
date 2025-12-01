@@ -1228,13 +1228,13 @@ const gameData = {
                     },
                     {
                         word: "REGENERATION",
-                        clue: "Naissance nouvelle après le brisement",
+                        clue: "Naissance nouvelle par la grâce transformatrice",
                         path: [[2,7], [2,8], [3,8], [4,8], [5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6], [9,5]], // Coudé en U
                         direction: "bent"
                     },
                     {
                         word: "FRAICHEUR",
-                        clue: "Nouveauté divine qui rafraîchit l'âme brisée",
+                        clue: "Nouveauté divine qui rafraîchit l'âme avec douceur",
                         path: [[5,0], [5,1], [6,1], [7,1], [8,1], [9,1], [9,2], [9,3], [9,4]], // Coudé
                         direction: "bent"
                     }
@@ -1245,7 +1245,7 @@ const gameData = {
                 words: [
                     {
                         word: "RELEVEMENT",
-                        clue: "Se relever après être tombé dans le brisement",
+                        clue: "Se relever avec force et dignité retrouvée",
                         path: [[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2]], // Vertical
                         direction: "vertical"
                     },
@@ -1274,13 +1274,13 @@ const gameData = {
                     },
                     {
                         word: "REBATIR",
-                        clue: "Reconstruire ce que le brisement a détruit",
+                        clue: "Reconstruire avec espoir et confiance renouvelée",
                         path: [[2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6]], // Vertical
                         direction: "vertical"
                     },
                     {
                         word: "REFONDATION",
-                        clue: "Nouvelles bases après l'effondrement total",
+                        clue: "Nouvelles bases solides pour un nouveau départ",
                         path: [[4,8], [5,8], [6,8], [7,8], [8,8], [9,8], [9,7], [9,6], [9,5], [9,4], [9,3]], // Coudé
                         direction: "bent"
                     },
@@ -1326,7 +1326,7 @@ const gameData = {
                 words: [
                     {
                         word: "RESTAURATION",
-                        clue: "Dieu restaure ce que le brisement a brisé",
+                        clue: "Dieu restaure et renouvelle avec tendresse",
                         path: [[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2], [9,3], [9,4]], // Coudé
                         direction: "bent"
                     },
@@ -1384,7 +1384,7 @@ const gameData = {
                     },
                     {
                         word: "NOUVEAUTE",
-                        clue: "Fraîcheur divine après l'ancien brisé",
+                        clue: "Fraîcheur divine d'un nouveau chapitre",
                         path: [[2,5], [2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6], [9,6]], // Coudé
                         direction: "bent"
                     },
@@ -1396,7 +1396,7 @@ const gameData = {
                     },
                     {
                         word: "AUBE",
-                        clue: "Lumière qui suit la nuit du brisement",
+                        clue: "Lumière joyeuse d'un nouveau jour qui commence",
                         path: [[5,0], [6,0], [7,0], [8,0]], // Vertical
                         direction: "vertical"
                     }
@@ -1407,7 +1407,7 @@ const gameData = {
                 words: [
                     {
                         word: "GUERISON",
-                        clue: "Restauration des parties brisées de l'être",
+                        clue: "Restauration douce et complète de l'être",
                         path: [[2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2]], // Vertical
                         direction: "vertical"
                     },
@@ -1448,7 +1448,7 @@ const gameData = {
                     },
                     {
                         word: "AVENIR",
-                        clue: "Futur lumineux après le brisement passé",
+                        clue: "Futur lumineux rempli d'espoir et de promesses",
                         path: [[2,6], [3,6], [4,6], [5,6], [6,6], [7,6]], // Vertical
                         direction: "vertical"
                     },
