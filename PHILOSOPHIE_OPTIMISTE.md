@@ -111,7 +111,79 @@ L'amour de Dieu est inconditionnel MAIS il appelle toujours à la transformation
 - Niveau 36: "Second chance for the condemned"
 - Niveau 37: "No one is too far from grace"
 
-### 3. **Progression Thématique Cohérente**
+### 3. **Inclusion et Amour Universel SANS EXCEPTION**
+
+🌈 **Dieu n'est PAS homophobe, raciste, anti-migrants, ou anti-autres religions**
+
+Le jeu affirme clairement que l'amour de Dieu est pour TOUS sans aucune exception.
+
+**NIVEAU BONUS 6 - Amour universel contre la haine:**
+
+✅ **INCLUSION** : "Dieu aime tous ses enfants sans exception ni rejet"
+- Message clair : PERSONNE n'est exclu de l'amour de Dieu
+
+✅ **RESPECT** : "Dignité de chaque personne créée à l'image divine"
+- Tout être humain a une dignité inviolable
+
+✅ **EGALITE** : "Justice contre racisme homophobie et toute discrimination"
+- Opposition explicite au racisme et à l'homophobie
+- Contre TOUTE forme de discrimination
+
+✅ **AMOUR** : "Dieu est amour pour tous exemple :il n'est pas homophobe"
+- Affirmation directe que Dieu n'est PAS homophobe
+- L'amour de Dieu est inclusif, pas exclusif
+
+**NIVEAU BONUS 3 - Fraternité:**
+
+✅ **FRATERNITE** : "Lien sacré qui fait de tous les humains une seule famille"
+- TOUS les humains = UNE SEULE famille
+- Pas de hiérarchie, pas d'exclusion
+
+✅ **UNITE** : "Harmonie qui naît de la diversité réconciliée"
+- La DIVERSITÉ est célébrée, pas condamnée
+- Unité dans la diversité
+
+**NIVEAU BONUS 4 - Vaincre la division:**
+
+✅ **ACCEPTATION** : "Accueil de la différence qui enrichit nos vies"
+- La différence ENRICHIT (pas une menace)
+- Accueil actif, pas simple tolérance
+
+✅ **RECONCILIATION** : "Pont qui unit ce que la haine a séparé"
+- Contre la haine et la division
+- Pour l'unité et la réconciliation
+
+**NIVEAUX 35 - Amour inconditionnel:**
+
+✅ **INCONDITIONNEL** : "Amour de Dieu sans limite pour tous les pécheurs"
+- SANS LIMITE = inclut absolument tout le monde
+
+✅ **ACCEPTANCE** : "Dieu t'accueille pour te transformer, pas te laisser ainsi"
+- Dieu accueille TOUS (grâce)
+- Puis appelle à la transformation (vérité)
+
+🎯 **Principe biblique appliqué:**
+
+- **Galates 3:28** : "Il n'y a plus ni Juif ni Grec, ni esclave ni libre, ni homme ni femme; car tous vous êtes un en Jésus-Christ"
+- **Actes 10:34-35** : "Dieu ne fait pas de favoritisme, mais en toute nation celui qui le craint et pratique la justice lui est agréable"
+- **Jean 3:16** : "Car Dieu a tant aimé le MONDE" (pas seulement certaines personnes)
+- **Matthieu 25:35** : "J'étais étranger, et vous m'avez recueilli" (accueil de l'étranger = accueil de Jésus)
+- **Hébreux 13:2** : "N'oubliez pas l'hospitalité; car en l'exerçant, quelques-uns ont logé des anges"
+
+❌ **Ce que le jeu ne fait PAS:**
+- ❌ Ne condamne AUCUN groupe de personnes (orientation, race, nationalité, religion)
+- ❌ Ne présente AUCUNE hiérarchie entre êtres humains
+- ❌ Ne promeut AUCUNE forme de discrimination
+- ❌ Ne rejette AUCUNE personne de l'amour de Dieu
+
+✅ **Ce que le jeu affirme:**
+- ✅ L'amour de Dieu est pour TOUS sans exception
+- ✅ Chaque personne a une dignité égale (image de Dieu)
+- ✅ La diversité est une richesse à célébrer
+- ✅ Dieu accueille pour transformer (grâce ET vérité)
+- ✅ Opposition claire à toute discrimination (racisme, homophobie, etc.)
+
+### 4. **Progression Thématique Cohérente**
 Du simple au complexe, toujours avec espoir:
 1. **Fondamentaux** (Niveaux 1-10): Jésus, Amour, Paix, Foi, Vie
 2. **Vertus** (Niveaux 11-20): Espérance, Grâce, Prière, Fruits de l'Esprit
