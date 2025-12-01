@@ -1,10 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python:*)",
-      "Bash(dir \"c:\\Users\\dream\\Documents\\GitHub\\mots-en-croix-chretiens\\js\\levels\")",
-      "Bash(node extract-levels.js:*)",
-      "Bash(git add:*)"
+      "Bash(git push)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
