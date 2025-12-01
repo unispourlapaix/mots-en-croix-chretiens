@@ -880,25 +880,25 @@ const gameData = {
                 words: [
                     {
                         word: "VERITE",
-                        clue: "Libération du menteur par la vérité qui sauve",
+                        clue: "Arrête de mentir, choisis la vérité maintenant",
                         path: [[2,2], [3,2], [4,2], [5,2], [6,2], [7,2]], // Vertical
                         direction: "vertical"
                     },
                     {
                         word: "SINCERITE",
-                        clue: "Nouveau chemin offert à celui qui a trompé",
+                        clue: "Parle vrai désormais, Dieu t'aide à changer",
                         path: [[1,4], [2,4], [3,4], [4,4], [5,4], [6,4], [7,4], [8,4], [9,4]], // Vertical
                         direction: "vertical"
                     },
                     {
                         word: "PURIFICATION",
-                        clue: "Nettoyage de la langue qui a menti",
+                        clue: "Renonce au mensonge avec l'aide de Dieu",
                         path: [[3,6], [3,7], [4,7], [5,7], [6,7], [7,7], [8,7], [9,7], [9,8], [9,9], [9,6], [9,5]], // Coudé complexe
                         direction: "bent"
                     },
                     {
                         word: "GRACE",
-                        clue: "Don qui efface tous les mensonges passés",
+                        clue: "Dieu pardonne et te donne la force de changer",
                         path: [[0,5], [1,5], [2,5], [3,5], [4,5]], // Vertical
                         direction: "vertical"
                     }
@@ -944,13 +944,13 @@ const gameData = {
                     },
                     {
                         word: "ACCEPTANCE",
-                        clue: "Dieu accueille même celui que tous condamnent",
+                        clue: "Dieu t'accueille pour te transformer, pas te laisser ainsi",
                         path: [[2,6], [2,7], [3,7], [4,7], [5,7], [6,7], [7,7], [8,7], [9,7], [9,8]], // Coudé
                         direction: "bent"
                     },
                     {
                         word: "GRACE",
-                        clue: "Faveur imméritée pour le criminel repenti",
+                        clue: "Pardon gratuit qui t'appelle à vivre autrement",
                         path: [[5,0], [5,1], [5,2], [5,3], [5,4]], // Horizontal
                         direction: "horizontal"
                     }
@@ -3225,25 +3225,25 @@ const gameData = {
                 words: [
                     {
                         word: "TRUTH",
-                        clue: "Liberation of the liar through saving truth",
+                        clue: "Stop lying, choose truth now",
                         path: [[2,2], [3,2], [4,2], [5,2], [6,2]],
                         direction: "vertical"
                     },
                     {
                         word: "SINCERITY",
-                        clue: "New path offered to the one who deceived",
+                        clue: "Speak truth from now on, God helps you change",
                         path: [[1,4], [2,4], [3,4], [4,4], [5,4], [6,4], [7,4], [8,4], [9,4]],
                         direction: "vertical"
                     },
                     {
                         word: "PURIFICATION",
-                        clue: "Cleansing of the tongue that has lied",
+                        clue: "Renounce lying with God's help",
                         path: [[3,6], [3,7], [4,7], [5,7], [6,7], [7,7], [8,7], [9,7], [9,8], [9,9], [9,6], [9,5]],
                         direction: "bent"
                     },
                     {
                         word: "GRACE",
-                        clue: "Gift that erases all past lies",
+                        clue: "God forgives and gives you strength to change",
                         path: [[0,5], [1,5], [2,5], [3,5], [4,5]],
                         direction: "vertical"
                     }
@@ -3289,13 +3289,13 @@ const gameData = {
                     },
                     {
                         word: "ACCEPTANCE",
-                        clue: "God welcomes even the one condemned by all",
+                        clue: "God welcomes you to transform you, not leave you as is",
                         path: [[2,6], [2,7], [3,7], [4,7], [5,7], [6,7], [7,7], [8,7], [9,7], [9,8]],
                         direction: "bent"
                     },
                     {
                         word: "GRACE",
-                        clue: "Unmerited favor for the repentant criminal",
+                        clue: "Free forgiveness that calls you to live differently",
                         path: [[5,0], [5,1], [5,2], [5,3], [5,4]],
                         direction: "horizontal"
                     }
