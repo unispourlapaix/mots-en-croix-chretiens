@@ -68,6 +68,9 @@
             <button class="play-button" id="playButton">
                 🎮 Jouer (<span id="clickCount">0</span>/7)
             </button>
+            <button class="play-button" id="multiplayerButton" style="background: linear-gradient(135deg, #ff85c1 0%, #ff69b4 100%); margin-top: 15px;">
+                👥 Mode Coopératif (2 joueurs)
+            </button>
             <div class="encouraging-words" id="encouragingWords"></div>
         </div>
 
@@ -212,11 +215,56 @@
         </div>
     </div>
 
+    <!-- Modal Multijoueur -->
+    <div id="multiplayerModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content">
+            <div class="kawaii-modal-header">
+                <span class="kawaii-modal-icon">👥</span>
+            </div>
+            <div class="kawaii-modal-body">
+                <h3>Mode Coopératif</h3>
+                <p>Résolvez un niveau à deux ! Chaque joueur trouve des mots différents.</p>
+                
+                <div id="multiplayerMenu">
+                    <input type="text" id="playerName" placeholder="Votre nom" class="kawaii-input" style="width: 100%; margin: 10px 0; padding: 12px; border: 2px solid #ff69b4; border-radius: 10px;">
+                    <button id="createRoomBtn" class="kawaii-modal-button" style="width: 100%; margin: 5px 0;">
+                        🎮 Créer une Partie
+                    </button>
+                    <button id="joinRoomBtn" class="kawaii-modal-button secondary" style="width: 100%; margin: 5px 0;">
+                        🔗 Rejoindre une Partie
+                    </button>
+                </div>
+
+                <div id="roomCodeDisplay" class="hidden" style="margin: 20px 0; padding: 15px; background: #fff5f9; border-radius: 10px; text-align: center;">
+                    <p><strong>Code de la partie:</strong></p>
+                    <p id="roomCode" style="font-size: 24px; color: #ff1493; font-weight: bold; letter-spacing: 2px; user-select: all;"></p>
+                    <button id="copyCodeBtn" class="kawaii-modal-button" style="margin-top: 10px;">
+                        📋 Copier le Code
+                    </button>
+                    <p style="margin-top: 10px; font-size: 14px; color: #666;">En attente du partenaire...</p>
+                </div>
+
+                <div id="joinRoomInput" class="hidden" style="margin: 20px 0;">
+                    <input type="text" id="roomCodeInput" placeholder="Code de la partie" class="kawaii-input" style="width: 100%; padding: 12px; border: 2px solid #ff69b4; border-radius: 10px; margin-bottom: 10px;">
+                    <button id="connectBtn" class="kawaii-modal-button" style="width: 100%;">
+                        ✅ Se Connecter
+                    </button>
+                </div>
+            </div>
+            <div class="kawaii-modal-footer">
+                <button id="closeMultiplayerBtn" class="kawaii-modal-button secondary">Annuler</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modules JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="js/config.js"></script>
     <script src="js/i18n.js"></script>
     <script src="js/gameData.js"></script>
     <script src="js/shareImage.js"></script>
+    <script src="js/multiplayer.js"></script>
     <script src="js/supabase.js"></script>
     <script src="js/game.js"></script>
     

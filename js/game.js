@@ -12,6 +12,10 @@ class ChristianCrosswordGame {
         this.cloudConnected = false;
         this.cloudUser = null;
 
+        // Mode multijoueur
+        this.multiplayerMode = false;
+        this.multiplayerManager = null;
+
         // Charger la sauvegarde
         this.loadGame();
         this.loadCloudConnection();
@@ -58,11 +62,19 @@ class ChristianCrosswordGame {
 
     initializeEventListeners() {
         document.getElementById('playButton').addEventListener('click', () => this.handlePlayButtonClick());
+        document.getElementById('multiplayerButton').addEventListener('click', () => this.openMultiplayerModal());
         document.getElementById('checkButton').addEventListener('click', () => this.checkAnswers());
         document.getElementById('hintButton').addEventListener('click', () => this.showHint());
         document.getElementById('shareButton').addEventListener('click', () => this.handleShare());
         document.getElementById('nextLevelButton').addEventListener('click', () => this.nextLevel());
         document.getElementById('resetButton').addEventListener('click', () => this.resetGame());
+
+        // Multijoueur
+        document.getElementById('createRoomBtn').addEventListener('click', () => this.createMultiplayerRoom());
+        document.getElementById('joinRoomBtn').addEventListener('click', () => this.showJoinRoomInput());
+        document.getElementById('connectBtn').addEventListener('click', () => this.joinMultiplayerRoom());
+        document.getElementById('closeMultiplayerBtn').addEventListener('click', () => this.closeMultiplayerModal());
+        document.getElementById('copyCodeBtn').addEventListener('click', () => this.copyRoomCode());
 
         // Modal kawaii
         document.getElementById('kawaiiModalBtn').addEventListener('click', () => this.closeKawaiiModal());
@@ -715,6 +727,11 @@ class ChristianCrosswordGame {
                             letterSpan.textContent = letter;
                             this.grid[i][j] = letter;
 
+                            // Envoyer la mise à jour en multijoueur
+                            if (this.multiplayerMode && this.multiplayerManager) {
+                                this.multiplayerManager.sendCellUpdate(i, j, letter);
+                            }
+
                             // Vérifier si correct
                             if (letter === this.solution[i][j]) {
                                 cell.classList.add('correct');
@@ -742,6 +759,11 @@ class ChristianCrosswordGame {
                             this.grid[i][j] = '';
                             cell.classList.remove('correct');
                             input.value = '';
+
+                            // Envoyer la mise à jour en multijoueur
+                            if (this.multiplayerMode && this.multiplayerManager) {
+                                this.multiplayerManager.sendCellUpdate(i, j, '');
+                            }
 
                             if (!currentValue) {
                                 this.moveToPreviousCell(i, j);
@@ -1128,6 +1150,81 @@ class ChristianCrosswordGame {
         } catch (error) {
             console.error('Erreur lors du partage:', error);
             await this.showKawaiiModal('Une erreur est survenue lors du partage', '❌');
+        }
+    }
+
+    // === MÉTHODES MULTIJOUEUR ===
+    
+    openMultiplayerModal() {
+        document.getElementById('multiplayerModal').classList.remove('hidden');
+        document.getElementById('multiplayerMenu').classList.remove('hidden');
+        document.getElementById('roomCodeDisplay').classList.add('hidden');
+        document.getElementById('joinRoomInput').classList.add('hidden');
+    }
+
+    closeMultiplayerModal() {
+        document.getElementById('multiplayerModal').classList.add('hidden');
+    }
+
+    async createMultiplayerRoom() {
+        const playerName = document.getElementById('playerName').value.trim();
+        if (!playerName) {
+            await this.showKawaiiModal('Veuillez entrer votre nom', '⚠️');
+            return;
+        }
+
+        // Initialiser le gestionnaire multijoueur
+        this.multiplayerManager = new MultiplayerManager(this);
+        const result = await this.multiplayerManager.createGame(playerName);
+
+        if (result.success) {
+            this.multiplayerMode = true;
+            document.getElementById('multiplayerMenu').classList.add('hidden');
+            document.getElementById('roomCodeDisplay').classList.remove('hidden');
+            document.getElementById('roomCode').textContent = result.roomId;
+        } else {
+            await this.showKawaiiModal(result.message, '❌');
+        }
+    }
+
+    showJoinRoomInput() {
+        document.getElementById('multiplayerMenu').classList.add('hidden');
+        document.getElementById('joinRoomInput').classList.remove('hidden');
+    }
+
+    async joinMultiplayerRoom() {
+        const playerName = document.getElementById('playerName').value.trim();
+        const roomCode = document.getElementById('roomCodeInput').value.trim();
+
+        if (!playerName || !roomCode) {
+            await this.showKawaiiModal('Veuillez entrer votre nom et le code', '⚠️');
+            return;
+        }
+
+        // Initialiser le gestionnaire multijoueur
+        this.multiplayerManager = new MultiplayerManager(this);
+        const result = await this.multiplayerManager.joinGame(roomCode, playerName);
+
+        if (result.success) {
+            this.multiplayerMode = true;
+            this.closeMultiplayerModal();
+            await this.showKawaiiModal(result.message, '✅');
+            
+            // Démarrer le jeu
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+        } else {
+            await this.showKawaiiModal(result.message, '❌');
+        }
+    }
+
+    async copyRoomCode() {
+        const code = document.getElementById('roomCode').textContent;
+        try {
+            await navigator.clipboard.writeText(code);
+            await this.showKawaiiModal('Code copié ! 📋', '✅');
+        } catch (error) {
+            await this.showKawaiiModal('Impossible de copier le code', '❌');
         }
     }
 }
