@@ -3047,14 +3047,14 @@ const gameData = {
                     },
                     {
                         word: "EQUALITY",
-                        clue: "Justice that opposes all forms of discrimination",
+                        clue: "Justice against racism homophobia and all discrimination",
                         path: [[2,7], [3,7], [4,7], [5,7], [6,7], [7,7], [8,7], [9,7]],
                         direction: "vertical",
                         bonus: true
                     },
                     {
                         word: "LOVE",
-                        clue: "God is love for everyone without prejudice",
+                        clue: "God is love for all example: He is not homophobic",
                         path: [[5,0], [5,1], [5,2], [5,3]],
                         direction: "horizontal",
                         bonus: true

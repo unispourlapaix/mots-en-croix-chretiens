@@ -117,21 +117,31 @@ L'amour de Dieu est inconditionnel MAIS il appelle toujours à la transformation
 
 Le jeu affirme clairement que l'amour de Dieu est pour TOUS sans aucune exception.
 
-**NIVEAU BONUS 6 - Amour universel contre la haine:**
+**NIVEAU BONUS 6 - Amour universel contre la haine (FR + EN):**
 
-✅ **INCLUSION** : "Dieu aime tous ses enfants sans exception ni rejet"
+✅ **INCLUSION** :
+- 🇫🇷 "Dieu aime tous ses enfants sans exception ni rejet"
+- 🇬🇧 "God loves all His children without exception or rejection"
 - Message clair : PERSONNE n'est exclu de l'amour de Dieu
 
-✅ **RESPECT** : "Dignité de chaque personne créée à l'image divine"
+✅ **RESPECT** :
+- 🇫🇷 "Dignité de chaque personne créée à l'image divine"
+- 🇬🇧 "Dignity of every person created in the divine image"
 - Tout être humain a une dignité inviolable
 
-✅ **EGALITE** : "Justice contre racisme homophobie et toute discrimination"
-- Opposition explicite au racisme et à l'homophobie
+✅ **EGALITE / EQUALITY** :
+- 🇫🇷 "Justice **contre racisme homophobie et toute discrimination**"
+- 🇬🇧 "Justice **against racism homophobia and all discrimination**"
+- Opposition EXPLICITE au racisme et à l'homophobie
 - Contre TOUTE forme de discrimination
+- **Versions FR et EN identiques en clarté**
 
-✅ **AMOUR** : "Dieu est amour pour tous exemple :il n'est pas homophobe"
+✅ **AMOUR / LOVE** :
+- 🇫🇷 "Dieu est amour pour tous **exemple :il n'est pas homophobe**"
+- 🇬🇧 "God is love for all **example: He is not homophobic**"
 - Affirmation directe que Dieu n'est PAS homophobe
 - L'amour de Dieu est inclusif, pas exclusif
+- **Versions FR et EN identiques en clarté**
 
 **NIVEAU BONUS 3 - Fraternité:**
 
