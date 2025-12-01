@@ -36,6 +36,7 @@
 - Mode offline complet
 - Optimisé mobile HD portrait
 - Responsive 3 breakpoints
+- **Icônes étoile kawaii souriante** pour tous les appareils
 
 ## 🚀 Démarrage Rapide
 
