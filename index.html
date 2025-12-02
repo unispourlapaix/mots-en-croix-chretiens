@@ -178,6 +178,14 @@
             </div>
 
             <div class="menu-section">
+                <h3>🏆 Collection de Médailles</h3>
+                <button id="achievementsBtn" class="menu-cloud-btn">
+                    🏆 Voir mes médailles
+                </button>
+                <p class="menu-description">Consultez vos récompenses et achievements</p>
+            </div>
+
+            <div class="menu-section">
                 <h3>🌍 Langue / Language</h3>
                 <div id="menuLanguageSelector" class="menu-language-selector"></div>
             </div>
@@ -259,11 +267,49 @@
         </div>
     </div>
 
+    <!-- Modal de Collection de Médailles -->
+    <div id="achievementsModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content achievements-modal-content">
+            <div class="menu-header">
+                <h2>🏆 Collection de Médailles</h2>
+                <button id="closeAchievementsBtn" class="close-menu-btn">✕</button>
+            </div>
+
+            <!-- Stats globales -->
+            <div class="achievements-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="achievementCount">0/0</div>
+                    <div class="stat-label">Médailles</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="achievementPoints">0</div>
+                    <div class="stat-label">Points</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="completionPercent">0%</div>
+                    <div class="stat-label">Complétion</div>
+                </div>
+            </div>
+
+            <!-- Filtres -->
+            <div class="achievements-filters">
+                <button class="filter-btn active" data-filter="all">Toutes</button>
+                <button class="filter-btn" data-filter="unlocked">Débloquées</button>
+                <button class="filter-btn" data-filter="locked">Verrouillées</button>
+            </div>
+
+            <!-- Liste des achievements -->
+            <div id="achievementsList" class="achievements-list"></div>
+        </div>
+    </div>
+
     <!-- Modules JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="js/config.js"></script>
     <script src="js/i18n.js"></script>
     <script src="js/gameData.js"></script>
+    <script src="js/achievements.js"></script>
     <script src="js/shareImage.js"></script>
     <script src="js/multiplayer.js"></script>
     <script src="js/supabase.js"></script>

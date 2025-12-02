@@ -8,6 +8,9 @@ class ChristianCrosswordGame {
         this.solution = Array(config.gridSize).fill().map(() => Array(config.gridSize).fill(''));
         this.blocked = Array(config.gridSize).fill().map(() => Array(config.gridSize).fill(false));
 
+        // Tracking des performances pour achievements
+        this.hintsUsedThisLevel = 0;
+
         // Connexion cloud
         this.cloudConnected = false;
         this.cloudUser = null;
@@ -113,6 +116,21 @@ class ChristianCrosswordGame {
         // Menu cloud button
         document.getElementById('menuCloudBtn').addEventListener('click', () => this.handleMenuCloudButton());
 
+        // Achievements modal
+        document.getElementById('achievementsBtn').addEventListener('click', () => this.openAchievements());
+        document.getElementById('closeAchievementsBtn').addEventListener('click', () => this.closeAchievements());
+
+        // Permettre de fermer le modal des achievements en cliquant sur l'overlay
+        const achievementsOverlay = document.querySelector('#achievementsModal .kawaii-modal-overlay');
+        if (achievementsOverlay) {
+            achievementsOverlay.addEventListener('click', () => this.closeAchievements());
+        }
+
+        // Filtres des achievements
+        document.querySelectorAll('.achievements-filters .filter-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => this.filterAchievements(e.target.dataset.filter));
+        });
+
         // Audio sliders
         document.getElementById('musicVolume').addEventListener('input', (e) => this.handleMusicVolumeChange(e));
         document.getElementById('soundVolume').addEventListener('input', (e) => this.handleSoundVolumeChange(e));
@@ -145,6 +163,14 @@ class ChristianCrosswordGame {
         if (this.kawaiiModalResolve) {
             this.kawaiiModalResolve();
             this.kawaiiModalResolve = null;
+        }
+    }
+
+    async showAchievementUnlocked(achievements) {
+        // Afficher chaque achievement débloqué avec une animation
+        for (const achievement of achievements) {
+            const message = `${achievement.icon} ${achievement.name}\n\n${achievement.description}\n\n+${achievement.points} points`;
+            await this.showKawaiiModal(message, '🏆');
         }
     }
 
@@ -550,6 +576,10 @@ class ChristianCrosswordGame {
 
     setupLevel() {
         this.clearGrid();
+
+        // Réinitialiser le compteur d'indices pour le nouveau niveau
+        this.hintsUsedThisLevel = 0;
+
         const levelData = gameDataManager.getLevelData(this.currentLevel);
 
         if (levelData) {
@@ -913,6 +943,20 @@ class ChristianCrosswordGame {
         this.saveGame();
 
         if (percentage === 100) {
+            // Enregistrer la complétion du niveau avec le système d'achievements
+            const currentLevelData = gameDataManager.getLevelData(this.currentLevel);
+            const isBonusLevel = currentLevelData && currentLevelData.bonusWords;
+            const newAchievements = achievementSystem.recordLevelCompletion(
+                this.currentLevel,
+                this.hintsUsedThisLevel,
+                isBonusLevel
+            );
+
+            // Afficher les achievements débloqués
+            if (newAchievements && newAchievements.length > 0) {
+                await this.showAchievementUnlocked(newAchievements);
+            }
+
             await this.showKawaiiModal(i18n.t('congratulations'), '🎉');
             document.getElementById('nextLevelButton').style.display = 'inline-block';
             document.getElementById('shareButton').style.display = 'inline-block';
@@ -987,6 +1031,75 @@ class ChristianCrosswordGame {
     closeMenu() {
         const modal = document.getElementById('menuModal');
         modal.classList.add('hidden');
+    }
+
+    openAchievements() {
+        const modal = document.getElementById('achievementsModal');
+        this.updateAchievementsDisplay();
+        modal.classList.remove('hidden');
+        this.closeMenu();
+    }
+
+    closeAchievements() {
+        const modal = document.getElementById('achievementsModal');
+        modal.classList.add('hidden');
+    }
+
+    updateAchievementsDisplay(filter = 'all') {
+        const stats = achievementSystem.getGlobalStats();
+
+        // Mettre à jour les stats globales
+        document.getElementById('achievementCount').textContent =
+            `${stats.unlockedAchievements}/${stats.totalAchievements}`;
+        document.getElementById('achievementPoints').textContent = stats.totalPoints;
+        document.getElementById('completionPercent').textContent = `${stats.completionPercentage}%`;
+
+        // Afficher les achievements
+        const achievementsList = document.getElementById('achievementsList');
+        achievementsList.innerHTML = '';
+
+        const allAchievements = achievementSystem.getAllAchievements();
+
+        allAchievements.forEach(achievement => {
+            const isUnlocked = achievementSystem.isUnlocked(achievement.id);
+
+            // Appliquer le filtre
+            if (filter === 'unlocked' && !isUnlocked) return;
+            if (filter === 'locked' && isUnlocked) return;
+
+            const achievementCard = document.createElement('div');
+            achievementCard.className = `achievement-card ${isUnlocked ? 'unlocked' : 'locked'}`;
+            achievementCard.style.borderLeft = `4px solid ${achievementSystem.getRarityColor(achievement.rarity)}`;
+
+            const iconClass = isUnlocked ? '' : 'locked-icon';
+            const displayIcon = isUnlocked ? achievement.icon : '🔒';
+
+            achievementCard.innerHTML = `
+                <div class="achievement-icon ${iconClass}">${displayIcon}</div>
+                <div class="achievement-info">
+                    <div class="achievement-name">${achievement.name}</div>
+                    <div class="achievement-description">${achievement.description}</div>
+                    <div class="achievement-meta">
+                        <span class="achievement-rarity" style="color: ${achievementSystem.getRarityColor(achievement.rarity)}">
+                            ${achievementSystem.getRarityLabel(achievement.rarity)}
+                        </span>
+                        <span class="achievement-points">+${achievement.points} pts</span>
+                    </div>
+                </div>
+            `;
+
+            achievementsList.appendChild(achievementCard);
+        });
+    }
+
+    filterAchievements(filter) {
+        // Mettre à jour les boutons actifs
+        document.querySelectorAll('.achievements-filters .filter-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.filter === filter);
+        });
+
+        // Réafficher avec le filtre
+        this.updateAchievementsDisplay(filter);
     }
 
     handleMenuCloudButton() {
@@ -1086,6 +1199,9 @@ class ChristianCrosswordGame {
             this.grid[row][col] = this.solution[row][col];
             this.score -= config.hintPenalty;
             document.getElementById('score').textContent = Math.max(0, this.score);
+
+            // Tracker l'utilisation d'un indice pour les achievements
+            this.hintsUsedThisLevel++;
 
             // Sauvegarder le progrès
             this.saveGame();
