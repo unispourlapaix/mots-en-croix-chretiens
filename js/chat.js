@@ -42,7 +42,7 @@ class P2PChatSystem {
 
     // Mettre à jour le username dans l'UI
     updateUsernameInUI() {
-        const usernameBtn = document.getElementById('chatUsername');
+        const usernameBtn = this.getElement('Username');
         if (usernameBtn) {
             usernameBtn.textContent = this.username;
         }
@@ -338,7 +338,7 @@ class P2PChatSystem {
 
     // Rendre les messages
     renderMessages() {
-        const container = document.getElementById('chatMessages');
+        const container = this.getElement('Messages');
         if (!container) return;
 
         const wasAtBottom = container.scrollHeight - container.scrollTop === container.clientHeight;
@@ -400,42 +400,45 @@ class P2PChatSystem {
 
     // Mettre à jour le compteur de participants
     updateParticipantCount() {
-        const countEl = document.getElementById('chatParticipantCount');
+        const countEl = this.getElement('ParticipantCount');
         if (countEl) {
             const count = this.connections.size + 1; // +1 pour soi-même
             countEl.textContent = `${count} 👥`;
         }
     }
 
-    // Ouvrir le chat
+    // Ouvrir le chat (via menu modal et onglet chat)
     open() {
-        const chatContainer = document.getElementById('chatContainer');
-        if (chatContainer) {
-            chatContainer.classList.remove('hidden');
-            this.isOpen = true;
+        // Ouvrir le menu modal et switcher vers l'onglet chat
+        if (typeof menuTabSystem !== 'undefined') {
+            menuTabSystem.openTab('chat');
+        }
 
-            const input = document.getElementById('chatInput');
+        this.isOpen = true;
+
+        // Focus sur l'input
+        setTimeout(() => {
+            const input = this.getElement('Input');
             if (input) input.focus();
 
-            setTimeout(() => {
-                const container = document.getElementById('chatMessages');
-                if (container) {
-                    container.scrollTop = container.scrollHeight;
-                }
-            }, 100);
-        }
+            // Scroll vers le bas
+            const container = this.getElement('Messages');
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }, 100);
     }
 
-    // Fermer le chat
+    // Fermer le chat (ferme le menu modal)
     close() {
-        const chatContainer = document.getElementById('chatContainer');
-        if (chatContainer) {
-            chatContainer.classList.add('hidden');
-            this.isOpen = false;
+        const menuModal = document.getElementById('menuModal');
+        if (menuModal) {
+            menuModal.classList.add('hidden');
         }
+        this.isOpen = false;
     }
 
-    // Toggle
+    // Toggle (ouvrir menu sur onglet chat)
     toggle() {
         if (this.isOpen) {
             this.close();
@@ -452,8 +455,8 @@ class P2PChatSystem {
 
     // Afficher l'interface de room
     showRoomInterface() {
-        const roomUI = document.getElementById('chatRoomInterface');
-        const messagesUI = document.getElementById('chatMessagesInterface');
+        const roomUI = this.getElement('RoomInterface');
+        const messagesUI = this.getElement('MessagesInterface');
 
         if (roomUI && messagesUI) {
             roomUI.classList.remove('hidden');
@@ -463,8 +466,8 @@ class P2PChatSystem {
 
     // Cacher l'interface de room
     hideRoomInterface() {
-        const roomUI = document.getElementById('chatRoomInterface');
-        const messagesUI = document.getElementById('chatMessagesInterface');
+        const roomUI = this.getElement('RoomInterface');
+        const messagesUI = this.getElement('MessagesInterface');
 
         if (roomUI && messagesUI) {
             roomUI.classList.add('hidden');
@@ -500,10 +503,21 @@ class P2PChatSystem {
         console.log('🔌 Déconnecté du chat P2P');
     }
 
+    // Helper pour obtenir un élément (essaie ancien + nouveau ID)
+    getElement(baseName) {
+        // Essayer avec le prefix menu
+        let el = document.getElementById(`menuChat${baseName}`);
+        if (el) return el;
+
+        // Essayer avec l'ancien ID
+        el = document.getElementById(`chat${baseName}`);
+        return el;
+    }
+
     // Initialiser l'UI
     initUI() {
         // Bouton créer room
-        const createBtn = document.getElementById('chatCreateRoomBtn');
+        const createBtn = this.getElement('CreateRoomBtn');
         if (createBtn) {
             createBtn.addEventListener('click', async () => {
                 try {
@@ -513,8 +527,8 @@ class P2PChatSystem {
                     const roomId = await this.createRoom();
 
                     // Afficher le code de room
-                    const codeDisplay = document.getElementById('chatRoomCodeDisplay');
-                    const codeText = document.getElementById('chatRoomCode');
+                    const codeDisplay = this.getElement('RoomCodeDisplay');
+                    const codeText = this.getElement('RoomCode');
                     if (codeDisplay && codeText) {
                         codeText.textContent = roomId;
                         codeDisplay.classList.remove('hidden');
@@ -532,8 +546,8 @@ class P2PChatSystem {
         }
 
         // Bouton rejoindre room
-        const joinBtn = document.getElementById('chatJoinRoomBtn');
-        const roomCodeInput = document.getElementById('chatRoomCodeInput');
+        const joinBtn = this.getElement('JoinRoomBtn');
+        const roomCodeInput = this.getElement('RoomCodeInput');
         if (joinBtn && roomCodeInput) {
             joinBtn.addEventListener('click', async () => {
                 const roomId = roomCodeInput.value.trim();
@@ -560,10 +574,10 @@ class P2PChatSystem {
         }
 
         // Copier le code
-        const copyBtn = document.getElementById('chatCopyCodeBtn');
+        const copyBtn = this.getElement('CopyCodeBtn');
         if (copyBtn) {
             copyBtn.addEventListener('click', () => {
-                const codeText = document.getElementById('chatRoomCode');
+                const codeText = this.getElement('RoomCode');
                 if (codeText) {
                     navigator.clipboard.writeText(codeText.textContent);
                     copyBtn.textContent = '✅ Copié !';
@@ -575,10 +589,10 @@ class P2PChatSystem {
         }
 
         // Bouton d'envoi
-        const sendBtn = document.getElementById('chatSendBtn');
+        const sendBtn = this.getElement('SendBtn');
         if (sendBtn) {
             sendBtn.addEventListener('click', () => {
-                const input = document.getElementById('chatInput');
+                const input = this.getElement('Input');
                 if (input) {
                     this.sendMessage(input.value);
                     input.value = '';
@@ -587,7 +601,7 @@ class P2PChatSystem {
         }
 
         // Enter pour envoyer
-        const input = document.getElementById('chatInput');
+        const input = this.getElement('Input');
         if (input) {
             input.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
@@ -598,8 +612,8 @@ class P2PChatSystem {
             });
         }
 
-        // Bouton fermer
-        const closeBtn = document.getElementById('chatCloseBtn');
+        // Bouton fermer (pas nécessaire dans menu, mais garde pour compatibilité)
+        const closeBtn = this.getElement('CloseBtn');
         if (closeBtn) {
             closeBtn.addEventListener('click', () => {
                 this.close();
@@ -607,7 +621,7 @@ class P2PChatSystem {
         }
 
         // Bouton changer pseudo
-        const usernameBtn = document.getElementById('chatUsername');
+        const usernameBtn = this.getElement('Username');
         if (usernameBtn) {
             usernameBtn.textContent = this.username;
 
