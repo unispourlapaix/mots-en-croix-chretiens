@@ -1745,9 +1745,93 @@ body {
 
 /* Menu modal */
 .menu-modal-content {
-    max-width: 400px;
-    width: 85%;
+    max-width: 500px;
+    width: 90%;
     max-height: 85vh;
+    overflow-y: auto;
+}
+
+/* Onglets de navigation */
+.menu-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(255, 192, 203, 0.2);
+}
+
+.menu-tab {
+    flex: 1;
+    padding: 12px 20px;
+    background: rgba(255, 192, 203, 0.1);
+    border: 2px solid rgba(255, 192, 203, 0.3);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.menu-tab:hover {
+    background: rgba(255, 192, 203, 0.2);
+    transform: translateY(-2px);
+}
+
+.menu-tab.active {
+    background: linear-gradient(135deg, #ff69b4, #ff85c1);
+    color: white;
+    border-color: #ff69b4;
+    box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Contenu des onglets */
+.menu-tab-content {
+    display: none;
+}
+
+.menu-tab-content.active {
+    display: block;
+    animation: fadeInTab 0.3s ease;
+}
+
+@keyframes fadeInTab {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header du chat dans le menu */
+.menu-chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: linear-gradient(135deg, #ff69b4, #ff85c1);
+    border-radius: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+}
+
+.chat-header-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.menu-tab-content .chat-room-interface {
+    padding: 15px 0;
+}
+
+.menu-tab-content .chat-messages-interface {
+    max-height: 400px;
     overflow-y: auto;
 }
 
