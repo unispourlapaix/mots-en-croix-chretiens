@@ -584,6 +584,14 @@ class P2PChatSystem {
             });
         }
 
+        // Bouton toggle chat (ouvrir/fermer)
+        const toggleBtn = document.getElementById('chatToggleBtn');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                this.toggle();
+            });
+        }
+
         // Afficher l'interface de room au démarrage
         this.showRoomInterface();
     }
