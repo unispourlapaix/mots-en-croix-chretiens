@@ -11,12 +11,41 @@ class P2PChatSystem {
         this.peer = null;
         this.connections = new Map(); // Map de peerId → DataConnection
         this.messages = []; // Messages en mémoire seulement
-        this.username = this.generateUsername();
+        this.username = this.getUsernameFromAuth() || this.generateUsername();
         this.userColor = this.generateColor();
         this.roomId = null;
         this.isHost = false;
         this.maxMessages = 100;
         this.isOpen = false;
+
+        // Écouter les changements d'authentification
+        if (typeof authSystem !== 'undefined') {
+            authSystem.onAuthChange((user) => {
+                if (user && user.username) {
+                    this.username = user.username;
+                    this.updateUsernameInUI();
+                }
+            });
+        }
+    }
+
+    // Obtenir le username depuis authSystem
+    getUsernameFromAuth() {
+        if (typeof authSystem !== 'undefined') {
+            const user = authSystem.getCurrentUser();
+            if (user && user.username) {
+                return user.username;
+            }
+        }
+        return null;
+    }
+
+    // Mettre à jour le username dans l'UI
+    updateUsernameInUI() {
+        const usernameBtn = document.getElementById('chatUsername');
+        if (usernameBtn) {
+            usernameBtn.textContent = this.username;
+        }
     }
 
     // Générer un pseudo aléatoire
@@ -411,7 +440,13 @@ class P2PChatSystem {
         if (this.isOpen) {
             this.close();
         } else {
-            this.open();
+            // Vérifier l'authentification avant d'ouvrir
+            if (typeof authSystem !== 'undefined' && !authSystem.isAuthenticated()) {
+                // Afficher le modal d'authentification
+                authSystem.showAuthModal();
+            } else {
+                this.open();
+            }
         }
     }
 
@@ -575,13 +610,20 @@ class P2PChatSystem {
         const usernameBtn = document.getElementById('chatUsername');
         if (usernameBtn) {
             usernameBtn.textContent = this.username;
-            usernameBtn.addEventListener('click', () => {
-                const newUsername = prompt('Nouveau pseudo:', this.username);
-                if (newUsername) {
-                    this.changeUsername(newUsername);
-                    usernameBtn.textContent = this.username;
-                }
-            });
+
+            // Désactiver si authentifié (username persistant)
+            if (typeof authSystem !== 'undefined' && authSystem.isAuthenticated()) {
+                usernameBtn.style.cursor = 'default';
+                usernameBtn.title = 'Username de votre compte';
+            } else {
+                usernameBtn.addEventListener('click', () => {
+                    const newUsername = prompt('Nouveau pseudo:', this.username);
+                    if (newUsername) {
+                        this.changeUsername(newUsername);
+                        usernameBtn.textContent = this.username;
+                    }
+                });
+            }
         }
 
         // Bouton toggle chat (ouvrir/fermer)

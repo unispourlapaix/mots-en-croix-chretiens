@@ -331,6 +331,57 @@
         </div>
     </div>
 
+    <!-- Modal d'authentification -->
+    <div id="authModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content auth-modal-content">
+            <div class="kawaii-modal-header">
+                <span class="kawaii-modal-icon">🔐</span>
+            </div>
+            <div class="kawaii-modal-body">
+                <h2 style="color: #ff69b4; margin-bottom: 15px;">Connexion au Chat</h2>
+                <p style="color: #666; margin-bottom: 20px;">Connectez-vous pour utiliser le chat communautaire</p>
+
+                <!-- Formulaire de connexion/inscription -->
+                <form id="authForm" style="display: flex; flex-direction: column; gap: 15px;">
+                    <input
+                        type="text"
+                        id="authUsername"
+                        placeholder="Nom d'utilisateur"
+                        required
+                        maxlength="20"
+                        style="padding: 12px; border: 2px solid #ffe8f0; border-radius: 10px; font-size: 0.95rem; outline: none;"
+                    >
+                    <input
+                        type="email"
+                        id="authEmail"
+                        placeholder="Votre email"
+                        required
+                        style="padding: 12px; border: 2px solid #ffe8f0; border-radius: 10px; font-size: 0.95rem; outline: none;"
+                    >
+
+                    <div id="authMessage" style="padding: 10px; border-radius: 8px; display: none; font-size: 0.9rem;"></div>
+
+                    <button
+                        type="submit"
+                        id="authSubmitBtn"
+                        class="kawaii-modal-button"
+                        style="width: 100%;"
+                    >
+                        📧 Envoyer le lien de connexion
+                    </button>
+                </form>
+
+                <p style="font-size: 0.85rem; color: #999; margin-top: 15px; line-height: 1.5;">
+                    Un lien de vérification sera envoyé à votre email. Cliquez sur le lien pour vous connecter.
+                </p>
+            </div>
+            <div class="kawaii-modal-footer">
+                <button id="authCancelBtn" class="kawaii-modal-button secondary">Annuler</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Conteneur du Chat -->
     <div id="chatContainer" class="chat-container hidden">
         <div class="chat-header">
@@ -394,23 +445,12 @@
     <script src="js/achievements.js"></script>
     <script src="js/biblicalQuotes.js"></script>
     <script src="js/shareImage.js"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/chat.js"></script>
     <script src="js/multiplayer.js"></script>
-    <script src="js/supabase.js"></script>
     <script src="js/game.js"></script>
 
-    <!-- Event listener pour le bouton Chat -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const chatToggleBtn = document.getElementById('chatToggleBtn');
-            if (chatToggleBtn) {
-                chatToggleBtn.addEventListener('click', () => {
-                    chatSystem.toggle();
-                });
-            }
-        });
-    </script>
-    
     <!-- Service Worker Registration -->
     <script>
         // Enregistrer le Service Worker
