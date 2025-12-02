@@ -8,8 +8,10 @@ class AuthSystem {
     // Initialiser l'authentification
     async init() {
         // Vérifier si supabase est disponible
-        if (typeof supabase === 'undefined') {
-            console.error('❌ Supabase non initialisé');
+        if (typeof supabase === 'undefined' || supabase === null) {
+            console.info('ℹ️ Auth System: Supabase non configuré, l\'authentification est désactivée');
+            console.info('ℹ️ Le chat fonctionnera avec des pseudos anonymes');
+            this.initUI(); // Initialiser l'UI quand même
             return;
         }
 
@@ -50,6 +52,11 @@ class AuthSystem {
 
     // Charger le profil utilisateur
     async loadUserProfile(user) {
+        if (!supabase) {
+            console.warn('⚠️ Impossible de charger le profil: Supabase non configuré');
+            return;
+        }
+
         try {
             const { data, error } = await supabase
                 .from('profiles')
@@ -90,6 +97,14 @@ class AuthSystem {
 
     // S'inscrire / Se connecter avec magic link
     async signInWithEmail(email, username) {
+        // Vérifier si supabase est disponible
+        if (!supabase) {
+            return {
+                success: false,
+                error: 'Authentification non configurée. Veuillez configurer Supabase dans js/supabase.js'
+            };
+        }
+
         try {
             // Vérifier si le username est déjà pris
             if (username) {
@@ -144,6 +159,10 @@ class AuthSystem {
 
     // Se déconnecter
     async signOut() {
+        if (!supabase) {
+            return { success: false, error: 'Authentification non configurée' };
+        }
+
         try {
             const { error } = await supabase.auth.signOut();
             if (error) throw error;

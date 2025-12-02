@@ -1,4 +1,37 @@
+// ========================================
+// Configuration Supabase Auth
+// ========================================
+
+// IMPORTANT: Configurez vos clés Supabase ici
+// Voir SETUP_SUPABASE_AUTH.md pour les instructions
+const SUPABASE_CONFIG = {
+    url: '', // Votre URL Supabase (ex: https://votre-projet.supabase.co)
+    anonKey: '' // Votre clé publique anon
+};
+
+// Créer le client Supabase seulement si configuré
+let supabase = null;
+
+if (SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
+    // Vérifier que la librairie Supabase est chargée
+    if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
+        supabase = window.supabase.createClient(
+            SUPABASE_CONFIG.url,
+            SUPABASE_CONFIG.anonKey
+        );
+        console.log('✅ Client Supabase Auth initialisé');
+    } else {
+        console.warn('⚠️ Librairie Supabase non chargée. Vérifiez que le script CDN est bien ajouté dans index.html');
+    }
+} else {
+    console.info('ℹ️ Supabase Auth non configuré (optionnel). Pour activer l\'authentification, configurez SUPABASE_CONFIG dans js/supabase.js');
+    console.info('ℹ️ Voir SETUP_SUPABASE_AUTH.md pour les instructions');
+}
+
+// ========================================
 // Configuration Supabase pour le leaderboard
+// ========================================
+
 class SupabaseScoreManager {
     constructor() {
         // Configuration Supabase

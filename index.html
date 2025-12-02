@@ -78,9 +78,6 @@
             <button id="installButton" class="install-button hidden">
                 📱 Installer l'Application
             </button>
-            <button id="chatToggleBtn" class="menu-button" style="right: 80px;">
-                💬 Chat
-            </button>
             <button id="menuButton" class="menu-button">
                 ☰ Menu
             </button>
@@ -192,11 +189,23 @@
         <div class="kawaii-modal-overlay"></div>
         <div class="kawaii-modal-content menu-modal-content">
             <div class="menu-header">
-                <h2>⚙️ Paramètres</h2>
+                <h2 id="menuTitle">⚙️ Paramètres</h2>
                 <button id="closeMenuBtn" class="close-menu-btn">✕</button>
             </div>
 
-            <div class="menu-section">
+            <!-- Onglets de navigation -->
+            <div class="menu-tabs">
+                <button class="menu-tab active" data-tab="settings">
+                    ⚙️ Menu
+                </button>
+                <button class="menu-tab" data-tab="chat">
+                    💬 Chat
+                </button>
+            </div>
+
+            <!-- Contenu Onglet Menu -->
+            <div id="settingsTabContent" class="menu-tab-content active">
+                <div class="menu-section">
                 <h3>☁️ Connexion Cloud</h3>
                 <button id="menuCloudBtn" class="menu-cloud-btn">
                     ☁️ Connexion Cloud
@@ -233,19 +242,72 @@
                 </div>
             </div>
 
-            <div class="menu-section">
-                <h3>ℹ️ À propos</h3>
-                <div class="about-info">
-                    <p class="about-item">
-                        <strong>🎨 Artiste:</strong>
-                        <a href="#" id="artistLink" class="info-link">Voir le profil</a>
-                    </p>
-                    <p class="about-item">
-                        <strong>✨ Création:</strong> Jeu de mots croisés chrétiens avec design kawaii
-                    </p>
-                    <p class="about-item">
-                        <strong>💻 Codage:</strong> Développé avec Claude Code Pro
-                    </p>
+                <div class="menu-section">
+                    <h3>ℹ️ À propos</h3>
+                    <div class="about-info">
+                        <p class="about-item">
+                            <strong>🎨 Artiste:</strong>
+                            <a href="#" id="artistLink" class="info-link">Voir le profil</a>
+                        </p>
+                        <p class="about-item">
+                            <strong>✨ Création:</strong> Jeu de mots croisés chrétiens avec design kawaii
+                        </p>
+                        <p class="about-item">
+                            <strong>💻 Codage:</strong> Développé avec Claude Code Pro
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenu Onglet Chat -->
+            <div id="chatTabContent" class="menu-tab-content">
+                <div class="menu-chat-header">
+                    <div class="chat-header-info">
+                        <span class="chat-icon">💬</span>
+                        <span class="chat-title">Chat P2P</span>
+                        <span id="menuChatParticipantCount" class="chat-participant-count">0 👥</span>
+                    </div>
+                    <button id="menuChatUsername" class="chat-username-btn">Anonyme</button>
+                </div>
+
+                <!-- Interface de création/join de room -->
+                <div id="menuChatRoomInterface" class="chat-room-interface">
+                    <div class="chat-room-content">
+                        <div class="chat-room-icon">🎮</div>
+                        <h3>Rejoindre le Chat</h3>
+                        <p>Créez une room ou rejoignez vos amis</p>
+
+                        <button id="menuChatCreateRoomBtn" class="chat-room-btn create-btn">
+                            🎮 Créer une Room
+                        </button>
+
+                        <div class="chat-divider">─── OU ───</div>
+
+                        <input type="text" id="menuChatRoomCodeInput" class="chat-room-input" placeholder="Code de la room" maxlength="50">
+                        <button id="menuChatJoinRoomBtn" class="chat-room-btn join-btn">
+                            🔗 Rejoindre
+                        </button>
+
+                        <!-- Affichage du code après création -->
+                        <div id="menuChatRoomCodeDisplay" class="chat-room-code-display hidden">
+                            <p><strong>Code de votre room:</strong></p>
+                            <div id="menuChatRoomCode" class="chat-room-code"></div>
+                            <button id="menuChatCopyCodeBtn" class="chat-copy-btn">📋 Copier</button>
+                            <p class="chat-room-hint">Partagez ce code avec vos amis !</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interface des messages -->
+                <div id="menuChatMessagesInterface" class="chat-messages-interface hidden">
+                    <div id="menuChatMessages" class="chat-messages">
+                        <!-- Les messages seront ajoutés dynamiquement -->
+                    </div>
+
+                    <div class="chat-input-container">
+                        <input type="text" id="menuChatInput" class="chat-input" placeholder="Écrivez un message..." maxlength="200">
+                        <button id="menuChatSendBtn" class="chat-send-btn">📤</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -382,63 +444,9 @@
         </div>
     </div>
 
-    <!-- Conteneur du Chat -->
-    <div id="chatContainer" class="chat-container hidden">
-        <div class="chat-header">
-            <div class="chat-header-left">
-                <span class="chat-icon">💬</span>
-                <span class="chat-title">Chat P2P</span>
-                <span id="chatParticipantCount" class="chat-participant-count">0 👥</span>
-            </div>
-            <div class="chat-header-right">
-                <button id="chatUsername" class="chat-username-btn">Anonyme</button>
-                <button id="chatCloseBtn" class="chat-close-btn">✕</button>
-            </div>
-        </div>
-
-        <!-- Interface de création/join de room -->
-        <div id="chatRoomInterface" class="chat-room-interface">
-            <div class="chat-room-content">
-                <div class="chat-room-icon">🎮</div>
-                <h3>Rejoindre le Chat</h3>
-                <p>Créez une room ou rejoignez vos amis</p>
-
-                <button id="chatCreateRoomBtn" class="chat-room-btn create-btn">
-                    🎮 Créer une Room
-                </button>
-
-                <div class="chat-divider">─── OU ───</div>
-
-                <input type="text" id="chatRoomCodeInput" class="chat-room-input" placeholder="Code de la room" maxlength="50">
-                <button id="chatJoinRoomBtn" class="chat-room-btn join-btn">
-                    🔗 Rejoindre
-                </button>
-
-                <!-- Affichage du code après création -->
-                <div id="chatRoomCodeDisplay" class="chat-room-code-display hidden">
-                    <p><strong>Code de votre room:</strong></p>
-                    <div id="chatRoomCode" class="chat-room-code"></div>
-                    <button id="chatCopyCodeBtn" class="chat-copy-btn">📋 Copier</button>
-                    <p class="chat-room-hint">Partagez ce code avec vos amis !</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Interface des messages -->
-        <div id="chatMessagesInterface" class="chat-messages-interface hidden">
-            <div id="chatMessages" class="chat-messages">
-                <!-- Les messages seront ajoutés dynamiquement -->
-            </div>
-
-            <div class="chat-input-container">
-                <input type="text" id="chatInput" class="chat-input" placeholder="Écrivez un message..." maxlength="200">
-                <button id="chatSendBtn" class="chat-send-btn">📤</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Modules JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/config.js"></script>
     <script src="js/i18n.js"></script>
     <script src="js/gameData.js"></script>
@@ -447,6 +455,7 @@
     <script src="js/shareImage.js"></script>
     <script src="js/supabase.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/menu-tabs.js"></script>
     <script src="js/chat.js"></script>
     <script src="js/multiplayer.js"></script>
     <script src="js/game.js"></script>
