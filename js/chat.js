@@ -1,6 +1,13 @@
 // Chat WebRTC P2P avec PeerJS - Sans DB ni sauvegarde
 class P2PChatSystem {
     constructor() {
+        // Couleurs kawaii (doit être défini avant generateColor)
+        this.userColors = [
+            '#ff69b4', '#ff6b9d', '#c44569', '#f8b500',
+            '#4b7bec', '#0abde3', '#10ac84', '#ee5a6f',
+            '#c56cf0', '#ffb8b8', '#ffa801', '#54a0ff'
+        ];
+
         this.peer = null;
         this.connections = new Map(); // Map de peerId → DataConnection
         this.messages = []; // Messages en mémoire seulement
@@ -10,13 +17,6 @@ class P2PChatSystem {
         this.isHost = false;
         this.maxMessages = 100;
         this.isOpen = false;
-
-        // Couleurs kawaii
-        this.userColors = [
-            '#ff69b4', '#ff6b9d', '#c44569', '#f8b500',
-            '#4b7bec', '#0abde3', '#10ac84', '#ee5a6f',
-            '#c56cf0', '#ffb8b8', '#ffa801', '#54a0ff'
-        ];
     }
 
     // Générer un pseudo aléatoire
