@@ -45,11 +45,41 @@
     </div>
 
     <div class="game-container">
+        <!-- Bouton Multijoueur Flottant -->
+        <div id="multiplayerFloatingBtn" class="multiplayer-floating-btn">
+            <button class="floating-btn">👥 2J</button>
+            <div id="multiplayerDropdown" class="multiplayer-dropdown hidden">
+                <div class="dropdown-header">
+                    <h4>🎮 Mode Coopératif</h4>
+                </div>
+                <input type="text" id="multiplayerPlayerNameFloat" placeholder="Votre nom" class="kawaii-input" style="width: 100%; margin: 10px 0; padding: 10px; border: 2px solid #ff69b4; border-radius: 8px; font-size: 14px;">
+                <button id="createRoomBtnFloat" class="dropdown-button create-btn">
+                    🎮 Créer une Partie
+                </button>
+                <div class="dropdown-divider">─── OU ───</div>
+                <input type="text" id="roomCodeInputFloat" placeholder="Code de la partie" class="kawaii-input" style="width: 100%; margin: 10px 0; padding: 10px; border: 2px solid #ff69b4; border-radius: 8px; font-size: 14px;">
+                <button id="joinRoomBtnFloat" class="dropdown-button join-btn">
+                    🔗 Rejoindre
+                </button>
+                <div id="roomCodeDisplayFloat" class="hidden" style="margin-top: 15px; padding: 12px; background: #fff5f9; border-radius: 8px; text-align: center;">
+                    <p style="font-size: 12px; margin-bottom: 5px;"><strong>Code:</strong></p>
+                    <p id="roomCodeFloat" style="font-size: 18px; color: #ff1493; font-weight: bold; letter-spacing: 1px; user-select: all; margin-bottom: 8px;"></p>
+                    <button id="copyCodeBtnFloat" class="dropdown-button" style="font-size: 12px; padding: 6px 12px;">
+                        📋 Copier
+                    </button>
+                    <p style="margin-top: 8px; font-size: 11px; color: #666;">En attente...</p>
+                </div>
+            </div>
+        </div>
+
         <div class="header">
             <h1>🙏 Mots En Croix Chrétiens 🙏</h1>
             <p>Trouve les mots d'encouragement et les mots bibliques</p>
             <button id="installButton" class="install-button hidden">
                 📱 Installer l'Application
+            </button>
+            <button id="chatToggleBtn" class="menu-button" style="right: 80px;">
+                💬 Chat
             </button>
             <button id="menuButton" class="menu-button">
                 ☰ Menu
@@ -68,9 +98,6 @@
         <div id="startScreen">
             <button class="play-button" id="playButton">
                 🎮 Jouer (<span id="clickCount">0</span>/7)
-            </button>
-            <button class="play-button" id="multiplayerButton" style="background: linear-gradient(135deg, #ff85c1 0%, #ff69b4 100%); margin-top: 15px;">
-                👥 Mode Coopératif (2 joueurs)
             </button>
             <div class="encouraging-words" id="encouragingWords"></div>
         </div>
@@ -236,7 +263,7 @@
                 <p>Résolvez un niveau à deux ! Chaque joueur trouve des mots différents.</p>
                 
                 <div id="multiplayerMenu">
-                    <input type="text" id="playerName" placeholder="Votre nom" class="kawaii-input" style="width: 100%; margin: 10px 0; padding: 12px; border: 2px solid #ff69b4; border-radius: 10px;">
+                    <input type="text" id="multiplayerPlayerName" placeholder="Votre nom" class="kawaii-input" style="width: 100%; margin: 10px 0; padding: 12px; border: 2px solid #ff69b4; border-radius: 10px;">
                     <button id="createRoomBtn" class="kawaii-modal-button" style="width: 100%; margin: 5px 0;">
                         🎮 Créer une Partie
                     </button>
@@ -304,6 +331,29 @@
         </div>
     </div>
 
+    <!-- Conteneur du Chat -->
+    <div id="chatContainer" class="chat-container hidden">
+        <div class="chat-header">
+            <div class="chat-header-left">
+                <span class="chat-icon">💬</span>
+                <span class="chat-title">Chat Communautaire</span>
+            </div>
+            <div class="chat-header-right">
+                <button id="chatUsername" class="chat-username-btn">Anonyme</button>
+                <button id="chatCloseBtn" class="chat-close-btn">✕</button>
+            </div>
+        </div>
+
+        <div id="chatMessages" class="chat-messages">
+            <!-- Les messages seront ajoutés dynamiquement -->
+        </div>
+
+        <div class="chat-input-container">
+            <input type="text" id="chatInput" class="chat-input" placeholder="Écrivez un message..." maxlength="200">
+            <button id="chatSendBtn" class="chat-send-btn">📤</button>
+        </div>
+    </div>
+
     <!-- Modules JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="js/config.js"></script>
@@ -312,9 +362,22 @@
     <script src="js/achievements.js"></script>
     <script src="js/biblicalQuotes.js"></script>
     <script src="js/shareImage.js"></script>
+    <script src="js/chat.js"></script>
     <script src="js/multiplayer.js"></script>
     <script src="js/supabase.js"></script>
     <script src="js/game.js"></script>
+
+    <!-- Event listener pour le bouton Chat -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatToggleBtn = document.getElementById('chatToggleBtn');
+            if (chatToggleBtn) {
+                chatToggleBtn.addEventListener('click', () => {
+                    chatSystem.toggle();
+                });
+            }
+        });
+    </script>
     
     <!-- Service Worker Registration -->
     <script>
