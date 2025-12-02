@@ -336,7 +336,8 @@
         <div class="chat-header">
             <div class="chat-header-left">
                 <span class="chat-icon">💬</span>
-                <span class="chat-title">Chat Communautaire</span>
+                <span class="chat-title">Chat P2P</span>
+                <span id="chatParticipantCount" class="chat-participant-count">0 👥</span>
             </div>
             <div class="chat-header-right">
                 <button id="chatUsername" class="chat-username-btn">Anonyme</button>
@@ -344,13 +345,44 @@
             </div>
         </div>
 
-        <div id="chatMessages" class="chat-messages">
-            <!-- Les messages seront ajoutés dynamiquement -->
+        <!-- Interface de création/join de room -->
+        <div id="chatRoomInterface" class="chat-room-interface">
+            <div class="chat-room-content">
+                <div class="chat-room-icon">🎮</div>
+                <h3>Rejoindre le Chat</h3>
+                <p>Créez une room ou rejoignez vos amis</p>
+
+                <button id="chatCreateRoomBtn" class="chat-room-btn create-btn">
+                    🎮 Créer une Room
+                </button>
+
+                <div class="chat-divider">─── OU ───</div>
+
+                <input type="text" id="chatRoomCodeInput" class="chat-room-input" placeholder="Code de la room" maxlength="50">
+                <button id="chatJoinRoomBtn" class="chat-room-btn join-btn">
+                    🔗 Rejoindre
+                </button>
+
+                <!-- Affichage du code après création -->
+                <div id="chatRoomCodeDisplay" class="chat-room-code-display hidden">
+                    <p><strong>Code de votre room:</strong></p>
+                    <div id="chatRoomCode" class="chat-room-code"></div>
+                    <button id="chatCopyCodeBtn" class="chat-copy-btn">📋 Copier</button>
+                    <p class="chat-room-hint">Partagez ce code avec vos amis !</p>
+                </div>
+            </div>
         </div>
 
-        <div class="chat-input-container">
-            <input type="text" id="chatInput" class="chat-input" placeholder="Écrivez un message..." maxlength="200">
-            <button id="chatSendBtn" class="chat-send-btn">📤</button>
+        <!-- Interface des messages -->
+        <div id="chatMessagesInterface" class="chat-messages-interface hidden">
+            <div id="chatMessages" class="chat-messages">
+                <!-- Les messages seront ajoutés dynamiquement -->
+            </div>
+
+            <div class="chat-input-container">
+                <input type="text" id="chatInput" class="chat-input" placeholder="Écrivez un message..." maxlength="200">
+                <button id="chatSendBtn" class="chat-send-btn">📤</button>
+            </div>
         </div>
     </div>
 

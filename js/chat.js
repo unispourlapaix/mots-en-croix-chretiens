@@ -1,19 +1,22 @@
-// Chat simple et léger (en mémoire, pas de DB)
-class SimpleChatSystem {
+// Chat WebRTC P2P avec PeerJS - Sans DB ni sauvegarde
+class P2PChatSystem {
     constructor() {
+        this.peer = null;
+        this.connections = new Map(); // Map de peerId → DataConnection
         this.messages = []; // Messages en mémoire seulement
         this.username = this.generateUsername();
-        this.maxMessages = 50; // Limite pour performance
+        this.userColor = this.generateColor();
+        this.roomId = null;
+        this.isHost = false;
+        this.maxMessages = 100;
         this.isOpen = false;
 
-        // Couleurs kawaii pour les utilisateurs
+        // Couleurs kawaii
         this.userColors = [
             '#ff69b4', '#ff6b9d', '#c44569', '#f8b500',
             '#4b7bec', '#0abde3', '#10ac84', '#ee5a6f',
             '#c56cf0', '#ffb8b8', '#ffa801', '#54a0ff'
         ];
-
-        this.userColor = this.userColors[Math.floor(Math.random() * this.userColors.length)];
     }
 
     // Générer un pseudo aléatoire
@@ -34,26 +37,219 @@ class SimpleChatSystem {
         return `${adj}${noun}${num}`;
     }
 
+    // Générer une couleur aléatoire
+    generateColor() {
+        return this.userColors[Math.floor(Math.random() * this.userColors.length)];
+    }
+
+    // Initialiser PeerJS
+    async initPeer() {
+        if (this.peer) return; // Déjà initialisé
+
+        return new Promise((resolve, reject) => {
+            // Vérifier que PeerJS est chargé
+            if (typeof Peer === 'undefined') {
+                reject(new Error('PeerJS non chargé'));
+                return;
+            }
+
+            this.peer = new Peer();
+
+            this.peer.on('open', (id) => {
+                console.log('✅ Peer connecté avec ID:', id);
+                resolve(id);
+            });
+
+            this.peer.on('error', (err) => {
+                console.error('❌ Erreur Peer:', err);
+                reject(err);
+            });
+
+            // Écouter les connexions entrantes (quelqu'un rejoint notre room)
+            this.peer.on('connection', (conn) => {
+                this.handleIncomingConnection(conn);
+            });
+        });
+    }
+
+    // Créer une room
+    async createRoom() {
+        try {
+            await this.initPeer();
+
+            this.roomId = this.peer.id;
+            this.isHost = true;
+
+            this.sendSystemMessage(`${this.username} a créé la room 🎉`);
+
+            return this.roomId;
+        } catch (error) {
+            console.error('Erreur création room:', error);
+            throw error;
+        }
+    }
+
+    // Rejoindre une room
+    async joinRoom(roomId) {
+        try {
+            await this.initPeer();
+
+            // Se connecter au host de la room
+            const conn = this.peer.connect(roomId, {
+                reliable: true,
+                metadata: {
+                    username: this.username,
+                    color: this.userColor
+                }
+            });
+
+            conn.on('open', () => {
+                console.log('✅ Connecté à la room:', roomId);
+                this.roomId = roomId;
+                this.handleIncomingConnection(conn);
+
+                // Envoyer un message de join
+                this.broadcastMessage({
+                    type: 'join',
+                    username: this.username,
+                    color: this.userColor,
+                    timestamp: Date.now()
+                });
+            });
+
+            conn.on('error', (err) => {
+                console.error('❌ Erreur connexion:', err);
+                throw err;
+            });
+
+        } catch (error) {
+            console.error('Erreur join room:', error);
+            throw error;
+        }
+    }
+
+    // Gérer une connexion entrante
+    handleIncomingConnection(conn) {
+        const peerId = conn.peer;
+
+        // Stocker la connexion
+        this.connections.set(peerId, conn);
+
+        console.log(`✅ Nouvelle connexion: ${peerId}`);
+
+        // Envoyer l'historique des messages au nouveau peer
+        if (this.isHost && this.messages.length > 0) {
+            conn.on('open', () => {
+                conn.send({
+                    type: 'history',
+                    messages: this.messages
+                });
+            });
+        }
+
+        // Écouter les messages
+        conn.on('data', (data) => {
+            this.handleIncomingMessage(data, peerId);
+        });
+
+        // Gérer la déconnexion
+        conn.on('close', () => {
+            this.connections.delete(peerId);
+            console.log(`❌ Déconnexion: ${peerId}`);
+
+            const username = conn.metadata?.username || 'Utilisateur';
+            this.sendSystemMessage(`${username} a quitté le chat 👋`);
+
+            this.updateParticipantCount();
+        });
+
+        // Mettre à jour le compteur
+        this.updateParticipantCount();
+    }
+
+    // Gérer un message entrant
+    handleIncomingMessage(data, fromPeerId) {
+        if (!data || !data.type) return;
+
+        if (data.type === 'message') {
+            // Nouveau message chat
+            const message = {
+                id: data.id || Date.now(),
+                username: data.username,
+                color: data.color,
+                text: data.text,
+                timestamp: data.timestamp
+            };
+
+            // Éviter les doublons
+            if (!this.messages.find(m => m.id === message.id)) {
+                this.messages.push(message);
+
+                // Limiter le nombre de messages
+                if (this.messages.length > this.maxMessages) {
+                    this.messages.shift();
+                }
+
+                this.renderMessages();
+
+                // Redistribuer aux autres peers (sauf l'émetteur)
+                this.redistributeMessage(data, fromPeerId);
+            }
+
+        } else if (data.type === 'history') {
+            // Historique des messages
+            this.messages = data.messages || [];
+            this.renderMessages();
+
+        } else if (data.type === 'join') {
+            // Quelqu'un a rejoint
+            this.sendSystemMessage(`${data.username} a rejoint le chat 🙏`);
+
+        } else if (data.type === 'system') {
+            // Message système
+            this.addSystemMessage(data.text);
+        }
+    }
+
+    // Redistribuer un message aux autres peers (mesh network)
+    redistributeMessage(data, exceptPeerId) {
+        this.connections.forEach((conn, peerId) => {
+            if (peerId !== exceptPeerId && conn.open) {
+                try {
+                    conn.send(data);
+                } catch (err) {
+                    console.error('Erreur envoi à', peerId, err);
+                }
+            }
+        });
+    }
+
     // Envoyer un message
     sendMessage(text) {
         if (!text || text.trim() === '') return;
+        if (!this.roomId) {
+            alert('Vous devez créer ou rejoindre une room d\'abord !');
+            return;
+        }
 
         const message = {
-            id: Date.now(),
+            type: 'message',
+            id: Date.now() + Math.random(), // ID unique
             username: this.username,
             color: this.userColor,
             text: text.trim(),
             timestamp: Date.now()
         };
 
+        // Ajouter à notre historique
         this.messages.push(message);
 
-        // Limiter le nombre de messages en mémoire
+        // Limiter
         if (this.messages.length > this.maxMessages) {
             this.messages.shift();
         }
 
-        // Broadcast aux autres onglets (même utilisateur)
+        // Envoyer à tous les peers
         this.broadcastMessage(message);
 
         // Refresh l'affichage
@@ -62,36 +258,53 @@ class SimpleChatSystem {
         return message;
     }
 
-    // Broadcast via localStorage (pour simuler multi-users entre onglets)
-    broadcastMessage(message) {
-        // Utiliser localStorage juste comme canal de communication temporaire
-        localStorage.setItem('chatLastMessage', JSON.stringify(message));
-        localStorage.removeItem('chatLastMessage'); // Supprimer immédiatement
-    }
-
-    // Écouter les messages des autres onglets
-    listenToOtherTabs() {
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'chatLastMessage' && e.newValue) {
+    // Broadcast un message à tous les peers
+    broadcastMessage(data) {
+        this.connections.forEach((conn) => {
+            if (conn.open) {
                 try {
-                    const message = JSON.parse(e.newValue);
-
-                    // Éviter les doublons
-                    if (!this.messages.find(m => m.id === message.id)) {
-                        this.messages.push(message);
-
-                        // Limiter
-                        if (this.messages.length > this.maxMessages) {
-                            this.messages.shift();
-                        }
-
-                        this.renderMessages();
-                    }
+                    conn.send(data);
                 } catch (err) {
-                    console.error('Erreur parsing message:', err);
+                    console.error('Erreur broadcast:', err);
                 }
             }
         });
+    }
+
+    // Message système
+    sendSystemMessage(text) {
+        const message = {
+            id: Date.now(),
+            username: 'Système',
+            color: '#95a5a6',
+            text: text,
+            timestamp: Date.now(),
+            isSystem: true
+        };
+
+        this.messages.push(message);
+        this.renderMessages();
+
+        // Broadcast aux autres
+        this.broadcastMessage({
+            type: 'system',
+            text: text
+        });
+    }
+
+    // Ajouter un message système (reçu)
+    addSystemMessage(text) {
+        const message = {
+            id: Date.now(),
+            username: 'Système',
+            color: '#95a5a6',
+            text: text,
+            timestamp: Date.now(),
+            isSystem: true
+        };
+
+        this.messages.push(message);
+        this.renderMessages();
     }
 
     // Rendre les messages
@@ -99,7 +312,6 @@ class SimpleChatSystem {
         const container = document.getElementById('chatMessages');
         if (!container) return;
 
-        // Garder la position de scroll
         const wasAtBottom = container.scrollHeight - container.scrollTop === container.clientHeight;
 
         container.innerHTML = '';
@@ -116,7 +328,7 @@ class SimpleChatSystem {
                 messageEl.classList.add('own-message');
             }
 
-            // Header du message
+            // Header
             const header = document.createElement('div');
             header.className = 'chat-message-header';
             header.style.color = msg.color;
@@ -132,7 +344,7 @@ class SimpleChatSystem {
             header.appendChild(usernameSpan);
             header.appendChild(timeSpan);
 
-            // Texte du message
+            // Texte
             const textEl = document.createElement('div');
             textEl.className = 'chat-message-text';
             textEl.textContent = msg.text;
@@ -143,7 +355,7 @@ class SimpleChatSystem {
             container.appendChild(messageEl);
         });
 
-        // Auto-scroll si on était en bas
+        // Auto-scroll
         if (wasAtBottom) {
             container.scrollTop = container.scrollHeight;
         }
@@ -157,6 +369,15 @@ class SimpleChatSystem {
         return `${hours}:${minutes}`;
     }
 
+    // Mettre à jour le compteur de participants
+    updateParticipantCount() {
+        const countEl = document.getElementById('chatParticipantCount');
+        if (countEl) {
+            const count = this.connections.size + 1; // +1 pour soi-même
+            countEl.textContent = `${count} 👥`;
+        }
+    }
+
     // Ouvrir le chat
     open() {
         const chatContainer = document.getElementById('chatContainer');
@@ -164,11 +385,9 @@ class SimpleChatSystem {
             chatContainer.classList.remove('hidden');
             this.isOpen = true;
 
-            // Focus sur l'input
             const input = document.getElementById('chatInput');
             if (input) input.focus();
 
-            // Scroll to bottom
             setTimeout(() => {
                 const container = document.getElementById('chatMessages');
                 if (container) {
@@ -196,34 +415,130 @@ class SimpleChatSystem {
         }
     }
 
-    // Changer de pseudo
-    changeUsername(newUsername) {
-        if (newUsername && newUsername.trim() !== '') {
-            this.username = newUsername.trim();
+    // Afficher l'interface de room
+    showRoomInterface() {
+        const roomUI = document.getElementById('chatRoomInterface');
+        const messagesUI = document.getElementById('chatMessagesInterface');
 
-            // Message système
-            this.sendSystemMessage(`${this.username} a rejoint le chat 🙏`);
+        if (roomUI && messagesUI) {
+            roomUI.classList.remove('hidden');
+            messagesUI.classList.add('hidden');
         }
     }
 
-    // Message système
-    sendSystemMessage(text) {
-        const message = {
-            id: Date.now(),
-            username: 'Système',
-            color: '#95a5a6',
-            text: text,
-            timestamp: Date.now(),
-            isSystem: true
-        };
+    // Cacher l'interface de room
+    hideRoomInterface() {
+        const roomUI = document.getElementById('chatRoomInterface');
+        const messagesUI = document.getElementById('chatMessagesInterface');
 
-        this.messages.push(message);
-        this.broadcastMessage(message);
-        this.renderMessages();
+        if (roomUI && messagesUI) {
+            roomUI.classList.add('hidden');
+            messagesUI.classList.remove('hidden');
+        }
     }
 
-    // Initialiser l'interface
+    // Changer de pseudo
+    changeUsername(newUsername) {
+        if (newUsername && newUsername.trim() !== '') {
+            const oldUsername = this.username;
+            this.username = newUsername.trim();
+            this.sendSystemMessage(`${oldUsername} est maintenant ${this.username}`);
+        }
+    }
+
+    // Déconnecter
+    disconnect() {
+        // Fermer toutes les connexions
+        this.connections.forEach(conn => conn.close());
+        this.connections.clear();
+
+        // Détruire le peer
+        if (this.peer) {
+            this.peer.destroy();
+            this.peer = null;
+        }
+
+        this.roomId = null;
+        this.isHost = false;
+        this.messages = [];
+
+        console.log('🔌 Déconnecté du chat P2P');
+    }
+
+    // Initialiser l'UI
     initUI() {
+        // Bouton créer room
+        const createBtn = document.getElementById('chatCreateRoomBtn');
+        if (createBtn) {
+            createBtn.addEventListener('click', async () => {
+                try {
+                    createBtn.disabled = true;
+                    createBtn.textContent = 'Création...';
+
+                    const roomId = await this.createRoom();
+
+                    // Afficher le code de room
+                    const codeDisplay = document.getElementById('chatRoomCodeDisplay');
+                    const codeText = document.getElementById('chatRoomCode');
+                    if (codeDisplay && codeText) {
+                        codeText.textContent = roomId;
+                        codeDisplay.classList.remove('hidden');
+                    }
+
+                    this.hideRoomInterface();
+                    this.updateParticipantCount();
+
+                } catch (error) {
+                    alert('Erreur lors de la création de la room: ' + error.message);
+                    createBtn.disabled = false;
+                    createBtn.textContent = '🎮 Créer une Room';
+                }
+            });
+        }
+
+        // Bouton rejoindre room
+        const joinBtn = document.getElementById('chatJoinRoomBtn');
+        const roomCodeInput = document.getElementById('chatRoomCodeInput');
+        if (joinBtn && roomCodeInput) {
+            joinBtn.addEventListener('click', async () => {
+                const roomId = roomCodeInput.value.trim();
+                if (!roomId) {
+                    alert('Veuillez entrer un code de room');
+                    return;
+                }
+
+                try {
+                    joinBtn.disabled = true;
+                    joinBtn.textContent = 'Connexion...';
+
+                    await this.joinRoom(roomId);
+
+                    this.hideRoomInterface();
+                    this.updateParticipantCount();
+
+                } catch (error) {
+                    alert('Erreur lors de la connexion: ' + error.message);
+                    joinBtn.disabled = false;
+                    joinBtn.textContent = '🔗 Rejoindre';
+                }
+            });
+        }
+
+        // Copier le code
+        const copyBtn = document.getElementById('chatCopyCodeBtn');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', () => {
+                const codeText = document.getElementById('chatRoomCode');
+                if (codeText) {
+                    navigator.clipboard.writeText(codeText.textContent);
+                    copyBtn.textContent = '✅ Copié !';
+                    setTimeout(() => {
+                        copyBtn.textContent = '📋 Copier';
+                    }, 2000);
+                }
+            });
+        }
+
         // Bouton d'envoi
         const sendBtn = document.getElementById('chatSendBtn');
         if (sendBtn) {
@@ -269,14 +584,11 @@ class SimpleChatSystem {
             });
         }
 
-        // Écouter les autres onglets
-        this.listenToOtherTabs();
-
-        // Message de bienvenue
-        this.sendSystemMessage('Bienvenue dans le chat ! 💬');
+        // Afficher l'interface de room au démarrage
+        this.showRoomInterface();
     }
 
-    // Nettoyer les vieux messages (appelé périodiquement)
+    // Nettoyer les vieux messages
     cleanup() {
         const now = Date.now();
         const maxAge = 30 * 60 * 1000; // 30 minutes
@@ -290,7 +602,7 @@ class SimpleChatSystem {
 }
 
 // Instance globale
-const chatSystem = new SimpleChatSystem();
+const chatSystem = new P2PChatSystem();
 
 // Initialiser au chargement
 if (document.readyState === 'loading') {
@@ -301,7 +613,12 @@ if (document.readyState === 'loading') {
     chatSystem.initUI();
 }
 
-// Nettoyage périodique (toutes les 5 minutes)
+// Nettoyage périodique
 setInterval(() => {
     chatSystem.cleanup();
 }, 5 * 60 * 1000);
+
+// Déconnexion propre avant fermeture
+window.addEventListener('beforeunload', () => {
+    chatSystem.disconnect();
+});

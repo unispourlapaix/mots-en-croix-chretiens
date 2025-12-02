@@ -2615,6 +2615,184 @@ body {
     transform: scale(0.95);
 }
 
+/* ========================================
+   INTERFACE DE ROOM P2P
+======================================== */
+
+.chat-room-interface {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.chat-room-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    text-align: center;
+}
+
+.chat-room-icon {
+    font-size: 4rem;
+    animation: float 3s ease-in-out infinite;
+}
+
+.chat-room-content h3 {
+    color: #ff69b4;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.chat-room-content p {
+    color: #666;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.chat-room-btn {
+    width: 100%;
+    padding: 14px 24px;
+    border: none;
+    border-radius: 15px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.chat-room-btn.create-btn {
+    background: linear-gradient(135deg, #ff69b4, #ff85c1);
+    color: white;
+}
+
+.chat-room-btn.create-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 105, 180, 0.4);
+}
+
+.chat-room-btn.join-btn {
+    background: linear-gradient(135deg, #87ceeb, #4a9fd8);
+    color: white;
+}
+
+.chat-room-btn.join-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(74, 159, 216, 0.4);
+}
+
+.chat-divider {
+    color: #999;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 10px 0;
+    position: relative;
+    width: 100%;
+}
+
+.chat-room-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #ffe8f0;
+    border-radius: 15px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.chat-room-input:focus {
+    border-color: #ff69b4;
+    box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
+}
+
+.chat-room-code-display {
+    width: 100%;
+    padding: 20px;
+    background: linear-gradient(135deg, #fff5f9, #ffe8f0);
+    border-radius: 15px;
+    border: 2px solid #ff69b4;
+    box-shadow: 0 4px 12px rgba(255, 105, 180, 0.2);
+}
+
+.chat-room-code-display p {
+    margin: 8px 0;
+    color: #333;
+}
+
+.chat-room-code {
+    background: white;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #ff1493;
+    letter-spacing: 2px;
+    margin: 10px 0;
+    word-break: break-all;
+    border: 2px solid #ffe8f0;
+}
+
+.chat-copy-btn {
+    background: linear-gradient(135deg, #4caf50, #45a049);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    margin-top: 10px;
+}
+
+.chat-copy-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+}
+
+.chat-room-hint {
+    font-size: 0.85rem;
+    color: #999;
+    font-style: italic;
+    margin: 5px 0 0 0;
+}
+
+.chat-participant-count {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.chat-messages-interface {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Messages système P2P */
+.chat-message.system-message {
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    border-left: 3px solid #4caf50;
+    text-align: center;
+    font-style: italic;
+}
+
+.chat-message.system-message .chat-message-text {
+    color: #2e7d32;
+    font-weight: 600;
+}
+
 /* Responsive mobile */
 @media (max-width: 768px) {
     .chat-container {
@@ -2656,5 +2834,33 @@ body {
         width: 40px;
         height: 40px;
         font-size: 16px;
+    }
+
+    /* Room interface mobile */
+    .chat-room-content {
+        gap: 15px;
+    }
+
+    .chat-room-icon {
+        font-size: 3rem;
+    }
+
+    .chat-room-content h3 {
+        font-size: 1.2rem;
+    }
+
+    .chat-room-btn {
+        padding: 12px 20px;
+        font-size: 0.9rem;
+    }
+
+    .chat-room-code {
+        font-size: 1rem;
+        padding: 10px 15px;
+    }
+
+    .chat-participant-count {
+        font-size: 11px;
+        padding: 5px 10px;
     }
 }

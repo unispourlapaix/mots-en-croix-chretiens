@@ -65,14 +65,20 @@ class ChristianCrosswordGame {
 
     initializeEventListeners() {
         document.getElementById('playButton').addEventListener('click', () => this.handlePlayButtonClick());
-        document.getElementById('multiplayerButton').addEventListener('click', () => this.openMultiplayerModal());
+        
+        // Bouton flottant multijoueur
+        document.querySelector('.multiplayer-floating-btn .floating-btn').addEventListener('click', () => this.toggleMultiplayerDropdown());
+        document.getElementById('createRoomBtnFloat').addEventListener('click', () => this.createMultiplayerRoomFloat());
+        document.getElementById('joinRoomBtnFloat').addEventListener('click', () => this.joinMultiplayerRoomFloat());
+        document.getElementById('copyCodeBtnFloat').addEventListener('click', () => this.copyRoomCodeFloat());
+        
         document.getElementById('checkButton').addEventListener('click', () => this.checkAnswers());
         document.getElementById('hintButton').addEventListener('click', () => this.showHint());
         document.getElementById('shareButton').addEventListener('click', () => this.handleShare());
         document.getElementById('nextLevelButton').addEventListener('click', () => this.nextLevel());
         document.getElementById('resetButton').addEventListener('click', () => this.resetGame());
 
-        // Multijoueur
+        // Ancien multijoueur (garde pour compatibilité avec le modal existant)
         document.getElementById('createRoomBtn').addEventListener('click', () => this.createMultiplayerRoom());
         document.getElementById('joinRoomBtn').addEventListener('click', () => this.showJoinRoomInput());
         document.getElementById('connectBtn').addEventListener('click', () => this.joinMultiplayerRoom());
@@ -1283,7 +1289,7 @@ class ChristianCrosswordGame {
     }
 
     async createMultiplayerRoom() {
-        const playerName = document.getElementById('playerName').value.trim();
+        const playerName = document.getElementById('multiplayerPlayerName').value.trim();
         if (!playerName) {
             await this.showKawaiiModal('Veuillez entrer votre nom', '⚠️');
             return;
@@ -1303,13 +1309,81 @@ class ChristianCrosswordGame {
         }
     }
 
+    // Nouvelles fonctions pour le bouton flottant
+    toggleMultiplayerDropdown() {
+        const dropdown = document.getElementById('multiplayerDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    async createMultiplayerRoomFloat() {
+        const playerName = document.getElementById('multiplayerPlayerNameFloat').value.trim();
+        if (!playerName) {
+            await this.showKawaiiModal('Veuillez entrer votre nom', '⚠️');
+            return;
+        }
+
+        // Initialiser le gestionnaire multijoueur
+        this.multiplayerManager = new MultiplayerManager(this);
+        const result = await this.multiplayerManager.createGame(playerName);
+
+        if (result.success) {
+            this.multiplayerMode = true;
+            document.getElementById('roomCodeDisplayFloat').classList.remove('hidden');
+            document.getElementById('roomCodeFloat').textContent = result.roomId;
+            
+            // Masquer les champs de création
+            document.getElementById('createRoomBtnFloat').style.display = 'none';
+            document.getElementById('multiplayerPlayerNameFloat').style.display = 'none';
+            document.querySelector('.dropdown-divider').style.display = 'none';
+            document.getElementById('roomCodeInputFloat').style.display = 'none';
+            document.getElementById('joinRoomBtnFloat').style.display = 'none';
+        } else {
+            await this.showKawaiiModal(result.message, '❌');
+        }
+    }
+
+    async joinMultiplayerRoomFloat() {
+        const playerName = document.getElementById('multiplayerPlayerNameFloat').value.trim();
+        const roomCode = document.getElementById('roomCodeInputFloat').value.trim();
+
+        if (!playerName || !roomCode) {
+            await this.showKawaiiModal('Veuillez entrer votre nom et le code', '⚠️');
+            return;
+        }
+
+        // Initialiser le gestionnaire multijoueur
+        this.multiplayerManager = new MultiplayerManager(this);
+        const result = await this.multiplayerManager.joinGame(roomCode, playerName);
+
+        if (result.success) {
+            this.multiplayerMode = true;
+            document.getElementById('multiplayerDropdown').classList.add('hidden');
+            await this.showKawaiiModal(result.message, '✅');
+            
+            // Démarrer le jeu
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+        } else {
+            await this.showKawaiiModal(result.message, '❌');
+        }
+    }
+
+    copyRoomCodeFloat() {
+        const roomCode = document.getElementById('roomCodeFloat').textContent;
+        navigator.clipboard.writeText(roomCode).then(() => {
+            this.showKawaiiModal('Code copié ! 📋', '✅');
+        }).catch(err => {
+            console.error('Erreur lors de la copie:', err);
+        });
+    }
+
     showJoinRoomInput() {
         document.getElementById('multiplayerMenu').classList.add('hidden');
         document.getElementById('joinRoomInput').classList.remove('hidden');
     }
 
     async joinMultiplayerRoom() {
-        const playerName = document.getElementById('playerName').value.trim();
+        const playerName = document.getElementById('multiplayerPlayerName').value.trim();
         const roomCode = document.getElementById('roomCodeInput').value.trim();
 
         if (!playerName || !roomCode) {
