@@ -1,5 +1,5 @@
 // Service Worker pour Mots En Croix Chrétiens
-const CACHE_NAME = 'mots-croix-v1.0.0';
+const CACHE_NAME = 'mots-croix-v1.0.1';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -42,6 +42,17 @@ self.addEventListener('activate', (event) => {
 
 // Stratégie de cache: Network First, fallback to Cache
 self.addEventListener('fetch', (event) => {
+  // Ne pas intercepter les requêtes vers PeerJS, Heroku ou Supabase
+  const url = new URL(event.request.url);
+  if (url.hostname.includes('peerjs.com') || 
+      url.hostname.includes('peerjs-server.herokuapp.com') ||
+      url.hostname.includes('herokuapp.com') ||
+      url.hostname.includes('supabase.co') ||
+      url.hostname.includes('supabase.in')) {
+    // Laisser passer directement sans cache
+    return;
+  }
+
   event.respondWith(
     fetch(event.request)
       .then((response) => {

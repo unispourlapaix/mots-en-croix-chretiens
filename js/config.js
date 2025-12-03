@@ -1,5 +1,9 @@
 // Configuration globale du jeu
 const config = {
+    // Identification du jeu
+    gamePrefix: 'mots-en-croix-chretiens',
+    gameName: 'Mots En Croix Chrétiens',
+    
     // Paramètres de la grille
     gridSize: 10, // Grille compacte 10x10 avec mots coudés
     cellSize: 35,

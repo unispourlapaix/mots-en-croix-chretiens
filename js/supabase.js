@@ -5,23 +5,33 @@
 // IMPORTANT: Configurez vos clés Supabase ici
 // Voir SETUP_SUPABASE_AUTH.md pour les instructions
 const SUPABASE_CONFIG = {
-    url: '', // Votre URL Supabase (ex: https://votre-projet.supabase.co)
-    anonKey: '' // Votre clé publique anon
+    url: 'https://dmszyxowetilvsanqsxm.supabase.co', // Votre URL Supabase
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtc3p5eG93ZXRpbHZzYW5xc3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3NzM0NDUsImV4cCI6MjA3NTM0OTQ0NX0.EukDYFVt0sCrDb0_V4ZPMv5B4gkD43V8Cw7CEuvl0C8' // Votre clé publique anon
 };
 
 // Créer le client Supabase seulement si configuré
 let supabase = null;
 
 if (SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
-    // Vérifier que la librairie Supabase est chargée
-    if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
-        supabase = window.supabase.createClient(
-            SUPABASE_CONFIG.url,
-            SUPABASE_CONFIG.anonKey
-        );
-        console.log('✅ Client Supabase Auth initialisé');
+    // Attendre que la librairie Supabase soit chargée
+    const initSupabase = () => {
+        if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
+            supabase = window.supabase.createClient(
+                SUPABASE_CONFIG.url,
+                SUPABASE_CONFIG.anonKey
+            );
+            console.log('✅ Client Supabase Auth initialisé');
+        } else {
+            console.warn('⚠️ Librairie Supabase non chargée. Nouvelle tentative...');
+            setTimeout(initSupabase, 100); // Réessayer après 100ms
+        }
+    };
+    
+    // Démarrer l'initialisation
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSupabase);
     } else {
-        console.warn('⚠️ Librairie Supabase non chargée. Vérifiez que le script CDN est bien ajouté dans index.html');
+        initSupabase();
     }
 } else {
     console.info('ℹ️ Supabase Auth non configuré (optionnel). Pour activer l\'authentification, configurez SUPABASE_CONFIG dans js/supabase.js');
@@ -67,6 +77,59 @@ class SupabaseScoreManager {
             return { success: true };
         } catch (error) {
             console.error('Erreur Supabase:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Sauvegarder la progression complète du joueur (avec user_id d'authentification)
+    async saveProgress(userId, username, currentLevel, score) {
+        if (!supabase) {
+            return { success: false, error: 'Supabase non configuré' };
+        }
+
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .update({
+                    username: username,
+                    game_level: currentLevel,
+                    game_score: score,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('user_id', userId);
+
+            if (error) throw error;
+
+            console.log('✅ Progression sauvegardée sur le cloud:', { username, currentLevel, score });
+            return { success: true };
+        } catch (error) {
+            console.error('❌ Erreur sauvegarde progression:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Charger la progression du joueur
+    async loadProgress(userId) {
+        if (!supabase) {
+            return { success: false, error: 'Supabase non configuré' };
+        }
+
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('game_level, game_score')
+                .eq('user_id', userId)
+                .single();
+
+            if (error) throw error;
+
+            return { 
+                success: true, 
+                level: data?.game_level || 1, 
+                score: data?.game_score || 0 
+            };
+        } catch (error) {
+            console.error('❌ Erreur chargement progression:', error);
             return { success: false, error: error.message };
         }
     }

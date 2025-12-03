@@ -4,12 +4,16 @@ class ChristianCrosswordGame {
         this.clickCount = 0;
         this.currentLevel = 1;
         this.score = 0;
+        this.gameStarted = false;
         this.grid = Array(config.gridSize).fill().map(() => Array(config.gridSize).fill(''));
         this.solution = Array(config.gridSize).fill().map(() => Array(config.gridSize).fill(''));
         this.blocked = Array(config.gridSize).fill().map(() => Array(config.gridSize).fill(false));
 
         // Tracking des performances pour achievements
         this.hintsUsedThisLevel = 0;
+
+        // Tracking des mots complétés pour éviter les notifications répétées
+        this.completedWords = new Set();
 
         // Connexion cloud
         this.cloudConnected = false;
@@ -21,12 +25,18 @@ class ChristianCrosswordGame {
 
         // Charger la sauvegarde
         this.loadGame();
-        this.loadCloudConnection();
         this.loadAudioSettings();
 
         this.initializeEventListeners();
         this.setupMenuLanguageSelector();
         this.updateUIText();
+
+        // Écouter les changements d'authentification pour mettre à jour le bouton cloud
+        if (typeof authSystem !== 'undefined') {
+            authSystem.onAuthChange(() => {
+                this.updateMenuCloudButton();
+            });
+        }
         this.updateMenuCloudButton();
 
         // Écouter les changements de langue
@@ -40,9 +50,13 @@ class ChristianCrosswordGame {
             currentLevel: this.currentLevel,
             score: this.score,
             clickCount: this.clickCount,
+            gameStarted: this.gameStarted || false,
             timestamp: Date.now()
         };
         localStorage.setItem('christianCrosswordSave', JSON.stringify(saveData));
+        
+        // Sauvegarder aussi dans le cloud si connecté
+        this.saveProgressToCloud();
     }
 
     loadGame() {
@@ -53,10 +67,40 @@ class ChristianCrosswordGame {
                 this.currentLevel = data.currentLevel || 1;
                 this.score = data.score || 0;
                 this.clickCount = data.clickCount || 0;
+                this.gameStarted = data.gameStarted || false;
+                
+                // Si le jeu était en cours, restaurer l'affichage
+                if (this.gameStarted) {
+                    setTimeout(() => {
+                        // Masquer l'écran de démarrage et le bouton jouer
+                        document.getElementById('startScreen').classList.add('hidden');
+                        document.getElementById('playButton').style.display = 'none';
+                        
+                        // Afficher l'écran de jeu
+                        document.getElementById('gameScreen').classList.remove('hidden');
+                        
+                        // Mettre à jour l'UI
+                        document.getElementById('score').textContent = this.score;
+                        document.getElementById('currentLevel').textContent = this.currentLevel;
+                        
+                        // Restaurer la grille
+                        this.setupLevel();
+                    }, 100);
+                }
             } catch (e) {
                 console.error('Erreur lors du chargement de la sauvegarde:', e);
             }
         }
+
+        // Charger la progression depuis le cloud si disponible
+        setTimeout(async () => {
+            await this.loadProgressFromCloud();
+            // Mettre à jour l'affichage si des données cloud ont été chargées
+            if (this.gameStarted) {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('currentLevel').textContent = this.currentLevel;
+            }
+        }, 1000);
     }
 
     clearSave() {
@@ -66,11 +110,26 @@ class ChristianCrosswordGame {
     initializeEventListeners() {
         document.getElementById('playButton').addEventListener('click', () => this.handlePlayButtonClick());
         
-        // Bouton flottant multijoueur
-        document.querySelector('.multiplayer-floating-btn .floating-btn').addEventListener('click', () => this.toggleMultiplayerDropdown());
-        document.getElementById('createRoomBtnFloat').addEventListener('click', () => this.createMultiplayerRoomFloat());
-        document.getElementById('joinRoomBtnFloat').addEventListener('click', () => this.joinMultiplayerRoomFloat());
-        document.getElementById('copyCodeBtnFloat').addEventListener('click', () => this.copyRoomCodeFloat());
+        // Boutons multijoueur flottants (vérifier s'ils existent)
+        const floatingBtn = document.querySelector('.multiplayer-floating-btn .floating-btn');
+        if (floatingBtn) {
+            floatingBtn.addEventListener('click', () => this.toggleMultiplayerDropdown());
+        }
+        
+        const createRoomBtnFloat = document.getElementById('createRoomBtnFloat');
+        if (createRoomBtnFloat) {
+            createRoomBtnFloat.addEventListener('click', () => this.createMultiplayerRoomFloat());
+        }
+        
+        const joinRoomBtnFloat = document.getElementById('joinRoomBtnFloat');
+        if (joinRoomBtnFloat) {
+            joinRoomBtnFloat.addEventListener('click', () => this.joinMultiplayerRoomFloat());
+        }
+        
+        const copyCodeBtnFloat = document.getElementById('copyCodeBtnFloat');
+        if (copyCodeBtnFloat) {
+            copyCodeBtnFloat.addEventListener('click', () => this.copyRoomCodeFloat());
+        }
         
         document.getElementById('checkButton').addEventListener('click', () => this.checkAnswers());
         document.getElementById('hintButton').addEventListener('click', () => this.showHint());
@@ -252,8 +311,12 @@ class ChristianCrosswordGame {
 
     updateMenuCloudButton() {
         const btn = document.getElementById('menuCloudBtn');
-        if (this.cloudConnected && this.cloudUser) {
-            btn.textContent = `✅ Connecté: ${this.cloudUser.name}`;
+        if (!btn) return;
+
+        // Utiliser l'authentification Supabase au lieu du système cloud local
+        if (typeof authSystem !== 'undefined' && authSystem.isAuthenticated()) {
+            const user = authSystem.getCurrentUser();
+            btn.textContent = `✅ Connecté: ${user.username}`;
             btn.classList.add('connected');
         } else {
             btn.textContent = '☁️ Connexion Cloud';
@@ -261,11 +324,22 @@ class ChristianCrosswordGame {
         }
     }
 
-    async showCloudDisconnectMenu() {
-        await this.showKawaiiModal(
-            `Connecté en tant que ${this.cloudUser.name}\n\nVos scores sont sauvegardés automatiquement.`,
-            '☁️'
-        );
+    async handleMenuCloudButton() {
+        // Vérifier si l'utilisateur est connecté via authSystem
+        if (typeof authSystem !== 'undefined' && authSystem.isAuthenticated()) {
+            const user = authSystem.getCurrentUser();
+            await this.showKawaiiModal(
+                `Connecté en tant que ${user.username}\n\nVos scores sont sauvegardés automatiquement.`,
+                '☁️'
+            );
+        } else {
+            // Afficher le modal d'authentification
+            if (typeof authSystem !== 'undefined') {
+                authSystem.showAuthModal();
+            } else {
+                await this.showKawaiiModal('Système d\'authentification non disponible', '⚠️');
+            }
+        }
     }
 
     showCloudModal() {
@@ -329,6 +403,61 @@ class ChristianCrosswordGame {
         }
     }
 
+    // Nouvelle méthode pour sauvegarder la progression complète
+    async saveProgressToCloud() {
+        // Vérifier si l'utilisateur est authentifié
+        if (typeof authSystem === 'undefined' || !authSystem.currentUser) {
+            return;
+        }
+
+        try {
+            const result = await supabaseScoreManager.saveProgress(
+                authSystem.currentUser.id,
+                authSystem.currentUser.username,
+                this.currentLevel,
+                this.score
+            );
+
+            if (result.success) {
+                console.log('✅ Progression sauvegardée dans le cloud');
+            }
+        } catch (error) {
+            console.error('❌ Erreur sauvegarde progression:', error);
+        }
+    }
+
+    // Charger la progression depuis le cloud
+    async loadProgressFromCloud() {
+        if (typeof authSystem === 'undefined' || !authSystem.currentUser) {
+            return false;
+        }
+
+        try {
+            const result = await supabaseScoreManager.loadProgress(authSystem.currentUser.id);
+
+            if (result.success) {
+                // Comparer avec la sauvegarde locale
+                const localSave = localStorage.getItem('christianCrosswordSave');
+                const localData = localSave ? JSON.parse(localSave) : null;
+
+                // Utiliser la progression la plus avancée
+                if (!localData || result.level > localData.currentLevel || result.score > localData.score) {
+                    this.currentLevel = result.level;
+                    this.score = result.score;
+                    console.log('✅ Progression chargée depuis le cloud:', { level: result.level, score: result.score });
+                    
+                    // Mettre à jour le localStorage aussi
+                    this.saveGame();
+                    return true;
+                }
+            }
+        } catch (error) {
+            console.error('❌ Erreur chargement progression:', error);
+        }
+
+        return false;
+    }
+
     setupMenuLanguageSelector() {
         const container = document.getElementById('menuLanguageSelector');
         if (!container) return;
@@ -390,11 +519,16 @@ class ChristianCrosswordGame {
 
         // Les flèches sont maintenant géométriques, pas besoin de mettre à jour le texte
 
-        // Mettre à jour les labels
-        document.querySelector('.level-info div:first-child strong').innerHTML =
-            `${i18n.t('level')}: <span id="currentLevel">${this.currentLevel}</span>/${gameDataManager.getTotalLevels()}`;
-        document.querySelector('.score-display').innerHTML =
-            `${i18n.t('score')}: <span id="score">${this.score}</span> ${i18n.t('points')}`;
+        // Mettre à jour les labels (maintenant dans le header du chat)
+        const levelSpan = document.getElementById('currentLevel');
+        const scoreSpan = document.getElementById('score');
+        
+        if (levelSpan) {
+            levelSpan.textContent = this.currentLevel;
+        }
+        if (scoreSpan) {
+            scoreSpan.textContent = this.score;
+        }
 
         // Mettre à jour les boutons de l'en-tête
         const installBtn = document.getElementById('installButton');
@@ -574,10 +708,25 @@ class ChristianCrosswordGame {
         }
     }
 
-    startGame() {
+    async startGame() {
+        this.gameStarted = true;
         document.getElementById('startScreen').classList.add('hidden');
         document.getElementById('gameScreen').classList.remove('hidden');
+        
+        // Créer automatiquement une room P2P quand on démarre une partie
+        if (typeof simpleChatSystem !== 'undefined' && !simpleChatSystem.isInRoom()) {
+            try {
+                const roomCode = simpleChatSystem.createRoom();
+                if (roomCode) {
+                    console.log('🎮 Room créée automatiquement:', roomCode);
+                }
+            } catch (error) {
+                console.error('Erreur création room auto:', error);
+            }
+        }
+        
         this.setupLevel();
+        this.saveGame();
     }
 
     setupLevel() {
@@ -586,13 +735,17 @@ class ChristianCrosswordGame {
         // Réinitialiser le compteur d'indices pour le nouveau niveau
         this.hintsUsedThisLevel = 0;
 
+        // Réinitialiser le tracking des mots complétés
+        this.completedWords = new Set();
+
         const levelData = gameDataManager.getLevelData(this.currentLevel);
 
         if (levelData) {
             this.placeWords(levelData.words);
             this.createGrid(levelData.words);
             this.displayClues(levelData.words);
-            document.getElementById('currentLevel').textContent = this.currentLevel;
+            const currentLevelEl = document.getElementById('currentLevel');
+            if (currentLevelEl) currentLevelEl.textContent = this.currentLevel;
         }
     }
 
@@ -771,6 +924,8 @@ class ChristianCrosswordGame {
                             // Vérifier si correct
                             if (letter === this.solution[i][j]) {
                                 cell.classList.add('correct');
+                                // Vérifier les mots complétés en temps réel
+                                this.checkCompletedWords();
                             } else {
                                 cell.classList.remove('correct');
                             }
@@ -929,6 +1084,7 @@ class ChristianCrosswordGame {
     async checkAnswers() {
         let correctCells = 0;
         let totalCells = 0;
+        let completedWords = 0;
 
         for (let i = 0; i < config.gridSize; i++) {
             for (let j = 0; j < config.gridSize; j++) {
@@ -941,9 +1097,52 @@ class ChristianCrosswordGame {
             }
         }
 
+        // Vérifier les mots complets
+        const levelData = gameDataManager.getLevelData(this.currentLevel);
+        if (levelData && levelData.words) {
+            levelData.words.forEach(wordData => {
+                let wordComplete = true;
+                if (wordData.path) {
+                    for (let i = 0; i < wordData.word.length && i < wordData.path.length; i++) {
+                        const [row, col] = wordData.path[i];
+                        if (this.grid[row][col] !== wordData.word[i]) {
+                            wordComplete = false;
+                            break;
+                        }
+                    }
+                }
+                if (wordComplete) completedWords++;
+            });
+        }
+
         const percentage = (correctCells / totalCells) * 100;
-        this.score += Math.round(percentage * this.currentLevel * config.basePointsMultiplier);
-        document.getElementById('score').textContent = this.score;
+        // 10 points par lettre correcte
+        const pointsPerLetter = 10;
+        const letterPoints = correctCells * pointsPerLetter;
+        
+        // 50 points bonus par mot complété
+        const wordBonus = 50;
+        const wordBonusPoints = completedWords * wordBonus;
+        
+        const totalPoints = letterPoints + wordBonusPoints;
+        this.score += totalPoints;
+        const scoreEl = document.getElementById('score');
+        if (scoreEl) scoreEl.textContent = this.score;
+
+        // Notifier dans le chat
+        if (percentage === 100 && typeof window.simpleChatSystem !== 'undefined') {
+            window.simpleChatSystem.showMessage(`🎉 Grille complète ! ${correctCells} lettres (+${letterPoints}pts) + ${completedWords} mots bonus (+${wordBonusPoints}pts) = +${totalPoints} points`, 'system');
+        } else if (completedWords > 0 && typeof window.simpleChatSystem !== 'undefined') {
+            window.simpleChatSystem.showMessage(`✅ ${correctCells}/${totalCells} lettres (+${letterPoints}pts) + ${completedWords} mots bonus (+${wordBonusPoints}pts) = +${totalPoints} points`, 'system');
+        } else if (percentage > 0 && typeof window.simpleChatSystem !== 'undefined') {
+            window.simpleChatSystem.showMessage(`✅ ${correctCells}/${totalCells} lettres correctes ! +${totalPoints} points`, 'system');
+        }
+
+        // Notifier le système de course multijoueur (si actif)
+        if (window.multiplayerRace && window.multiplayerRace.isRaceMode) {
+            // Le système de course calculera la progression et enverra les mises à jour
+            // Pas besoin d'action ici - les mises à jour sont automatiques
+        }
 
         // Sauvegarder le progrès
         this.saveGame();
@@ -971,6 +1170,66 @@ class ChristianCrosswordGame {
         }
     }
 
+    // Vérifier les mots complétés en temps réel
+    checkCompletedWords() {
+        const levelData = gameDataManager.getLevelData(this.currentLevel);
+        if (!levelData || !levelData.words) return;
+
+        // Vérifier chaque mot
+        levelData.words.forEach(wordData => {
+            // Vérifier si ce mot était déjà marqué comme complété
+            if (!this.completedWords) {
+                this.completedWords = new Set();
+            }
+
+            const wordKey = `${wordData.word}_${wordData.row}_${wordData.col}`;
+            
+            // Si déjà notifié, ne rien faire
+            if (this.completedWords.has(wordKey)) return;
+
+            // Vérifier si le mot est complet
+            let wordComplete = true;
+            if (wordData.path) {
+                for (let i = 0; i < wordData.word.length && i < wordData.path.length; i++) {
+                    const [row, col] = wordData.path[i];
+                    if (this.grid[row][col] !== wordData.word[i]) {
+                        wordComplete = false;
+                        break;
+                    }
+                }
+            }
+
+            // Si le mot vient d'être complété
+            if (wordComplete) {
+                this.completedWords.add(wordKey);
+                
+                // Ajouter les points bonus
+                const wordBonus = 50;
+                this.score += wordBonus;
+                const scoreEl = document.getElementById('score');
+                if (scoreEl) scoreEl.textContent = this.score;
+
+                // Notifier dans le chat
+                if (typeof window.simpleChatSystem !== 'undefined') {
+                    window.simpleChatSystem.showMessage(`✨ Mot complété : "${wordData.word}" ! +${wordBonus} pts`, 'system');
+                }
+
+                // Animation visuelle sur les cellules du mot
+                if (wordData.path) {
+                    wordData.path.forEach(([row, col]) => {
+                        const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                        if (cell) {
+                            cell.classList.add('word-completed');
+                            setTimeout(() => {
+                                cell.classList.remove('word-completed');
+                            }, 1000);
+                        }
+                    });
+                }
+            }
+        });
+    }
+
     async checkIfLevelComplete() {
         // Vérifier si toutes les cellules sont correctement remplies
         let allCorrect = true;
@@ -992,9 +1251,21 @@ class ChristianCrosswordGame {
 
         // Si tout est correct, passer au niveau suivant automatiquement
         if (allCorrect && totalCells > 0) {
+            // Féliciter le joueur avec l'IA
+            if (typeof welcomeAI !== 'undefined') {
+                welcomeAI.congratulate();
+            }
+            
             // Ajouter les points du niveau
-            this.score += Math.round(100 * this.currentLevel * config.basePointsMultiplier);
-            document.getElementById('score').textContent = this.score;
+            const bonusPoints = Math.round(100 * this.currentLevel * config.basePointsMultiplier);
+            this.score += bonusPoints;
+            const scoreEl = document.getElementById('score');
+            if (scoreEl) scoreEl.textContent = this.score;
+
+            // Notifier dans le chat
+            if (typeof window.simpleChatSystem !== 'undefined') {
+                window.simpleChatSystem.showMessage(`🏆 Niveau ${this.currentLevel} terminé ! +${bonusPoints} points bonus`, 'system');
+            }
 
             // Sauvegarder automatiquement sur le cloud si connecté
             await this.saveScoreToCloud();
@@ -1006,6 +1277,12 @@ class ChristianCrosswordGame {
                     // Afficher un message de félicitations rapide
                     await this.showKawaiiModal(i18n.t('congratulations') + '\n' + i18n.t('nextLevel'), '🎉');
                     this.currentLevel++;
+                    
+                    // Célébrer les jalons avec l'IA
+                    if (typeof welcomeAI !== 'undefined') {
+                        welcomeAI.celebrateMilestone(this.currentLevel);
+                    }
+                    
                     this.setupLevel();
                     // Sauvegarder le progrès
                     this.saveGame();
@@ -1108,16 +1385,8 @@ class ChristianCrosswordGame {
         this.updateAchievementsDisplay(filter);
     }
 
-    handleMenuCloudButton() {
-        if (this.cloudConnected) {
-            // Déjà connecté - proposer de se déconnecter
-            this.showCloudDisconnectMenu();
-        } else {
-            // Pas connecté - afficher le modal de connexion
-            this.closeMenu();
-            this.showCloudModal();
-        }
-    }
+    // Méthode handleMenuCloudButton maintenant définie plus haut dans la classe
+    // (ligne ~283 - utilise authSystem au lieu de cloudConnected)
 
     // Audio settings
     loadAudioSettings() {
@@ -1208,6 +1477,16 @@ class ChristianCrosswordGame {
 
             // Tracker l'utilisation d'un indice pour les achievements
             this.hintsUsedThisLevel++;
+            
+            // Encourager le joueur avec l'IA
+            if (typeof welcomeAI !== 'undefined') {
+                if (this.hintsUsedThisLevel === 1) {
+                    welcomeAI.encourageOnHint();
+                } else if (this.hintsUsedThisLevel === 3) {
+                    // Encourager si le joueur a besoin de plusieurs indices
+                    welcomeAI.encourageOnStruggle();
+                }
+            }
 
             // Sauvegarder le progrès
             this.saveGame();
@@ -1249,6 +1528,7 @@ class ChristianCrosswordGame {
         this.currentLevel = 1;
         this.score = 0;
         this.clickCount = 0;
+        this.gameStarted = false;
         document.getElementById('score').textContent = '0';
         document.getElementById('clickCount').textContent = '0';
         document.getElementById('encouragingWords').innerHTML = '';
@@ -1311,14 +1591,59 @@ class ChristianCrosswordGame {
 
     // Nouvelles fonctions pour le bouton flottant
     toggleMultiplayerDropdown() {
+        // Vérifier si l'utilisateur est authentifié
+        if (typeof authSystem !== 'undefined' && !authSystem.isAuthenticated()) {
+            // Fermer le dropdown s'il est ouvert
+            const dropdown = document.getElementById('multiplayerDropdown');
+            dropdown.classList.add('hidden');
+            
+            // Afficher le modal d'authentification
+            authSystem.showAuthModal();
+            return;
+        }
+
+        // Utilisateur connecté : afficher le dropdown
         const dropdown = document.getElementById('multiplayerDropdown');
         dropdown.classList.toggle('hidden');
+        
+        // Pré-remplir et afficher les infos utilisateur
+        if (typeof authSystem !== 'undefined' && authSystem.isAuthenticated()) {
+            const user = authSystem.getCurrentUser();
+            const nameInput = document.getElementById('multiplayerPlayerNameFloat');
+            const userInfo = document.getElementById('multiplayerUserInfo');
+            
+            if (user && user.username) {
+                // Afficher l'info utilisateur
+                if (userInfo) {
+                    userInfo.textContent = `👤 ${user.username}`;
+                }
+                
+                // Pré-remplir et désactiver l'input (au cas où il serait visible)
+                if (nameInput) {
+                    nameInput.value = user.username;
+                    nameInput.disabled = true;
+                    nameInput.style.opacity = '0.7';
+                    nameInput.style.cursor = 'not-allowed';
+                }
+            }
+        }
     }
 
     async createMultiplayerRoomFloat() {
-        const playerName = document.getElementById('multiplayerPlayerNameFloat').value.trim();
+        // Récupérer le username depuis authSystem
+        let playerName = '';
+        if (typeof authSystem !== 'undefined' && authSystem.isAuthenticated()) {
+            const user = authSystem.getCurrentUser();
+            playerName = user.username || '';
+        }
+        
+        // Fallback sur l'input si pas de username (ne devrait pas arriver)
         if (!playerName) {
-            await this.showKawaiiModal('Veuillez entrer votre nom', '⚠️');
+            playerName = document.getElementById('multiplayerPlayerNameFloat').value.trim();
+        }
+        
+        if (!playerName) {
+            await this.showKawaiiModal('Erreur: Nom d\'utilisateur manquant', '⚠️');
             return;
         }
 
@@ -1343,11 +1668,22 @@ class ChristianCrosswordGame {
     }
 
     async joinMultiplayerRoomFloat() {
-        const playerName = document.getElementById('multiplayerPlayerNameFloat').value.trim();
+        // Récupérer le username depuis authSystem
+        let playerName = '';
+        if (typeof authSystem !== 'undefined' && authSystem.isAuthenticated()) {
+            const user = authSystem.getCurrentUser();
+            playerName = user.username || '';
+        }
+        
+        // Fallback sur l'input si pas de username (ne devrait pas arriver)
+        if (!playerName) {
+            playerName = document.getElementById('multiplayerPlayerNameFloat').value.trim();
+        }
+        
         const roomCode = document.getElementById('roomCodeInputFloat').value.trim();
 
         if (!playerName || !roomCode) {
-            await this.showKawaiiModal('Veuillez entrer votre nom et le code', '⚠️');
+            await this.showKawaiiModal('Veuillez entrer le code de la partie', '⚠️');
             return;
         }
 
@@ -1421,5 +1757,6 @@ class ChristianCrosswordGame {
 
 // Initialiser le jeu quand le DOM est prêt
 document.addEventListener('DOMContentLoaded', () => {
-    new ChristianCrosswordGame();
+    window.game = new ChristianCrosswordGame();
+    console.log('✅ Jeu initialisé et exposé globalement');
 });
