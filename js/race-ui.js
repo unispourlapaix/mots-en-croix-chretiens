@@ -63,11 +63,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.multiplayerRace.stopRace();
             }
 
-            // Basculer les boutons
-            if (startRaceBtn) startRaceBtn.style.display = 'inline-block';
+            // Cacher les deux boutons jusqu'à la fin naturelle de la course
+            if (startRaceBtn) startRaceBtn.style.display = 'none';
             stopRaceBtn.style.display = 'none';
         });
     }
+
+    // Écouter la fin de course pour réafficher le bouton démarrer
+    window.addEventListener('raceEnded', () => {
+        if (startRaceBtn) startRaceBtn.style.display = 'inline-block';
+        if (stopRaceBtn) stopRaceBtn.style.display = 'none';
+    });
 
     // Commande rapide pour démarrer une course via le chat
     if (chatInput) {

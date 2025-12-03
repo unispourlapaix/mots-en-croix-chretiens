@@ -188,6 +188,9 @@ class MultiplayerRace {
         if (timerEl) {
             timerEl.remove();
         }
+        
+        // Notifier l'UI que la course est terminée
+        window.dispatchEvent(new Event('raceEnded'));
     }
 
     // Afficher le classement final
@@ -290,6 +293,9 @@ class MultiplayerRace {
         
         const timerEl = document.getElementById('raceTimer');
         if (timerEl) timerEl.remove();
+        
+        // Notifier l'UI que la course est terminée
+        window.dispatchEvent(new Event('raceEnded'));
     }
 }
 
