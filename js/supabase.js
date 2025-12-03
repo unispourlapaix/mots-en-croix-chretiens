@@ -18,9 +18,18 @@ if (SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
         if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
             supabase = window.supabase.createClient(
                 SUPABASE_CONFIG.url,
-                SUPABASE_CONFIG.anonKey
+                SUPABASE_CONFIG.anonKey,
+                {
+                    auth: {
+                        persistSession: true, // Persister la session dans localStorage
+                        autoRefreshToken: true, // Rafraîchir automatiquement le token
+                        detectSessionInUrl: true, // Détecter les tokens dans l'URL (pour email verification)
+                        storageKey: 'mots-croix-auth', // Clé unique pour éviter les conflits
+                        storage: window.localStorage // Utiliser localStorage explicitement
+                    }
+                }
             );
-            console.log('✅ Client Supabase Auth initialisé');
+            console.log('✅ Client Supabase Auth initialisé avec persistSession');
         } else {
             console.warn('⚠️ Librairie Supabase non chargée. Nouvelle tentative...');
             setTimeout(initSupabase, 100); // Réessayer après 100ms

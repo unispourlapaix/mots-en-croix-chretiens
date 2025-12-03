@@ -26,7 +26,7 @@ class AuthSystem {
 
         // Écouter les changements d'auth
         supabase.auth.onAuthStateChange(async (event, session) => {
-            console.log('🔐 Auth event:', event, session);
+            console.log('🔐 Auth event:', event, session ? 'Session active' : 'Pas de session');
 
             if (session && session.user) {
                 // Utilisateur connecté
@@ -44,16 +44,27 @@ class AuthSystem {
             } else {
                 // Utilisateur déconnecté
                 this.currentUser = null;
+                console.log('ℹ️ Utilisateur déconnecté ou pas de session');
             }
 
             // Appeler les callbacks
             this.onAuthChangeCallbacks.forEach(cb => cb(this.currentUser));
         });
 
-        // Vérifier la session actuelle
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session && session.user) {
-            await this.loadUserProfile(session.user);
+        // Vérifier la session actuelle au démarrage
+        try {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            
+            if (error) {
+                console.error('❌ Erreur récupération session:', error);
+            } else if (session && session.user) {
+                console.log('✅ Session restaurée depuis localStorage');
+                await this.loadUserProfile(session.user);
+            } else {
+                console.log('ℹ️ Aucune session sauvegardée');
+            }
+        } catch (err) {
+            console.error('❌ Erreur vérification session:', err);
         }
 
         this.initUI();
