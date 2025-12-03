@@ -103,6 +103,9 @@ class AuthSystem {
                     created_at: data.created_at
                 };
                 console.log('✅ Profil chargé:', this.currentUser);
+                
+                // Mettre à jour l'UI immédiatement
+                this.updateUIWithUser();
             } else {
                 // Profil inexistant - créer un profil automatiquement
                 console.log('⚠️ Profil non trouvé pour user:', user.id, '- Création automatique...');
@@ -484,6 +487,19 @@ class AuthSystem {
         if (modal) {
             modal.classList.add('hidden');
         }
+    }
+
+    // Mettre à jour l'UI avec les infos utilisateur
+    updateUIWithUser() {
+        if (!this.currentUser) return;
+        
+        // Masquer le modal d'auth
+        this.hideAuthModal();
+        
+        // Déclencher les callbacks pour mettre à jour l'UI
+        this.onAuthChangeCallbacks.forEach(cb => cb(this.currentUser));
+        
+        console.log('🔄 UI mise à jour avec utilisateur:', this.currentUser.username);
     }
 
     // Initialiser l'UI

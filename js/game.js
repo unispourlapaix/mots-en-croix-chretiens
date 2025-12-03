@@ -43,14 +43,39 @@ class ChristianCrosswordGame {
         window.addEventListener('languageChanged', () => {
             this.onLanguageChange();
         });
+        
+        // Sauvegarder avant de quitter ou actualiser la page
+        window.addEventListener('beforeunload', () => {
+            this.saveGame();
+        });
     }
 
     saveGame() {
+        // Sauvegarder l'état de la grille
+        const gridState = [];
+        if (this.grid) {
+            for (let row = 0; row < this.gridSize; row++) {
+                gridState[row] = [];
+                for (let col = 0; col < this.gridSize; col++) {
+                    const cell = this.grid[row][col];
+                    if (cell) {
+                        gridState[row][col] = {
+                            letter: cell.letter || '',
+                            userLetter: cell.userLetter || '',
+                            isBlocked: cell.isBlocked || false
+                        };
+                    }
+                }
+            }
+        }
+        
         const saveData = {
             currentLevel: this.currentLevel,
             score: this.score,
             clickCount: this.clickCount,
             gameStarted: this.gameStarted || false,
+            gridState: gridState,
+            words: this.words || [],
             timestamp: Date.now()
         };
         localStorage.setItem('christianCrosswordSave', JSON.stringify(saveData));
@@ -70,7 +95,10 @@ class ChristianCrosswordGame {
                 this.gameStarted = data.gameStarted || false;
                 
                 // Si le jeu était en cours, restaurer l'affichage
-                if (this.gameStarted) {
+                if (this.gameStarted && data.gridState && data.words) {
+                    // Restaurer les mots et la grille
+                    this.words = data.words;
+                    
                     setTimeout(() => {
                         // Masquer l'écran de démarrage et le bouton jouer
                         document.getElementById('startScreen').classList.add('hidden');
@@ -83,8 +111,37 @@ class ChristianCrosswordGame {
                         document.getElementById('score').textContent = this.score;
                         document.getElementById('currentLevel').textContent = this.currentLevel;
                         
-                        // Restaurer la grille
-                        this.setupLevel();
+                        // Recréer la grille
+                        this.createGrid();
+                        
+                        // Restaurer l'état des cellules
+                        for (let row = 0; row < this.gridSize; row++) {
+                            for (let col = 0; col < this.gridSize; col++) {
+                                const savedCell = data.gridState[row] && data.gridState[row][col];
+                                if (savedCell && this.grid[row] && this.grid[row][col]) {
+                                    this.grid[row][col].letter = savedCell.letter || '';
+                                    this.grid[row][col].userLetter = savedCell.userLetter || '';
+                                    this.grid[row][col].isBlocked = savedCell.isBlocked || false;
+                                    
+                                    // Mettre à jour l'affichage de la cellule
+                                    const cellElement = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                                    if (cellElement) {
+                                        if (savedCell.isBlocked) {
+                                            cellElement.classList.add('blocked');
+                                        }
+                                        if (savedCell.userLetter) {
+                                            cellElement.textContent = savedCell.userLetter;
+                                            if (savedCell.userLetter === savedCell.letter) {
+                                                cellElement.classList.add('correct');
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Afficher les indices
+                        this.displayClues();
                     }, 100);
                 }
             } catch (e) {
