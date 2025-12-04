@@ -830,6 +830,9 @@ class ChristianCrosswordGame {
         const levelData = gameDataManager.getLevelData(this.currentLevel);
 
         if (levelData) {
+            // Sauvegarder les mots du niveau pour pouvoir les restaurer
+            this.words = levelData.words;
+            
             this.placeWords(levelData.words);
             this.createGrid(levelData.words);
             this.displayClues(levelData.words);
