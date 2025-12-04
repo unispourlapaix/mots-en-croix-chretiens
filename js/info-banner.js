@@ -14,8 +14,9 @@ class InfoBannerManager {
             { icon: '►', text: 'RANK: CONSULTEZ LE CLASSEMENT', link: 'public/leaderboard.html' }
         ];
         
-        this.currentMessages = [];
+        this.currentMessageIndex = 0;
         this.updateInterval = null;
+        this.messageInterval = null;
         this.initialized = false;
     }
 
@@ -35,8 +36,13 @@ class InfoBannerManager {
             return;
         }
 
-        // Générer les messages défilants (dupliquer pour loop infini)
-        this.generateMessages();
+        // Afficher le premier message
+        this.showCurrentMessage();
+        
+        // Changer de message toutes les 5 secondes
+        this.messageInterval = setInterval(() => {
+            this.nextMessage();
+        }, 5000);
         
         // Mise à jour automatique des stats toutes les secondes
         this.updateInterval = setInterval(() => {
@@ -47,28 +53,36 @@ class InfoBannerManager {
         console.log('✅ Bandeau info initialisé');
     }
 
-    // Générer les messages HTML (dupliquer pour effet de boucle)
-    generateMessages() {
-        const messagesHTML = this.messages.map(msg => {
-            if (msg.link) {
-                return `
-                    <div class="info-message">
-                        <span class="info-message-icon">${msg.icon}</span>
-                        <a href="${msg.link}" target="_blank">${msg.text}</a>
-                    </div>
-                `;
-            } else {
-                return `
-                    <div class="info-message">
-                        <span class="info-message-icon">${msg.icon}</span>
-                        <span>${msg.text}</span>
-                    </div>
-                `;
-            }
-        }).join('');
+    // Afficher le message courant
+    showCurrentMessage() {
+        const msg = this.messages[this.currentMessageIndex];
+        if (msg.link) {
+            this.messagesContainer.innerHTML = `
+                <div class="info-message" style="position: static; opacity: 1; visibility: visible; animation: none;">
+                    <span class="info-message-icon">${msg.icon}</span>
+                    <a href="${msg.link}" target="_blank">${msg.text}</a>
+                </div>
+            `;
+        } else {
+            this.messagesContainer.innerHTML = `
+                <div class="info-message" style="position: static; opacity: 1; visibility: visible; animation: none;">
+                    <span class="info-message-icon">${msg.icon}</span>
+                    <span>${msg.text}</span>
+                </div>
+            `;
+        }
+    }
 
-        // Dupliquer pour créer un défilement infini
-        this.messagesContainer.innerHTML = messagesHTML + messagesHTML;
+    // Passer au message suivant
+    nextMessage() {
+        this.currentMessageIndex = (this.currentMessageIndex + 1) % this.messages.length;
+        this.showCurrentMessage();
+    }
+
+    // Générer les messages HTML (déprécié, utilise showCurrentMessage maintenant)
+    generateMessages() {
+        // Méthode gardée pour compatibilité, mais non utilisée
+        this.showCurrentMessage();
     }
 
     // Mettre à jour les stats (score, niveau, etc.)

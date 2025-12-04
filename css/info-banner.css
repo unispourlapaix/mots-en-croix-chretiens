@@ -73,9 +73,6 @@
 }
 
 .info-message {
-    position: absolute;
-    left: 0;
-    top: 0;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -85,48 +82,9 @@
     letter-spacing: 2px;
     color: #000000;
     white-space: nowrap;
-    opacity: 0;
-    visibility: hidden;
-    animation: led-flash 8s ease-in-out infinite;
 }
 
-/* Animation LED style aéroport - apparition/disparition */
-@keyframes led-flash {
-    0% {
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(5px);
-    }
-    2% {
-        visibility: visible;
-    }
-    5%, 85% {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
-    }
-    90% {
-        opacity: 0;
-        visibility: visible;
-        transform: translateY(-5px);
-    }
-    92%, 100% {
-        opacity: 0;
-        visibility: hidden;
-    }
-}
-
-/* Décalage pour chaque message - timing ajusté pour éviter superposition */
-.info-message:nth-child(1) { animation-delay: 0s; }
-.info-message:nth-child(2) { animation-delay: 8s; }
-.info-message:nth-child(3) { animation-delay: 16s; }
-.info-message:nth-child(4) { animation-delay: 24s; }
-.info-message:nth-child(5) { animation-delay: 32s; }
-.info-message:nth-child(6) { animation-delay: 40s; }
-.info-message:nth-child(7) { animation-delay: 48s; }
-.info-message:nth-child(8) { animation-delay: 56s; }
-.info-message:nth-child(9) { animation-delay: 64s; }
-.info-message:nth-child(10) { animation-delay: 72s; }
+/* Plus besoin d'animations CSS - géré par JavaScript */
 
 .info-message-icon {
     font-size: 1em;
@@ -226,37 +184,10 @@
         padding: 5px 6px;
         gap: 5px;
     }
-
-    .info-fixed {
-        grid-template-columns: 1fr 1fr;
-        gap: 3px;
-    }
-
-    .info-stat {
-        padding: 3px 5px;
-        font-size: 0.6em;
-        gap: 3px;
-        letter-spacing: 0.3px;
-    }
-
-    .info-stat-icon {
-        font-size: 0.85em;
-    }
-
-    .info-scrolling {
-        height: 16px;
-    }
-
     .info-message {
-        font-size: 0.55em;
-        gap: 3px;
-        letter-spacing: 0.8px;
+        font-size: 0.6em;
+        letter-spacing: 1px;
     }
-
-    .info-progress {
-        height: 2px;
-    }
-}
 
 /* Thème alternatif: Inversé */
 .info-banner.inverted {
