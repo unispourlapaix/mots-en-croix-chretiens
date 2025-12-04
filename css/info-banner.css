@@ -112,15 +112,21 @@
     }
 
     .info-fixed {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 4px;
+        display: flex;
+        justify-content: center;
+        gap: 8px;
         width: 100%;
     }
 
+    /* Masquer MaxScore et Clicks sur mobile */
+    .info-stat:nth-child(3),
+    .info-stat:nth-child(4) {
+        display: none;
+    }
+
     .info-stat {
-        padding: 4px 6px;
-        font-size: 0.65em;
+        padding: 4px 8px;
+        font-size: 0.7em;
         letter-spacing: 0.5px;
         justify-content: center;
         border-radius: 4px;
@@ -132,7 +138,7 @@
 
     .info-scrolling {
         width: 100%;
-        height: 18px;
+        height: 20px;
         margin-left: 0;
         padding-left: 0;
         padding-top: 0;
@@ -143,10 +149,9 @@
     }
 
     .info-message {
-        font-size: 0.6em;
+    .info-message {
+        font-size: 0.65em;
         letter-spacing: 1px;
-        left: 50%;
-        transform: translateX(-50%) translateY(5px);
     }
 
     @keyframes led-flash {
@@ -158,6 +163,21 @@
         2% {
             visibility: visible;
         }
+        5%, 85% {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+        90% {
+            opacity: 0;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-5px);
+        }
+        92%, 100% {
+            opacity: 0;
+            visibility: hidden;
+        }
+    }   }
         5%, 85% {
             opacity: 1;
             visibility: visible;
@@ -184,10 +204,36 @@
         padding: 5px 6px;
         gap: 5px;
     }
+
+    .info-fixed {
+        gap: 6px;
+    }
+
+    .info-stat {
+        padding: 3px 6px;
+        font-size: 0.65em;
+        gap: 3px;
+        letter-spacing: 0.3px;
+    }
+
+    .info-stat-icon {
+        font-size: 0.85em;
+    }
+
+    .info-scrolling {
+        height: 18px;
+    }
+
     .info-message {
         font-size: 0.6em;
-        letter-spacing: 1px;
+        gap: 3px;
+        letter-spacing: 0.8px;
     }
+
+    .info-progress {
+        height: 2px;
+    }
+}
 
 /* Thème alternatif: Inversé */
 .info-banner.inverted {
