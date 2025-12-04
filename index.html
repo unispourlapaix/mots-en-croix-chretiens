@@ -53,7 +53,7 @@
                 📱 Installer l'Application
             </button>
             <button id="menuButton" class="menu-button">
-                ☰ Info
+                ☰ Menu
             </button>
         </div>
 
@@ -217,6 +217,12 @@
                 <button class="menu-tab active" data-tab="settings">
                     ⚙️ Menu
                 </button>
+                <button class="menu-tab" data-tab="leaderboard" onclick="window.location.href='public/leaderboard.html'">
+                    🏆 Score
+                </button>
+                <button class="menu-tab" data-tab="connexion">
+                    👤 Connexion
+                </button>
                 <button class="menu-tab" data-tab="chat">
                     💬 Chat
                 </button>
@@ -236,14 +242,6 @@
                     </button>
                 </div>
                 <p class="menu-description">Gérez votre compte et vos informations</p>
-            </div>
-
-            <div class="menu-section">
-                <h3>☁️ Connexion Cloud</h3>
-                <button id="menuCloudBtn" class="menu-cloud-btn">
-                    ☁️ Connexion Cloud
-                </button>
-                <p class="menu-description">Sauvegardez vos scores automatiquement en ligne</p>
             </div>
 
             <div class="menu-section">
@@ -288,6 +286,77 @@
                         <p class="about-item">
                             <strong>💻 Codage:</strong> Développé avec Claude Code Pro
                         </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenu Onglet Score/Leaderboard -->
+            <div id="leaderboardTabContent" class="menu-tab-content">
+                <div class="leaderboard-header">
+                    <h3>🏆 Tableau des Scores</h3>
+                    <button id="refreshLeaderboardBtn" class="menu-cloud-btn" style="margin: 10px 0;">
+                        🔄 Actualiser
+                    </button>
+                </div>
+                <div id="leaderboardContainer" class="leaderboard-container">
+                    <p style="text-align: center; color: #666;">Chargement des scores...</p>
+                </div>
+                <div style="text-align: center; margin-top: 15px;">
+                    <button id="viewFullLeaderboardBtn" class="menu-cloud-btn secondary">
+                        📊 Voir le classement complet
+                    </button>
+                </div>
+            </div>
+
+            <!-- Contenu Onglet Connexion -->
+            <div id="connexionTabContent" class="menu-tab-content">
+                <div class="connexion-header" style="text-align: center; margin-bottom: 20px;">
+                    <h3>👤 Connexion / Inscription</h3>
+                    <p style="color: #666; font-size: 14px;">Sauvegardez vos scores en ligne</p>
+                </div>
+
+                <div id="connexionSection">
+                    <!-- Formulaire de connexion/inscription -->
+                    <div id="authForm" class="auth-form">
+                        <div class="menu-section">
+                            <input type="text" id="authUsername" placeholder="Nom d'utilisateur" class="kawaii-input" style="width: 100%; margin-bottom: 10px; padding: 12px; border: 2px solid #ff69b4; border-radius: 10px;">
+                            <input type="email" id="authEmail" placeholder="Email" class="kawaii-input" style="width: 100%; margin-bottom: 10px; padding: 12px; border: 2px solid #ff69b4; border-radius: 10px;">
+                            <input type="password" id="authPassword" placeholder="Mot de passe" class="kawaii-input" style="width: 100%; margin-bottom: 15px; padding: 12px; border: 2px solid #ff69b4; border-radius: 10px;">
+                            
+                            <button id="signInBtn" class="menu-cloud-btn" style="width: 100%; margin-bottom: 10px;">
+                                🔓 Se connecter
+                            </button>
+                            <button id="signUpBtn" class="menu-cloud-btn secondary" style="width: 100%; margin-bottom: 10px;">
+                                ✨ Créer un compte
+                            </button>
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #ffe0f0;">
+                            <p style="font-size: 12px; color: #999;">Vos données sont sécurisées ☁️</p>
+                        </div>
+                    </div>
+
+                    <!-- Section profil (visible quand connecté) -->
+                    <div id="profileInfo" class="profile-info" style="display: none;">
+                        <div class="menu-section" style="text-align: center;">
+                            <div style="margin-bottom: 15px;">
+                                <span style="font-size: 48px;">👤</span>
+                            </div>
+                            <p id="connectedUsername" style="font-size: 18px; font-weight: bold; color: #ff1493; margin-bottom: 5px;">Utilisateur</p>
+                            <p id="connectedEmail" style="font-size: 14px; color: #666; margin-bottom: 20px;">email@example.com</p>
+                            
+                            <div style="background: #fff5f9; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                                <p style="font-size: 14px; color: #666; margin-bottom: 5px;">Meilleur Score</p>
+                                <p id="userMaxScore" style="font-size: 32px; font-weight: bold; color: #ff1493;">0</p>
+                            </div>
+                            
+                            <button id="editProfileBtn" class="menu-cloud-btn" style="width: 100%; margin-bottom: 10px;">
+                                ✏️ Modifier le profil
+                            </button>
+                            <button id="signOutProfileBtn" class="menu-cloud-btn secondary" style="width: 100%;">
+                                🚪 Déconnexion
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

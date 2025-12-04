@@ -15,48 +15,58 @@ class SimpleChatSystem {
         if (this.isInitialized) return;
         this.isInitialized = true;
 
-        // Définir un nom d'utilisateur par défaut
-        this.currentUser = 'Joueur' + Math.floor(Math.random() * 1000);
+        // Récupérer le username depuis authSystem si disponible
+        this.updateUsername();
         
         // Afficher message de bienvenue clair
         setTimeout(() => {
             this.showMessage('💬 Chat actif ! Vous pouvez envoyer des messages', 'system');
         }, 500);
 
-        // Écouter les changements d'authentification (optionnel)
+        // Écouter les changements d'authentification
         if (typeof authSystem !== 'undefined') {
             authSystem.onAuthChange((user) => {
+                this.updateUsername();
                 if (user && user.username) {
-                    this.currentUser = user.username;
                     this.showMessage(`✅ Connecté en tant que ${user.username}`, 'system');
                     this.initP2P();
-                } else if (!this.currentUser) {
-                    this.currentUser = 'Joueur' + Math.floor(Math.random() * 1000);
                 }
             });
 
-            // Si déjà connecté, récupérer l'utilisateur
-            const user = authSystem.getCurrentUser();
-            if (user && user.username) {
-                this.currentUser = user.username;
+            // Si déjà connecté, afficher le message de bienvenue
+            if (this.currentUser && this.currentUser !== 'Joueur' + Math.floor(Math.random() * 1000)) {
                 setTimeout(() => {
-                    this.showMessage(`👋 Bonjour ${user.username} !`, 'system');
+                    this.showMessage(`👋 Bonjour ${this.currentUser} !`, 'system');
                 }, 800);
-                // P2P sera initialisé à la demande (pas au démarrage)
             }
         }
         
         // Ne pas initialiser P2P automatiquement - le faire à la demande
     }
 
+    // Mettre à jour le username depuis authSystem
+    updateUsername() {
+        if (typeof authSystem !== 'undefined' && authSystem.isAuthenticated()) {
+            const user = authSystem.getCurrentUser();
+            if (user && user.username) {
+                this.currentUser = user.username;
+                console.log('✅ Chat utilise le pseudo:', this.currentUser);
+                return;
+            }
+        }
+        
+        // Si pas connecté, générer un pseudo aléatoire
+        if (!this.currentUser) {
+            this.currentUser = 'Joueur' + Math.floor(Math.random() * 1000);
+        }
+    }
+
     // Initialiser PeerJS
     initP2P() {
         if (this.peer) return;
 
-        // S'assurer qu'on a un username
-        if (!this.currentUser) {
-            this.currentUser = 'Joueur' + Math.floor(Math.random() * 1000);
-        }
+        // Mettre à jour le username depuis authSystem
+        this.updateUsername();
 
         try {
             // Configuration PeerJS avec serveurs STUN pour meilleure connectivité
@@ -139,38 +149,81 @@ class SimpleChatSystem {
 
     // Rejoindre une room P2P
     async joinRoom(roomCode) {
+        if (!roomCode || roomCode.trim() === '') {
+            this.showMessage('❌ Code de partie invalide', 'system');
+            return false;
+        }
+
+        // Vérifier que ce n'est pas notre propre code
+        if (this.peer && this.peer.id === roomCode) {
+            this.showMessage('❌ Vous ne pouvez pas rejoindre votre propre partie', 'system');
+            return false;
+        }
+
         // Initialiser P2P si nécessaire
         if (!this.peer) {
             this.initP2P();
             // Attendre un peu l'initialisation
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 1500));
         }
 
         if (!this.peer) {
-            this.showMessage('Impossible d\'initialiser P2P', 'system');
+            this.showMessage('❌ Impossible d\'initialiser P2P', 'system');
             return false;
         }
 
         try {
-            const conn = this.peer.connect(roomCode);
+            this.showMessage('🔗 Tentative de connexion...', 'system');
+            
+            const conn = this.peer.connect(roomCode, {
+                reliable: true
+            });
+            
+            // Timeout de connexion
+            const timeout = setTimeout(() => {
+                if (!conn.open) {
+                    conn.close();
+                    this.showMessage('❌ Code de partie introuvable ou partie fermée', 'system');
+                }
+            }, 10000); // 10 secondes timeout
+
+            conn.on('open', () => {
+                clearTimeout(timeout);
+                console.log('✅ Connecté à:', conn.peer);
+                this.connections.set(conn.peer, conn);
+                this.roomCode = roomCode;
+                this.showMessage('✅ Connecté à la partie !', 'system');
+                
+                // Envoyer un message de bienvenue
+                conn.send({
+                    type: 'join',
+                    username: this.currentUser
+                });
+            });
+
+            conn.on('error', (err) => {
+                clearTimeout(timeout);
+                console.error('❌ Erreur connexion:', err);
+                this.showMessage('❌ Code de partie invalide ou connexion échouée', 'system');
+            });
+
             this.handleConnection(conn);
-            this.roomCode = roomCode;
-            this.showMessage('Connexion à la room...', 'system');
             return true;
         } catch (error) {
             console.error('❌ Erreur connexion:', error);
-            this.showMessage('Impossible de rejoindre la room', 'system');
+            this.showMessage('❌ Impossible de rejoindre cette partie', 'system');
             return false;
         }
     }
 
     // Gérer une nouvelle connexion
     handleConnection(conn) {
-        this.connections.set(conn.peer, conn);
-
+        // Ne pas ajouter immédiatement à la map, attendre que la connexion soit ouverte
+        
         conn.on('open', () => {
             console.log('✅ Connecté à:', conn.peer);
-            this.showMessage('Un joueur a rejoint', 'system');
+            this.connections.set(conn.peer, conn);
+            this.showMessage('✅ Un joueur a rejoint', 'system');
             
             // Envoyer un message de bienvenue
             conn.send({
@@ -185,12 +238,13 @@ class SimpleChatSystem {
 
         conn.on('close', () => {
             this.connections.delete(conn.peer);
-            this.showMessage('Un joueur est parti', 'system');
+            this.showMessage('👋 Un joueur est parti', 'system');
         });
 
         conn.on('error', (err) => {
             console.error('❌ Erreur connexion:', err);
             this.connections.delete(conn.peer);
+            this.showMessage('❌ Erreur de connexion avec un joueur', 'system');
         });
     }
 
@@ -246,15 +300,15 @@ class SimpleChatSystem {
         const avatar = this.getUserAvatar(username || this.currentUser);
 
         if (type === 'message' && username) {
-            messageDiv.innerHTML = `<span class="chat-avatar">${avatar}</span><span class="username">${username}:</span>${text}`;
+            messageDiv.innerHTML = `<span class="chat-avatar">${avatar}</span><span class="username">${username}:</span> ${text}`;
         } else if (type === 'own') {
-            messageDiv.innerHTML = `<span class="chat-avatar">${avatar}</span>${text}`;
+            messageDiv.innerHTML = `<span class="chat-avatar">${avatar}</span><span class="username">${this.currentUser}:</span> ${text}`;
         } else if (type === 'system') {
             messageDiv.textContent = `✨ ${text}`;
         } else if (type === 'ai') {
             messageDiv.textContent = text;
         } else {
-            messageDiv.innerHTML = `<span class="chat-avatar">${avatar}</span>${text}`;
+            messageDiv.innerHTML = `<span class="chat-avatar">${avatar}</span><span class="username">${username || 'Anonyme'}:</span> ${text}`;
         }
 
         messagesDiv.appendChild(messageDiv);
@@ -271,9 +325,8 @@ class SimpleChatSystem {
 
     // Envoyer un message à tous
     sendMessage(text) {
-        if (!this.currentUser) {
-            this.currentUser = 'Joueur' + Math.floor(Math.random() * 1000);
-        }
+        // Mettre à jour le username depuis authSystem
+        this.updateUsername();
 
         // Afficher le message localement
         this.showMessage(text, 'own', this.currentUser);

@@ -301,9 +301,6 @@ class ChristianCrosswordGame {
             menuOverlay.addEventListener('click', () => this.closeMenu());
         }
 
-        // Menu cloud button
-        document.getElementById('menuCloudBtn').addEventListener('click', () => this.handleMenuCloudButton());
-
         // Achievements modal
         document.getElementById('achievementsBtn').addEventListener('click', () => this.openAchievements());
         document.getElementById('closeAchievementsBtn').addEventListener('click', () => this.closeAchievements());
@@ -312,6 +309,44 @@ class ChristianCrosswordGame {
         const achievementsOverlay = document.querySelector('#achievementsModal .kawaii-modal-overlay');
         if (achievementsOverlay) {
             achievementsOverlay.addEventListener('click', () => this.closeAchievements());
+        }
+
+        // Boutons leaderboard tab
+        const refreshLeaderboardBtn = document.getElementById('refreshLeaderboardBtn');
+        if (refreshLeaderboardBtn) {
+            refreshLeaderboardBtn.addEventListener('click', () => {
+                if (typeof menuTabSystem !== 'undefined') {
+                    menuTabSystem.loadLeaderboard();
+                }
+            });
+        }
+
+        const viewFullLeaderboardBtn = document.getElementById('viewFullLeaderboardBtn');
+        if (viewFullLeaderboardBtn) {
+            viewFullLeaderboardBtn.addEventListener('click', () => {
+                window.open('public/leaderboard.html', '_blank');
+            });
+        }
+
+        // Boutons connexion tab
+        const signInBtn = document.getElementById('signInBtn');
+        if (signInBtn) {
+            signInBtn.addEventListener('click', () => this.handleSignIn());
+        }
+
+        const signUpBtn = document.getElementById('signUpBtn');
+        if (signUpBtn) {
+            signUpBtn.addEventListener('click', () => this.handleSignUp());
+        }
+
+        const signOutProfileBtn = document.getElementById('signOutProfileBtn');
+        if (signOutProfileBtn) {
+            signOutProfileBtn.addEventListener('click', () => this.handleSignOut());
+        }
+
+        const editProfileBtn = document.getElementById('editProfileBtn');
+        if (editProfileBtn) {
+            editProfileBtn.addEventListener('click', () => this.handleEditProfile());
         }
 
         // Filtres des achievements
@@ -1988,6 +2023,80 @@ class ChristianCrosswordGame {
             await this.showKawaiiModal('Code copié ! 📋', '✅');
         } catch (error) {
             await this.showKawaiiModal('Impossible de copier le code', '❌');
+        }
+    }
+
+    // Gestion de la connexion
+    async handleSignIn() {
+        const username = document.getElementById('authUsername').value.trim();
+        const email = document.getElementById('authEmail').value.trim();
+        const password = document.getElementById('authPassword').value.trim();
+
+        if (!email || !password) {
+            await this.showKawaiiModal('Veuillez remplir tous les champs', '⚠️');
+            return;
+        }
+
+        if (typeof authSystem !== 'undefined') {
+            const result = await authSystem.signIn(email, password);
+            if (result.success) {
+                await this.showKawaiiModal('Connexion réussie ! 🎉', '✅');
+                if (typeof menuTabSystem !== 'undefined') {
+                    menuTabSystem.updateConnexionTab();
+                }
+            } else {
+                await this.showKawaiiModal(result.message || 'Erreur de connexion', '❌');
+            }
+        }
+    }
+
+    async handleSignUp() {
+        const username = document.getElementById('authUsername').value.trim();
+        const email = document.getElementById('authEmail').value.trim();
+        const password = document.getElementById('authPassword').value.trim();
+
+        if (!username || !email || !password) {
+            await this.showKawaiiModal('Veuillez remplir tous les champs', '⚠️');
+            return;
+        }
+
+        if (typeof authSystem !== 'undefined') {
+            const result = await authSystem.signUp(email, password, username);
+            if (result.success) {
+                await this.showKawaiiModal('Compte créé ! 🎉 Vérifiez votre email.', '✅');
+                if (typeof menuTabSystem !== 'undefined') {
+                    menuTabSystem.updateConnexionTab();
+                }
+            } else {
+                await this.showKawaiiModal(result.message || 'Erreur lors de la création', '❌');
+            }
+        }
+    }
+
+    async handleSignOut() {
+        if (typeof authSystem !== 'undefined') {
+            const result = await authSystem.signOut();
+            if (result.success) {
+                await this.showKawaiiModal('Déconnexion réussie', '👋');
+                if (typeof menuTabSystem !== 'undefined') {
+                    menuTabSystem.updateConnexionTab();
+                }
+            }
+        }
+    }
+
+    async handleEditProfile() {
+        const newUsername = prompt('Nouveau pseudo:');
+        if (newUsername && newUsername.trim() && typeof authSystem !== 'undefined') {
+            const result = await authSystem.updateUsername(newUsername.trim());
+            if (result.success) {
+                await this.showKawaiiModal('Pseudo mis à jour ! ✨', '✅');
+                if (typeof menuTabSystem !== 'undefined') {
+                    menuTabSystem.updateConnexionTab();
+                }
+            } else {
+                await this.showKawaiiModal(result.message || 'Erreur lors de la modification', '❌');
+            }
         }
     }
 }

@@ -318,6 +318,25 @@ class AuthSystem {
             if (error) throw error;
 
             this.currentUser = null;
+            
+            // Réinitialiser l'UI
+            const profileUsername = document.getElementById('profileUsername');
+            const connectedUsername = document.getElementById('connectedUsername');
+            const chatUsername = document.getElementById('chatUsername');
+            
+            if (profileUsername) {
+                profileUsername.textContent = 'Non connecté';
+            }
+            
+            if (connectedUsername) {
+                connectedUsername.textContent = 'Utilisateur';
+            }
+            
+            if (chatUsername) {
+                chatUsername.textContent = 'Non connecté';
+                chatUsername.style.color = '#666';
+            }
+            
             console.log('✅ Déconnecté');
             return { success: true };
         } catch (err) {
@@ -495,6 +514,24 @@ class AuthSystem {
         
         // Masquer le modal d'auth
         this.hideAuthModal();
+        
+        // Mettre à jour les affichages du pseudo dans l'interface
+        const profileUsername = document.getElementById('profileUsername');
+        const connectedUsername = document.getElementById('connectedUsername');
+        const chatUsername = document.getElementById('chatUsername');
+        
+        if (profileUsername) {
+            profileUsername.textContent = this.currentUser.username || 'Utilisateur';
+        }
+        
+        if (connectedUsername) {
+            connectedUsername.textContent = this.currentUser.username || 'Utilisateur';
+        }
+        
+        if (chatUsername) {
+            chatUsername.textContent = `Connecté: ${this.currentUser.username || 'Utilisateur'}`;
+            chatUsername.style.color = '#4caf50';
+        }
         
         // Déclencher les callbacks pour mettre à jour l'UI
         this.onAuthChangeCallbacks.forEach(cb => cb(this.currentUser));
