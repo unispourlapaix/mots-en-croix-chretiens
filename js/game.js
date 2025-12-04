@@ -782,9 +782,7 @@ class ChristianCrosswordGame {
                 this.startGame();
             }, config.levelTransitionDelay);
         }
-
-        // Sauvegarder le progrès
-        this.saveGame();
+        // Note: pas de saveGame() ici, sera appelé automatiquement par startGame()
     }
 
     showEncouragingWord(index) {
