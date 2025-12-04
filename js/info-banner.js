@@ -159,11 +159,11 @@ class InfoBannerManager {
         if (!banner) return;
 
         // Supprimer les thèmes existants
-        banner.classList.remove('tech-scan');
+        banner.classList.remove('orange-led');
         
         // Appliquer le nouveau thème
-        if (theme === 'tech-scan') {
-            banner.classList.add('tech-scan');
+        if (theme === 'orange-led') {
+            banner.classList.add('orange-led');
         }
     }
 

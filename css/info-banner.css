@@ -1,19 +1,19 @@
-/* Bandeau Info - Style Futuriste Compact */
+/* Bandeau Info - Style Panneau LED Aéroport */
 .info-banner {
-    background: #ffffff;
-    color: #000000;
+    background: #000000;
+    color: #ffdd00;
     padding: 8px 15px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    box-shadow: inset 0 0 20px rgba(255, 221, 0, 0.1);
     position: relative;
     overflow: hidden;
     min-height: 45px;
     display: flex;
     align-items: center;
     gap: 15px;
-    border-bottom: 2px solid #000000;
+    border: 2px solid #333333;
     font-family: 'Courier New', 'Monaco', 'Consolas', monospace;
     font-weight: 700;
-    letter-spacing: 0.5px;
+    letter-spacing: 2px;
 }
 
 .info-banner-content {
@@ -21,7 +21,6 @@
     align-items: center;
     gap: 20px;
     width: 100%;
-    animation: none;
 }
 
 /* Scores et progression fixes (ne défilent pas) */
@@ -36,17 +35,16 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    background: #000000;
-    color: #ffffff;
+    background: #ffdd00;
+    color: #000000;
     padding: 4px 10px;
-    border-radius: 3px;
+    border-radius: 2px;
     font-weight: 900;
     font-size: 0.75em;
     white-space: nowrap;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    border: 1px solid #000000;
-    box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+    letter-spacing: 1.5px;
+    box-shadow: 0 0 10px rgba(255, 221, 0, 0.5);
 }
 
 .info-stat-icon {
@@ -59,57 +57,77 @@
     font-family: 'Courier New', monospace;
 }
 
-/* Messages défilants */
+/* Messages avec apparition/disparition (style aéroport) */
 .info-scrolling {
     flex: 1;
     overflow: hidden;
     position: relative;
     height: 25px;
     margin-left: auto;
-    border-left: 2px solid #000000;
+    border-left: 2px solid #333333;
     padding-left: 15px;
 }
 
 .info-messages {
     display: flex;
-    gap: 40px;
-    animation: scroll-left 30s linear infinite;
-    white-space: nowrap;
-}
-
-.info-messages.paused {
-    animation-play-state: paused;
+    position: relative;
+    height: 100%;
 }
 
 .info-message {
+    position: absolute;
+    left: 0;
+    top: 0;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     font-size: 0.75em;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: #000000;
+    letter-spacing: 2px;
+    color: #ffdd00;
+    white-space: nowrap;
+    opacity: 0;
+    animation: led-flash 8s ease-in-out infinite;
 }
+
+/* Animation LED style aéroport - apparition/disparition */
+@keyframes led-flash {
+    0%, 100% {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    5%, 85% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    90% {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+}
+
+/* Décalage pour chaque message */
+.info-message:nth-child(1) { animation-delay: 0s; }
+.info-message:nth-child(2) { animation-delay: 0.8s; }
+.info-message:nth-child(3) { animation-delay: 1.6s; }
+.info-message:nth-child(4) { animation-delay: 2.4s; }
+.info-message:nth-child(5) { animation-delay: 3.2s; }
+.info-message:nth-child(6) { animation-delay: 4s; }
+.info-message:nth-child(7) { animation-delay: 4.8s; }
+.info-message:nth-child(8) { animation-delay: 5.6s; }
+.info-message:nth-child(9) { animation-delay: 6.4s; }
+.info-message:nth-child(10) { animation-delay: 7.2s; }
 
 .info-message-icon {
     font-size: 1em;
     font-weight: 900;
-}
-
-@keyframes scroll-left {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(-50%);
-    }
+    color: #ff6600;
 }
 
 /* Pause au survol */
-.info-scrolling:hover .info-messages {
+.info-scrolling:hover .info-message {
     animation-play-state: paused;
-    color: #333333;
 }
 
 /* Variante: mode compact (mobile) */
@@ -131,24 +149,21 @@
     .info-stat {
         padding: 3px 8px;
         font-size: 0.7em;
-        letter-spacing: 0.5px;
+        letter-spacing: 1px;
     }
 
     .info-scrolling {
         width: 100%;
         height: 20px;
         border-left: none;
-        border-top: 1px solid #000000;
+        border-top: 1px solid #333333;
         padding-left: 0;
         padding-top: 8px;
     }
 
-    .info-messages {
-        animation-duration: 20s;
-    }
-
     .info-message {
         font-size: 0.7em;
+        letter-spacing: 1.5px;
     }
 }
 
@@ -161,6 +176,7 @@
         padding: 2px 6px;
         font-size: 0.65em;
         gap: 4px;
+        letter-spacing: 0.8px;
     }
 
     .info-stat-icon {
@@ -170,66 +186,52 @@
     .info-message {
         font-size: 0.65em;
         gap: 4px;
+        letter-spacing: 1px;
     }
 }
 
-/* Thème alternatif: mode tech scan */
-.info-banner.tech-scan {
-    background: #000000;
-    color: #00ff00;
-    border-bottom: 2px solid #00ff00;
-    animation: tech-scan 3s linear infinite;
+/* Thème alternatif: Orange LED */
+.info-banner.orange-led {
+    background: #1a1a1a;
+    color: #ff6600;
+    border-color: #2a2a2a;
 }
 
-.info-banner.tech-scan .info-stat {
-    background: #00ff00;
+.info-banner.orange-led .info-stat {
+    background: #ff6600;
     color: #000000;
-    border: 1px solid #00ff00;
+    box-shadow: 0 0 10px rgba(255, 102, 0, 0.5);
 }
 
-.info-banner.tech-scan .info-message {
-    color: #00ff00;
+.info-banner.orange-led .info-message {
+    color: #ff6600;
 }
 
-@keyframes tech-scan {
-    0%, 100% { 
-        box-shadow: 0 2px 8px rgba(0, 255, 0, 0.3);
-    }
-    50% { 
-        box-shadow: 0 2px 15px rgba(0, 255, 0, 0.6);
-    }
+.info-banner.orange-led .info-message-icon {
+    color: #ffdd00;
 }
 
-/* Notifications importantes (effet tech) */
+/* Notifications importantes (LED clignotant) */
 .info-message.important {
-    animation: tech-blink 1.5s ease-in-out infinite;
+    animation: led-blink 1s ease-in-out infinite;
     font-weight: 900;
-    background: #000000;
-    color: #00ff00;
-    padding: 2px 8px;
-    border: 1px solid #00ff00;
+    color: #ff0000;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
 }
 
-@keyframes tech-blink {
+@keyframes led-blink {
     0%, 100% {
         opacity: 1;
-        box-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+        text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
     }
     50% {
-        opacity: 0.7;
-        box-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+        opacity: 0.3;
+        text-shadow: 0 0 5px rgba(255, 0, 0, 0.4);
     }
 }
 
-/* Séparateur entre messages - style tech */
+/* Pas de séparateur entre messages (ils apparaissent un par un) */
 .info-message::after {
-    content: "//";
-    margin-left: 20px;
-    opacity: 0.4;
-    font-weight: 900;
-}
-
-.info-message:last-child::after {
     display: none;
 }info-message a:hover {
     background: #000000;
