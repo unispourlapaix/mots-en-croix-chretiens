@@ -7,8 +7,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Afficher les boutons quand une room est rejointe
     function updateRaceButtonsVisibility() {
         if (window.simpleChatSystem && window.simpleChatSystem.isInRoom()) {
-            if (startRaceBtn) startRaceBtn.style.display = 'inline-block';
+            // Si une course est en cours, afficher le bouton stop
+            if (window.multiplayerRace && window.multiplayerRace.isRaceMode) {
+                if (startRaceBtn) startRaceBtn.style.display = 'none';
+                if (stopRaceBtn) stopRaceBtn.style.display = 'block';
+            } else {
+                // Sinon, afficher le bouton start
+                if (startRaceBtn) startRaceBtn.style.display = 'block';
+                if (stopRaceBtn) stopRaceBtn.style.display = 'none';
+            }
         } else {
+            // Pas dans une room, cacher tous les boutons
             if (startRaceBtn) startRaceBtn.style.display = 'none';
             if (stopRaceBtn) stopRaceBtn.style.display = 'none';
         }
@@ -50,9 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             window.multiplayerRace.startRace();
             
-            // Basculer les boutons
+            // Basculer les boutons - IMPORTANT: masquer immédiatement
             startRaceBtn.style.display = 'none';
-            if (stopRaceBtn) stopRaceBtn.style.display = 'inline-block';
+            if (stopRaceBtn) stopRaceBtn.style.display = 'block';
+            
+            console.log('🏁 Course démarrée - bouton start caché, bouton stop affiché');
         });
     }
 
@@ -71,8 +82,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Écouter la fin de course pour réafficher le bouton démarrer
     window.addEventListener('raceEnded', () => {
-        if (startRaceBtn) startRaceBtn.style.display = 'inline-block';
+        if (startRaceBtn) startRaceBtn.style.display = 'block';
         if (stopRaceBtn) stopRaceBtn.style.display = 'none';
+        console.log('🏁 Course terminée - bouton start réaffiché');
     });
 
     // Commande rapide pour démarrer une course via le chat

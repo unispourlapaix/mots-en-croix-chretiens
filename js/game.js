@@ -141,8 +141,10 @@ class ChristianCrosswordGame {
                         document.getElementById('gameScreen').classList.remove('hidden');
                         
                         // Mettre à jour l'UI
-                        document.getElementById('score').textContent = this.score;
-                        document.getElementById('currentLevel').textContent = this.currentLevel;
+                        const scoreEl = document.getElementById('infoBannerScore');
+                        const levelEl = document.getElementById('infoBannerLevel');
+                        if (scoreEl) scoreEl.textContent = this.score;
+                        if (levelEl) levelEl.textContent = this.currentLevel;
                         
                         // Recharger le niveau complètement
                         this.setupLevel();
@@ -669,8 +671,8 @@ class ChristianCrosswordGame {
         // Les flèches sont maintenant géométriques, pas besoin de mettre à jour le texte
 
         // Mettre à jour les labels (maintenant dans le header du chat)
-        const levelSpan = document.getElementById('currentLevel');
-        const scoreSpan = document.getElementById('score');
+        const levelSpan = document.getElementById('infoBannerLevel');
+        const scoreSpan = document.getElementById('infoBannerScore');
         
         if (levelSpan) {
             levelSpan.textContent = this.currentLevel;
@@ -899,7 +901,7 @@ class ChristianCrosswordGame {
             this.placeWords(levelData.words);
             this.createGrid(levelData.words);
             this.displayClues(levelData.words);
-            const currentLevelEl = document.getElementById('currentLevel');
+            const currentLevelEl = document.getElementById('infoBannerLevel');
             if (currentLevelEl) currentLevelEl.textContent = this.currentLevel;
         }
     }
@@ -1291,7 +1293,7 @@ class ChristianCrosswordGame {
         
         const totalPoints = letterPoints + wordBonusPoints;
         this.score += totalPoints;
-        const scoreEl = document.getElementById('score');
+        const scoreEl = document.getElementById('infoBannerScore');
         if (scoreEl) scoreEl.textContent = this.score;
 
         // Notifier dans le chat
@@ -1371,7 +1373,7 @@ class ChristianCrosswordGame {
                 // Ajouter les points bonus
                 const wordBonus = 50;
                 this.score += wordBonus;
-                const scoreEl = document.getElementById('score');
+                const scoreEl = document.getElementById('infoBannerScore');
                 if (scoreEl) scoreEl.textContent = this.score;
 
                 // Notifier dans le chat
@@ -1431,7 +1433,7 @@ class ChristianCrosswordGame {
             // Ajouter les points du niveau
             const bonusPoints = Math.round(100 * this.currentLevel * config.basePointsMultiplier);
             this.score += bonusPoints;
-            const scoreEl = document.getElementById('score');
+            const scoreEl = document.getElementById('infoBannerScore');
             if (scoreEl) scoreEl.textContent = this.score;
 
             // Notifier dans le chat
@@ -1645,7 +1647,8 @@ class ChristianCrosswordGame {
             cell.classList.add('correct');
             this.grid[row][col] = this.solution[row][col];
             this.score -= config.hintPenalty;
-            document.getElementById('score').textContent = Math.max(0, this.score);
+            const scoreEl = document.getElementById('infoBannerScore');
+            if (scoreEl) scoreEl.textContent = Math.max(0, this.score);
 
             // Tracker l'utilisation d'un indice pour les achievements
             this.hintsUsedThisLevel++;
@@ -1703,7 +1706,8 @@ class ChristianCrosswordGame {
         this.score = 0;
         this.clickCount = 0;
         this.gameStarted = false;
-        document.getElementById('score').textContent = '0';
+        const scoreEl = document.getElementById('infoBannerScore');
+        if (scoreEl) scoreEl.textContent = '0';
         document.getElementById('clickCount').textContent = '0';
         document.getElementById('encouragingWords').innerHTML = '';
         document.getElementById('startScreen').classList.remove('hidden');
