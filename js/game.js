@@ -123,8 +123,8 @@ class ChristianCrosswordGame {
                         document.getElementById('score').textContent = this.score;
                         document.getElementById('currentLevel').textContent = this.currentLevel;
                         
-                        // Recréer la grille avec les mots restaurés
-                        this.createGrid(this.words);
+                        // Recréer la grille (this.words déjà restauré)
+                        this.createGrid();
                         
                         // Restaurer l'état des cellules
                         for (let row = 0; row < this.gridSize; row++) {
@@ -858,9 +858,14 @@ class ChristianCrosswordGame {
         }
     }
 
-    createGrid(words) {
+    createGrid(words = this.words) {
         const gridContainer = document.getElementById('crosswordGrid');
         gridContainer.innerHTML = '';
+
+        if (!words || words.length === 0) {
+            console.warn('⚠️ Aucun mot à afficher dans la grille');
+            return;
+        }
 
         // Ajouter des traits décoratifs animés roses
         const lineTop = document.createElement('div');
@@ -1116,7 +1121,7 @@ class ChristianCrosswordGame {
         }
     }
 
-    displayClues(words) {
+    displayClues(words = this.words) {
         const horizontalClues = document.getElementById('horizontalClues');
         const verticalClues = document.getElementById('verticalClues');
 
@@ -1124,6 +1129,11 @@ class ChristianCrosswordGame {
 
         horizontalClues.innerHTML = '';
         verticalClues.innerHTML = '';
+
+        if (!words || words.length === 0) {
+            console.warn('⚠️ Aucun mot à afficher dans les indices');
+            return;
+        }
 
         words.forEach((wordData, index) => {
             const clueElement = document.createElement('div');
