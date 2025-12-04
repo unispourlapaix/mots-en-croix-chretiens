@@ -2,16 +2,16 @@
 class InfoBannerManager {
     constructor() {
         this.messages = [
-            { icon: '🎨', text: 'Créé avec ❤️ par Emmanuel Payet', link: 'https://emmanuel.gallery/' },
-            { icon: '📚', text: 'Découvrez mes ebooks chrétiens sur Google Play', link: 'https://play.google.com/store/search?q=Ebooks%20Emmanuel%20Payet%20Dreamer&c=books' },
-            { icon: '🎵', text: 'Écoutez mon gospel gratuit sur AudioMack', link: 'https://audiomack.com/emmanuelpayet888/album/amour-amour' },
-            { icon: '🚢', text: 'Jouez au Petit Bateau Rouge', link: 'https://unispourlapaix.github.io/petitbateau/petitbateauRouge.html' },
-            { icon: '💝', text: 'UnityQuest: Chronicles of Love', link: 'https://unispourlapaix.github.io/unityquest-chronicles-of-love/' },
-            { icon: '✝️', text: 'La foi unit les cœurs au-delà des différences' },
-            { icon: '🕊️', text: 'Paix, Amour, Unité - Ne participez pas aux œuvres du mal' },
-            { icon: '📖', text: 'Chaque mot est une bénédiction pour l\'âme' },
-            { icon: '🌟', text: 'Que la grâce de Dieu illumine votre chemin' },
-            { icon: '🏆', text: 'Consultez le classement des meilleurs joueurs', link: 'public/leaderboard.html' }
+            { icon: '►', text: 'CONNEXION: EMMANUEL PAYET', link: 'https://emmanuel.gallery/' },
+            { icon: '►', text: 'EBOOKS: GOOGLE PLAY STORE', link: 'https://play.google.com/store/search?q=Ebooks%20Emmanuel%20Payet%20Dreamer&c=books' },
+            { icon: '►', text: 'AUDIO: GOSPEL FREE AUDIOMACK', link: 'https://audiomack.com/emmanuelpayet888/album/amour-amour' },
+            { icon: '►', text: 'GAME: LE PETIT BATEAU ROUGE', link: 'https://unispourlapaix.github.io/petitbateau/petitbateauRouge.html' },
+            { icon: '►', text: 'ADVENTURE: UNITYQUEST CHRONICLES', link: 'https://unispourlapaix.github.io/unityquest-chronicles-of-love/' },
+            { icon: '►', text: 'INFO: JEU DE MOTS CROISES CHRETIENS' },
+            { icon: '►', text: 'STATUS: PARTIE EN COURS' },
+            { icon: '►', text: 'TECH: HTML5 + CSS3 + JAVASCRIPT' },
+            { icon: '►', text: 'ENGINE: SUPABASE DATABASE CLOUD' },
+            { icon: '►', text: 'RANK: CONSULTEZ LE CLASSEMENT', link: 'public/leaderboard.html' }
         ];
         
         this.currentMessages = [];
@@ -159,11 +159,11 @@ class InfoBannerManager {
         if (!banner) return;
 
         // Supprimer les thèmes existants
-        banner.classList.remove('rainbow');
+        banner.classList.remove('tech-scan');
         
         // Appliquer le nouveau thème
-        if (theme === 'rainbow') {
-            banner.classList.add('rainbow');
+        if (theme === 'tech-scan') {
+            banner.classList.add('tech-scan');
         }
     }
 
