@@ -24,6 +24,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
     
     <!-- CSS -->
+    <link rel="stylesheet" href="css/info-banner.css">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -48,16 +49,49 @@
         <div class="header">
             <h1>🙏 Mots En Croix Chrétiens 🙏</h1>
             <p>Trouve les mots d'encouragement et les mots bibliques</p>
-            <div class="level-score-display">
-                <span class="level-badge">Niveau: <span id="currentLevel">1</span>/77</span>
-                <span class="score-badge">⭐ <span id="score">0</span></span>
-            </div>
             <button id="installButton" class="install-button hidden">
                 📱 Installer l'Application
             </button>
             <button id="menuButton" class="menu-button">
-                ☰ Menu
+                ☰ Info
             </button>
+        </div>
+
+        <!-- Bandeau Info défilant -->
+        <div class="info-banner" id="infoBanner">
+            <div class="info-banner-content">
+                <!-- Stats fixes (ne défilent pas) -->
+                <div class="info-fixed">
+                    <div class="info-stat">
+                        <span class="info-stat-icon">📊</span>
+                        <span>Niveau <span class="info-stat-value" id="infoBannerLevel">1</span>/77</span>
+                    </div>
+                    <div class="info-stat">
+                        <span class="info-stat-icon">⭐</span>
+                        <span class="info-stat-value" id="infoBannerScore">0</span>
+                    </div>
+                    <div class="info-stat">
+                        <span class="info-stat-icon">🏆</span>
+                        <span>Max: <span class="info-stat-value" id="infoBannerMaxScore">0</span></span>
+                    </div>
+                    <div class="info-stat">
+                        <span class="info-stat-icon">🖱️</span>
+                        <span class="info-stat-value" id="infoBannerClicks">0</span>/7
+                    </div>
+                </div>
+
+                <!-- Messages défilants -->
+                <div class="info-scrolling">
+                    <div class="info-messages" id="infoMessages">
+                        <!-- Messages générés dynamiquement -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Barre de progression (optionnelle) -->
+            <div class="info-progress">
+                <div class="info-progress-bar" id="infoProgressBar" style="width: 0%"></div>
+            </div>
         </div>
 
         <!-- Interface Chat simplifiée -->
@@ -461,6 +495,7 @@
     <script src="js/race-ui.js"></script>
     <script src="js/menu-tabs.js"></script>
     <script src="js/chat.js"></script>
+    <script src="js/info-banner.js"></script>
     <script src="js/multiplayer.js"></script>
     <script src="js/game.js"></script>
 
