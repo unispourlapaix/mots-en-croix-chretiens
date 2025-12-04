@@ -88,6 +88,7 @@ class ChristianCrosswordGame {
             solution: this.solution, // Bonnes réponses
             blocked: this.blocked, // Cellules bloquées
             words: this.words || [],
+            completedWords: Array.from(this.completedWords || []), // Mots déjà complétés (Set -> Array)
             timestamp: Date.now()
         };
         localStorage.setItem('christianCrosswordSave', JSON.stringify(saveData));
@@ -125,6 +126,8 @@ class ChristianCrosswordGame {
                     this.grid = data.grid;
                     this.solution = data.solution;
                     this.blocked = data.blocked;
+                    // Restaurer les mots complétés pour éviter de recompter les points
+                    this.completedWords = new Set(data.completedWords || []);
                     
                     setTimeout(() => {
                         try {
