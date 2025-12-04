@@ -678,6 +678,11 @@ class ChristianCrosswordGame {
         if (scoreSpan) {
             scoreSpan.textContent = this.score;
         }
+        
+        // Mettre à jour le bandeau info
+        if (typeof infoBannerManager !== 'undefined' && infoBannerManager.initialized) {
+            infoBannerManager.updateStats(this);
+        }
 
         // Mettre à jour les boutons de l'en-tête
         const installBtn = document.getElementById('installButton');
