@@ -1,16 +1,16 @@
 /* Bandeau Info - Style Panneau LED Aéroport */
 .info-banner {
-    background: #000000;
-    color: #ffdd00;
+    background: #ffffff;
+    color: #000000;
     padding: 8px 15px;
-    box-shadow: inset 0 0 20px rgba(255, 221, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     position: relative;
     overflow: hidden;
     min-height: 45px;
     display: flex;
     align-items: center;
     gap: 15px;
-    border: 2px solid #333333;
+    border: 2px solid #000000;
     font-family: 'Courier New', 'Monaco', 'Consolas', monospace;
     font-weight: 700;
     letter-spacing: 2px;
@@ -35,8 +35,8 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    background: #ffdd00;
-    color: #000000;
+    background: #000000;
+    color: #ffffff;
     padding: 4px 10px;
     border-radius: 2px;
     font-weight: 900;
@@ -44,7 +44,7 @@
     white-space: nowrap;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    box-shadow: 0 0 10px rgba(255, 221, 0, 0.5);
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
 }
 
 .info-stat-icon {
@@ -64,7 +64,7 @@
     position: relative;
     height: 25px;
     margin-left: auto;
-    border-left: 2px solid #333333;
+    border-left: 2px solid #000000;
     padding-left: 15px;
 }
 
@@ -82,10 +82,10 @@
     align-items: center;
     gap: 8px;
     font-size: 0.75em;
-    font-weight: 700;
+    font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 2px;
-    color: #ffdd00;
+    color: #000000;
     white-space: nowrap;
     opacity: 0;
     animation: led-flash 8s ease-in-out infinite;
@@ -122,7 +122,7 @@
 .info-message-icon {
     font-size: 1em;
     font-weight: 900;
-    color: #ff6600;
+    color: #000000;
 }
 
 /* Pause au survol */
@@ -190,43 +190,42 @@
     }
 }
 
-/* Thème alternatif: Orange LED */
-.info-banner.orange-led {
-    background: #1a1a1a;
-    color: #ff6600;
-    border-color: #2a2a2a;
+/* Thème alternatif: Inversé */
+.info-banner.inverted {
+    background: #000000;
+    color: #ffffff;
+    border-color: #ffffff;
 }
 
-.info-banner.orange-led .info-stat {
-    background: #ff6600;
+.info-banner.inverted .info-stat {
+    background: #ffffff;
     color: #000000;
-    box-shadow: 0 0 10px rgba(255, 102, 0, 0.5);
+    box-shadow: 2px 2px 0 rgba(255, 255, 255, 0.2);
 }
 
-.info-banner.orange-led .info-message {
-    color: #ff6600;
+.info-banner.inverted .info-message {
+    color: #ffffff;
 }
 
-.info-banner.orange-led .info-message-icon {
-    color: #ffdd00;
+.info-banner.inverted .info-message-icon {
+    color: #ffffff;
 }
 
 /* Notifications importantes (LED clignotant) */
 .info-message.important {
     animation: led-blink 1s ease-in-out infinite;
     font-weight: 900;
-    color: #ff0000;
-    text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+    color: #000000;
+    background: #ffeb3b;
+    padding: 2px 8px;
 }
 
 @keyframes led-blink {
     0%, 100% {
         opacity: 1;
-        text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
     }
     50% {
-        opacity: 0.3;
-        text-shadow: 0 0 5px rgba(255, 0, 0, 0.4);
+        opacity: 0.5;
     }
 }
 
