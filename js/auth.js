@@ -24,34 +24,7 @@ class AuthSystem {
 
         console.log('✅ Auth System: Supabase détecté, initialisation...');
 
-        // Écouter les changements d'auth
-        supabase.auth.onAuthStateChange(async (event, session) => {
-            console.log('🔐 Auth event:', event, session ? 'Session active' : 'Pas de session');
-
-            if (session && session.user) {
-                // Utilisateur connecté
-                await this.loadUserProfile(session.user);
-
-                // Fermer le modal d'auth
-                this.hideAuthModal();
-
-                // Ouvrir automatiquement le chat après authentification
-                if (event === 'SIGNED_IN' && typeof chatSystem !== 'undefined') {
-                    setTimeout(() => {
-                        chatSystem.open();
-                    }, 500);
-                }
-            } else {
-                // Utilisateur déconnecté
-                this.currentUser = null;
-                console.log('ℹ️ Utilisateur déconnecté ou pas de session');
-            }
-
-            // Appeler les callbacks
-            this.onAuthChangeCallbacks.forEach(cb => cb(this.currentUser));
-        });
-
-        // Vérifier la session actuelle au démarrage
+        // Vérifier D'ABORD la session actuelle au démarrage
         try {
             const { data: { session }, error } = await supabase.auth.getSession();
             
@@ -66,6 +39,33 @@ class AuthSystem {
         } catch (err) {
             console.error('❌ Erreur vérification session:', err);
         }
+
+        // PUIS écouter les changements d'auth
+        supabase.auth.onAuthStateChange(async (event, session) => {
+            console.log('🔐 Auth event:', event, session ? 'Session active' : 'Pas de session');
+
+            if (session && session.user) {
+                // Utilisateur connecté
+                await this.loadUserProfile(session.user);
+
+                // Fermer le modal d'auth
+                this.hideAuthModal();
+
+                // Ouvrir automatiquement le chat après authentification (sauf au démarrage)
+                if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && typeof chatSystem !== 'undefined') {
+                    setTimeout(() => {
+                        chatSystem.open();
+                    }, 500);
+                }
+            } else {
+                // Utilisateur déconnecté
+                this.currentUser = null;
+                console.log('ℹ️ Utilisateur déconnecté ou pas de session');
+            }
+
+            // Appeler les callbacks
+            this.onAuthChangeCallbacks.forEach(cb => cb(this.currentUser));
+        });
 
         this.initUI();
     }

@@ -86,9 +86,19 @@ class ChristianCrosswordGame {
 
     loadGame() {
         const savedData = localStorage.getItem('christianCrosswordSave');
+        console.log('📂 Chargement sauvegarde:', savedData ? 'Données trouvées' : 'Aucune donnée');
+        
         if (savedData) {
             try {
                 const data = JSON.parse(savedData);
+                console.log('📊 Données sauvegardées:', {
+                    level: data.currentLevel,
+                    score: data.score,
+                    gameStarted: data.gameStarted,
+                    hasGridState: !!data.gridState,
+                    hasWords: !!data.words
+                });
+                
                 this.currentLevel = data.currentLevel || 1;
                 this.score = data.score || 0;
                 this.clickCount = data.clickCount || 0;
@@ -96,6 +106,7 @@ class ChristianCrosswordGame {
                 
                 // Si le jeu était en cours, restaurer l'affichage
                 if (this.gameStarted && data.gridState && data.words) {
+                    console.log('✅ Restauration partie en cours...');
                     // Restaurer les mots et la grille
                     this.words = data.words;
                     
