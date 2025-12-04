@@ -163,7 +163,13 @@ class ChristianCrosswordGame {
     }
 
     clearSave() {
+        // Réinitialiser l'état AVANT d'effacer pour éviter re-sauvegarde
+        this.gameStarted = false;
+        this.completedWords = new Set();
+        
+        // Effacer localStorage
         localStorage.removeItem('christianCrosswordSave');
+        
         // Marquer qu'on a effacé pour éviter que le cloud recharge
         this.saveCleared = true;
         console.log('🗑️ Sauvegarde locale effacée');
