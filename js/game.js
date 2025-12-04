@@ -8,6 +8,7 @@ class ChristianCrosswordGame {
         this.grid = Array(config.gridSize).fill().map(() => Array(config.gridSize).fill(''));
         this.solution = Array(config.gridSize).fill().map(() => Array(config.gridSize).fill(''));
         this.blocked = Array(config.gridSize).fill().map(() => Array(config.gridSize).fill(false));
+        this.words = []; // Initialiser le tableau de mots
 
         // Tracking des performances pour achievements
         this.hintsUsedThisLevel = 0;
@@ -122,8 +123,8 @@ class ChristianCrosswordGame {
                         document.getElementById('score').textContent = this.score;
                         document.getElementById('currentLevel').textContent = this.currentLevel;
                         
-                        // Recréer la grille
-                        this.createGrid();
+                        // Recréer la grille avec les mots restaurés
+                        this.createGrid(this.words);
                         
                         // Restaurer l'état des cellules
                         for (let row = 0; row < this.gridSize; row++) {
