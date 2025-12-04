@@ -1,9 +1,9 @@
 /* Bandeau Info - Style Panneau LED Aéroport */
 .info-banner {
-    background: #ffffff;
+    background: transparent;
     color: #000000;
     padding: 8px 15px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: none;
     position: relative;
     overflow: hidden;
     min-height: 45px;
@@ -34,8 +34,8 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    background: #000000;
-    color: #ffffff;
+    background: transparent;
+    color: #000000;
     padding: 4px 10px;
     border-radius: 2px;
     font-weight: 900;
@@ -43,7 +43,7 @@
     white-space: nowrap;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
+    box-shadow: none;
 }
 
 .info-stat-icon {
@@ -116,17 +116,17 @@
     }
 }
 
-/* Décalage pour chaque message */
+/* Décalage pour chaque message - timing ajusté pour éviter superposition */
 .info-message:nth-child(1) { animation-delay: 0s; }
-.info-message:nth-child(2) { animation-delay: 0.8s; }
-.info-message:nth-child(3) { animation-delay: 1.6s; }
-.info-message:nth-child(4) { animation-delay: 2.4s; }
-.info-message:nth-child(5) { animation-delay: 3.2s; }
-.info-message:nth-child(6) { animation-delay: 4s; }
-.info-message:nth-child(7) { animation-delay: 4.8s; }
-.info-message:nth-child(8) { animation-delay: 5.6s; }
-.info-message:nth-child(9) { animation-delay: 6.4s; }
-.info-message:nth-child(10) { animation-delay: 7.2s; }
+.info-message:nth-child(2) { animation-delay: 8s; }
+.info-message:nth-child(3) { animation-delay: 16s; }
+.info-message:nth-child(4) { animation-delay: 24s; }
+.info-message:nth-child(5) { animation-delay: 32s; }
+.info-message:nth-child(6) { animation-delay: 40s; }
+.info-message:nth-child(7) { animation-delay: 48s; }
+.info-message:nth-child(8) { animation-delay: 56s; }
+.info-message:nth-child(9) { animation-delay: 64s; }
+.info-message:nth-child(10) { animation-delay: 72s; }
 
 .info-message-icon {
     font-size: 1em;
@@ -323,22 +323,22 @@
     left: 0;
     width: 100%;
     height: 2px;
-    background: #e0e0e0;
+    background: transparent;
 }
 
 .info-progress-bar {
     height: 100%;
     background: #000000;
     transition: width 0.3s ease;
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+    box-shadow: none;
 }
 
 /* Notifications importantes (fond jaune clignotant) */
 .info-message.important {
     animation: led-blink 1s ease-in-out infinite;
     font-weight: 900;
-    color: #000000;
-    background: #ffeb3b;
+    color: #ff9800;
+    background: transparent;
     padding: 2px 8px;
 }
 
