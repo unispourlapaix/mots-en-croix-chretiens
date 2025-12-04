@@ -17,6 +17,8 @@ class InfoBannerManager {
         this.currentMessageIndex = 0;
         this.updateInterval = null;
         this.messageInterval = null;
+        this.mobileToggleInterval = null;
+        this.showingStats = true; // Pour mobile: true = stats, false = messages
         this.initialized = false;
     }
 
@@ -24,6 +26,7 @@ class InfoBannerManager {
     init() {
         if (this.initialized) return;
         
+        this.banner = document.getElementById('infoBanner');
         this.messagesContainer = document.getElementById('infoMessages');
         this.levelEl = document.getElementById('infoBannerLevel');
         this.scoreEl = document.getElementById('infoBannerScore');
@@ -31,7 +34,7 @@ class InfoBannerManager {
         this.clicksEl = document.getElementById('infoBannerClicks');
         this.progressBar = document.getElementById('infoProgressBar');
 
-        if (!this.messagesContainer) {
+        if (!this.messagesContainer || !this.banner) {
             console.warn('⚠️ Bandeau info non trouvé');
             return;
         }
@@ -44,6 +47,26 @@ class InfoBannerManager {
             this.nextMessage();
         }, 5000);
         
+        // Mobile: alterner stats/messages toutes les 5 secondes
+        if (window.innerWidth <= 768) {
+            this.mobileToggleInterval = setInterval(() => {
+                this.toggleMobileView();
+            }, 5000);
+        }
+
+        // Gérer le redimensionnement
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 768 && !this.mobileToggleInterval) {
+                this.mobileToggleInterval = setInterval(() => {
+                    this.toggleMobileView();
+                }, 5000);
+            } else if (window.innerWidth > 768 && this.mobileToggleInterval) {
+                clearInterval(this.mobileToggleInterval);
+                this.mobileToggleInterval = null;
+                this.banner.classList.remove('mobile-show-messages');
+            }
+        });
+        
         // Mise à jour automatique des stats toutes les secondes
         this.updateInterval = setInterval(() => {
             this.updateStats();
@@ -51,6 +74,16 @@ class InfoBannerManager {
 
         this.initialized = true;
         console.log('✅ Bandeau info initialisé');
+    }
+
+    // Alterner affichage mobile entre stats et messages
+    toggleMobileView() {
+        this.showingStats = !this.showingStats;
+        if (this.showingStats) {
+            this.banner.classList.remove('mobile-show-messages');
+        } else {
+            this.banner.classList.add('mobile-show-messages');
+        }
     }
 
     // Afficher le message courant

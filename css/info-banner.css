@@ -109,13 +109,41 @@
     .info-banner-content {
         flex-direction: column;
         gap: 6px;
+        position: relative;
     }
 
+    /* Stats et messages alternent - par défaut on affiche les stats */
     .info-fixed {
         display: flex;
         justify-content: center;
         gap: 8px;
         width: 100%;
+        opacity: 1;
+        transition: opacity 0.3s ease;
+    }
+
+    .info-scrolling {
+        width: 100%;
+        height: 20px;
+        margin-left: 0;
+        padding-left: 0;
+        padding-top: 0;
+        opacity: 0;
+        position: absolute;
+        top: 0;
+        left: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    /* Mode alternance: masquer stats, afficher messages */
+    .info-banner.mobile-show-messages .info-fixed {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .info-banner.mobile-show-messages .info-scrolling {
+        opacity: 1;
+        position: static;
     }
 
     /* Masquer MaxScore et Clicks sur mobile */
@@ -134,14 +162,6 @@
 
     .info-stat-icon {
         font-size: 0.9em;
-    }
-
-    .info-scrolling {
-        width: 100%;
-        height: 20px;
-        margin-left: 0;
-        padding-left: 0;
-        padding-top: 0;
     }
 
     .info-messages {
