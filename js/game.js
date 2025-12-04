@@ -153,7 +153,11 @@ class ChristianCrosswordGame {
                                         }
                                         // Si l'utilisateur a rempli la cellule
                                         if (this.grid[row][col]) {
-                                            cellElement.textContent = this.grid[row][col];
+                                            // Trouver le span qui affiche la lettre
+                                            const letterSpan = cellElement.querySelector('.cell-letter');
+                                            if (letterSpan) {
+                                                letterSpan.textContent = this.grid[row][col];
+                                            }
                                             // Vérifier si c'est correct
                                             if (this.grid[row][col] === this.solution[row][col]) {
                                                 cellElement.classList.add('correct');
