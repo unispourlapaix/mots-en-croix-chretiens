@@ -91,26 +91,45 @@ class SupabaseScoreManager {
     }
 
     // Sauvegarder la progression complète du joueur (avec user_id d'authentification)
-    async saveProgress(userId, username, currentLevel, score) {
+    async saveProgress(userId, username, currentLevel, currentScore, maxScore, raceScore) {
         if (!supabase) {
             return { success: false, error: 'Supabase non configuré' };
         }
 
         try {
+            // Récupérer d'abord le max_score actuel du cloud
+            const { data: profile, error: fetchError } = await supabase
+                .from('profiles')
+                .select('max_score')
+                .eq('user_id', userId)
+                .single();
+
+            // Utiliser le meilleur entre local et cloud
+            const cloudMaxScore = profile?.max_score || 0;
+            const finalMaxScore = Math.max(maxScore, cloudMaxScore, currentScore);
+
             const { data, error } = await supabase
                 .from('profiles')
                 .update({
                     username: username,
                     game_level: currentLevel,
-                    game_score: score,
+                    game_score: currentScore,    // Score de la partie en cours
+                    max_score: finalMaxScore,    // Meilleur score (toujours le max)
+                    race_score: raceScore,       // Score de course
                     updated_at: new Date().toISOString()
                 })
                 .eq('user_id', userId);
 
             if (error) throw error;
 
-            console.log('✅ Progression sauvegardée sur le cloud:', { username, currentLevel, score });
-            return { success: true };
+            console.log('✅ Progression sauvegardée:', { 
+                username, 
+                currentLevel, 
+                currentScore, 
+                maxScore: finalMaxScore,
+                raceScore 
+            });
+            return { success: true, maxScore: finalMaxScore };
         } catch (error) {
             console.error('❌ Erreur sauvegarde progression:', error);
             return { success: false, error: error.message };
@@ -126,7 +145,7 @@ class SupabaseScoreManager {
         try {
             const { data, error } = await supabase
                 .from('profiles')
-                .select('game_level, game_score')
+                .select('game_level, game_score, max_score, race_score')
                 .eq('user_id', userId)
                 .single();
 
@@ -135,7 +154,9 @@ class SupabaseScoreManager {
             return { 
                 success: true, 
                 level: data?.game_level || 1, 
-                score: data?.game_score || 0 
+                score: data?.game_score || 0,
+                maxScore: data?.max_score || 0,
+                raceScore: data?.race_score || 0
             };
         } catch (error) {
             console.error('❌ Erreur chargement progression:', error);

@@ -3,7 +3,9 @@ class ChristianCrosswordGame {
     constructor() {
         this.clickCount = 0;
         this.currentLevel = 1;
-        this.score = 0;
+        this.score = 0;          // Score de la partie en cours
+        this.maxScore = 0;       // Meilleur score jamais atteint
+        this.raceScore = 0;      // Score en mode course
         this.gameStarted = false;
         this.grid = Array(config.gridSize).fill().map(() => Array(config.gridSize).fill(''));
         this.solution = Array(config.gridSize).fill().map(() => Array(config.gridSize).fill(''));
@@ -123,6 +125,8 @@ class ChristianCrosswordGame {
             // Restaurer l'état du jeu
             this.currentLevel = data.currentLevel || 1;
             this.score = data.score || 0;
+            this.maxScore = data.maxScore || this.score; // Utiliser maxScore sauvegardé ou score actuel
+            this.raceScore = data.raceScore || 0;
             this.clickCount = data.clickCount || 0;
             this.gameStarted = true;
             this.completedWords = new Set(data.completedWords || []);
@@ -173,6 +177,8 @@ class ChristianCrosswordGame {
         this.completedWords = new Set();
         this.currentLevel = 1;
         this.score = 0;
+        this.maxScore = 0;
+        this.raceScore = 0;
         this.clickCount = 0;
         
         // Effacer localStorage
@@ -526,15 +532,21 @@ class ChristianCrosswordGame {
         }
 
         try {
-            console.log('☁️ Sauvegarde cloud (level + score uniquement)...');
+            console.log('☁️ Sauvegarde cloud...');
             const result = await supabaseScoreManager.saveProgress(
                 authSystem.currentUser.id,
                 authSystem.currentUser.username,
                 this.currentLevel,
-                this.score
+                this.score,        // Score actuel
+                this.maxScore,     // Meilleur score
+                this.raceScore     // Score de course
             );
 
             if (result.success) {
+                // Mettre à jour maxScore local si le cloud a un meilleur
+                if (result.maxScore && result.maxScore > this.maxScore) {
+                    this.maxScore = result.maxScore;
+                }
                 console.log('✅ Progression sauvegardée dans le cloud');
             }
         } catch (error) {
@@ -566,12 +578,25 @@ class ChristianCrosswordGame {
                 if (!localData || result.level > localData.currentLevel || result.score > localData.score) {
                     this.currentLevel = result.level;
                     this.score = result.score;
-                    console.log('✅ Progression chargée depuis le cloud:', { level: result.level, score: result.score });
+                    this.maxScore = Math.max(result.maxScore || 0, localData?.maxScore || 0);
+                    this.raceScore = result.raceScore || 0;
+                    console.log('✅ Progression chargée depuis le cloud:', { 
+                        level: result.level, 
+                        score: result.score,
+                        maxScore: this.maxScore,
+                        raceScore: this.raceScore
+                    });
                     
                     // Mettre à jour le localStorage aussi
                     this.saveGame();
                     return true;
                 } else {
+                    // Même si on ne charge pas tout, prendre le meilleur maxScore
+                    const cloudMaxScore = result.maxScore || 0;
+                    if (cloudMaxScore > this.maxScore) {
+                        this.maxScore = cloudMaxScore;
+                        console.log('⬆️ maxScore mis à jour depuis le cloud:', this.maxScore);
+                    }
                     console.log('ℹ️ Sauvegarde locale plus récente, pas de chargement cloud');
                 }
             }
