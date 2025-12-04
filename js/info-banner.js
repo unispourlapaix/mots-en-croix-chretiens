@@ -42,14 +42,14 @@ class InfoBannerManager {
         // Afficher le premier message
         this.showCurrentMessage();
         
-        // Desktop: changer de message toutes les 5 secondes
+        // Desktop: changer de message toutes les 8 secondes
         if (window.innerWidth > 768) {
             this.messageInterval = setInterval(() => {
                 this.nextMessage();
-            }, 5000);
+            }, 8000);
         }
         
-        // Mobile: alterner stats/messages toutes les 4 secondes
+        // Mobile: alterner stats/messages toutes les 6 secondes
         if (window.innerWidth <= 768) {
             this.mobileToggleInterval = setInterval(() => {
                 this.toggleMobileView();
@@ -57,7 +57,7 @@ class InfoBannerManager {
                 if (!this.showingStats) {
                     this.nextMessage();
                 }
-            }, 4000);
+            }, 6000);
         }
 
         // Gérer le redimensionnement
@@ -74,7 +74,7 @@ class InfoBannerManager {
                         if (!this.showingStats) {
                             this.nextMessage();
                         }
-                    }, 4000);
+                    }, 6000);
                 }
             } else {
                 // Passer en mode desktop
@@ -87,7 +87,7 @@ class InfoBannerManager {
                 if (!this.messageInterval) {
                     this.messageInterval = setInterval(() => {
                         this.nextMessage();
-                    }, 5000);
+                    }, 8000);
                 }
             }
         });
