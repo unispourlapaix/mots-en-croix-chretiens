@@ -66,36 +66,22 @@ class ChristianCrosswordGame {
     saveGame() {
         console.log('💾 Sauvegarde en cours...', {
             gameStarted: this.gameStarted,
-            gridLength: this.grid?.length,
-            solutionLength: this.solution?.length,
-            wordsLength: this.words?.length
+            currentLevel: this.currentLevel,
+            score: this.score,
+            completedWordsCount: this.completedWords?.size || 0
         });
         
-        // Ne pas sauvegarder si le jeu est démarré mais qu'il n'y a pas de mots
-        // (évite de sauvegarder un état invalide au premier démarrage)
-        if (this.gameStarted && (!this.words || this.words.length === 0)) {
-            console.warn('⚠️ Sauvegarde annulée : pas de mots chargés');
-            return;
-        }
-        
-        // Sauvegarder l'état de la grille
+        // Sauvegarder de manière minimale : level, score et mots complétés
         const saveData = {
             currentLevel: this.currentLevel,
             score: this.score,
             clickCount: this.clickCount,
             gameStarted: this.gameStarted || false,
-            grid: this.grid, // Réponses utilisateur (tableau de strings)
-            solution: this.solution, // Bonnes réponses
-            blocked: this.blocked, // Cellules bloquées
-            words: this.words || [],
-            completedWords: Array.from(this.completedWords || []), // Mots déjà complétés (Set -> Array)
+            completedWords: Array.from(this.completedWords || []), // Mots déjà complétés
             timestamp: Date.now()
         };
         localStorage.setItem('christianCrosswordSave', JSON.stringify(saveData));
-        console.log('✅ Sauvegarde terminée');
-        
-        // Sauvegarder aussi dans le cloud si connecté
-        this.saveProgressToCloud();
+        console.log('✅ Sauvegarde terminée (minimale)');
     }
 
     loadGame() {
@@ -118,15 +104,10 @@ class ChristianCrosswordGame {
                 this.clickCount = data.clickCount || 0;
                 this.gameStarted = data.gameStarted || false;
                 
-                // Si le jeu était en cours, restaurer l'affichage
-                if (this.gameStarted && data.grid && data.solution && data.words) {
+                // Si le jeu était en cours, restaurer en rechargeant le niveau
+                if (this.gameStarted) {
                     console.log('✅ Restauration partie en cours...');
-                    // Restaurer les mots et les grilles
-                    this.words = data.words;
-                    this.grid = data.grid;
-                    this.solution = data.solution;
-                    this.blocked = data.blocked;
-                    // Restaurer les mots complétés pour éviter de recompter les points
+                    // Restaurer les mots complétés
                     this.completedWords = new Set(data.completedWords || []);
                     
                     setTimeout(() => {
@@ -142,36 +123,12 @@ class ChristianCrosswordGame {
                             document.getElementById('score').textContent = this.score;
                             document.getElementById('currentLevel').textContent = this.currentLevel;
                             
-                            // Recréer la grille (this.words déjà restauré)
-                            this.createGrid();
+                            // Recharger le niveau complètement
+                            this.setupLevel();
                             
-                            // Restaurer l'affichage des cellules
-                            for (let row = 0; row < this.gridSize; row++) {
-                                for (let col = 0; col < this.gridSize; col++) {
-                                    const cellElement = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-                                    if (cellElement) {
-                                        // Si la cellule est bloquée
-                                        if (this.blocked[row][col]) {
-                                            cellElement.classList.add('blocked');
-                                        }
-                                        // Si l'utilisateur a rempli la cellule
-                                        if (this.grid[row][col]) {
-                                            // Trouver le span qui affiche la lettre
-                                            const letterSpan = cellElement.querySelector('.cell-letter');
-                                            if (letterSpan) {
-                                                letterSpan.textContent = this.grid[row][col];
-                                            }
-                                            // Vérifier si c'est correct
-                                            if (this.grid[row][col] === this.solution[row][col]) {
-                                                cellElement.classList.add('correct');
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            // Compléter automatiquement les mots déjà complétés
+                            this.restoreCompletedWords();
                             
-                            // Afficher les indices
-                            this.displayClues();
                         } catch (error) {
                             console.error('❌ Erreur restauration:', error);
                             // En cas d'erreur, réinitialiser l'état et afficher l'écran de démarrage
@@ -183,18 +140,6 @@ class ChristianCrosswordGame {
                             localStorage.removeItem('christianCrosswordSave');
                         }
                     }, 100);
-                } else if (this.gameStarted && (!data.grid || !data.solution || !data.words)) {
-                    // Sauvegarde incomplète : réinitialiser
-                    console.warn('⚠️ Sauvegarde incomplète détectée');
-                    this.gameStarted = false;
-                    document.getElementById('playButton').style.display = 'inline-block';
-                    localStorage.removeItem('christianCrosswordSave');
-                } else if (this.gameStarted && data.words && data.words.length === 0) {
-                    // Sauvegarde avec tableau de mots vide : réinitialiser
-                    console.warn('⚠️ Sauvegarde invalide (mots vides) - premier démarrage non sauvegardé correctement');
-                    this.gameStarted = false;
-                    document.getElementById('playButton').style.display = 'inline-block';
-                    localStorage.removeItem('christianCrosswordSave');
                 }
             } catch (e) {
                 console.error('Erreur lors du chargement de la sauvegarde:', e);
@@ -214,6 +159,43 @@ class ChristianCrosswordGame {
 
     clearSave() {
         localStorage.removeItem('christianCrosswordSave');
+    }
+
+    restoreCompletedWords() {
+        // Remplir automatiquement les mots complétés dans la grille
+        if (!this.completedWords || this.completedWords.size === 0) {
+            return;
+        }
+
+        console.log('🔄 Restauration des mots complétés:', this.completedWords.size);
+        
+        this.words.forEach(wordData => {
+            const wordKey = `${wordData.word}_${wordData.row}_${wordData.col}`;
+            
+            // Si ce mot était complété
+            if (this.completedWords.has(wordKey)) {
+                // Remplir les lettres dans la grille
+                if (wordData.path) {
+                    for (let i = 0; i < wordData.word.length && i < wordData.path.length; i++) {
+                        const [row, col] = wordData.path[i];
+                        const letter = wordData.word[i];
+                        this.grid[row][col] = letter;
+                        
+                        // Mettre à jour l'affichage
+                        const cellElement = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                        if (cellElement) {
+                            const letterSpan = cellElement.querySelector('.cell-letter');
+                            if (letterSpan) {
+                                letterSpan.textContent = letter;
+                            }
+                            cellElement.classList.add('correct');
+                        }
+                    }
+                }
+            }
+        });
+        
+        console.log('✅ Mots restaurés');
     }
 
     initializeEventListeners() {
@@ -520,6 +502,7 @@ class ChristianCrosswordGame {
         }
 
         try {
+            console.log('☁️ Sauvegarde cloud (level + score uniquement)...');
             const result = await supabaseScoreManager.saveProgress(
                 authSystem.currentUser.id,
                 authSystem.currentUser.username,
@@ -1337,6 +1320,9 @@ class ChristianCrosswordGame {
                 // Sauvegarder automatiquement après chaque mot complété
                 console.log('💾 Sauvegarde auto (mot complété):', wordData.word);
                 this.saveGame();
+                
+                // Sauvegarder aussi la progression dans le cloud (level + score uniquement)
+                this.saveProgressToCloud();
 
                 // Animation visuelle sur les cellules du mot
                 if (wordData.path) {
@@ -1624,10 +1610,10 @@ class ChristianCrosswordGame {
             this.setupLevel();
             document.getElementById('nextLevelButton').style.display = 'none';
             document.getElementById('shareButton').style.display = 'none';
-            // Sauvegarder le progrès
+            // Sauvegarder le progrès localement
             this.saveGame();
-            // Sauvegarder automatiquement sur le cloud si connecté
-            await this.saveScoreToCloud();
+            // Sauvegarder la progression dans le cloud (level + score uniquement)
+            await this.saveProgressToCloud();
         } else {
             // Fin du jeu
             // Sauvegarder automatiquement sur le cloud si connecté
