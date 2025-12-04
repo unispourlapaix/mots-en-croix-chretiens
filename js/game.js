@@ -34,8 +34,17 @@ class ChristianCrosswordGame {
 
         // Écouter les changements d'authentification pour mettre à jour le bouton cloud
         if (typeof authSystem !== 'undefined') {
-            authSystem.onAuthChange(() => {
+            authSystem.onAuthChange(async (user) => {
                 this.updateMenuCloudButton();
+                
+                // Charger la progression cloud SEULEMENT lors de la connexion
+                if (user && user.id && !this.saveCleared) {
+                    console.log('🔐 Utilisateur connecté, chargement progression cloud...');
+                    await this.loadProgressFromCloud();
+                } else if (this.saveCleared) {
+                    console.log('⏭️ Sauvegarde effacée, pas de chargement cloud');
+                    this.saveCleared = false; // Réinitialiser le flag
+                }
             });
         }
         this.updateMenuCloudButton();
@@ -64,101 +73,100 @@ class ChristianCrosswordGame {
     }
 
     saveGame() {
-        console.log('💾 Sauvegarde en cours...', {
-            gameStarted: this.gameStarted,
-            currentLevel: this.currentLevel,
-            score: this.score,
-            completedWordsCount: this.completedWords?.size || 0
-        });
+        // Ne sauvegarder QUE si le jeu est réellement démarré
+        if (!this.gameStarted) {
+            return;
+        }
         
         // Sauvegarder de manière minimale : level, score et mots complétés
         const saveData = {
             currentLevel: this.currentLevel,
             score: this.score,
             clickCount: this.clickCount,
-            gameStarted: this.gameStarted || false,
+            gameStarted: this.gameStarted,
             completedWords: Array.from(this.completedWords || []), // Mots déjà complétés
             timestamp: Date.now()
         };
         localStorage.setItem('christianCrosswordSave', JSON.stringify(saveData));
-        console.log('✅ Sauvegarde terminée (minimale)');
     }
 
     loadGame() {
         const savedData = localStorage.getItem('christianCrosswordSave');
-        console.log('📂 Chargement sauvegarde:', savedData ? 'Données trouvées' : 'Aucune donnée');
         
-        if (savedData) {
-            try {
-                const data = JSON.parse(savedData);
-                console.log('📊 Données sauvegardées:', {
-                    level: data.currentLevel,
-                    score: data.score,
-                    gameStarted: data.gameStarted,
-                    hasGridState: !!data.gridState,
-                    hasWords: !!data.words
-                });
-                
-                this.currentLevel = data.currentLevel || 1;
-                this.score = data.score || 0;
-                this.clickCount = data.clickCount || 0;
-                this.gameStarted = data.gameStarted || false;
-                
-                // Si le jeu était en cours, restaurer en rechargeant le niveau
-                if (this.gameStarted) {
-                    console.log('✅ Restauration partie en cours...');
-                    // Restaurer les mots complétés
-                    this.completedWords = new Set(data.completedWords || []);
-                    
-                    setTimeout(() => {
-                        try {
-                            // Masquer l'écran de démarrage et le bouton jouer
-                            document.getElementById('startScreen').classList.add('hidden');
-                            document.getElementById('playButton').style.display = 'none';
-                            
-                            // Afficher l'écran de jeu
-                            document.getElementById('gameScreen').classList.remove('hidden');
-                            
-                            // Mettre à jour l'UI
-                            document.getElementById('score').textContent = this.score;
-                            document.getElementById('currentLevel').textContent = this.currentLevel;
-                            
-                            // Recharger le niveau complètement
-                            this.setupLevel();
-                            
-                            // Compléter automatiquement les mots déjà complétés
-                            this.restoreCompletedWords();
-                            
-                        } catch (error) {
-                            console.error('❌ Erreur restauration:', error);
-                            // En cas d'erreur, réinitialiser l'état et afficher l'écran de démarrage
-                            this.gameStarted = false;
-                            document.getElementById('startScreen').classList.remove('hidden');
-                            document.getElementById('gameScreen').classList.add('hidden');
-                            document.getElementById('playButton').style.display = 'inline-block';
-                            // Effacer la sauvegarde corrompue
-                            localStorage.removeItem('christianCrosswordSave');
-                        }
-                    }, 100);
-                }
-            } catch (e) {
-                console.error('Erreur lors du chargement de la sauvegarde:', e);
-            }
+        // Si pas de sauvegarde, rester en mode premier démarrage
+        if (!savedData) {
+            console.log('📂 Pas de sauvegarde, mode premier démarrage');
+            return;
         }
-
-        // Charger la progression depuis le cloud si disponible
-        setTimeout(async () => {
-            await this.loadProgressFromCloud();
-            // Mettre à jour l'affichage si des données cloud ont été chargées
+        
+        console.log('📂 Chargement sauvegarde: Données trouvées');
+        
+        try {
+            const data = JSON.parse(savedData);
+            console.log('📊 Données sauvegardées:', {
+                level: data.currentLevel,
+                score: data.score,
+                gameStarted: data.gameStarted,
+                completedWordsCount: data.completedWords?.length || 0
+            });
+            
+            this.currentLevel = data.currentLevel || 1;
+            this.score = data.score || 0;
+            this.clickCount = data.clickCount || 0;
+            this.gameStarted = data.gameStarted || false;
+            
+            // Si le jeu était en cours, restaurer en rechargeant le niveau
             if (this.gameStarted) {
-                document.getElementById('score').textContent = this.score;
-                document.getElementById('currentLevel').textContent = this.currentLevel;
+                console.log('✅ Restauration partie en cours...');
+                // Restaurer les mots complétés
+                this.completedWords = new Set(data.completedWords || []);
+                
+                setTimeout(() => {
+                    try {
+                        // Masquer l'écran de démarrage et le bouton jouer
+                        document.getElementById('startScreen').classList.add('hidden');
+                        document.getElementById('playButton').style.display = 'none';
+                        
+                        // Afficher l'écran de jeu
+                        document.getElementById('gameScreen').classList.remove('hidden');
+                        
+                        // Mettre à jour l'UI
+                        document.getElementById('score').textContent = this.score;
+                        document.getElementById('currentLevel').textContent = this.currentLevel;
+                        
+                        // Recharger le niveau complètement
+                        this.setupLevel();
+                        
+                        // Compléter automatiquement les mots déjà complétés
+                        this.restoreCompletedWords();
+                        
+                    } catch (error) {
+                        console.error('❌ Erreur restauration:', error);
+                        // En cas d'erreur, réinitialiser l'état et afficher l'écran de démarrage
+                        this.gameStarted = false;
+                        document.getElementById('startScreen').classList.remove('hidden');
+                        document.getElementById('gameScreen').classList.add('hidden');
+                        document.getElementById('playButton').style.display = 'inline-block';
+                        // Effacer la sauvegarde corrompue
+                        localStorage.removeItem('christianCrosswordSave');
+                    }
+                }, 100);
+            } else {
+                console.log('ℹ️ Sauvegarde présente mais jeu non démarré');
             }
-        }, 1000);
+        } catch (e) {
+            console.error('Erreur lors du chargement de la sauvegarde:', e);
+        }
+        
+        // Note: loadProgressFromCloud() sera appelé uniquement lors de la connexion
+        // via authSystem.onAuthChange() pour éviter les requêtes inutiles
     }
 
     clearSave() {
         localStorage.removeItem('christianCrosswordSave');
+        // Marquer qu'on a effacé pour éviter que le cloud recharge
+        this.saveCleared = true;
+        console.log('🗑️ Sauvegarde locale effacée');
     }
 
     restoreCompletedWords() {
@@ -532,6 +540,12 @@ class ChristianCrosswordGame {
                 const localSave = localStorage.getItem('christianCrosswordSave');
                 const localData = localSave ? JSON.parse(localSave) : null;
 
+                // Si sauvegarde vient d'être effacée, ne pas charger le cloud
+                if (this.saveCleared) {
+                    console.log('⏭️ Sauvegarde locale effacée, ignorer cloud');
+                    return false;
+                }
+
                 // Utiliser la progression la plus avancée
                 if (!localData || result.level > localData.currentLevel || result.score > localData.score) {
                     this.currentLevel = result.level;
@@ -541,6 +555,8 @@ class ChristianCrosswordGame {
                     // Mettre à jour le localStorage aussi
                     this.saveGame();
                     return true;
+                } else {
+                    console.log('ℹ️ Sauvegarde locale plus récente, pas de chargement cloud');
                 }
             }
         } catch (error) {
