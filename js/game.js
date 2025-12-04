@@ -53,29 +53,14 @@ class ChristianCrosswordGame {
 
     saveGame() {
         // Sauvegarder l'état de la grille
-        const gridState = [];
-        if (this.grid) {
-            for (let row = 0; row < this.gridSize; row++) {
-                gridState[row] = [];
-                for (let col = 0; col < this.gridSize; col++) {
-                    const cell = this.grid[row][col];
-                    if (cell) {
-                        gridState[row][col] = {
-                            letter: cell.letter || '',
-                            userLetter: cell.userLetter || '',
-                            isBlocked: cell.isBlocked || false
-                        };
-                    }
-                }
-            }
-        }
-        
         const saveData = {
             currentLevel: this.currentLevel,
             score: this.score,
             clickCount: this.clickCount,
             gameStarted: this.gameStarted || false,
-            gridState: gridState,
+            grid: this.grid, // Réponses utilisateur (tableau de strings)
+            solution: this.solution, // Bonnes réponses
+            blocked: this.blocked, // Cellules bloquées
             words: this.words || [],
             timestamp: Date.now()
         };
@@ -106,10 +91,13 @@ class ChristianCrosswordGame {
                 this.gameStarted = data.gameStarted || false;
                 
                 // Si le jeu était en cours, restaurer l'affichage
-                if (this.gameStarted && data.gridState && data.words) {
+                if (this.gameStarted && data.grid && data.solution && data.words) {
                     console.log('✅ Restauration partie en cours...');
-                    // Restaurer les mots et la grille
+                    // Restaurer les mots et les grilles
                     this.words = data.words;
+                    this.grid = data.grid;
+                    this.solution = data.solution;
+                    this.blocked = data.blocked;
                     
                     setTimeout(() => {
                         // Masquer l'écran de démarrage et le bouton jouer
@@ -126,26 +114,21 @@ class ChristianCrosswordGame {
                         // Recréer la grille (this.words déjà restauré)
                         this.createGrid();
                         
-                        // Restaurer l'état des cellules
+                        // Restaurer l'affichage des cellules
                         for (let row = 0; row < this.gridSize; row++) {
                             for (let col = 0; col < this.gridSize; col++) {
-                                const savedCell = data.gridState[row] && data.gridState[row][col];
-                                if (savedCell && this.grid[row] && this.grid[row][col]) {
-                                    this.grid[row][col].letter = savedCell.letter || '';
-                                    this.grid[row][col].userLetter = savedCell.userLetter || '';
-                                    this.grid[row][col].isBlocked = savedCell.isBlocked || false;
-                                    
-                                    // Mettre à jour l'affichage de la cellule
-                                    const cellElement = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-                                    if (cellElement) {
-                                        if (savedCell.isBlocked) {
-                                            cellElement.classList.add('blocked');
-                                        }
-                                        if (savedCell.userLetter) {
-                                            cellElement.textContent = savedCell.userLetter;
-                                            if (savedCell.userLetter === savedCell.letter) {
-                                                cellElement.classList.add('correct');
-                                            }
+                                const cellElement = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                                if (cellElement) {
+                                    // Si la cellule est bloquée
+                                    if (this.blocked[row][col]) {
+                                        cellElement.classList.add('blocked');
+                                    }
+                                    // Si l'utilisateur a rempli la cellule
+                                    if (this.grid[row][col]) {
+                                        cellElement.textContent = this.grid[row][col];
+                                        // Vérifier si c'est correct
+                                        if (this.grid[row][col] === this.solution[row][col]) {
+                                            cellElement.classList.add('correct');
                                         }
                                     }
                                 }
