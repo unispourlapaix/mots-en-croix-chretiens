@@ -47,7 +47,7 @@
             console.log('📊 Chargement du leaderboard...');
             
             await leaderboardManager.displayLeaderboard('leaderboard', {
-                limit: 50,           // Top 50 joueurs
+                limit: 20,           // Top 20 joueurs
                 showArtist: true,    // Afficher info artiste
                 showStats: true,     // Afficher stats
                 forceRefresh: false  // Utiliser cache si disponible
@@ -60,7 +60,7 @@
                 refreshBtn.textContent = '⏳ Actualisation...';
                 
                 await leaderboardManager.displayLeaderboard('leaderboard', {
-                    limit: 50,
+                    limit: 20,
                     showArtist: true,
                     showStats: true,
                     forceRefresh: true  // Forcer le rechargement depuis DB

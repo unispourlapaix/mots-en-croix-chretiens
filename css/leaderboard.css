@@ -20,6 +20,15 @@ body {
     padding: 20px;
     position: relative;
     z-index: 1;
+    width: 100%;
+}
+
+/* Centrer le contenu du leaderboard */
+#leaderboard {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .leaderboard-header {
@@ -169,59 +178,116 @@ body {
     text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.8);
 }
 
-/* Tableau des scores */
+/* Tableau glossy girly élégant */
 .leaderboard-table {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 16px;
+    background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.95) 0%, 
+                rgba(255, 250, 252, 0.9) 100%);
+    border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(255, 105, 180, 0.2), 
-                0 1px 3px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 32px rgba(236, 72, 153, 0.08),
+                0 2px 8px rgba(0, 0, 0, 0.03),
+                inset 0 1px 1px rgba(255, 255, 255, 0.9);
     margin-bottom: 30px;
-    border: 2px solid rgba(255, 182, 225, 0.5);
+    border: 1px solid rgba(236, 72, 153, 0.15);
     backdrop-filter: blur(10px);
+    width: 100%;
+    max-width: 100%;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.leaderboard-table:hover {
+    box-shadow: 0 12px 40px rgba(236, 72, 153, 0.12),
+                0 4px 12px rgba(0, 0, 0, 0.04),
+                inset 0 1px 1px rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
 }
 
 .leaderboard-table table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
 }
 
 .leaderboard-table thead {
-    background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
-    color: white;
+    background: linear-gradient(135deg, 
+                #fce7f3 0%, 
+                #fbcfe8 50%, 
+                #fce7f3 100%);
+    color: #9d174d;
+    position: relative;
+}
+
+.leaderboard-table thead::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(236, 72, 153, 0.2) 50%, 
+                transparent 100%);
 }
 
 .leaderboard-table th {
-    padding: 14px 16px;
+    padding: 16px 20px;
     text-align: left;
-    font-weight: 800;
-    font-size: 0.9em;
+    font-weight: 600;
+    font-size: 0.85em;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.15);
+    white-space: nowrap;
+    background: transparent;
+    border: none;
 }
 
 .leaderboard-table th:first-child {
     text-align: center;
-    width: 70px;
+    width: 80px;
+}
+
+.leaderboard-table th:nth-child(2) {
+    text-align: left;
+    padding-left: 20px;
 }
 
 .leaderboard-table th:last-child {
     text-align: right;
-    padding-right: 20px;
+    padding-right: 24px;
+    width: 130px;
+}
+
+.leaderboard-table th:first-child {
+    text-align: center;
+    width: 90px;
+    font-size: 0.8em;
+}
+
+.leaderboard-table th:nth-child(2) {
+    text-align: left;
+    padding-left: 24px;
+}
+
+.leaderboard-table th:last-child {
+    text-align: right;
+    padding-right: 28px;
+    width: 140px;
 }
 
 .leaderboard-row {
-    border-bottom: 1px solid rgba(255, 228, 233, 0.6);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border-bottom: 1px solid rgba(236, 72, 153, 0.06);
+    transition: all 0.25s ease;
+    position: relative;
 }
 
 .leaderboard-row:hover {
     background: linear-gradient(90deg, 
-                rgba(255, 240, 245, 0.8) 0%, 
-                rgba(255, 228, 233, 0.5) 100%);
+                rgba(252, 231, 243, 0.4) 0%, 
+                rgba(252, 231, 243, 0.1) 100%);
     transform: translateX(4px);
-    box-shadow: -4px 0 12px rgba(255, 105, 180, 0.15);
 }
 
 .leaderboard-row:last-child {
@@ -229,130 +295,131 @@ body {
 }
 
 .leaderboard-row td {
-    padding: 14px 16px;
+    padding: 16px 20px;
+    position: relative;
+    color: #4a5568;
 }
 
 .leaderboard-row .rank {
     text-align: center;
-    font-size: 1.1em;
-    font-weight: 800;
-    color: #ff69b4;
+    font-size: 0.95em;
+    font-weight: 600;
+    color: #ec4899;
     font-variant-numeric: tabular-nums;
+    width: 80px;
 }
 
 .leaderboard-row .username {
-    font-weight: 700;
-    color: #c71585;
+    font-weight: 500;
+    color: #1f2937;
     letter-spacing: 0.3px;
+    padding-left: 20px;
+    word-break: break-word;
+    font-size: 0.95em;
 }
 
 .leaderboard-row .score {
     text-align: right;
-    font-weight: 800;
-    color: #ff1493;
-    font-size: 1.05em;
+    font-weight: 600;
+    color: #ec4899;
+    font-size: 1em;
     font-variant-numeric: tabular-nums;
-    padding-right: 20px;
+    padding-right: 24px;
+    width: 130px;
 }
 
-/* Médailles élégantes pour le top 3 */
+/* Top 3 girly avec badges glossy */
 .leaderboard-row.rank-1 {
     background: linear-gradient(90deg, 
-                rgba(255, 215, 0, 0.12) 0%, 
-                rgba(255, 223, 0, 0.08) 50%, 
-                rgba(255, 215, 0, 0.12) 100%);
-    border-left: 4px solid #ffd700;
-    position: relative;
-}
-
-.leaderboard-row.rank-1::before {
-    content: '🥇';
-    position: absolute;
-    left: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 1.6em;
-    filter: drop-shadow(0 2px 4px rgba(255, 215, 0, 0.4));
+                rgba(253, 224, 71, 0.12) 0%, 
+                rgba(253, 224, 71, 0.05) 100%);
+    border-left: 3px solid #fbbf24;
 }
 
 .leaderboard-row.rank-1 .rank {
-    font-size: 1.4em;
-    color: #ffd700;
-    padding-left: 35px;
+    font-size: 1.1em;
+    color: #d97706;
+    font-weight: 700;
+}
+
+.leaderboard-row.rank-1 .username {
+    font-weight: 600;
+    color: #92400e;
+}
+
+.leaderboard-row.rank-1 .score {
+    color: #d97706;
+    font-weight: 700;
+    font-size: 1.1em;
 }
 
 .leaderboard-row.rank-1:hover {
     background: linear-gradient(90deg, 
-                rgba(255, 215, 0, 0.18) 0%, 
-                rgba(255, 223, 0, 0.12) 50%, 
-                rgba(255, 215, 0, 0.18) 100%);
-    border-left-color: #ffed4e;
+                rgba(253, 224, 71, 0.18) 0%, 
+                rgba(253, 224, 71, 0.08) 100%);
+    box-shadow: -3px 0 12px rgba(251, 191, 36, 0.15);
 }
 
 .leaderboard-row.rank-2 {
     background: linear-gradient(90deg, 
-                rgba(192, 192, 192, 0.1) 0%, 
-                rgba(192, 192, 192, 0.06) 50%, 
-                rgba(192, 192, 192, 0.1) 100%);
-    border-left: 4px solid #c0c0c0;
-    position: relative;
-}
-
-.leaderboard-row.rank-2::before {
-    content: '🥈';
-    position: absolute;
-    left: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 1.5em;
-    filter: drop-shadow(0 2px 4px rgba(192, 192, 192, 0.4));
+                rgba(203, 213, 225, 0.12) 0%, 
+                rgba(203, 213, 225, 0.05) 100%);
+    border-left: 3px solid #94a3b8;
 }
 
 .leaderboard-row.rank-2 .rank {
-    font-size: 1.3em;
-    color: #c0c0c0;
-    padding-left: 35px;
+    font-size: 1.08em;
+    color: #475569;
+    font-weight: 700;
+}
+
+.leaderboard-row.rank-2 .username {
+    font-weight: 600;
+    color: #334155;
+}
+
+.leaderboard-row.rank-2 .score {
+    color: #475569;
+    font-weight: 700;
+    font-size: 1.08em;
 }
 
 .leaderboard-row.rank-2:hover {
     background: linear-gradient(90deg, 
-                rgba(192, 192, 192, 0.15) 0%, 
-                rgba(192, 192, 192, 0.1) 50%, 
-                rgba(192, 192, 192, 0.15) 100%);
-    border-left-color: #d4d4d4;
+                rgba(203, 213, 225, 0.18) 0%, 
+                rgba(203, 213, 225, 0.08) 100%);
+    box-shadow: -3px 0 12px rgba(148, 163, 184, 0.15);
 }
 
 .leaderboard-row.rank-3 {
     background: linear-gradient(90deg, 
-                rgba(205, 127, 50, 0.1) 0%, 
-                rgba(205, 127, 50, 0.06) 50%, 
-                rgba(205, 127, 50, 0.1) 100%);
-    border-left: 4px solid #cd7f32;
-    position: relative;
-}
-
-.leaderboard-row.rank-3::before {
-    content: '🥉';
-    position: absolute;
-    left: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 1.4em;
-    filter: drop-shadow(0 2px 4px rgba(205, 127, 50, 0.4));
+                rgba(251, 146, 60, 0.12) 0%, 
+                rgba(251, 146, 60, 0.05) 100%);
+    border-left: 3px solid #f97316;
 }
 
 .leaderboard-row.rank-3 .rank {
-    font-size: 1.2em;
-    color: #cd7f32;
-    padding-left: 35px;
+    font-size: 1.05em;
+    color: #c2410c;
+    font-weight: 700;
+}
+
+.leaderboard-row.rank-3 .username {
+    font-weight: 600;
+    color: #9a3412;
+}
+
+.leaderboard-row.rank-3 .score {
+    color: #c2410c;
+    font-weight: 700;
+    font-size: 1.05em;
 }
 
 .leaderboard-row.rank-3:hover {
     background: linear-gradient(90deg, 
-                rgba(205, 127, 50, 0.15) 0%, 
-                rgba(205, 127, 50, 0.1) 50%, 
-                rgba(205, 127, 50, 0.15) 100%);
-    border-left-color: #e89449;
+                rgba(251, 146, 60, 0.18) 0%, 
+                rgba(251, 146, 60, 0.08) 100%);
+    box-shadow: -3px 0 12px rgba(249, 115, 22, 0.15);
 }
 
 @keyframes spin-slow {
@@ -603,44 +670,63 @@ body {
     }
 
     .leaderboard-table {
-        border-radius: 12px;
-        border-width: 2px;
+        border-radius: 20px;
+        margin-bottom: 25px;
     }
 
     .leaderboard-table th {
-        padding: 12px 12px;
-        font-size: 0.85em;
-        letter-spacing: 1px;
+        padding: 16px 18px;
+        font-size: 0.75em;
+        letter-spacing: 2px;
     }
 
     .leaderboard-table th:first-child {
-        width: 55px;
+        width: 75px;
+    }
+
+    .leaderboard-table th:nth-child(2) {
+        padding-left: 18px;
     }
 
     .leaderboard-table th:last-child {
-        padding-right: 12px;
+        padding-right: 18px;
+        width: 130px;
     }
 
     .leaderboard-row td {
-        padding: 12px 12px;
+        padding: 16px 18px;
         font-size: 0.9em;
     }
 
+    .leaderboard-row .rank {
+        width: 75px;
+        font-size: 0.9em;
+    }
+
+    .leaderboard-row .username {
+        padding-left: 18px;
+    }
+
     .leaderboard-row .score {
-        padding-right: 12px;
+        padding-right: 18px;
+        font-size: 1em;
+        width: 130px;
     }
 
-    .leaderboard-row.rank-1::before,
-    .leaderboard-row.rank-2::before,
-    .leaderboard-row.rank-3::before {
-        font-size: 1.3em;
-        left: 6px;
+    .leaderboard-row:hover {
+        transform: translateX(6px);
     }
 
-    .leaderboard-row.rank-1 .rank,
-    .leaderboard-row.rank-2 .rank,
+    .leaderboard-row.rank-1 .rank {
+        font-size: 1.1em;
+    }
+
+    .leaderboard-row.rank-2 .rank {
+        font-size: 1.08em;
+    }
+
     .leaderboard-row.rank-3 .rank {
-        padding-left: 30px;
+        font-size: 1.05em;
     }
 
     .artist-info {
@@ -726,72 +812,82 @@ body {
     }
 
     .leaderboard-table {
-        border-radius: 10px;
-        border-width: 2px;
+        border-radius: 14px;
+        margin-bottom: 20px;
     }
 
     .leaderboard-table th {
-        padding: 10px 8px;
-        font-size: 0.75em;
-        letter-spacing: 0.8px;
+        padding: 12px 12px;
+        font-size: 0.72em;
+        letter-spacing: 1px;
     }
 
     .leaderboard-table th:first-child {
-        width: 50px;
+        width: 60px;
+    }
+
+    .leaderboard-table th:nth-child(2) {
+        padding-left: 12px;
     }
 
     .leaderboard-table th:last-child {
-        padding-right: 8px;
+        padding-right: 12px;
+        width: 110px;
     }
 
     .leaderboard-row td {
-        padding: 10px 8px;
-        font-size: 0.85em;
+        padding: 12px 12px;
+        font-size: 0.88em;
     }
 
     .leaderboard-row .rank {
-        font-size: 1em;
+        font-size: 0.9em;
+        width: 60px;
+    }
+
+    .leaderboard-row .username {
+        padding-left: 12px;
+        font-size: 0.9em;
     }
 
     .leaderboard-row .score {
         font-size: 0.95em;
-        padding-right: 8px;
+        padding-right: 12px;
+        width: 110px;
     }
+
+    .leaderboard-row:hover {\n        transform: translateX(4px) scale(1.003);\n    }
 
     .leaderboard-row.rank-1,
     .leaderboard-row.rank-2,
-    .leaderboard-row.rank-3 {
-        border-left-width: 3px;
-    }
+    .leaderboard-row.rank-3 {\n        border-left-width: 2px;\n    }
 
-    .leaderboard-row.rank-1::before {
-        font-size: 1.2em;
-        left: 4px;
-    }
+    .leaderboard-row.rank-1::after,
+    .leaderboard-row.rank-2::after,
+    .leaderboard-row.rank-3::after {\n        width: 2px;\n    }
 
     .leaderboard-row.rank-1 .rank {
-        font-size: 1.2em;
-        padding-left: 28px;
+        font-size: 1.05em;
     }
 
-    .leaderboard-row.rank-2::before {
-        font-size: 1.15em;
-        left: 4px;
+    .leaderboard-row.rank-1 .score {
+        font-size: 1.05em;
     }
 
     .leaderboard-row.rank-2 .rank {
-        font-size: 1.15em;
-        padding-left: 28px;
+        font-size: 1.02em;
     }
 
-    .leaderboard-row.rank-3::before {
-        font-size: 1.1em;
-        left: 4px;
+    .leaderboard-row.rank-2 .score {
+        font-size: 1.03em;
     }
 
     .leaderboard-row.rank-3 .rank {
-        font-size: 1.1em;
-        padding-left: 28px;
+        font-size: 1em;
+    }
+
+    .leaderboard-row.rank-3 .score {
+        font-size: 1.02em;
     }
 
     .artist-info {

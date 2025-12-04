@@ -6,7 +6,7 @@ class LeaderboardManager {
     constructor() {
         this.cache = null;
         this.cacheTimestamp = null;
-        this.cacheDuration = 5 * 60 * 1000; // Cache de 5 minutes
+        this.cacheDuration = 10 * 60 * 1000; // Cache de 10 minutes
         this.isLoading = false;
         
         // Info artiste
@@ -49,27 +49,25 @@ class LeaderboardManager {
 
             console.log('☁️ Chargement top scores depuis DB...');
             
-            // Requête optimisée: seulement username et max_score
+            // Requête optimisée: seulement username et max_score (2 colonnes)
             const { data, error } = await supabase
                 .from('profiles')
                 .select('username, max_score')
+                .gt('max_score', 0)  // Filtrer dès la requête
                 .order('max_score', { ascending: false })
                 .limit(limit);
 
             if (error) throw error;
 
-            // Filtrer les scores à 0
-            const validScores = data.filter(profile => profile.max_score > 0);
-
             // Mettre en cache
-            this.cache = validScores;
+            this.cache = data;
             this.cacheTimestamp = now;
 
-            console.log(`✅ ${validScores.length} scores chargés et mis en cache`);
+            console.log(`✅ ${data.length} scores chargés et mis en cache (10 min)`);
             
             return { 
                 success: true, 
-                scores: validScores,
+                scores: data,
                 fromCache: false 
             };
 
@@ -114,18 +112,20 @@ class LeaderboardManager {
         }).join('');
 
         return `
-            <table class="leaderboard-table">
-                <thead>
-                    <tr>
-                        <th>Rang</th>
-                        <th>Joueur</th>
-                        <th>Meilleur Score</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${rows}
-                </tbody>
-            </table>
+            <div class="leaderboard-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rang</th>
+                            <th>Joueur</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows}
+                    </tbody>
+                </table>
+            </div>
         `;
     }
 
@@ -217,6 +217,12 @@ class LeaderboardManager {
 
         // Tableau des scores
         html += this.generateLeaderboardHTML(scores);
+
+        // Info cache
+        if (result.fromCache) {
+            const cacheAge = Math.round((Date.now() - this.cacheTimestamp) / 1000 / 60);
+            html += `<div class="cache-info">📦 Données en cache (${cacheAge} min) • Actualise dans ${10 - cacheAge} min</div>`;
+        }
 
         // Info artiste
         if (showArtist) {
