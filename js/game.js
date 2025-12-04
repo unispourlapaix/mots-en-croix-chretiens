@@ -24,7 +24,7 @@ class ChristianCrosswordGame {
         this.multiplayerMode = false;
         this.multiplayerManager = null;
 
-        // Charger la sauvegarde
+        // Charger la sauvegarde SEULEMENT si elle existe ET que le jeu était démarré
         this.loadGame();
         this.loadAudioSettings();
 
@@ -73,6 +73,12 @@ class ChristianCrosswordGame {
     }
 
     saveGame() {
+        // CRITICAL: Ne JAMAIS sauvegarder pendant un clearSave
+        if (this.isClearingData) {
+            console.log('🚫 Sauvegarde bloquée: clearSave en cours');
+            return;
+        }
+        
         // Ne sauvegarder QUE si le jeu est réellement démarré
         if (!this.gameStarted) {
             return;
@@ -95,33 +101,33 @@ class ChristianCrosswordGame {
         
         // Si pas de sauvegarde, rester en mode premier démarrage
         if (!savedData) {
-            console.log('📂 Pas de sauvegarde, mode premier démarrage');
+            console.log('📂 Aucune sauvegarde - Première visite');
             return;
         }
         
-        console.log('📂 Chargement sauvegarde: Données trouvées');
-        
         try {
             const data = JSON.parse(savedData);
-            console.log('📊 Données sauvegardées:', {
+            
+            // CRITICAL: Charger SEULEMENT si le jeu était vraiment démarré
+            if (!data.gameStarted) {
+                console.log('📂 Sauvegarde existe mais jeu non démarré - Ignorer');
+                return;
+            }
+            
+            console.log('📂 Restauration partie en cours:', {
                 level: data.currentLevel,
                 score: data.score,
-                gameStarted: data.gameStarted,
                 completedWordsCount: data.completedWords?.length || 0
             });
-            
+                
+            // Restaurer l'état du jeu
             this.currentLevel = data.currentLevel || 1;
             this.score = data.score || 0;
             this.clickCount = data.clickCount || 0;
-            this.gameStarted = data.gameStarted || false;
-            
-            // Si le jeu était en cours, restaurer en rechargeant le niveau
-            if (this.gameStarted) {
-                console.log('✅ Restauration partie en cours...');
-                // Restaurer les mots complétés
-                this.completedWords = new Set(data.completedWords || []);
+            this.gameStarted = true;
+            this.completedWords = new Set(data.completedWords || []);
                 
-                setTimeout(() => {
+            setTimeout(() => {
                     try {
                         // Masquer l'écran de démarrage et le bouton jouer
                         document.getElementById('startScreen').classList.add('hidden');
@@ -151,28 +157,32 @@ class ChristianCrosswordGame {
                         localStorage.removeItem('christianCrosswordSave');
                     }
                 }, 100);
-            } else {
-                console.log('ℹ️ Sauvegarde présente mais jeu non démarré');
-            }
         } catch (e) {
-            console.error('Erreur lors du chargement de la sauvegarde:', e);
+            console.error('❌ Erreur chargement sauvegarde:', e);
+            // En cas d'erreur de parsing, effacer la sauvegarde corrompue
+            localStorage.removeItem('christianCrosswordSave');
         }
-        
-        // Note: loadProgressFromCloud() sera appelé uniquement lors de la connexion
-        // via authSystem.onAuthChange() pour éviter les requêtes inutiles
     }
 
     clearSave() {
-        // Réinitialiser l'état AVANT d'effacer pour éviter re-sauvegarde
+        // CRITICAL: Bloquer toute sauvegarde pendant l'effacement
+        this.isClearingData = true;
+        
+        // Réinitialiser complètement l'état du jeu
         this.gameStarted = false;
         this.completedWords = new Set();
+        this.currentLevel = 1;
+        this.score = 0;
+        this.clickCount = 0;
         
         // Effacer localStorage
         localStorage.removeItem('christianCrosswordSave');
         
         // Marquer qu'on a effacé pour éviter que le cloud recharge
         this.saveCleared = true;
-        console.log('🗑️ Sauvegarde locale effacée');
+        
+        console.log('🗑️ Sauvegarde locale effacée - Remise à zéro complète');
+        console.log('🔒 Blocage des sauvegardes activé');
     }
 
     restoreCompletedWords() {
@@ -1651,12 +1661,14 @@ class ChristianCrosswordGame {
                 // Sinon, proposer de sauvegarder le score
                 this.showScoreModal(this.score);
             }
-            // Effacer la sauvegarde car le jeu est terminé
-            this.clearSave();
         }
     }
 
     resetGame() {
+        // CRITICAL: Effacer AVANT de reset l'UI pour éviter toute race condition
+        this.clearSave();
+        
+        // Reset UI
         this.currentLevel = 1;
         this.score = 0;
         this.clickCount = 0;
@@ -1670,9 +1682,8 @@ class ChristianCrosswordGame {
         document.getElementById('shareButton').style.display = 'none';
         document.getElementById('playButton').style.display = 'inline-block';
         this.updateUIText();
-
-        // Effacer la sauvegarde
-        this.clearSave();
+        
+        console.log('♻️ Jeu réinitialisé - Prêt pour nouveau démarrage');
     }
 
     async handleShare() {
