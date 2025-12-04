@@ -48,10 +48,29 @@ class ChristianCrosswordGame {
         // Sauvegarder avant de quitter ou actualiser la page
         window.addEventListener('beforeunload', () => {
             this.saveGame();
+            // Nettoyer l'intervalle de sauvegarde automatique
+            if (this.autoSaveInterval) {
+                clearInterval(this.autoSaveInterval);
+            }
         });
+        
+        // Sauvegarder automatiquement toutes les 3 minutes
+        this.autoSaveInterval = setInterval(() => {
+            if (this.gameStarted) {
+                console.log('⏰ Sauvegarde automatique (3 min)');
+                this.saveGame();
+            }
+        }, 3 * 60 * 1000); // 3 minutes en millisecondes
     }
 
     saveGame() {
+        console.log('💾 Sauvegarde en cours...', {
+            gameStarted: this.gameStarted,
+            gridLength: this.grid?.length,
+            solutionLength: this.solution?.length,
+            wordsLength: this.words?.length
+        });
+        
         // Sauvegarder l'état de la grille
         const saveData = {
             currentLevel: this.currentLevel,
@@ -65,6 +84,7 @@ class ChristianCrosswordGame {
             timestamp: Date.now()
         };
         localStorage.setItem('christianCrosswordSave', JSON.stringify(saveData));
+        console.log('✅ Sauvegarde terminée');
         
         // Sauvegarder aussi dans le cloud si connecté
         this.saveProgressToCloud();
@@ -1275,6 +1295,10 @@ class ChristianCrosswordGame {
                 if (typeof window.simpleChatSystem !== 'undefined') {
                     window.simpleChatSystem.showMessage(`✨ Mot complété : "${wordData.word}" ! +${wordBonus} pts`, 'system');
                 }
+                
+                // Sauvegarder automatiquement après chaque mot complété
+                console.log('💾 Sauvegarde auto (mot complété):', wordData.word);
+                this.saveGame();
 
                 // Animation visuelle sur les cellules du mot
                 if (wordData.path) {
