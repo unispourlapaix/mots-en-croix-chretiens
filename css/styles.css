@@ -360,6 +360,16 @@ body {
     50% { transform: scale(1.05); }
 }
 
+/* Conteneur des boutons de course */
+.race-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 10px;
+}
+
 /* Boutons de course */
 .race-button {
     padding: 10px 20px;
@@ -372,7 +382,6 @@ body {
     cursor: pointer;
     box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
     transition: all 0.3s ease;
-    margin: 5px;
 }
 
 .race-button:hover {

@@ -99,8 +99,6 @@
             <div class="chat-sms-input-container">
                 <input type="text" id="chatSmsInput" class="chat-sms-input" placeholder="Écrire ici..." maxlength="100">
                 <button id="chatSmsSend" class="chat-sms-send">📤</button>
-                <button id="startRaceButton" class="race-button" style="display: none;">🏁 Démarrer Course</button>
-                <button id="stopRaceButton" class="race-button stop" style="display: none;">⏹️ Arrêter</button>
             </div>
             <div id="chatSmsMessages" class="chat-sms-messages">
                 <!-- Messages apparaissent ici -->
@@ -115,6 +113,12 @@
         </div>
 
         <div id="gameScreen" class="hidden">
+            <!-- Boutons de course en haut de la grille -->
+            <div class="race-controls">
+                <button id="startRaceButton" class="race-button" style="display: none;">🏁 Démarrer Course</button>
+                <button id="stopRaceButton" class="race-button stop" style="display: none;">⏹️ Arrêter</button>
+            </div>
+            
             <div class="crossword-grid" id="crosswordGrid"></div>
             
             <div class="word-clues">
