@@ -10,6 +10,7 @@ class AchievementSystem {
             MILESTONE: 'milestone',       // Jalons de progression (5, 10, 20, etc.)
             SPEED: 'speed',               // Complétion rapide
             STREAK: 'streak',             // Série de niveaux parfaits
+            SCORE: 'score',               // Paliers de score
             SPECIAL: 'special'            // Événements spéciaux
         };
 
@@ -194,6 +195,98 @@ class AchievementSystem {
                 type: this.achievementTypes.SPECIAL,
                 rarity: 'common',
                 points: 5
+            },
+
+            // Médailles de score (paliers)
+            score_1000: {
+                id: 'score_1000',
+                name: 'Apprenti',
+                nameKey: 'achievement_score_1000',
+                description: 'Atteindre 1000 points',
+                descriptionKey: 'achievement_score_1000_desc',
+                icon: '🥉',
+                type: this.achievementTypes.SCORE,
+                rarity: 'common',
+                points: 10,
+                requirement: 1000
+            },
+
+            score_5000: {
+                id: 'score_5000',
+                name: 'Disciple Appliqué',
+                nameKey: 'achievement_score_5000',
+                description: 'Atteindre 5000 points',
+                descriptionKey: 'achievement_score_5000_desc',
+                icon: '🥈',
+                type: this.achievementTypes.SCORE,
+                rarity: 'common',
+                points: 25,
+                requirement: 5000
+            },
+
+            score_10000: {
+                id: 'score_10000',
+                name: 'Érudit Biblique',
+                nameKey: 'achievement_score_10000',
+                description: 'Atteindre 10000 points',
+                descriptionKey: 'achievement_score_10000_desc',
+                icon: '🥇',
+                type: this.achievementTypes.SCORE,
+                rarity: 'rare',
+                points: 50,
+                requirement: 10000
+            },
+
+            score_25000: {
+                id: 'score_25000',
+                name: 'Maître des Mots',
+                nameKey: 'achievement_score_25000',
+                description: 'Atteindre 25000 points',
+                descriptionKey: 'achievement_score_25000_desc',
+                icon: '🏅',
+                type: this.achievementTypes.SCORE,
+                rarity: 'epic',
+                points: 100,
+                requirement: 25000
+            },
+
+            score_50000: {
+                id: 'score_50000',
+                name: 'Sage Inspiré',
+                nameKey: 'achievement_score_50000',
+                description: 'Atteindre 50000 points',
+                descriptionKey: 'achievement_score_50000_desc',
+                icon: '🎖️',
+                type: this.achievementTypes.SCORE,
+                rarity: 'epic',
+                points: 150,
+                requirement: 50000
+            },
+
+            score_100000: {
+                id: 'score_100000',
+                name: 'Champion Légendaire',
+                nameKey: 'achievement_score_100000',
+                description: 'Atteindre 100000 points',
+                descriptionKey: 'achievement_score_100000_desc',
+                icon: '🏆',
+                type: this.achievementTypes.SCORE,
+                rarity: 'legendary',
+                points: 300,
+                requirement: 100000
+            },
+
+            score_250000: {
+                id: 'score_250000',
+                name: 'Virtuose Divin',
+                nameKey: 'achievement_score_250000',
+                description: 'Atteindre 250000 points',
+                descriptionKey: 'achievement_score_250000_desc',
+                icon: '⭐',
+                type: this.achievementTypes.SCORE,
+                rarity: 'legendary',
+                points: 500,
+                requirement: 250000
             }
         };
 
@@ -212,14 +305,20 @@ class AchievementSystem {
         const saved = localStorage.getItem('christianCrosswordAchievements');
         if (saved) {
             try {
-                return JSON.parse(saved);
+                const data = JSON.parse(saved);
+                // Ajouter currentScore si manquant
+                if (!data.currentScore) {
+                    data.currentScore = 0;
+                }
+                return data;
             } catch (e) {
                 console.error('Erreur lors du chargement des achievements:', e);
                 return {
                     unlocked: [],
                     progress: {},
                     totalPoints: 0,
-                    unlockedAt: {}
+                    unlockedAt: {},
+                    currentScore: 0
                 };
             }
         }
@@ -227,7 +326,8 @@ class AchievementSystem {
             unlocked: [],
             progress: {},
             totalPoints: 0,
-            unlockedAt: {}
+            unlockedAt: {},
+            currentScore: 0
         };
     }
 
@@ -253,6 +353,31 @@ class AchievementSystem {
     // Sauvegarder les stats
     saveLevelStats() {
         localStorage.setItem('christianCrosswordLevelStats', JSON.stringify(this.levelStats));
+    }
+
+    // Mettre à jour le score et vérifier les achievements de score
+    updateScore(newScore) {
+        this.userAchievements.currentScore = newScore;
+        this.saveAchievements();
+
+        // Vérifier les achievements de score débloqués
+        const newAchievements = [];
+        [1000, 5000, 10000, 25000, 50000, 100000, 250000].forEach(scoreThreshold => {
+            const achievementId = `score_${scoreThreshold}`;
+            if (newScore >= scoreThreshold && !this.isUnlocked(achievementId)) {
+                const medal = this.unlockAchievement(achievementId);
+                if (medal) {
+                    newAchievements.push(medal);
+                }
+            }
+        });
+
+        // Afficher les nouvelles médailles débloquées
+        if (newAchievements.length > 0) {
+            this.showAchievementNotifications(newAchievements);
+        }
+
+        return newAchievements;
     }
 
     // Enregistrer la complétion d'un niveau
@@ -327,6 +452,15 @@ class AchievementSystem {
         [5, 10, 20, 40, 77].forEach(milestone => {
             const achievementId = `milestone_${milestone}`;
             if (completedLevels >= milestone && !this.isUnlocked(achievementId)) {
+                newAchievements.push(this.unlockAchievement(achievementId));
+            }
+        });
+
+        // Achievements: Paliers de score
+        const currentScore = this.userAchievements.currentScore || 0;
+        [1000, 5000, 10000, 25000, 50000, 100000, 250000].forEach(scoreThreshold => {
+            const achievementId = `score_${scoreThreshold}`;
+            if (currentScore >= scoreThreshold && !this.isUnlocked(achievementId)) {
                 newAchievements.push(this.unlockAchievement(achievementId));
             }
         });

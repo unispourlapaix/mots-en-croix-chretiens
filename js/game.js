@@ -1296,6 +1296,11 @@ class ChristianCrosswordGame {
         const scoreEl = document.getElementById('infoBannerScore');
         if (scoreEl) scoreEl.textContent = this.score;
 
+        // Mettre à jour le score dans le système d'achievements
+        if (window.achievementSystem) {
+            window.achievementSystem.updateScore(this.score);
+        }
+
         // Notifier dans le chat
         if (percentage === 100 && typeof window.simpleChatSystem !== 'undefined') {
             window.simpleChatSystem.showMessage(`🎉 Grille complète ! ${correctCells} lettres (+${letterPoints}pts) + ${completedWords} mots bonus (+${wordBonusPoints}pts) = +${totalPoints} points`, 'system');
@@ -1376,6 +1381,11 @@ class ChristianCrosswordGame {
                 const scoreEl = document.getElementById('infoBannerScore');
                 if (scoreEl) scoreEl.textContent = this.score;
 
+                // Mettre à jour le score dans le système d'achievements
+                if (window.achievementSystem) {
+                    window.achievementSystem.updateScore(this.score);
+                }
+
                 // Notifier dans le chat
                 if (typeof window.simpleChatSystem !== 'undefined') {
                     window.simpleChatSystem.showMessage(`✨ Mot complété : "${wordData.word}" ! +${wordBonus} pts`, 'system');
@@ -1435,6 +1445,11 @@ class ChristianCrosswordGame {
             this.score += bonusPoints;
             const scoreEl = document.getElementById('infoBannerScore');
             if (scoreEl) scoreEl.textContent = this.score;
+
+            // Mettre à jour le score dans le système d'achievements
+            if (window.achievementSystem) {
+                window.achievementSystem.updateScore(this.score);
+            }
 
             // Notifier dans le chat
             if (typeof window.simpleChatSystem !== 'undefined') {
