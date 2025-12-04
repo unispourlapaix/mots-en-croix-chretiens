@@ -120,44 +120,61 @@ class ChristianCrosswordGame {
                     this.blocked = data.blocked;
                     
                     setTimeout(() => {
-                        // Masquer l'écran de démarrage et le bouton jouer
-                        document.getElementById('startScreen').classList.add('hidden');
-                        document.getElementById('playButton').style.display = 'none';
-                        
-                        // Afficher l'écran de jeu
-                        document.getElementById('gameScreen').classList.remove('hidden');
-                        
-                        // Mettre à jour l'UI
-                        document.getElementById('score').textContent = this.score;
-                        document.getElementById('currentLevel').textContent = this.currentLevel;
-                        
-                        // Recréer la grille (this.words déjà restauré)
-                        this.createGrid();
-                        
-                        // Restaurer l'affichage des cellules
-                        for (let row = 0; row < this.gridSize; row++) {
-                            for (let col = 0; col < this.gridSize; col++) {
-                                const cellElement = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-                                if (cellElement) {
-                                    // Si la cellule est bloquée
-                                    if (this.blocked[row][col]) {
-                                        cellElement.classList.add('blocked');
-                                    }
-                                    // Si l'utilisateur a rempli la cellule
-                                    if (this.grid[row][col]) {
-                                        cellElement.textContent = this.grid[row][col];
-                                        // Vérifier si c'est correct
-                                        if (this.grid[row][col] === this.solution[row][col]) {
-                                            cellElement.classList.add('correct');
+                        try {
+                            // Masquer l'écran de démarrage et le bouton jouer
+                            document.getElementById('startScreen').classList.add('hidden');
+                            document.getElementById('playButton').style.display = 'none';
+                            
+                            // Afficher l'écran de jeu
+                            document.getElementById('gameScreen').classList.remove('hidden');
+                            
+                            // Mettre à jour l'UI
+                            document.getElementById('score').textContent = this.score;
+                            document.getElementById('currentLevel').textContent = this.currentLevel;
+                            
+                            // Recréer la grille (this.words déjà restauré)
+                            this.createGrid();
+                            
+                            // Restaurer l'affichage des cellules
+                            for (let row = 0; row < this.gridSize; row++) {
+                                for (let col = 0; col < this.gridSize; col++) {
+                                    const cellElement = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                                    if (cellElement) {
+                                        // Si la cellule est bloquée
+                                        if (this.blocked[row][col]) {
+                                            cellElement.classList.add('blocked');
+                                        }
+                                        // Si l'utilisateur a rempli la cellule
+                                        if (this.grid[row][col]) {
+                                            cellElement.textContent = this.grid[row][col];
+                                            // Vérifier si c'est correct
+                                            if (this.grid[row][col] === this.solution[row][col]) {
+                                                cellElement.classList.add('correct');
+                                            }
                                         }
                                     }
                                 }
                             }
+                            
+                            // Afficher les indices
+                            this.displayClues();
+                        } catch (error) {
+                            console.error('❌ Erreur restauration:', error);
+                            // En cas d'erreur, réinitialiser l'état et afficher l'écran de démarrage
+                            this.gameStarted = false;
+                            document.getElementById('startScreen').classList.remove('hidden');
+                            document.getElementById('gameScreen').classList.add('hidden');
+                            document.getElementById('playButton').style.display = 'inline-block';
+                            // Effacer la sauvegarde corrompue
+                            localStorage.removeItem('christianCrosswordSave');
                         }
-                        
-                        // Afficher les indices
-                        this.displayClues();
                     }, 100);
+                } else if (this.gameStarted && (!data.grid || !data.solution || !data.words)) {
+                    // Sauvegarde incomplète : réinitialiser
+                    console.warn('⚠️ Sauvegarde incomplète détectée');
+                    this.gameStarted = false;
+                    document.getElementById('playButton').style.display = 'inline-block';
+                    localStorage.removeItem('christianCrosswordSave');
                 }
             } catch (e) {
                 console.error('Erreur lors du chargement de la sauvegarde:', e);
