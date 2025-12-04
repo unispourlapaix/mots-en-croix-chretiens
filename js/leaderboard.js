@@ -262,11 +262,12 @@ class LeaderboardManager {
                 throw new Error('Supabase non configuré');
             }
 
-            // Requête optimisée avec agrégation
+            // Appeler la fonction Postgres optimisée
             const { data, error } = await supabase
-                .rpc('get_leaderboard_stats'); // Fonction Postgres custom
+                .rpc('get_leaderboard_stats');
 
             if (error) {
+                console.warn('⚠️ Fonction RPC non disponible, calcul depuis cache');
                 // Fallback: calculer depuis le cache
                 if (this.cache && this.cache.length > 0) {
                     return {
@@ -279,9 +280,26 @@ class LeaderboardManager {
                 throw error;
             }
 
-            return { success: true, ...data };
+            return { 
+                success: true, 
+                totalPlayers: data.total_players,
+                topScore: data.top_score,
+                avgScore: Math.round(data.avg_score)
+            };
         } catch (error) {
             console.error('❌ Erreur stats globales:', error);
+            
+            // Fallback final: retourner depuis le cache si disponible
+            if (this.cache && this.cache.length > 0) {
+                return {
+                    success: true,
+                    totalPlayers: this.cache.length,
+                    topScore: this.cache[0].max_score,
+                    avgScore: Math.round(this.cache.reduce((sum, p) => sum + p.max_score, 0) / this.cache.length),
+                    fromCache: true
+                };
+            }
+            
             return { success: false, error: error.message };
         }
     }
