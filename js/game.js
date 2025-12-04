@@ -1526,6 +1526,9 @@ class ChristianCrosswordGame {
         document.getElementById('achievementPoints').textContent = stats.totalPoints;
         document.getElementById('completionPercent').textContent = `${stats.completionPercentage}%`;
 
+        // Remplir la section des médailles de score
+        this.updateScoreMedalsShowcase();
+
         // Afficher les achievements
         const achievementsList = document.getElementById('achievementsList');
         achievementsList.innerHTML = '';
@@ -1561,6 +1564,48 @@ class ChristianCrosswordGame {
             `;
 
             achievementsList.appendChild(achievementCard);
+        });
+    }
+
+    updateScoreMedalsShowcase() {
+        const scoreMedalsGrid = document.getElementById('scoreMedalsGrid');
+        if (!scoreMedalsGrid) return;
+
+        scoreMedalsGrid.innerHTML = '';
+
+        // Récupérer les médailles de score
+        const scoreMedals = [
+            { id: 'score_1000', threshold: 1000, icon: '🥉', name: 'Apprenti' },
+            { id: 'score_5000', threshold: 5000, icon: '🥈', name: 'Disciple Appliqué' },
+            { id: 'score_10000', threshold: 10000, icon: '🥇', name: 'Érudit Biblique' },
+            { id: 'score_25000', threshold: 25000, icon: '🏅', name: 'Maître des Mots' },
+            { id: 'score_50000', threshold: 50000, icon: '🎖️', name: 'Sage Inspiré' },
+            { id: 'score_100000', threshold: 100000, icon: '🏆', name: 'Champion Légendaire' },
+            { id: 'score_250000', threshold: 250000, icon: '⭐', name: 'Virtuose Divin' }
+        ];
+
+        const currentScore = achievementSystem.userAchievements.currentScore || 0;
+
+        scoreMedals.forEach(medal => {
+            const isUnlocked = achievementSystem.isUnlocked(medal.id);
+            const progress = Math.min(100, (currentScore / medal.threshold) * 100);
+
+            const medalItem = document.createElement('div');
+            medalItem.className = `score-medal-item ${isUnlocked ? 'unlocked' : 'locked'}`;
+            medalItem.title = isUnlocked ? `Débloquée ! ${medal.threshold.toLocaleString()} points` : `${medal.threshold.toLocaleString()} points requis`;
+
+            medalItem.innerHTML = `
+                <div class="score-medal-icon">${isUnlocked ? medal.icon : '🔒'}</div>
+                <div class="score-medal-name">${medal.name}</div>
+                <div class="score-medal-requirement">${medal.threshold.toLocaleString()}</div>
+                ${!isUnlocked ? `
+                    <div class="score-medal-progress">
+                        <div class="score-medal-progress-bar" style="width: ${progress}%"></div>
+                    </div>
+                ` : '<div style="color: #4caf50; font-size: 0.75em; margin-top: 5px;">✓ Débloquée</div>'}
+            `;
+
+            scoreMedalsGrid.appendChild(medalItem);
         });
     }
 
