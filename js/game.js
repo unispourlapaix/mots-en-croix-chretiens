@@ -71,6 +71,13 @@ class ChristianCrosswordGame {
             wordsLength: this.words?.length
         });
         
+        // Ne pas sauvegarder si le jeu est démarré mais qu'il n'y a pas de mots
+        // (évite de sauvegarder un état invalide au premier démarrage)
+        if (this.gameStarted && (!this.words || this.words.length === 0)) {
+            console.warn('⚠️ Sauvegarde annulée : pas de mots chargés');
+            return;
+        }
+        
         // Sauvegarder l'état de la grille
         const saveData = {
             currentLevel: this.currentLevel,
@@ -172,6 +179,12 @@ class ChristianCrosswordGame {
                 } else if (this.gameStarted && (!data.grid || !data.solution || !data.words)) {
                     // Sauvegarde incomplète : réinitialiser
                     console.warn('⚠️ Sauvegarde incomplète détectée');
+                    this.gameStarted = false;
+                    document.getElementById('playButton').style.display = 'inline-block';
+                    localStorage.removeItem('christianCrosswordSave');
+                } else if (this.gameStarted && data.words && data.words.length === 0) {
+                    // Sauvegarde avec tableau de mots vide : réinitialiser
+                    console.warn('⚠️ Sauvegarde invalide (mots vides) - premier démarrage non sauvegardé correctement');
                     this.gameStarted = false;
                     document.getElementById('playButton').style.display = 'inline-block';
                     localStorage.removeItem('christianCrosswordSave');
