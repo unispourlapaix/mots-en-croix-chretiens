@@ -42,28 +42,53 @@ class InfoBannerManager {
         // Afficher le premier message
         this.showCurrentMessage();
         
-        // Changer de message toutes les 5 secondes
-        this.messageInterval = setInterval(() => {
-            this.nextMessage();
-        }, 5000);
+        // Desktop: changer de message toutes les 5 secondes
+        if (window.innerWidth > 768) {
+            this.messageInterval = setInterval(() => {
+                this.nextMessage();
+            }, 5000);
+        }
         
-        // Mobile: alterner stats/messages toutes les 5 secondes
+        // Mobile: alterner stats/messages toutes les 4 secondes
         if (window.innerWidth <= 768) {
             this.mobileToggleInterval = setInterval(() => {
                 this.toggleMobileView();
-            }, 5000);
+                // Changer de message quand on affiche les messages
+                if (!this.showingStats) {
+                    this.nextMessage();
+                }
+            }, 4000);
         }
 
         // Gérer le redimensionnement
         window.addEventListener('resize', () => {
-            if (window.innerWidth <= 768 && !this.mobileToggleInterval) {
-                this.mobileToggleInterval = setInterval(() => {
-                    this.toggleMobileView();
-                }, 5000);
-            } else if (window.innerWidth > 768 && this.mobileToggleInterval) {
-                clearInterval(this.mobileToggleInterval);
-                this.mobileToggleInterval = null;
-                this.banner.classList.remove('mobile-show-messages');
+            if (window.innerWidth <= 768) {
+                // Passer en mode mobile
+                if (this.messageInterval) {
+                    clearInterval(this.messageInterval);
+                    this.messageInterval = null;
+                }
+                if (!this.mobileToggleInterval) {
+                    this.mobileToggleInterval = setInterval(() => {
+                        this.toggleMobileView();
+                        if (!this.showingStats) {
+                            this.nextMessage();
+                        }
+                    }, 4000);
+                }
+            } else {
+                // Passer en mode desktop
+                if (this.mobileToggleInterval) {
+                    clearInterval(this.mobileToggleInterval);
+                    this.mobileToggleInterval = null;
+                    this.banner.classList.remove('mobile-show-messages');
+                    this.showingStats = true;
+                }
+                if (!this.messageInterval) {
+                    this.messageInterval = setInterval(() => {
+                        this.nextMessage();
+                    }, 5000);
+                }
             }
         });
         
@@ -89,21 +114,33 @@ class InfoBannerManager {
     // Afficher le message courant
     showCurrentMessage() {
         const msg = this.messages[this.currentMessageIndex];
+        
+        // Vider complètement le conteneur avant d'ajouter le nouveau message
+        this.messagesContainer.innerHTML = '';
+        
+        // Créer le nouveau message
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'info-message';
+        messageDiv.style.cssText = 'position: static; opacity: 1; visibility: visible; animation: none;';
+        
+        const icon = document.createElement('span');
+        icon.className = 'info-message-icon';
+        icon.textContent = msg.icon;
+        messageDiv.appendChild(icon);
+        
         if (msg.link) {
-            this.messagesContainer.innerHTML = `
-                <div class="info-message" style="position: static; opacity: 1; visibility: visible; animation: none;">
-                    <span class="info-message-icon">${msg.icon}</span>
-                    <a href="${msg.link}" target="_blank">${msg.text}</a>
-                </div>
-            `;
+            const link = document.createElement('a');
+            link.href = msg.link;
+            link.target = '_blank';
+            link.textContent = msg.text;
+            messageDiv.appendChild(link);
         } else {
-            this.messagesContainer.innerHTML = `
-                <div class="info-message" style="position: static; opacity: 1; visibility: visible; animation: none;">
-                    <span class="info-message-icon">${msg.icon}</span>
-                    <span>${msg.text}</span>
-                </div>
-            `;
+            const text = document.createElement('span');
+            text.textContent = msg.text;
+            messageDiv.appendChild(text);
         }
+        
+        this.messagesContainer.appendChild(messageDiv);
     }
 
     // Passer au message suivant
