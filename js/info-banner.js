@@ -159,11 +159,11 @@ class InfoBannerManager {
         if (!banner) return;
 
         // Supprimer les thèmes existants
-        banner.classList.remove('orange-led');
+        banner.classList.remove('inverted');
         
         // Appliquer le nouveau thème
-        if (theme === 'orange-led') {
-            banner.classList.add('orange-led');
+        if (theme === 'inverted') {
+            banner.classList.add('inverted');
         }
     }
 
