@@ -117,14 +117,33 @@ class ChatUI {
         }
 
         try {
-            await this.chatSystem.joinRoom(roomCode);
+            const success = await this.chatSystem.joinRoom(roomCode);
 
             // Vider le champ de saisie
             if (this.chatRoomCodeInput) {
                 this.chatRoomCodeInput.value = '';
             }
 
-            this.chatSystem.showMessage('Connecté à la partie!', 'system');
+            if (success) {
+                this.chatSystem.showMessage('✅ Connecté à la partie!', 'system');
+                
+                // Fermer le menu modal
+                const menuModal = document.getElementById('menuModal');
+                if (menuModal) {
+                    menuModal.classList.add('hidden');
+                }
+                
+                // Retourner au jeu si pas encore démarré
+                const startScreen = document.getElementById('startScreen');
+                const gameScreen = document.getElementById('gameScreen');
+                if (startScreen && !startScreen.classList.contains('hidden')) {
+                    // Le jeu n'a pas encore démarré, on peut rester sur l'écran de départ
+                    // L'utilisateur cliquera sur Jouer quand il est prêt
+                } else if (gameScreen && gameScreen.classList.contains('hidden')) {
+                    // Si le jeu est caché, l'afficher
+                    gameScreen.classList.remove('hidden');
+                }
+            }
         } catch (error) {
             console.error('Erreur connexion room:', error);
             alert('Erreur lors de la connexion: ' + error.message);
