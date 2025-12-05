@@ -600,9 +600,12 @@ class MultiplayerRace {
         // Trier par score décroissant
         allPlayers.sort((a, b) => b.score - a.score);
         
+        // Afficher seulement le top 3
+        const top3Players = allPlayers.slice(0, 3);
+        
         // Générer le HTML
-        listEl.innerHTML = allPlayers.map((player, index) => {
-            const medal = ['🥇', '🥈', '🥉'][index] || `${index + 1}.`;
+        listEl.innerHTML = top3Players.map((player, index) => {
+            const medal = ['🥇', '🥈', '🥉'][index];
             const avatar = this.chatSystem.getUserAvatar(player.username);
             const meClass = player.isMe ? 'me' : '';
             const finishedIcon = player.finishTime ? '✅' : '';
