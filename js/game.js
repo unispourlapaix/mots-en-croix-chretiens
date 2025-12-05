@@ -1117,6 +1117,11 @@ class ChristianCrosswordGame {
                             if (this.multiplayerMode && this.multiplayerManager) {
                                 this.multiplayerManager.sendCellUpdate(i, j, letter);
                             }
+                            
+                            // Partager la progression en mode course
+                            if (window.multiplayerRace && window.multiplayerRace.isRaceMode) {
+                                window.multiplayerRace.shareProgress();
+                            }
 
                             // Vérifier si correct
                             if (letter === this.solution[i][j]) {
@@ -1424,6 +1429,11 @@ class ChristianCrosswordGame {
                 // Notifier dans le chat
                 if (typeof window.simpleChatSystem !== 'undefined') {
                     window.simpleChatSystem.showMessage(`✨ Mot complété : "${wordData.word}" ! +${wordBonus} pts`, 'system');
+                }
+                
+                // Partager le mot trouvé avec les autres joueurs en mode course
+                if (window.multiplayerRace && window.multiplayerRace.isRaceMode) {
+                    window.multiplayerRace.shareWordFound(wordData.word, this.score);
                 }
                 
                 // Sauvegarder automatiquement après chaque mot complété

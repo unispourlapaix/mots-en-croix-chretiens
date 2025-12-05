@@ -14,6 +14,7 @@ class MultiplayerRace {
             totalLetters: 0
         };
         this.raceFinished = false;
+        this.lastProgressShare = 0; // Pour le throttling
     }
 
     // Démarrer une course
@@ -31,15 +32,26 @@ class MultiplayerRace {
 
         // Afficher le timer
         this.startTimer();
+        
+        // Afficher le panneau des joueurs
+        this.showPlayersPanel();
 
         // Notifier les autres joueurs
-        this.broadcastProgress('start');
+        this.broadcastProgress('start', {
+            startTime: this.raceStartTime,
+            duration: this.raceDuration
+        });
         this.chatSystem.showMessage('🏁 Course démarrée ! 5 minutes pour compléter la grille !', 'system');
 
         // Envoyer des mises à jour régulières
         this.progressInterval = setInterval(() => {
             this.sendProgressUpdate();
         }, 5000); // Toutes les 5 secondes
+        
+        // Mettre à jour l'affichage des joueurs régulièrement
+        this.playersUpdateInterval = setInterval(() => {
+            this.updatePlayersDisplay();
+        }, 2000); // Toutes les 2 secondes
     }
 
     // Démarrer le chronomètre
@@ -93,6 +105,39 @@ class MultiplayerRace {
             lettersCorrect: this.myProgress.lettersCorrect,
             totalLetters: this.myProgress.totalLetters,
             score: this.game.score
+        });
+    }
+    
+    // Partager la progression immédiatement (appelé à chaque lettre)
+    shareProgress() {
+        if (!this.isRaceMode || this.raceFinished) return;
+        
+        // Calculer et envoyer la progression sans attendre l'intervalle
+        this.calculateProgress();
+        
+        // Throttle pour éviter trop de messages (max 1 par seconde)
+        const now = Date.now();
+        if (!this.lastProgressShare || now - this.lastProgressShare > 1000) {
+            this.broadcastProgress('progress', {
+                wordsCompleted: this.myProgress.wordsCompleted,
+                lettersCorrect: this.myProgress.lettersCorrect,
+                totalLetters: this.myProgress.totalLetters,
+                percentage: this.myProgress.totalLetters > 0 
+                    ? Math.round((this.myProgress.lettersCorrect / this.myProgress.totalLetters) * 100)
+                    : 0
+            });
+            this.lastProgressShare = now;
+        }
+    }
+    
+    // Partager un mot trouvé
+    shareWordFound(word, newScore) {
+        if (!this.isRaceMode || this.raceFinished) return;
+        
+        this.broadcastProgress('word', {
+            word: word,
+            score: newScore,
+            wordsCompleted: this.myProgress.wordsCompleted + 1
         });
     }
 
@@ -179,6 +224,7 @@ class MultiplayerRace {
     endRace() {
         clearInterval(this.raceTimer);
         clearInterval(this.progressInterval);
+        clearInterval(this.playersUpdateInterval);
         this.isRaceMode = false;
 
         // Afficher le classement final
@@ -188,6 +234,9 @@ class MultiplayerRace {
         if (timerEl) {
             timerEl.remove();
         }
+        
+        // Cacher le panneau des joueurs
+        this.hidePlayersPanel();
         
         // Notifier l'UI que la course est terminée
         window.dispatchEvent(new Event('raceEnded'));
@@ -255,7 +304,39 @@ class MultiplayerRace {
 
         switch (action) {
             case 'start':
-                this.chatSystem.showMessage(`🏁 ${username} a rejoint la course !`, 'system');
+                // Recevoir notification de démarrage de course
+                if (!this.isRaceMode && data.startTime && data.duration) {
+                    // Rejoindre la course en cours
+                    this.joinOngoingRace(data.startTime, data.duration);
+                } else {
+                    this.chatSystem.showMessage(`🏁 ${username} a rejoint la course !`, 'system');
+                }
+                break;
+            
+            case 'state':
+                // Recevoir l'état complet de la course en cours
+                if (!this.isRaceMode && data.isRaceActive) {
+                    this.joinOngoingRace(data.startTime, data.duration);
+                }
+                break;
+            
+            case 'progress':
+                // Mise à jour de progression en temps réel
+                player.lettersCorrect = data.lettersCorrect || 0;
+                player.totalLetters = data.totalLetters || 0;
+                player.wordsCompleted = data.wordsCompleted || 0;
+                player.progress = data.percentage || 0;
+                // Mettre à jour l'affichage immédiatement
+                this.updatePlayersDisplay();
+                break;
+            
+            case 'word':
+                // Un joueur a trouvé un mot
+                player.score = data.score || 0;
+                player.wordsCompleted = data.wordsCompleted || 0;
+                this.chatSystem.showMessage(`🎯 ${username} a trouvé : "${data.word}" !`, 'ai');
+                // Mettre à jour l'affichage immédiatement
+                this.updatePlayersDisplay();
                 break;
 
             case 'update':
@@ -271,6 +352,8 @@ class MultiplayerRace {
                     player.lastNotifiedWords = data.wordsCompleted;
                     this.chatSystem.showMessage(`⭐ ${username} : ${data.wordsCompleted} mots complétés !`, 'system');
                 }
+                // Mettre à jour l'affichage
+                this.updatePlayersDisplay();
                 break;
 
             case 'finish':
@@ -280,6 +363,8 @@ class MultiplayerRace {
                 const seconds = data.finishTime % 60;
                 const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
                 this.chatSystem.showMessage(`🎊 ${username} a terminé en ${timeStr} ! (${data.score} pts, +${data.bonus} bonus)`, 'system');
+                // Mettre à jour l'affichage immédiatement
+                this.updatePlayersDisplay();
                 break;
         }
     }
@@ -288,14 +373,148 @@ class MultiplayerRace {
     stopRace() {
         if (this.raceTimer) clearInterval(this.raceTimer);
         if (this.progressInterval) clearInterval(this.progressInterval);
+        if (this.playersUpdateInterval) clearInterval(this.playersUpdateInterval);
         this.isRaceMode = false;
         this.raceFinished = false;
         
         const timerEl = document.getElementById('raceTimer');
         if (timerEl) timerEl.remove();
         
+        // Cacher le panneau des joueurs
+        this.hidePlayersPanel();
+        
         // Notifier l'UI que la course est terminée
         window.dispatchEvent(new Event('raceEnded'));
+    }
+    
+    // Afficher le panneau des joueurs
+    showPlayersPanel() {
+        const panel = document.getElementById('racePlayersPanel');
+        if (panel) {
+            panel.style.display = 'block';
+            this.updatePlayersDisplay();
+        }
+    }
+    
+    // Cacher le panneau des joueurs
+    hidePlayersPanel() {
+        const panel = document.getElementById('racePlayersPanel');
+        if (panel) {
+            panel.style.display = 'none';
+        }
+    }
+    
+    // Mettre à jour l'affichage des joueurs
+    updatePlayersDisplay() {
+        const listEl = document.getElementById('racePlayersList');
+        if (!listEl || !this.isRaceMode) return;
+        
+        // Calculer ma progression actuelle
+        this.calculateProgress();
+        
+        // Créer la liste de tous les joueurs
+        const allPlayers = [
+            {
+                username: this.chatSystem.currentUser,
+                score: this.game.score,
+                wordsCompleted: this.myProgress.wordsCompleted,
+                progress: this.myProgress.totalLetters > 0 
+                    ? Math.round((this.myProgress.lettersCorrect / this.myProgress.totalLetters) * 100)
+                    : 0,
+                isMe: true,
+                finishTime: this.raceFinished ? Math.floor((Date.now() - this.raceStartTime) / 1000) : null
+            },
+            ...Array.from(this.players.values()).map(p => ({
+                ...p,
+                isMe: false
+            }))
+        ];
+        
+        // Trier par score décroissant
+        allPlayers.sort((a, b) => b.score - a.score);
+        
+        // Générer le HTML
+        listEl.innerHTML = allPlayers.map((player, index) => {
+            const medal = ['🥇', '🥈', '🥉'][index] || `${index + 1}.`;
+            const avatar = this.chatSystem.getUserAvatar(player.username);
+            const meClass = player.isMe ? 'me' : '';
+            const finishedIcon = player.finishTime ? '✅' : '';
+            
+            return `
+                <div class="race-player-item ${meClass}">
+                    <div class="race-player-info">
+                        <span class="race-player-avatar">${medal} ${avatar}</span>
+                        <span class="race-player-name">${player.username} ${finishedIcon}</span>
+                    </div>
+                    <div class="race-player-stats">
+                        <div class="race-player-progress">
+                            <div class="race-progress-bar">
+                                <div class="race-progress-fill" style="width: ${player.progress}%"></div>
+                            </div>
+                            <span>${player.progress}%</span>
+                        </div>
+                        <div class="race-player-words">📝 ${player.wordsCompleted}</div>
+                        <div class="race-player-score">⭐ ${player.score}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    // Obtenir l'état actuel de la course
+    getRaceState() {
+        return {
+            isRaceActive: this.isRaceMode,
+            startTime: this.raceStartTime,
+            duration: this.raceDuration,
+            myProgress: this.myProgress,
+            players: Array.from(this.players.values())
+        };
+    }
+    
+    // Rejoindre une course déjà en cours
+    joinOngoingRace(startTime, duration) {
+        if (this.isRaceMode) return; // Déjà dans une course
+        
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const remaining = Math.max(0, duration - elapsed);
+        
+        if (remaining <= 0) {
+            this.chatSystem.showMessage('⏰ La course est déjà terminée', 'system');
+            return;
+        }
+        
+        this.isRaceMode = true;
+        this.raceFinished = false;
+        this.raceStartTime = startTime;
+        this.raceDuration = duration;
+        this.myProgress = { wordsCompleted: 0, lettersCorrect: 0, totalLetters: 0 };
+        
+        // Afficher le timer avec le temps correct
+        this.startTimer();
+        
+        // Afficher le panneau des joueurs
+        this.showPlayersPanel();
+        
+        const minutes = Math.floor(remaining / 60);
+        const seconds = remaining % 60;
+        this.chatSystem.showMessage(`🏁 Course en cours ! Temps restant: ${minutes}:${seconds.toString().padStart(2, '0')}`, 'system');
+        
+        // Envoyer des mises à jour régulières
+        this.progressInterval = setInterval(() => {
+            this.sendProgressUpdate();
+        }, 5000);
+        
+        // Mettre à jour l'affichage des joueurs régulièrement
+        this.playersUpdateInterval = setInterval(() => {
+            this.updatePlayersDisplay();
+        }, 2000);
+        
+        // Mettre à jour l'UI
+        const startBtn = document.getElementById('startRaceButton');
+        const stopBtn = document.getElementById('stopRaceButton');
+        if (startBtn) startBtn.style.display = 'none';
+        if (stopBtn) stopBtn.style.display = 'block';
     }
 }
 

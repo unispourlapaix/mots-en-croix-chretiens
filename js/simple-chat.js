@@ -230,6 +230,18 @@ class SimpleChatSystem {
                 type: 'join',
                 username: this.currentUser
             });
+            
+            // Si une course est en cours, envoyer l'état de la course au nouveau joueur
+            if (window.multiplayerRace && window.multiplayerRace.isRaceMode) {
+                const raceState = window.multiplayerRace.getRaceState();
+                conn.send({
+                    type: 'race',
+                    action: 'state',
+                    username: this.currentUser,
+                    data: raceState
+                });
+                console.log('📤 État de course envoyé au nouveau joueur:', raceState);
+            }
         });
 
         conn.on('data', (data) => {
@@ -254,6 +266,18 @@ class SimpleChatSystem {
             this.receiveMessage(data.username, data.text);
         } else if (data.type === 'join') {
             this.showMessage(`${data.username} a rejoint`, 'system');
+            
+            // Si une course est en cours, envoyer l'état au nouveau joueur
+            if (window.multiplayerRace && window.multiplayerRace.isRaceMode) {
+                const raceState = window.multiplayerRace.getRaceState();
+                conn.send({
+                    type: 'race',
+                    action: 'state',
+                    username: this.currentUser,
+                    data: raceState
+                });
+                console.log('📤 État de course envoyé à', data.username, ':', raceState);
+            }
         } else if (data.type === 'race') {
             // Transmettre les messages de course au système multiplayer
             if (window.multiplayerRace) {
