@@ -335,16 +335,16 @@ class SimpleChatSystem {
             messageDiv.innerHTML = `<span class="chat-avatar">${avatar}</span><span class="username">${username || 'Anonyme'}:</span> ${text}`;
         }
 
-        messagesDiv.appendChild(messageDiv);
+        messagesDiv.prepend(messageDiv);
 
         // Limiter à 30 messages max (10 visibles + 20 en scroll)
         const messages = messagesDiv.children;
         if (messages.length > 30) {
-            messages[0].remove();
+            messages[messages.length - 1].remove();
         }
 
-        // Scroll automatique vers le bas (nouveau message visible)
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        // Scroll vers le haut (nouveau message visible)
+        messagesDiv.scrollTop = 0;
     }
 
     // Envoyer un message à tous
