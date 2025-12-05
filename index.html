@@ -115,6 +115,14 @@
         <div id="gameScreen" class="hidden">
             <!-- Boutons de course en haut de la grille -->
             <div class="race-controls">
+                <!-- Box info points des joueurs -->
+                <div id="raceScoreBox" class="race-score-box" style="display: none;">
+                    <div class="race-score-header">📊 Scores en Direct</div>
+                    <div id="raceScoreList" class="race-score-list">
+                        <!-- Scores générés dynamiquement -->
+                    </div>
+                </div>
+                
                 <button id="startRaceButton" class="race-button" style="display: none;">🏁 Démarrer Course</button>
                 <button id="stopRaceButton" class="race-button stop" style="display: none;">⏹️ Arrêter</button>
             </div>

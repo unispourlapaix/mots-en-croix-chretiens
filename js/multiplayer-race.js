@@ -35,6 +35,9 @@ class MultiplayerRace {
         
         // Afficher le panneau des joueurs
         this.showPlayersPanel();
+        
+        // Afficher la box des scores
+        this.showScoreBox();
 
         // Notifier les autres joueurs
         this.broadcastProgress('start', {
@@ -51,6 +54,7 @@ class MultiplayerRace {
         // Mettre à jour l'affichage des joueurs régulièrement
         this.playersUpdateInterval = setInterval(() => {
             this.updatePlayersDisplay();
+            this.updateScoreBox();
         }, 2000); // Toutes les 2 secondes
     }
 
@@ -235,8 +239,9 @@ class MultiplayerRace {
             timerEl.remove();
         }
         
-        // Cacher le panneau des joueurs
+        // Cacher le panneau des joueurs et la box des scores
         this.hidePlayersPanel();
+        this.hideScoreBox();
         
         // Notifier l'UI que la course est terminée
         window.dispatchEvent(new Event('raceEnded'));
@@ -328,6 +333,7 @@ class MultiplayerRace {
                 player.progress = data.percentage || 0;
                 // Mettre à jour l'affichage immédiatement
                 this.updatePlayersDisplay();
+                this.updateScoreBox();
                 break;
             
             case 'word':
@@ -337,6 +343,7 @@ class MultiplayerRace {
                 this.chatSystem.showMessage(`🎯 ${username} a trouvé : "${data.word}" !`, 'ai');
                 // Mettre à jour l'affichage immédiatement
                 this.updatePlayersDisplay();
+                this.updateScoreBox();
                 break;
 
             case 'update':
@@ -354,6 +361,7 @@ class MultiplayerRace {
                 }
                 // Mettre à jour l'affichage
                 this.updatePlayersDisplay();
+                this.updateScoreBox();
                 break;
 
             case 'finish':
@@ -365,6 +373,7 @@ class MultiplayerRace {
                 this.chatSystem.showMessage(`🎊 ${username} a terminé en ${timeStr} ! (${data.score} pts, +${data.bonus} bonus)`, 'system');
                 // Mettre à jour l'affichage immédiatement
                 this.updatePlayersDisplay();
+                this.updateScoreBox();
                 break;
         }
     }
@@ -380,11 +389,71 @@ class MultiplayerRace {
         const timerEl = document.getElementById('raceTimer');
         if (timerEl) timerEl.remove();
         
-        // Cacher le panneau des joueurs
+        // Cacher le panneau des joueurs et la box des scores
         this.hidePlayersPanel();
+        this.hideScoreBox();
         
         // Notifier l'UI que la course est terminée
         window.dispatchEvent(new Event('raceEnded'));
+    }
+    
+    // Afficher la box des scores
+    showScoreBox() {
+        const box = document.getElementById('raceScoreBox');
+        if (box) {
+            box.style.display = 'block';
+            this.updateScoreBox();
+        }
+    }
+    
+    // Cacher la box des scores
+    hideScoreBox() {
+        const box = document.getElementById('raceScoreBox');
+        if (box) {
+            box.style.display = 'none';
+        }
+    }
+    
+    // Mettre à jour la box des scores
+    updateScoreBox() {
+        const listEl = document.getElementById('raceScoreList');
+        if (!listEl || !this.isRaceMode) return;
+        
+        // Calculer ma progression actuelle
+        this.calculateProgress();
+        
+        // Créer la liste de tous les joueurs
+        const allPlayers = [
+            {
+                username: this.chatSystem.currentUser,
+                score: this.game.score,
+                isMe: true
+            },
+            ...Array.from(this.players.values()).map(p => ({
+                username: p.username,
+                score: p.score || 0,
+                isMe: false
+            }))
+        ];
+        
+        // Trier par score décroissant
+        allPlayers.sort((a, b) => b.score - a.score);
+        
+        // Générer le HTML
+        listEl.innerHTML = allPlayers.map((player, index) => {
+            const avatar = this.chatSystem.getUserAvatar(player.username);
+            const meClass = player.isMe ? 'me' : '';
+            const leaderClass = index === 0 ? 'leader' : '';
+            const medal = index === 0 ? '👑' : '';
+            
+            return `
+                <div class="race-score-item ${meClass} ${leaderClass}">
+                    <span class="race-score-avatar">${avatar}</span>
+                    <span class="race-score-name">${medal} ${player.username}</span>
+                    <span class="race-score-points">⭐${player.score}</span>
+                </div>
+            `;
+        }).join('');
     }
     
     // Afficher le panneau des joueurs
@@ -496,6 +565,9 @@ class MultiplayerRace {
         // Afficher le panneau des joueurs
         this.showPlayersPanel();
         
+        // Afficher la box des scores
+        this.showScoreBox();
+        
         const minutes = Math.floor(remaining / 60);
         const seconds = remaining % 60;
         this.chatSystem.showMessage(`🏁 Course en cours ! Temps restant: ${minutes}:${seconds.toString().padStart(2, '0')}`, 'system');
@@ -508,6 +580,7 @@ class MultiplayerRace {
         // Mettre à jour l'affichage des joueurs régulièrement
         this.playersUpdateInterval = setInterval(() => {
             this.updatePlayersDisplay();
+            this.updateScoreBox();
         }, 2000);
         
         // Mettre à jour l'UI
