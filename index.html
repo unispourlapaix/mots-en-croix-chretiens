@@ -428,42 +428,62 @@
     <!-- Modal Multijoueur -->
     <div id="multiplayerModal" class="kawaii-modal hidden">
         <div class="kawaii-modal-overlay"></div>
-        <div class="kawaii-modal-content">
+        <div class="kawaii-modal-content room-system-modal">
             <div class="kawaii-modal-header">
-                <span class="kawaii-modal-icon">👥</span>
+                <span class="kawaii-modal-icon">🏠</span>
             </div>
             <div class="kawaii-modal-body">
-                <h3>Mode Coopératif</h3>
-                <p>Résolvez un niveau à deux ! Chaque joueur trouve des mots différents.</p>
+                <h3>Salles Multijoueur</h3>
+                <p>Chaque joueur a sa propre salle automatique !</p>
                 
-                <div id="multiplayerMenu">
-                    <input type="text" id="multiplayerPlayerName" placeholder="Votre nom" class="kawaii-input" style="width: 100%; margin: 10px 0; padding: 12px; border: 2px solid #ff69b4; border-radius: 10px;">
-                    <button id="createRoomBtn" class="kawaii-modal-button" style="width: 100%; margin: 5px 0;">
-                        🎮 Créer une Partie
-                    </button>
-                    <button id="joinRoomBtn" class="kawaii-modal-button secondary" style="width: 100%; margin: 5px 0;">
-                        🔗 Rejoindre une Partie
-                    </button>
+                <!-- Panel de contrôle hôte -->
+                <div id="hostControlPanel" class="host-panel hidden">
+                    <div class="panel-section">
+                        <h4>🎛️ Ma Salle</h4>
+                        <div class="room-mode-selector">
+                            <label>Mode:</label>
+                            <select id="roomModeSelect" class="kawaii-input">
+                                <option value="open">🔓 Entrée Libre</option>
+                                <option value="invite">🎫 Sur Invitation</option>
+                                <option value="private">🔒 Privée</option>
+                            </select>
+                        </div>
+                        <div class="room-info">
+                            <span class="room-mode-display" id="roomModeDisplay">🔓 Entrée Libre</span>
+                            <span class="room-player-count">
+                                Joueurs: <strong id="roomPlayerCount">1/8</strong>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Demandes en attente -->
+                    <div id="pendingRequestsContainer" class="panel-section hidden">
+                        <h4>🔔 Demandes d'Accès</h4>
+                        <div id="pendingRequestsList" class="requests-list"></div>
+                    </div>
+
+                    <!-- Joueurs dans la salle -->
+                    <div class="panel-section">
+                        <h4>👥 Joueurs dans la Salle</h4>
+                        <div id="roomPlayersList" class="room-players-list"></div>
+                    </div>
                 </div>
 
-                <div id="roomCodeDisplay" class="hidden" style="margin: 20px 0; padding: 15px; background: #fff5f9; border-radius: 10px; text-align: center;">
-                    <p><strong>Code de la partie:</strong></p>
-                    <p id="roomCode" style="font-size: 24px; color: #ff1493; font-weight: bold; letter-spacing: 2px; user-select: all;"></p>
-                    <button id="copyCodeBtn" class="kawaii-modal-button" style="margin-top: 10px;">
-                        📋 Copier le Code
-                    </button>
-                    <p style="margin-top: 10px; font-size: 14px; color: #666;">En attente du partenaire...</p>
-                </div>
-
-                <div id="joinRoomInput" class="hidden" style="margin: 20px 0;">
-                    <input type="text" id="roomCodeInput" placeholder="Code de la partie" class="kawaii-input" style="width: 100%; padding: 12px; border: 2px solid #ff69b4; border-radius: 10px; margin-bottom: 10px;">
-                    <button id="connectBtn" class="kawaii-modal-button" style="width: 100%;">
-                        ✅ Se Connecter
-                    </button>
+                <!-- Liste des joueurs disponibles (pour joindre) -->
+                <div id="availablePlayersPanel" class="available-players-panel">
+                    <h4>🌐 Rejoindre une Salle</h4>
+                    <div class="join-room-input">
+                        <input type="text" id="targetUsername" placeholder="Nom du joueur..." class="kawaii-input">
+                        <button id="joinPlayerRoomBtn" class="kawaii-modal-button">
+                            🚪 Rejoindre
+                        </button>
+                    </div>
+                    <p class="help-text">Tapez le nom d'un joueur pour rejoindre sa salle</p>
                 </div>
             </div>
             <div class="kawaii-modal-footer">
-                <button id="closeMultiplayerBtn" class="kawaii-modal-button secondary">Annuler</button>
+                <button id="leaveRoomBtn" class="kawaii-modal-button secondary hidden">👋 Quitter la Salle</button>
+                <button id="closeMultiplayerBtn" class="kawaii-modal-button secondary">Fermer</button>
             </div>
         </div>
     </div>
@@ -588,10 +608,13 @@
     <script src="js/supabase.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/simple-chat.js"></script>
+    <script src="js/room-system.js"></script>
+    <script src="js/room-ui.js"></script>
     <script src="js/multiplayer-race.js"></script>
     <script src="js/race-ui.js"></script>
     <script src="js/menu-tabs.js"></script>
     <script src="js/chat.js"></script>
+    <script src="js/chat-ui.js"></script>
     <script src="js/info-banner.js"></script>
     <script src="js/multiplayer.js"></script>
     <script src="js/game.js"></script>

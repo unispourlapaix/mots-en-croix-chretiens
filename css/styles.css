@@ -3583,3 +3583,271 @@ body {
         padding: 5px 10px;
     }
 }
+
+/* ===== SYSTÈME DE SALLES INTELLIGENTES ===== */
+.room-system-modal .kawaii-modal-content {
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+/* Panel de contrôle hôte */
+.host-panel {
+    background: linear-gradient(135deg, #fff5f9 0%, #ffe6f2 100%);
+    border: 2px solid #ff69b4;
+    border-radius: 15px;
+    padding: 20px;
+    margin: 15px 0;
+}
+
+.panel-section {
+    margin-bottom: 20px;
+}
+
+.panel-section:last-child {
+    margin-bottom: 0;
+}
+
+.panel-section h4 {
+    color: #d81b60;
+    font-size: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.room-mode-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.room-mode-selector label {
+    font-weight: 600;
+    color: #666;
+}
+
+.room-mode-selector select {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid #ff69b4;
+    border-radius: 10px;
+    background: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.room-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: white;
+    border-radius: 10px;
+    border: 2px solid #ffb3d9;
+}
+
+.room-mode-display {
+    font-weight: 600;
+    color: #d81b60;
+}
+
+.room-player-count {
+    color: #666;
+}
+
+/* Liste des joueurs dans la salle */
+.room-players-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.room-player-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: white;
+    border-radius: 10px;
+    border: 2px solid #ffcceb;
+    transition: all 0.3s ease;
+}
+
+.room-player-item:hover {
+    border-color: #ff69b4;
+    transform: translateX(3px);
+}
+
+.player-avatar {
+    font-size: 24px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.player-name {
+    flex: 1;
+    font-weight: 600;
+    color: #333;
+}
+
+.btn-kick {
+    padding: 6px 12px;
+    background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+    border: 2px solid #ef5350;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.btn-kick:hover {
+    background: linear-gradient(135deg, #ef5350 0%, #e53935 100%);
+    transform: scale(1.1);
+}
+
+/* Demandes en attente */
+.requests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.pending-request-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: linear-gradient(135deg, #fff9c4 0%, #fff59d 100%);
+    border: 2px solid #fbc02d;
+    border-radius: 10px;
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(251, 192, 45, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(251, 192, 45, 0.6);
+    }
+}
+
+.request-avatar {
+    font-size: 28px;
+}
+
+.request-name {
+    flex: 1;
+    font-weight: 600;
+    color: #f57f17;
+}
+
+.btn-accept,
+.btn-refuse {
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-accept {
+    background: linear-gradient(135deg, #c8e6c9 0%, #81c784 100%);
+    border: 2px solid #4caf50;
+}
+
+.btn-accept:hover {
+    background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+    transform: scale(1.1);
+}
+
+.btn-refuse {
+    background: linear-gradient(135deg, #ffcdd2 0%, #ef9a9a 100%);
+    border: 2px solid #f44336;
+}
+
+.btn-refuse:hover {
+    background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+    transform: scale(1.1);
+}
+
+/* Panel des joueurs disponibles */
+.available-players-panel {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    border: 2px solid #42a5f5;
+    border-radius: 15px;
+    padding: 20px;
+    margin: 15px 0;
+}
+
+.available-players-panel h4 {
+    color: #1976d2;
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+.join-room-input {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.join-room-input input {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #42a5f5;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+.join-room-input button {
+    padding: 12px 20px;
+    white-space: nowrap;
+}
+
+.help-text {
+    font-size: 13px;
+    color: #1565c0;
+    font-style: italic;
+    margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .room-system-modal .kawaii-modal-content {
+        max-width: 95%;
+        max-height: 90vh;
+    }
+
+    .host-panel,
+    .available-players-panel {
+        padding: 15px;
+    }
+
+    .room-player-item,
+    .pending-request-item {
+        padding: 8px 10px;
+    }
+
+    .player-avatar,
+    .request-avatar {
+        font-size: 20px;
+    }
+
+    .join-room-input {
+        flex-direction: column;
+    }
+
+    .join-room-input button {
+        width: 100%;
+    }
+}

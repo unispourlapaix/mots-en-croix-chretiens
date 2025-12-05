@@ -90,6 +90,18 @@ class SimpleChatSystem {
 
             this.peer.on('connection', (conn) => {
                 this.handleConnection(conn);
+                
+                // Notifier le système de salles
+                if (window.roomSystem) {
+                    conn.on('data', (data) => {
+                        // Transférer les messages de salle au RoomSystem
+                        if (data.type && ['join-request', 'join-accepted', 'join-refused', 
+                            'player-kicked', 'room-mode-changed', 'player-joined', 
+                            'player-left', 'host-transferred'].includes(data.type)) {
+                            window.roomSystem.handleRoomMessage(conn, data);
+                        }
+                    });
+                }
             });
 
             this.peer.on('error', (err) => {
@@ -245,12 +257,29 @@ class SimpleChatSystem {
         });
 
         conn.on('data', (data) => {
-            this.handleMessage(data, conn);
+            // Vérifier si c'est un message de salle
+            if (window.roomSystem && data.type && 
+                ['join-request', 'join-accepted', 'join-refused', 'player-kicked', 
+                 'room-mode-changed', 'player-joined', 'player-left', 'host-transferred',
+                 'host-left'].includes(data.type)) {
+                window.roomSystem.handleRoomMessage(conn, data);
+            } else {
+                // Message normal
+                this.handleMessage(data, conn);
+            }
         });
 
         conn.on('close', () => {
             this.connections.delete(conn.peer);
             this.showMessage('👋 Un joueur est parti', 'system');
+            
+            // Notifier le room system
+            if (window.roomSystem) {
+                window.roomSystem.handlePlayerLeft({
+                    peerId: conn.peer,
+                    username: 'Joueur déconnecté'
+                });
+            }
         });
 
         conn.on('error', (err) => {
