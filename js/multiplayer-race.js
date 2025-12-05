@@ -7,7 +7,7 @@ class MultiplayerRace {
         this.raceTimer = null;
         this.raceStartTime = null;
         this.raceDuration = 300; // 5 minutes en secondes
-        this.players = new Map(); // playerId -> {username, score, wordsCompleted, progress, finishTime}
+        this.players = new Map(); // playerId -> {username, score, wordsCompleted, progress, finishTime, stopped}
         this.myProgress = {
             wordsCompleted: 0,
             lettersCorrect: 0,
@@ -15,6 +15,7 @@ class MultiplayerRace {
         };
         this.raceFinished = false;
         this.lastProgressShare = 0; // Pour le throttling
+        this.hasStoppedRace = false; // Pour savoir si j'ai arrêté ma course
     }
 
     // Démarrer une course
@@ -26,6 +27,7 @@ class MultiplayerRace {
 
         this.isRaceMode = true;
         this.raceFinished = false;
+        this.hasStoppedRace = false;
         this.raceStartTime = Date.now();
         this.myProgress = { wordsCompleted: 0, lettersCorrect: 0, totalLetters: 0 };
         this.players.clear();
@@ -256,7 +258,8 @@ class MultiplayerRace {
             {
                 username: this.chatSystem.currentUser,
                 score: this.game.score,
-                finishTime: this.raceFinished ? Math.floor((Date.now() - this.raceStartTime) / 1000) : null
+                finishTime: this.raceFinished ? Math.floor((Date.now() - this.raceStartTime) / 1000) : null,
+                stopped: this.hasStoppedRace
             },
             ...Array.from(this.players.values())
         ];
@@ -269,9 +272,71 @@ class MultiplayerRace {
             const medal = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'][index];
             const timeStr = player.finishTime 
                 ? ` (${Math.floor(player.finishTime / 60)}:${(player.finishTime % 60).toString().padStart(2, '0')})`
-                : ' (incomplet)';
+                : player.stopped ? ' (arrêté)' : ' (incomplet)';
             this.chatSystem.showMessage(`${medal} ${player.username}: ${player.score} pts${timeStr}`, 'system');
         });
+    }
+    
+    // Vérifier s'il y a un gagnant
+    checkForWinner() {
+        // Compter combien de joueurs sont encore actifs
+        const allPlayers = [
+            {
+                username: this.chatSystem.currentUser,
+                score: this.game.score,
+                stopped: this.hasStoppedRace,
+                isMe: true
+            },
+            ...Array.from(this.players.values()).map(p => ({
+                username: p.username,
+                score: p.score || 0,
+                stopped: p.stopped || false,
+                isMe: false
+            }))
+        ];
+        
+        const activePlayers = allPlayers.filter(p => !p.stopped);
+        
+        // Si tous les joueurs sauf un ont arrêté, ou si tous ont arrêté
+        if (activePlayers.length <= 1 || allPlayers.every(p => p.stopped)) {
+            // Trouver le gagnant (meilleur score)
+            const sortedPlayers = [...allPlayers].sort((a, b) => b.score - a.score);
+            const winner = sortedPlayers[0];
+            
+            // Afficher le popup de victoire
+            this.showWinnerPopup(winner, sortedPlayers);
+            
+            // Terminer la course pour tout le monde
+            setTimeout(() => {
+                this.endRace();
+            }, 5000); // 5 secondes pour voir le popup
+        }
+    }
+    
+    // Afficher le popup de victoire
+    showWinnerPopup(winner, allPlayers) {
+        const isMe = winner.isMe;
+        const message = isMe 
+            ? `🏆 VICTOIRE ! 🏆\n\nVous avez gagné avec ${winner.score} points !`
+            : `🏆 ${winner.username} a gagné !\n\nScore final : ${winner.score} points`;
+        
+        // Créer le classement
+        let ranking = '\n\n📊 Classement Final:\n';
+        allPlayers.slice(0, 3).forEach((player, index) => {
+            const medal = ['🥇', '🥈', '🥉'][index];
+            const you = player.isMe ? ' (Vous)' : '';
+            ranking += `${medal} ${player.username}${you}: ${player.score} pts\n`;
+        });
+        
+        // Utiliser le modal Kawaii du jeu
+        if (this.game && typeof this.game.showKawaiiModal === 'function') {
+            this.game.showKawaiiModal(message + ranking, '🎉');
+        } else {
+            alert(message + ranking);
+        }
+        
+        // Message dans le chat
+        this.chatSystem.showMessage(`🏆 ${winner.username} remporte la course avec ${winner.score} points !`, 'system');
     }
 
     // Diffuser la progression via P2P
@@ -375,6 +440,18 @@ class MultiplayerRace {
                 this.updatePlayersDisplay();
                 this.updateScoreBox();
                 break;
+            
+            case 'stop':
+                // Un joueur a arrêté sa course
+                player.stopped = true;
+                player.score = data.finalScore || data.score || 0;
+                this.chatSystem.showMessage(`⏹️ ${username} a arrêté sa course (${player.score} pts)`, 'system');
+                // Mettre à jour l'affichage
+                this.updatePlayersDisplay();
+                this.updateScoreBox();
+                // Vérifier s'il y a un gagnant
+                this.checkForWinner();
+                break;
         }
     }
 
@@ -383,6 +460,23 @@ class MultiplayerRace {
         if (this.raceTimer) clearInterval(this.raceTimer);
         if (this.progressInterval) clearInterval(this.progressInterval);
         if (this.playersUpdateInterval) clearInterval(this.playersUpdateInterval);
+        
+        if (this.isRaceMode && !this.hasStoppedRace) {
+            // Marquer comme ayant arrêté
+            this.hasStoppedRace = true;
+            
+            // Notifier les autres joueurs que j'ai arrêté
+            this.broadcastProgress('stop', {
+                score: this.game.score,
+                finalScore: this.game.score
+            });
+            
+            this.chatSystem.showMessage('⏹️ Vous avez arrêté votre course', 'system');
+            
+            // Vérifier s'il y a un gagnant
+            this.checkForWinner();
+        }
+        
         this.isRaceMode = false;
         this.raceFinished = false;
         
@@ -427,12 +521,14 @@ class MultiplayerRace {
             {
                 username: this.chatSystem.currentUser,
                 score: this.game.score,
-                isMe: true
+                isMe: true,
+                stopped: this.hasStoppedRace
             },
             ...Array.from(this.players.values()).map(p => ({
                 username: p.username,
                 score: p.score || 0,
-                isMe: false
+                isMe: false,
+                stopped: p.stopped || false
             }))
         ];
         
@@ -445,11 +541,12 @@ class MultiplayerRace {
             const meClass = player.isMe ? 'me' : '';
             const leaderClass = index === 0 ? 'leader' : '';
             const medal = index === 0 ? '👑' : '';
+            const stoppedIcon = player.stopped ? '⏹️' : '';
             
             return `
                 <div class="race-score-item ${meClass} ${leaderClass}">
                     <span class="race-score-avatar">${avatar}</span>
-                    <span class="race-score-name">${medal} ${player.username}</span>
+                    <span class="race-score-name">${medal} ${player.username} ${stoppedIcon}</span>
                     <span class="race-score-points">⭐${player.score}</span>
                 </div>
             `;
@@ -491,7 +588,8 @@ class MultiplayerRace {
                     ? Math.round((this.myProgress.lettersCorrect / this.myProgress.totalLetters) * 100)
                     : 0,
                 isMe: true,
-                finishTime: this.raceFinished ? Math.floor((Date.now() - this.raceStartTime) / 1000) : null
+                finishTime: this.raceFinished ? Math.floor((Date.now() - this.raceStartTime) / 1000) : null,
+                stopped: this.hasStoppedRace
             },
             ...Array.from(this.players.values()).map(p => ({
                 ...p,
@@ -508,12 +606,13 @@ class MultiplayerRace {
             const avatar = this.chatSystem.getUserAvatar(player.username);
             const meClass = player.isMe ? 'me' : '';
             const finishedIcon = player.finishTime ? '✅' : '';
+            const stoppedIcon = player.stopped ? '⏹️' : '';
             
             return `
                 <div class="race-player-item ${meClass}">
                     <div class="race-player-info">
                         <span class="race-player-avatar">${medal} ${avatar}</span>
-                        <span class="race-player-name">${player.username} ${finishedIcon}</span>
+                        <span class="race-player-name">${player.username} ${finishedIcon}${stoppedIcon}</span>
                     </div>
                     <div class="race-player-stats">
                         <div class="race-player-progress">
