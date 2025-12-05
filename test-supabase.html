@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Connexion Supabase</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .success { color: #4caf50; }
+        .error { color: #f44336; }
+        .warning { color: #ff9800; }
+        button {
+            padding: 10px 20px;
+            background: #ff69b4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #ff1493;
+        }
+        input {
+            padding: 10px;
+            margin: 5px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            width: 300px;
+        }
+        pre {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔐 Test de Connexion Supabase</h1>
+
+    <div class="test-section">
+        <h2>1. Vérification du chargement</h2>
+        <div id="loadStatus">Chargement...</div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Test de connexion</h2>
+        <input type="email" id="testEmail" placeholder="Email">
+        <input type="password" id="testPassword" placeholder="Mot de passe">
+        <br>
+        <button onclick="testSignIn()">🔐 Tester la connexion</button>
+        <div id="signInResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Test d'inscription</h2>
+        <input type="text" id="testUsername" placeholder="Nom d'utilisateur">
+        <input type="email" id="testSignUpEmail" placeholder="Email">
+        <input type="password" id="testSignUpPassword" placeholder="Mot de passe">
+        <br>
+        <button onclick="testSignUp()">✨ Tester l'inscription</button>
+        <div id="signUpResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Session actuelle</h2>
+        <button onclick="checkSession()">🔍 Vérifier la session</button>
+        <div id="sessionResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>5. Logs</h2>
+        <pre id="logs"></pre>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/supabase.js"></script>
+    
+    <script>
+        const logs = [];
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+        const originalConsoleWarn = console.warn;
+
+        function addLog(message, type = 'log') {
+            logs.push(`[${new Date().toLocaleTimeString()}] ${type.toUpperCase()}: ${message}`);
+            document.getElementById('logs').textContent = logs.join('\n');
+        }
+
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            addLog(args.join(' '), 'log');
+        };
+
+        console.error = function(...args) {
+            originalConsoleError.apply(console, args);
+            addLog(args.join(' '), 'error');
+        };
+
+        console.warn = function(...args) {
+            originalConsoleWarn.apply(console, args);
+            addLog(args.join(' '), 'warn');
+        };
+
+        // Attendre que tout soit chargé
+        setTimeout(() => {
+            const loadStatus = document.getElementById('loadStatus');
+            
+            if (typeof window.supabase !== 'undefined') {
+                loadStatus.innerHTML = '<span class="success">✅ Librairie Supabase chargée</span>';
+                addLog('Librairie Supabase disponible', 'success');
+            } else {
+                loadStatus.innerHTML = '<span class="error">❌ Librairie Supabase non chargée</span>';
+                addLog('Librairie Supabase NON disponible', 'error');
+            }
+
+            if (typeof supabase !== 'undefined' && supabase !== null) {
+                loadStatus.innerHTML += '<br><span class="success">✅ Client Supabase initialisé</span>';
+                addLog('Client Supabase initialisé', 'success');
+            } else {
+                loadStatus.innerHTML += '<br><span class="error">❌ Client Supabase non initialisé</span>';
+                addLog('Client Supabase NON initialisé', 'error');
+            }
+        }, 2000);
+
+        async function testSignIn() {
+            const email = document.getElementById('testEmail').value;
+            const password = document.getElementById('testPassword').value;
+            const resultDiv = document.getElementById('signInResult');
+
+            if (!email || !password) {
+                resultDiv.innerHTML = '<span class="error">❌ Veuillez entrer un email et un mot de passe</span>';
+                return;
+            }
+
+            resultDiv.innerHTML = '⏳ Connexion en cours...';
+            addLog(`Tentative de connexion: ${email}`, 'log');
+
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) {
+                    resultDiv.innerHTML = `<span class="error">❌ Erreur: ${error.message}</span>`;
+                    addLog(`Erreur connexion: ${error.message}`, 'error');
+                } else {
+                    resultDiv.innerHTML = `<span class="success">✅ Connexion réussie !<br>User ID: ${data.user.id}</span>`;
+                    addLog(`Connexion réussie: ${data.user.email}`, 'success');
+                }
+            } catch (err) {
+                resultDiv.innerHTML = `<span class="error">❌ Exception: ${err.message}</span>`;
+                addLog(`Exception: ${err.message}`, 'error');
+            }
+        }
+
+        async function testSignUp() {
+            const username = document.getElementById('testUsername').value;
+            const email = document.getElementById('testSignUpEmail').value;
+            const password = document.getElementById('testSignUpPassword').value;
+            const resultDiv = document.getElementById('signUpResult');
+
+            if (!username || !email || !password) {
+                resultDiv.innerHTML = '<span class="error">❌ Veuillez remplir tous les champs</span>';
+                return;
+            }
+
+            resultDiv.innerHTML = '⏳ Inscription en cours...';
+            addLog(`Tentative d'inscription: ${email}`, 'log');
+
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            username: username
+                        }
+                    }
+                });
+
+                if (error) {
+                    resultDiv.innerHTML = `<span class="error">❌ Erreur: ${error.message}</span>`;
+                    addLog(`Erreur inscription: ${error.message}`, 'error');
+                } else {
+                    resultDiv.innerHTML = `<span class="success">✅ Inscription réussie !<br>User ID: ${data.user.id}<br>Vérifiez votre email pour confirmer.</span>`;
+                    addLog(`Inscription réussie: ${data.user.email}`, 'success');
+                }
+            } catch (err) {
+                resultDiv.innerHTML = `<span class="error">❌ Exception: ${err.message}</span>`;
+                addLog(`Exception: ${err.message}`, 'error');
+            }
+        }
+
+        async function checkSession() {
+            const resultDiv = document.getElementById('sessionResult');
+            resultDiv.innerHTML = '⏳ Vérification...';
+
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+
+                if (error) {
+                    resultDiv.innerHTML = `<span class="error">❌ Erreur: ${error.message}</span>`;
+                    addLog(`Erreur session: ${error.message}`, 'error');
+                } else if (session) {
+                    resultDiv.innerHTML = `<span class="success">✅ Session active<br>User: ${session.user.email}<br>Expires: ${new Date(session.expires_at * 1000).toLocaleString()}</span>`;
+                    addLog(`Session active: ${session.user.email}`, 'success');
+                } else {
+                    resultDiv.innerHTML = '<span class="warning">⚠️ Aucune session active</span>';
+                    addLog('Aucune session active', 'warn');
+                }
+            } catch (err) {
+                resultDiv.innerHTML = `<span class="error">❌ Exception: ${err.message}</span>`;
+                addLog(`Exception: ${err.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

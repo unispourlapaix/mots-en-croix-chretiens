@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 Classement - Mots En Croix Chrétiens</title>
+    <meta name="description" content="Classement des meilleurs joueurs du jeu de mots croisés chrétiens par Emmanuel Payet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="../css/leaderboard.css">
+</head>
+<body>
+    <div class="page-header">
+        <h1>🏆 Classement des Champions</h1>
+        <p>Les meilleurs joueurs de Mots En Croix Chrétiens</p>
+        <a href="../index.html" class="back-button">← Retour au jeu</a>
+    </div>
+
+    <div class="leaderboard-container">
+        <div id="leaderboard"></div>
+        <button id="refreshButton" class="refresh-button">🔄 Actualiser le classement</button>
+    </div>
+
+    <footer>
+        <p>Créé avec ❤️ par <a href="https://emmanuel.gallery/" target="_blank">Emmanuel Payet</a></p>
+        <p style="margin-top: 10px; font-size: 0.9em;">Christian Author • Digital Artist • Spiritual Composer</p>
+    </footer>
+
+    <!-- Supabase Client -->
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        
+        // Configuration Supabase (même que le jeu)
+        const SUPABASE_URL = 'https://dmszyxowetilvsanqsxm.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtc3p5eG93ZXRpbHZzYW5xc3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3NzM0NDUsImV4cCI6MjA3NTM0OTQ0NX0.EukDYFVt0sCrDb0_V4ZPMv5B4gkD43V8Cw7CEuvl0C8';
+        
+        window.supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+        console.log('✅ Supabase initialisé');
+    </script>
+
+    <!-- Module Leaderboard -->
+    <script src="../js/leaderboard.js"></script>
+
+    <script>
+        // Charger le leaderboard au démarrage
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('📊 Chargement du leaderboard...');
+            
+            await leaderboardManager.displayLeaderboard('leaderboard', {
+                limit: 20,           // Top 20 joueurs
+                showArtist: true,    // Afficher info artiste
+                showStats: true,     // Afficher stats
+                forceRefresh: false  // Utiliser cache si disponible
+            });
+
+            // Bouton refresh
+            const refreshBtn = document.getElementById('refreshButton');
+            refreshBtn.addEventListener('click', async () => {
+                refreshBtn.disabled = true;
+                refreshBtn.textContent = '⏳ Actualisation...';
+                
+                await leaderboardManager.displayLeaderboard('leaderboard', {
+                    limit: 20,
+                    showArtist: true,
+                    showStats: true,
+                    forceRefresh: true  // Forcer le rechargement depuis DB
+                });
+                
+                refreshBtn.disabled = false;
+                refreshBtn.textContent = '🔄 Actualiser le classement';
+            });
+        });
+    </script>
+</body>
+</html>

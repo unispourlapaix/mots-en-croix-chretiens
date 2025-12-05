@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#ff69b4">
+    <meta name="description" content="Jeu de mots croisés chrétiens avec un design kawaii rose élégant">
+    <title>💕 Mots En Croix Chrétiens 💕</title>
+    
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff69b4">
+    
+    <!-- iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Mots Croix">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-192x192.png">
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/info-banner.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Fond animé avec lignes ondulées -->
+    <div class="background-waves">
+        <div class="wave wave-1"></div>
+        <div class="wave wave-2"></div>
+        <div class="wave wave-3"></div>
+        <div class="wave wave-4"></div>
+    </div>
+
+    <!-- Étoiles scintillantes -->
+    <div class="background-stars">
+        <div class="star s1"></div>
+        <div class="star s2"></div>
+        <div class="star s3"></div>
+        <div class="star s4"></div>
+        <div class="star s5"></div>
+    </div>
+
+    <div class="game-container">
+        <div class="header">
+            <h1>🙏 Mots En Croix Chrétiens 🙏</h1>
+            <p>Trouve les mots d'encouragement et les mots bibliques</p>
+            <button id="installButton" class="install-button hidden">
+                📱 Installer l'Application
+            </button>
+            <button id="menuButton" class="menu-button">
+                ☰ Menu
+            </button>
+        </div>
+
+        <!-- Bandeau Info défilant -->
+        <div class="info-banner" id="infoBanner">
+            <div class="info-banner-content">
+                <!-- Stats fixes (ne défilent pas) -->
+                <div class="info-fixed">
+                    <div class="info-stat">
+                        <span class="info-stat-icon">📊</span>
+                        <span>Niveau <span class="info-stat-value" id="infoBannerLevel">1</span>/77</span>
+                    </div>
+                    <div class="info-stat">
+                        <span class="info-stat-icon">⭐</span>
+                        <span class="info-stat-value" id="infoBannerScore">0</span>
+                    </div>
+                    <div class="info-stat">
+                        <span class="info-stat-icon">🏆</span>
+                        <span>Max: <span class="info-stat-value" id="infoBannerMaxScore">0</span></span>
+                    </div>
+                    <div class="info-stat">
+                        <span class="info-stat-icon">🖱️</span>
+                        <span class="info-stat-value" id="infoBannerClicks">0</span>/7
+                    </div>
+                </div>
+
+                <!-- Messages défilants -->
+                <div class="info-scrolling">
+                    <div class="info-messages" id="infoMessages">
+                        <!-- Messages générés dynamiquement -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Barre de progression (optionnelle) -->
+            <div class="info-progress">
+                <div class="info-progress-bar" id="infoProgressBar" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Interface Chat simplifiée -->
+        <div id="chatSmsContainer" class="chat-sms-container">
+            <div class="chat-sms-input-container">
+                <input type="text" id="chatSmsInput" class="chat-sms-input" placeholder="Écrire ici..." maxlength="100">
+                <button id="chatSmsSend" class="chat-sms-send">📤</button>
+            </div>
+            <div id="chatSmsMessages" class="chat-sms-messages">
+                <!-- Messages apparaissent ici -->
+            </div>
+        </div>
+
+        <div id="startScreen">
+            <button class="play-button" id="playButton">
+                🎮 Jouer (<span id="clickCount">0</span>/7)
+            </button>
+            <div class="encouraging-words" id="encouragingWords"></div>
+        </div>
+
+        <div id="gameScreen" class="hidden">
+            <!-- Boutons de course en haut de la grille -->
+            <div class="race-controls">
+                <!-- Box info points des joueurs -->
+                <div id="raceScoreBox" class="race-score-box" style="display: none;">
+                    <div class="race-score-header">📊 Scores en Direct</div>
+                    <div id="raceScoreList" class="race-score-list">
+                        <!-- Scores générés dynamiquement -->
+                    </div>
+                </div>
+                
+                <button id="startRaceButton" class="race-button" style="display: none;">🏁 Démarrer Course</button>
+                <button id="stopRaceButton" class="race-button stop" style="display: none;">⏹️ Arrêter</button>
+            </div>
+            
+            <!-- Tableau des joueurs en course -->
+            <div id="racePlayersPanel" class="race-players-panel" style="display: none;">
+                <div class="race-players-header">👥 Joueurs en Course</div>
+                <div id="racePlayersList" class="race-players-list">
+                    <!-- Liste des joueurs générée dynamiquement -->
+                </div>
+            </div>
+            
+            <div class="crossword-grid" id="crosswordGrid"></div>
+            
+            <div class="word-clues">
+                <div class="clue-section">
+                    <h3><span class="arrow-icon arrow-right"></span></h3>
+                    <div id="horizontalClues"></div>
+                </div>
+                <div class="clue-section">
+                    <h3><span class="arrow-icon arrow-down"></span></h3>
+                    <div id="verticalClues"></div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn" id="checkButton">✅ Vérifier</button>
+                <button class="control-btn" id="hintButton">💡 Indice</button>
+                <button class="control-btn" id="shareButton" style="display:none;">📤 Partager</button>
+                <button class="control-btn" id="nextLevelButton" style="display:none;">➡️ Niveau Suivant</button>
+                <button class="control-btn" id="resetButton">🔄 Recommencer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Kawaii pour les notifications -->
+    <div id="kawaiiModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content">
+            <div class="kawaii-modal-header">
+                <span class="kawaii-modal-icon">✨</span>
+            </div>
+            <div class="kawaii-modal-body">
+                <p id="kawaiiModalMessage"></p>
+            </div>
+            <div class="kawaii-modal-footer">
+                <button id="kawaiiModalBtn" class="kawaii-modal-button">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour sauvegarder le score -->
+    <div id="scoreModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content">
+            <div class="kawaii-modal-header">
+                <span class="kawaii-modal-icon">🏆</span>
+            </div>
+            <div class="kawaii-modal-body">
+                <p><strong>Félicitations ! 🎉</strong></p>
+                <p>Votre score: <span id="finalScoreDisplay">0</span> points</p>
+                <p>Sauvegarder votre score en ligne:</p>
+                <form id="scoreForm">
+                    <input type="text" id="playerName" placeholder="Votre nom" required>
+                    <input type="email" id="playerEmail" placeholder="Votre email" required>
+                </form>
+            </div>
+            <div class="kawaii-modal-footer">
+                <button id="saveScoreBtn" class="kawaii-modal-button">💾 Sauvegarder</button>
+                <button id="skipScoreBtn" class="kawaii-modal-button secondary">Passer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de connexion cloud -->
+    <div id="cloudModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content">
+            <div class="kawaii-modal-header">
+                <span class="kawaii-modal-icon">☁️</span>
+            </div>
+            <div class="kawaii-modal-body">
+                <p><strong>Connexion Cloud</strong></p>
+                <p>Connectez-vous pour sauvegarder automatiquement vos scores en ligne</p>
+                <form id="cloudForm">
+                    <input type="text" id="cloudPlayerName" placeholder="Votre nom" required>
+                    <input type="email" id="cloudPlayerEmail" placeholder="Votre email" required>
+                </form>
+            </div>
+            <div class="kawaii-modal-footer">
+                <button id="cloudConnectSubmitBtn" class="kawaii-modal-button">✅ Se connecter</button>
+                <button id="cloudCancelBtn" class="kawaii-modal-button secondary">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de menu -->
+    <div id="menuModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content menu-modal-content">
+            <div class="menu-header">
+                <h2 id="menuTitle">⚙️ Paramètres</h2>
+                <button id="closeMenuBtn" class="close-menu-btn">✕</button>
+            </div>
+
+            <!-- Onglets de navigation -->
+            <div class="menu-tabs">
+                <button class="menu-tab active" data-tab="settings">
+                    ⚙️ Menu
+                </button>
+                <button class="menu-tab" data-tab="leaderboard" onclick="window.location.href='public/leaderboard.html'">
+                    🏆 Score
+                </button>
+                <button class="menu-tab" data-tab="connexion">
+                    👤 Connexion
+                </button>
+                <button class="menu-tab" data-tab="chat">
+                    💬 Chat
+                </button>
+            </div>
+
+            <!-- Contenu Onglet Menu -->
+            <div id="settingsTabContent" class="menu-tab-content active">
+                <div class="menu-section">
+                <h3>👤 Profil</h3>
+                <div id="profileSection">
+                    <p id="profileUsername" style="font-size: 16px; font-weight: bold; color: #ff1493; margin-bottom: 10px;">Non connecté</p>
+                    <button id="changeUsernameBtn" class="menu-cloud-btn" style="display: none;">
+                        ✏️ Modifier le pseudo
+                    </button>
+                    <button id="signOutBtn" class="menu-cloud-btn secondary" style="display: none; margin-top: 10px;">
+                        🚪 Déconnexion
+                    </button>
+                </div>
+                <p class="menu-description">Gérez votre compte et vos informations</p>
+            </div>
+
+            <div class="menu-section">
+                <h3>🏆 Collection de Médailles</h3>
+                <button id="achievementsBtn" class="menu-cloud-btn">
+                    🏆 Voir mes médailles
+                </button>
+                <p class="menu-description">Consultez vos récompenses et achievements</p>
+            </div>
+
+            <div class="menu-section">
+                <h3>🌍 Langue / Language</h3>
+                <div id="menuLanguageSelector" class="menu-language-selector"></div>
+            </div>
+
+            <div class="menu-section">
+                <h3>🔊 Audio</h3>
+                <div class="audio-controls">
+                    <div class="audio-control-item">
+                        <label for="musicVolume">🎵 Musique</label>
+                        <input type="range" id="musicVolume" min="0" max="100" value="50">
+                        <span id="musicVolumeValue">50%</span>
+                    </div>
+                    <div class="audio-control-item">
+                        <label for="soundVolume">🔔 Effets sonores</label>
+                        <input type="range" id="soundVolume" min="0" max="100" value="50">
+                        <span id="soundVolumeValue">50%</span>
+                    </div>
+                </div>
+            </div>
+
+                <div class="menu-section">
+                    <h3>ℹ️ À propos</h3>
+                    <div class="about-info">
+                        <p class="about-item">
+                            <strong>🎨 Artiste:</strong>
+                            <a href="#" id="artistLink" class="info-link">Voir le profil</a>
+                        </p>
+                        <p class="about-item">
+                            <strong>✨ Création:</strong> Jeu de mots croisés chrétiens avec design kawaii
+                        </p>
+                        <p class="about-item">
+                            <strong>💻 Codage:</strong> Développé avec Claude Code Pro
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenu Onglet Score/Leaderboard -->
+            <div id="leaderboardTabContent" class="menu-tab-content">
+                <div class="leaderboard-header">
+                    <h3>🏆 Tableau des Scores</h3>
+                    <button id="refreshLeaderboardBtn" class="menu-cloud-btn" style="margin: 10px 0;">
+                        🔄 Actualiser
+                    </button>
+                </div>
+                <div id="leaderboardContainer" class="leaderboard-container">
+                    <p style="text-align: center; color: #666;">Chargement des scores...</p>
+                </div>
+                <div style="text-align: center; margin-top: 15px;">
+                    <button id="viewFullLeaderboardBtn" class="menu-cloud-btn secondary">
+                        📊 Voir le classement complet
+                    </button>
+                </div>
+            </div>
+
+            <!-- Contenu Onglet Connexion -->
+            <div id="connexionTabContent" class="menu-tab-content">
+                <div class="connexion-header" style="text-align: center; margin-bottom: 20px;">
+                    <h3>👤 Connexion / Inscription</h3>
+                    <p style="color: #666; font-size: 14px;">Sauvegardez vos scores en ligne</p>
+                </div>
+
+                <div id="connexionSection">
+                    <!-- Formulaire de connexion/inscription -->
+                    <div id="authForm" class="auth-form">
+                        <div class="menu-section">
+                            <input type="text" id="authUsername" placeholder="Nom d'utilisateur" class="kawaii-input" style="width: 100%; margin-bottom: 10px; padding: 12px; border: 2px solid #ff69b4; border-radius: 10px;">
+                            <input type="email" id="authEmail" placeholder="Email" class="kawaii-input" style="width: 100%; margin-bottom: 10px; padding: 12px; border: 2px solid #ff69b4; border-radius: 10px;">
+                            <input type="password" id="authPassword" placeholder="Mot de passe" class="kawaii-input" style="width: 100%; margin-bottom: 15px; padding: 12px; border: 2px solid #ff69b4; border-radius: 10px;">
+                            
+                            <button id="signInBtn" class="menu-cloud-btn" style="width: 100%; margin-bottom: 10px;">
+                                🔓 Se connecter
+                            </button>
+                            <button id="signUpBtn" class="menu-cloud-btn secondary" style="width: 100%; margin-bottom: 10px;">
+                                ✨ Créer un compte
+                            </button>
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #ffe0f0;">
+                            <p style="font-size: 12px; color: #999;">Vos données sont sécurisées ☁️</p>
+                        </div>
+                    </div>
+
+                    <!-- Section profil (visible quand connecté) -->
+                    <div id="profileInfo" class="profile-info" style="display: none;">
+                        <div class="menu-section" style="text-align: center;">
+                            <div style="margin-bottom: 15px;">
+                                <span style="font-size: 48px;">👤</span>
+                            </div>
+                            <p id="connectedUsername" style="font-size: 18px; font-weight: bold; color: #ff1493; margin-bottom: 5px;">Utilisateur</p>
+                            <p id="connectedEmail" style="font-size: 14px; color: #666; margin-bottom: 20px;">email@example.com</p>
+                            
+                            <div style="background: #fff5f9; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                                <p style="font-size: 14px; color: #666; margin-bottom: 5px;">Meilleur Score</p>
+                                <p id="userMaxScore" style="font-size: 32px; font-weight: bold; color: #ff1493;">0</p>
+                            </div>
+                            
+                            <button id="editProfileBtn" class="menu-cloud-btn" style="width: 100%; margin-bottom: 10px;">
+                                ✏️ Modifier le profil
+                            </button>
+                            <button id="signOutProfileBtn" class="menu-cloud-btn secondary" style="width: 100%;">
+                                🚪 Déconnexion
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenu Onglet Chat -->
+            <div id="chatTabContent" class="menu-tab-content">
+                <div class="menu-chat-header">
+                    <div class="chat-header-info">
+                        <span class="chat-icon">💬</span>
+                        <span class="chat-title">Chat P2P</span>
+                        <span id="chatParticipantCount" class="chat-participant-count">0 👥</span>
+                    </div>
+                    <p id="chatUsername" style="font-size: 14px; color: #666; margin: 10px 0;">Non connecté</p>
+                </div>
+
+                <!-- Interface P2P simplifiée -->
+                <div id="chatRoomInterface" class="chat-room-interface">
+                    <div class="chat-room-content">
+                        <div class="chat-room-icon">💬</div>
+                        <h3>Chat de Partie</h3>
+                        <p style="margin-bottom: 15px; color: #666;">Le chat est actif automatiquement pendant votre partie</p>
+
+                        <!-- Code de partie pour inviter des amis -->
+                        <div id="chatRoomCodeDisplay" style="padding: 15px; background: #fff5f9; border-radius: 8px; text-align: center;">
+                            <p style="font-size: 13px; margin-bottom: 8px; color: #666;">🎮 <strong>Pour jouer avec un ami:</strong></p>
+                            <p style="font-size: 12px; margin-bottom: 10px; color: #888;">Partagez ce code:</p>
+                            <p id="chatRoomCode" style="font-size: 20px; color: #ff1493; font-weight: bold; user-select: all; margin-bottom: 12px; padding: 10px; background: white; border-radius: 8px;">En attente...</p>
+                            <button id="chatCopyCodeBtn" class="chat-room-btn" style="font-size: 13px; padding: 10px 20px;">
+                                📋 Copier le code
+                            </button>
+                        </div>
+
+                        <div class="chat-divider" style="margin: 20px 0;">─── OU ───</div>
+
+                        <!-- Rejoindre une partie -->
+                        <div style="text-align: center;">
+                            <p style="font-size: 13px; margin-bottom: 10px; color: #666;">Un ami vous a partagé un code?</p>
+                            <input type="text" id="chatRoomCodeInput" class="chat-room-input" placeholder="Entrez le code ici" maxlength="50" style="margin-bottom: 10px; text-align: center;">
+                            <button id="chatJoinRoomBtn" class="chat-room-btn join-btn">
+                                🔗 Rejoindre sa partie
+                            </button>
+                        </div>
+
+                        <p style="font-size: 11px; color: #999; margin-top: 20px; text-align: center;">
+                            💡 Astuce: Chattez directement depuis la zone en haut de la grille!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Multijoueur -->
+    <div id="multiplayerModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content room-system-modal">
+            <div class="kawaii-modal-header">
+                <span class="kawaii-modal-icon">🏠</span>
+            </div>
+            <div class="kawaii-modal-body">
+                <h3>Salles Multijoueur</h3>
+                <p>Chaque joueur a sa propre salle automatique !</p>
+                
+                <!-- Panel de contrôle hôte -->
+                <div id="hostControlPanel" class="host-panel hidden">
+                    <div class="panel-section">
+                        <h4>🎛️ Ma Salle</h4>
+                        <div class="room-mode-selector">
+                            <label>Mode:</label>
+                            <select id="roomModeSelect" class="kawaii-input">
+                                <option value="open">🔓 Entrée Libre</option>
+                                <option value="invite">🎫 Sur Invitation</option>
+                                <option value="private">🔒 Privée</option>
+                            </select>
+                        </div>
+                        <div class="room-info">
+                            <span class="room-mode-display" id="roomModeDisplay">🔓 Entrée Libre</span>
+                            <span class="room-player-count">
+                                Joueurs: <strong id="roomPlayerCount">1/8</strong>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Demandes en attente -->
+                    <div id="pendingRequestsContainer" class="panel-section hidden">
+                        <h4>🔔 Demandes d'Accès</h4>
+                        <div id="pendingRequestsList" class="requests-list"></div>
+                    </div>
+
+                    <!-- Joueurs dans la salle -->
+                    <div class="panel-section">
+                        <h4>👥 Joueurs dans la Salle</h4>
+                        <div id="roomPlayersList" class="room-players-list"></div>
+                    </div>
+                </div>
+
+                <!-- Liste des joueurs disponibles (pour joindre) -->
+                <div id="availablePlayersPanel" class="available-players-panel">
+                    <h4>🌐 Rejoindre une Salle</h4>
+                    <div class="join-room-input">
+                        <input type="text" id="targetUsername" placeholder="Nom du joueur..." class="kawaii-input">
+                        <button id="joinPlayerRoomBtn" class="kawaii-modal-button">
+                            🚪 Rejoindre
+                        </button>
+                    </div>
+                    <p class="help-text">Tapez le nom d'un joueur pour rejoindre sa salle</p>
+                </div>
+            </div>
+            <div class="kawaii-modal-footer">
+                <button id="leaveRoomBtn" class="kawaii-modal-button secondary hidden">👋 Quitter la Salle</button>
+                <button id="closeMultiplayerBtn" class="kawaii-modal-button secondary">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Collection de Médailles -->
+    <div id="achievementsModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content achievements-modal-content">
+            <div class="menu-header">
+                <h2>🏆 Collection de Médailles</h2>
+                <button id="closeAchievementsBtn" class="close-menu-btn">✕</button>
+            </div>
+
+            <!-- Stats globales -->
+            <div class="achievements-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="achievementCount">0/0</div>
+                    <div class="stat-label">Médailles</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="achievementPoints">0</div>
+                    <div class="stat-label">Points</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="completionPercent">0%</div>
+                    <div class="stat-label">Complétion</div>
+                </div>
+            </div>
+
+            <!-- Section Médailles de Score (mise en avant) -->
+            <div class="score-medals-showcase">
+                <h3 class="showcase-title">🎯 Médailles de Score</h3>
+                <div class="score-medals-grid" id="scoreMedalsGrid">
+                    <!-- Généré dynamiquement -->
+                </div>
+            </div>
+
+            <!-- Filtres -->
+            <div class="achievements-filters">
+                <button class="filter-btn active" data-filter="all">Toutes</button>
+                <button class="filter-btn" data-filter="unlocked">Débloquées</button>
+                <button class="filter-btn" data-filter="locked">Verrouillées</button>
+            </div>
+
+            <!-- Liste des achievements -->
+            <div id="achievementsList" class="achievements-list"></div>
+        </div>
+    </div>
+
+    <!-- Modal d'authentification -->
+    <div id="authModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content auth-modal-content">
+            <div class="kawaii-modal-header">
+                <span class="kawaii-modal-icon">🔐</span>
+            </div>
+            <div class="kawaii-modal-body">
+                <h2 id="authModalTitle" style="color: #ff69b4; margin-bottom: 15px;">Inscription au Chat</h2>
+                <p style="color: #666; margin-bottom: 20px;">Créez un compte pour utiliser le chat communautaire</p>
+
+                <!-- Formulaire de connexion/inscription -->
+                <form id="authForm" style="display: flex; flex-direction: column; gap: 15px;">
+                    <input
+                        type="text"
+                        id="authUsername"
+                        placeholder="Nom d'utilisateur"
+                        required
+                        maxlength="20"
+                        style="padding: 12px; border: 2px solid #ffe8f0; border-radius: 10px; font-size: 0.95rem; outline: none;"
+                    >
+                    <input
+                        type="email"
+                        id="authEmail"
+                        placeholder="Votre email"
+                        required
+                        style="padding: 12px; border: 2px solid #ffe8f0; border-radius: 10px; font-size: 0.95rem; outline: none;"
+                    >
+                    <input
+                        type="password"
+                        id="authPassword"
+                        placeholder="Mot de passe (min. 6 caractères)"
+                        required
+                        minlength="6"
+                        style="padding: 12px; border: 2px solid #ffe8f0; border-radius: 10px; font-size: 0.95rem; outline: none;"
+                    >
+
+                    <div id="authMessage" style="padding: 10px; border-radius: 8px; display: none; font-size: 0.9rem;"></div>
+
+                    <button
+                        type="submit"
+                        id="authSubmitBtn"
+                        class="kawaii-modal-button"
+                        style="width: 100%;"
+                    >
+                        🔐 S'inscrire
+                    </button>
+                </form>
+
+                <p style="font-size: 0.85rem; color: #666; margin-top: 15px; text-align: center;">
+                    <span id="authToggleText">Déjà un compte ?</span>
+                    <a href="#" id="authToggleLink" style="color: #ff69b4; font-weight: bold; text-decoration: none; margin-left: 5px;">Se connecter</a>
+                </p>
+                <p id="forgotPasswordLink" style="font-size: 0.85rem; color: #666; margin-top: 10px; text-align: center; display: none;">
+                    <a href="#" id="forgotPasswordBtn" style="color: #999; text-decoration: none;">🔑 Mot de passe oublié ?</a>
+                </p>
+            </div>
+            <div class="kawaii-modal-footer">
+                <button id="authCancelBtn" class="kawaii-modal-button secondary">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modules JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/gameData.js"></script>
+    <script src="js/achievements.js"></script>
+    <script src="js/biblicalQuotes.js"></script>
+    <script src="js/shareImage.js"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/simple-chat.js"></script>
+    <script src="js/room-system.js"></script>
+    <script src="js/room-ui.js"></script>
+    <script src="js/multiplayer-race.js"></script>
+    <script src="js/race-ui.js"></script>
+    <script src="js/menu-tabs.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/chat-ui.js"></script>
+    <script src="js/info-banner.js"></script>
+    <script src="js/multiplayer.js"></script>
+    <script src="js/game.js"></script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        // Enregistrer le Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                // Utiliser le chemin relatif pour GitHub Pages
+                const swPath = window.location.hostname === 'unispourlapaix.github.io' 
+                    ? '/mots-en-croix-chretiens/service-worker.js'
+                    : '/service-worker.js';
+                    
+                navigator.serviceWorker.register(swPath)
+                    .then((registration) => {
+                        console.log('✅ Service Worker enregistré:', registration.scope);
+                        
+                        // Vérifier les mises à jour
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // Nouvelle version disponible
+                                    if (confirm('🎉 Nouvelle version disponible ! Voulez-vous mettre à jour ?')) {
+                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch((error) => {
+                        console.log('❌ Erreur Service Worker:', error);
+                    });
+            });
+
+            // Gérer les mises à jour du Service Worker
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    window.location.reload();
+                }
+            });
+        }
+
+        // Gérer l'événement d'installation de la PWA
+        let deferredPrompt;
+        const installButton = document.getElementById('installButton');
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Afficher le bouton d'installation
+            if (installButton) {
+                installButton.classList.remove('hidden');
+                installButton.addEventListener('click', async () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        console.log(`Installation: ${outcome}`);
+                        deferredPrompt = null;
+                        installButton.classList.add('hidden');
+                    }
+                });
+            }
+        });
+
+        // Détecter quand l'app est installée
+        window.addEventListener('appinstalled', () => {
+            console.log('🎉 Application installée avec succès!');
+            if (installButton) {
+                installButton.classList.add('hidden');
+            }
+            deferredPrompt = null;
+        });
+    </script>
+    <script src="js/chat-ui.js"></script>
+    <script src="js/ai-simulator.js"></script>
+    <script src="js/welcome-ai.js"></script>
+</body>
+</html>
