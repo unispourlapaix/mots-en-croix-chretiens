@@ -437,6 +437,24 @@
                 <h3>Salles Multijoueur</h3>
                 <p>Chaque joueur a sa propre salle automatique !</p>
                 
+                <!-- Bulle de chat flottante avec liste des connectés -->
+                <div id="chatBubble" class="chat-bubble">
+                    <div class="chat-bubble-header">
+                        <div class="header-title">
+                            <span class="pulse-dot"></span>
+                            <span>Joueurs en ligne</span>
+                            <span class="online-count" id="onlineCount">0</span>
+                        </div>
+                        <button class="minimize-btn" id="toggleChatBubble">−</button>
+                    </div>
+                    <div class="chat-bubble-body" id="chatBubbleBody">
+                        <!-- Liste des joueurs connectés -->
+                        <div class="connected-players-list" id="connectedPlayersList">
+                            <!-- Généré dynamiquement -->
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Panel de contrôle hôte -->
                 <div id="hostControlPanel" class="host-panel hidden">
                     <div class="panel-section">

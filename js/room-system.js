@@ -640,6 +640,17 @@ class RoomSystem {
                 this.chatSystem.handleConnection(conn);
             });
         }
+
+        // Gestion du bouton de minimisation de la bulle
+        const toggleBtn = document.getElementById('toggleChatBubble');
+        const chatBubble = document.getElementById('chatBubble');
+        
+        if (toggleBtn && chatBubble) {
+            toggleBtn.addEventListener('click', () => {
+                chatBubble.classList.toggle('minimized');
+                toggleBtn.textContent = chatBubble.classList.contains('minimized') ? '+' : '−';
+            });
+        }
     }
 
     // Mettre à jour l'interface
@@ -826,8 +837,79 @@ class RoomSystem {
                 this.requestJoinRoom(username, peerId);
             });
         });
+
+        // Mettre à jour la bulle de chat flottante
+        this.updateChatBubble();
+    }
+
+    // Mettre à jour la bulle de chat flottante
+    updateChatBubble() {
+        const bubbleList = document.getElementById('connectedPlayersList');
+        const onlineCountEl = document.getElementById('onlineCount');
+        
+        if (!bubbleList || !onlineCountEl) return;
+
+        const count = this.availablePlayers.size;
+        onlineCountEl.textContent = count;
+
+        if (count === 0) {
+            bubbleList.innerHTML = `
+                <div class="no-players-message">
+                    <span class="emoji">💤</span>
+                    Aucun joueur en ligne...
+                </div>
+            `;
+            return;
+        }
+
+        let bubbleHTML = '';
+        this.availablePlayers.forEach((player, peerId) => {
+            const modeIcon = {
+                'open': '🔓',
+                'private': '🔒',
+                'invite': '🎫'
+            }[player.roomMode] || '🔓';
+
+            const modeName = {
+                'open': 'Entrée libre',
+                'private': 'Privée',
+                'invite': 'Sur invitation'
+            }[player.roomMode] || 'Public';
+
+            bubbleHTML += `
+                <div class="connected-player-item" data-peer-id="${peerId}">
+                    <div class="player-avatar-mini">${player.avatar}</div>
+                    <div class="player-details">
+                        <div class="player-name-mini">${player.username}</div>
+                        <div class="player-status-mini">
+                            <span class="status-indicator"></span>
+                            <span>${player.playerCount}/${player.maxPlayers}</span>
+                            <span class="room-mode-badge">${modeIcon} ${modeName}</span>
+                        </div>
+                    </div>
+                    <div class="player-actions-mini">
+                        <button class="action-btn-mini btn-join-bubble" data-peer-id="${peerId}" data-username="${player.username}" title="Rejoindre">
+                            🚪
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+
+        bubbleList.innerHTML = bubbleHTML;
+
+        // Ajouter les écouteurs pour les boutons rejoindre dans la bulle
+        bubbleList.querySelectorAll('.btn-join-bubble').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const peerId = e.target.dataset.peerId;
+                const username = e.target.dataset.username;
+                this.requestJoinRoom(username, peerId);
+            });
+        });
     }
 }
 
 // Instance globale
 window.roomSystem = null;
+
