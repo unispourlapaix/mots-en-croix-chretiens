@@ -899,15 +899,18 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtc3p5eG93ZXRpbHZzYW5xc3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3NzM0NDUsImV4cCI6MjA3NTM0OTQ0NX0.EukDYFVt0sCrDb0_V4ZPMv5B4gkD43V8Cw7CEuvl0C8';
         
         // Import Supabase (optionnel - fallback sur scores locaux si échec)
-        let supabase = null;
+        let supabaseClient = null;
         
         try {
-            const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
-            supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-            console.log('✅ Supabase chargé avec succès');
+            if (typeof supabase !== 'undefined' && supabase.createClient) {
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                console.log('✅ Supabase chargé avec succès');
+            } else {
+                throw new Error('Supabase UMD bundle not loaded');
+            }
         } catch (error) {
             console.warn('⚠️ Supabase non disponible, utilisation scores locaux uniquement:', error);
-            supabase = null;
+            supabaseClient = null;
         }
 
         let currentPage = 1;
@@ -954,9 +957,9 @@
                 allScores = [];
 
                 // 1️⃣ CHARGER LES SCORES DU JEU MOTS EN CROIX CHRÉTIENS (SUPABASE)
-                if (supabase) {
+                if (supabaseClient) {
                     try {
-                        const { data, error } = await supabase
+                        const { data, error } = await supabaseClient
                             .from('mots_croix_scores')
                             .select('*')
                             .eq('game_prefix', 'mots-en-croix-chretiens')
@@ -1087,7 +1090,7 @@
                 const start = loadedCount;
                 const end = Math.min(loadedCount + loadMoreIncrement - 1, totalScores - 1);
 
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('mots_croix_scores')
                     .select('*')
                     .eq('game_prefix', 'mots-en-croix-chretiens')
@@ -1350,9 +1353,9 @@
                 let leaderboard = [];
 
                 // 1️⃣ Essayer de charger depuis Supabase en premier
-                if (supabase) {
+                if (supabaseClient) {
                     try {
-                        const { data: leaderboardData, error } = await supabase
+                        const { data: leaderboardData, error } = await supabaseClient
                             .from('dove_leaderboard')
                             .select('high_score, highest_level_reached, total_clouds_destroyed, star_stock, nickname')
                             .order('high_score', { ascending: false })
@@ -1427,6 +1430,9 @@
         // Charger le score Dove uniquement au démarrage
         loadDoveScore();
     </script>
+
+    <!-- Supabase Client UMD Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
 
     <script>
         // Traductions multilingues
