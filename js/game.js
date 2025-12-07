@@ -1654,12 +1654,8 @@ class ChristianCrosswordGame {
         const allMedals = raceMedalSystem.getAllMedals();
         const raceScore = raceMedalSystem.getRaceScore();
 
-        // Afficher seulement les 20 premières et les 5 dernières débloquées
-        const unlockedMedals = allMedals.filter(m => m.unlocked).slice(-20);
-        const nextMedals = allMedals.filter(m => !m.unlocked).slice(0, 10);
-        const displayMedals = [...unlockedMedals, ...nextMedals];
-
-        displayMedals.forEach(medal => {
+        // Afficher TOUTES les 112 médailles
+        allMedals.forEach(medal => {
             const progress = Math.min(100, (raceScore / medal.points) * 100);
             
             const medalItem = document.createElement('div');
