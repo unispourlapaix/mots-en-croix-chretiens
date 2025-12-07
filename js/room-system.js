@@ -8,6 +8,7 @@ class RoomSystem {
         this.kickedPlayers = new Set(); // peerIds exclus
         this.myRoomInfo = null; // Info de ma salle
         this.availablePlayers = new Map(); // Liste des joueurs en ligne
+        this.presenceInterval = null; // Interval pour annoncer sa présence
         
         // Auto-créer ma salle au démarrage
         this.createMyRoom();
@@ -39,7 +40,8 @@ class RoomSystem {
                     hostUsername: this.chatSystem.currentUser,
                     mode: this.roomMode,
                     playerCount: 1,
-                    maxPlayers: 8
+                    maxPlayers: 8,
+                    lastSeen: Date.now()
                 };
                 
                 // M'ajouter à ma propre salle
@@ -52,8 +54,8 @@ class RoomSystem {
                 this.chatSystem.showMessage(`🏠 Votre salle est créée ! Mode: ${this.getRoomModeIcon()}`, 'system');
                 this.updateUI();
                 
-                // Annoncer ma présence aux autres (si serveur de signaling disponible)
-                this.announcePresence();
+                // Démarrer l'annonce de présence périodique
+                this.startPresenceBroadcast();
             } else {
                 setTimeout(checkPeer, 200);
             }
@@ -62,11 +64,93 @@ class RoomSystem {
         checkPeer();
     }
 
-    // Annoncer ma présence (pour future implémentation avec serveur)
+    // Démarrer la diffusion périodique de présence
+    startPresenceBroadcast() {
+        // Annoncer immédiatement
+        this.announcePresence();
+        
+        // Puis toutes les 10 secondes
+        this.presenceInterval = setInterval(() => {
+            this.announcePresence();
+            this.cleanupStalePlayer();
+        }, 10000);
+        
+        console.log('📡 Broadcast de présence démarré');
+    }
+
+    // Arrêter la diffusion de présence
+    stopPresenceBroadcast() {
+        if (this.presenceInterval) {
+            clearInterval(this.presenceInterval);
+            this.presenceInterval = null;
+        }
+    }
+
+    // Annoncer ma présence via broadcast
     announcePresence() {
-        // TODO: Implémenter avec un serveur de signaling pour découverte automatique
-        // Pour l'instant, les joueurs doivent se connecter manuellement
-        console.log('🔊 Salle annoncée:', this.myRoomInfo);
+        if (!this.myRoomInfo || this.roomMode === 'private') {
+            return; // Ne pas annoncer si privé
+        }
+
+        const announcement = {
+            type: 'player-presence',
+            peerId: this.chatSystem.peer?.id,
+            username: this.chatSystem.currentUser,
+            avatar: this.chatSystem.getUserAvatar(this.chatSystem.currentUser),
+            roomMode: this.roomMode,
+            playerCount: this.playersInRoom.size,
+            maxPlayers: this.myRoomInfo.maxPlayers,
+            timestamp: Date.now()
+        };
+
+        // Broadcast à tous les peers connectés
+        this.chatSystem.connections.forEach((conn) => {
+            if (conn.open) {
+                conn.send(announcement);
+            }
+        });
+        
+        console.log('📡 Présence annoncée:', announcement.username);
+    }
+
+    // Recevoir une annonce de présence
+    handlePlayerPresence(data) {
+        const { peerId, username, avatar, roomMode, playerCount, maxPlayers, timestamp } = data;
+        
+        // Ne pas s'ajouter soi-même
+        if (peerId === this.chatSystem.peer?.id) {
+            return;
+        }
+
+        // Mettre à jour la liste des joueurs disponibles
+        this.availablePlayers.set(peerId, {
+            username,
+            avatar,
+            roomMode,
+            playerCount,
+            maxPlayers,
+            lastSeen: timestamp
+        });
+
+        console.log('👤 Joueur détecté:', username, `(${playerCount}/${maxPlayers})`);
+        
+        // Mettre à jour l'UI
+        this.updateAvailablePlayersList();
+    }
+
+    // Nettoyer les joueurs inactifs (plus de 30 secondes)
+    cleanupStalePlayer() {
+        const now = Date.now();
+        const staleThreshold = 30000; // 30 secondes
+        
+        this.availablePlayers.forEach((player, peerId) => {
+            if (now - player.lastSeen > staleThreshold) {
+                console.log('🗑️ Retrait joueur inactif:', player.username);
+                this.availablePlayers.delete(peerId);
+            }
+        });
+        
+        this.updateAvailablePlayersList();
     }
 
     // Changer le mode de la salle
@@ -163,6 +247,10 @@ class RoomSystem {
     // Gérer les messages de salle
     handleRoomMessage(conn, data) {
         switch (data.type) {
+            case 'player-presence':
+                this.handlePlayerPresence(data);
+                break;
+            
             case 'join-request':
                 this.handleJoinRequest(conn, data);
                 break;
@@ -678,6 +766,64 @@ class RoomSystem {
             btn.addEventListener('click', (e) => {
                 const peerId = e.target.dataset.peerId;
                 this.refuseJoinRequest(peerId);
+            });
+        });
+    }
+
+    // Mettre à jour la liste des joueurs disponibles
+    updateAvailablePlayersList() {
+        const container = document.getElementById('availablePlayersPanel');
+        if (!container) return;
+
+        // Si je suis déjà dans une salle, masquer la liste
+        if (this.playersInRoom.size > 1) {
+            container.classList.add('hidden');
+            return;
+        }
+
+        container.classList.remove('hidden');
+
+        // Afficher le nombre de joueurs en ligne
+        const count = this.availablePlayers.size;
+        let listHTML = `<h4>🌐 Joueurs en Ligne (${count})</h4>`;
+
+        if (count === 0) {
+            listHTML += '<p class="no-players">Aucun joueur en ligne pour le moment...</p>';
+        } else {
+            listHTML += '<div class="available-players-list">';
+            
+            this.availablePlayers.forEach((player, peerId) => {
+                const modeIcon = {
+                    'open': '🔓',
+                    'private': '🔒',
+                    'invite': '🎫'
+                }[player.roomMode] || '🔓';
+                
+                listHTML += `
+                    <div class="available-player-item" data-peer-id="${peerId}">
+                        <span class="player-avatar">${player.avatar}</span>
+                        <div class="player-info">
+                            <span class="player-name">${player.username}</span>
+                            <span class="player-status">${modeIcon} ${player.playerCount}/${player.maxPlayers} joueurs</span>
+                        </div>
+                        <button class="btn-join-player" data-peer-id="${peerId}" data-username="${player.username}">
+                            🚪 Rejoindre
+                        </button>
+                    </div>
+                `;
+            });
+            
+            listHTML += '</div>';
+        }
+
+        container.innerHTML = listHTML;
+
+        // Ajouter les écouteurs pour les boutons rejoindre
+        container.querySelectorAll('.btn-join-player').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const peerId = e.target.dataset.peerId;
+                const username = e.target.dataset.username;
+                this.requestJoinRoom(username, peerId);
             });
         });
     }
