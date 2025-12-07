@@ -62,35 +62,29 @@
                 showStats: true,     // Afficher stats
                 forceRefresh: false  // Utiliser cache si disponible
             });
+
+            // Bouton refresh
+            const refreshBtn = document.getElementById('refreshButton');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', async () => {
+                    refreshBtn.disabled = true;
+                    refreshBtn.textContent = '⏳ Actualisation...';
+                    
+                    await leaderboardManager.displayLeaderboard('leaderboard', {
+                        limit: 20,
+                        showArtist: true,
+                        showStats: true,
+                        forceRefresh: true  // Forcer le rechargement depuis DB
+                    });
+                    
+                    refreshBtn.disabled = false;
+                    refreshBtn.textContent = '🔄 Actualiser le classement';
+                });
+            }
         };
 
         // Charger le leaderboard au démarrage
         document.addEventListener('DOMContentLoaded', initLeaderboard);
-            
-            await leaderboardManager.displayLeaderboard('leaderboard', {
-                limit: 20,           // Top 20 joueurs
-                showArtist: true,    // Afficher info artiste
-                showStats: true,     // Afficher stats
-                forceRefresh: false  // Utiliser cache si disponible
-            });
-
-            // Bouton refresh
-            const refreshBtn = document.getElementById('refreshButton');
-            refreshBtn.addEventListener('click', async () => {
-                refreshBtn.disabled = true;
-                refreshBtn.textContent = '⏳ Actualisation...';
-                
-                await leaderboardManager.displayLeaderboard('leaderboard', {
-                    limit: 20,
-                    showArtist: true,
-                    showStats: true,
-                    forceRefresh: true  // Forcer le rechargement depuis DB
-                });
-                
-                refreshBtn.disabled = false;
-                refreshBtn.textContent = '🔄 Actualiser le classement';
-            });
-        });
     </script>
 </body>
 </html>
