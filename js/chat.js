@@ -100,7 +100,20 @@ class P2PChatSystem {
             });
 
             this.peer.on('error', (err) => {
-                console.error('❌ Erreur Peer:', err);
+                // Gestion intelligente des erreurs comme dans simple-chat.js
+                if (err.type === 'network' || err.message?.includes('Lost connection')) {
+                    console.log('ℹ️ PeerJS: Connexion serveur perdue (normal en localhost)');
+                    // Ne pas rejeter la promesse pour ce type d'erreur
+                    return;
+                }
+                
+                if (err.type === 'peer-unavailable' || err.message?.includes('Could not connect to peer')) {
+                    console.log('ℹ️ PeerJS: Peer non disponible');
+                    return;
+                }
+                
+                // Erreurs critiques uniquement
+                console.error('❌ Erreur Peer critique:', err);
                 reject(err);
             });
 
