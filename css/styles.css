@@ -3962,19 +3962,19 @@ body {
 }
 
 .chat-bubble.minimized .chat-bubble-header {
-    padding: 16px;
+    padding: 8px;
     justify-content: center;
 }
 
-.chat-bubble.minimized .header-title span:not(.online-count) {
+.chat-bubble.minimized .header-title {
     display: none;
 }
 
-.chat-bubble.minimized .online-count {
-    font-size: 12px;
-    position: absolute;
-    top: 8px;
-    right: 8px;
+.chat-bubble.minimized .minimize-btn {
+    position: static;
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
 }
 
 .chat-bubble-header {

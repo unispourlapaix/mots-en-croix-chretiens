@@ -32,8 +32,8 @@ class MultiplayerRace {
         this.myProgress = { wordsCompleted: 0, lettersCorrect: 0, totalLetters: 0 };
         this.players.clear();
         
-        // Initialiser le score de course séparé (commence à 0)
-        this.currentRaceScore = 0;
+        // Sauvegarder le score du jeu au début de la course
+        this.startGameScore = this.game.score;
 
         // Afficher le timer
         this.startTimer();
@@ -108,12 +108,16 @@ class MultiplayerRace {
 
         // Calculer la progression actuelle
         this.calculateProgress();
+        
+        // Calculer le score de course actuel
+        const raceScore = this.game.score - this.startGameScore;
 
         this.broadcastProgress('update', {
             wordsCompleted: this.myProgress.wordsCompleted,
             lettersCorrect: this.myProgress.lettersCorrect,
             totalLetters: this.myProgress.totalLetters,
-            score: this.game.score
+            score: this.game.score,
+            raceScore: raceScore
         });
     }
     
@@ -143,9 +147,12 @@ class MultiplayerRace {
     shareWordFound(word, newScore) {
         if (!this.isRaceMode || this.raceFinished) return;
         
+        const raceScore = newScore - this.startGameScore;
+        
         this.broadcastProgress('word', {
             word: word,
             score: newScore,
+            raceScore: raceScore,
             wordsCompleted: this.myProgress.wordsCompleted + 1
         });
     }
@@ -212,16 +219,17 @@ class MultiplayerRace {
         else if (finishedPlayers === 1) positionBonus = 300; // Deuxième
         else if (finishedPlayers === 2) positionBonus = 100; // Troisième
 
-        // Le score de course est séparé et accumule tous les points de la partie
-        this.currentRaceScore = this.game.score + positionBonus;
+        // Score de course = points gagnés pendant la course (sans le bonus de position)
+        const pointsEarnedDuringRace = this.game.score - this.startGameScore;
+        this.currentRaceScore = pointsEarnedDuringRace;
         
-        // Ajouter au système de médailles de course
+        // Ajouter au système de médailles de course (score pur de la course)
         if (typeof raceMedalSystem !== 'undefined') {
             raceMedalSystem.addRacePoints(this.currentRaceScore);
             console.log(`🏅 +${this.currentRaceScore} points ajoutés au score de course !`);
         }
 
-        // Bonus de partage : ajouter le bonus de position au score du jeu
+        // Bonus de partage : ajouter le bonus de position au score du jeu principal
         this.game.score += positionBonus;
         const scoreEl = document.getElementById('score');
         if (scoreEl) scoreEl.textContent = this.game.score;
@@ -469,6 +477,7 @@ les yeux fixés sur Jésus." - Hébreux 12:1-2
             case 'word':
                 // Un joueur a trouvé un mot
                 player.score = data.score || 0;
+                player.raceScore = data.raceScore || 0;
                 player.wordsCompleted = data.wordsCompleted || 0;
                 this.chatSystem.showMessage(`🎯 ${username} a trouvé : "${data.word}" !`, 'ai');
                 // Mettre à jour l'affichage immédiatement
@@ -478,6 +487,7 @@ les yeux fixés sur Jésus." - Hébreux 12:1-2
 
             case 'update':
                 player.score = data.score || 0;
+                player.raceScore = data.raceScore || 0;
                 player.wordsCompleted = data.wordsCompleted || 0;
                 const progress = data.totalLetters > 0 
                     ? Math.round((data.lettersCorrect / data.totalLetters) * 100)
@@ -497,10 +507,11 @@ les yeux fixés sur Jésus." - Hébreux 12:1-2
             case 'finish':
                 player.finishTime = data.finishTime;
                 player.score = data.score;
+                player.raceScore = data.raceScore || 0;
                 const minutes = Math.floor(data.finishTime / 60);
                 const seconds = data.finishTime % 60;
                 const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                this.chatSystem.showMessage(`🎊 ${username} a terminé en ${timeStr} ! (${data.score} pts, +${data.bonus} bonus)`, 'system');
+                this.chatSystem.showMessage(`🎊 ${username} a terminé en ${timeStr} ! (🏅 ${player.raceScore} pts course, +${data.bonus} bonus jeu)`, 'system');
                 // Mettre à jour l'affichage immédiatement
                 this.updatePlayersDisplay();
                 this.updateScoreBox();
@@ -581,29 +592,30 @@ les yeux fixés sur Jésus." - Hébreux 12:1-2
         // Calculer ma progression actuelle
         this.calculateProgress();
         
-        // Calculer le score de course actuel (sans modifier le score du jeu)
+        // Calculer le score de course actuel = points gagnés depuis le début de la course
         const currentGameScore = this.game.score;
+        const currentRaceScore = currentGameScore - this.startGameScore;
         
         // Créer la liste de tous les joueurs
         const allPlayers = [
             {
                 username: this.chatSystem.currentUser,
-                score: currentGameScore,
-                raceScore: currentGameScore, // Score de course = score actuel de la partie
+                score: currentGameScore, // Score total du jeu
+                raceScore: currentRaceScore, // Points gagnés pendant la course
                 isMe: true,
                 stopped: this.hasStoppedRace
             },
             ...Array.from(this.players.values()).map(p => ({
                 username: p.username,
                 score: p.score || 0,
-                raceScore: p.raceScore || p.score || 0,
+                raceScore: p.raceScore || 0,
                 isMe: false,
                 stopped: p.stopped || false
             }))
         ];
         
-        // Trier par score décroissant
-        allPlayers.sort((a, b) => b.score - a.score);
+        // Trier par score de course décroissant (compétition sur les points de la course)
+        allPlayers.sort((a, b) => b.raceScore - a.raceScore);
         
         // Générer le HTML
         listEl.innerHTML = allPlayers.map((player, index) => {
