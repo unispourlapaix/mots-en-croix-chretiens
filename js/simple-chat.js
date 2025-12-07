@@ -108,18 +108,26 @@ class SimpleChatSystem {
                 // Ignorer les erreurs de connexion réseau (normales pour localhost)
                 if (err.type === 'network' || err.message?.includes('Lost connection')) {
                     console.log('ℹ️ PeerJS: Connexion serveur perdue (normal en localhost)');
-                    // Ne pas afficher de message d'erreur à l'utilisateur
                     return;
                 }
                 
-                console.error('❌ Erreur PeerJS:', err);
-                // Ne pas bloquer le jeu si P2P ne fonctionne pas
-                this.showMessage('⚠️ Chat P2P non disponible (mode local uniquement)', 'system');
+                // Ignorer les erreurs de connexion à un peer (joueur déconnecté/inexistant)
+                if (err.type === 'peer-unavailable' || err.message?.includes('Could not connect to peer')) {
+                    console.log('ℹ️ PeerJS: Joueur non disponible ou déconnecté');
+                    this.showMessage('⚠️ Ce joueur est déconnecté ou n\'existe plus', 'system');
+                    return;
+                }
                 
-                // Nettoyer le peer
-                if (this.peer) {
-                    this.peer.destroy();
-                    this.peer = null;
+                // Erreurs critiques seulement
+                console.error('❌ Erreur PeerJS critique:', err);
+                this.showMessage('⚠️ Erreur de connexion P2P', 'system');
+                
+                // Ne détruire le peer que pour des erreurs vraiment critiques
+                if (err.type === 'server-error' || err.type === 'socket-error') {
+                    if (this.peer) {
+                        this.peer.destroy();
+                        this.peer = null;
+                    }
                 }
             });
         } catch (error) {

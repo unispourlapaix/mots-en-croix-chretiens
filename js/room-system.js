@@ -136,9 +136,20 @@ class RoomSystem {
                 this.handleRoomMessage(conn, data);
             });
 
+            conn.on('close', () => {
+                clearTimeout(timeout);
+            });
+
             conn.on('error', (err) => {
-                console.error('Erreur de connexion:', err);
-                this.chatSystem.showMessage('❌ Erreur de connexion', 'system');
+                clearTimeout(timeout);
+                console.log('ℹ️ Connexion échouée:', err.type);
+                
+                // Message utilisateur plus clair selon le type d'erreur
+                if (err.type === 'peer-unavailable' || err.message?.includes('Could not connect')) {
+                    this.chatSystem.showMessage('❌ Joueur introuvable ou déconnecté', 'system');
+                } else {
+                    this.chatSystem.showMessage('❌ Impossible de se connecter à ce joueur', 'system');
+                }
             });
 
             return true;
