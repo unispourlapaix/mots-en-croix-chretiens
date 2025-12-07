@@ -36,15 +36,36 @@
         
         window.supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
         console.log('✅ Supabase initialisé');
+        
+        // Déclencher un événement quand Supabase est prêt
+        window.dispatchEvent(new Event('supabase-ready'));
     </script>
 
     <!-- Module Leaderboard -->
     <script src="../js/leaderboard.js"></script>
 
     <script>
-        // Charger le leaderboard au démarrage
-        document.addEventListener('DOMContentLoaded', async () => {
+        // Attendre que Supabase soit prêt avant de charger le leaderboard
+        const initLeaderboard = async () => {
+            if (!window.supabase) {
+                // Attendre l'événement supabase-ready
+                await new Promise(resolve => {
+                    window.addEventListener('supabase-ready', resolve, { once: true });
+                });
+            }
+            
             console.log('📊 Chargement du leaderboard...');
+            
+            await leaderboardManager.displayLeaderboard('leaderboard', {
+                limit: 20,           // Top 20 joueurs
+                showArtist: true,    // Afficher info artiste
+                showStats: true,     // Afficher stats
+                forceRefresh: false  // Utiliser cache si disponible
+            });
+        };
+
+        // Charger le leaderboard au démarrage
+        document.addEventListener('DOMContentLoaded', initLeaderboard);
             
             await leaderboardManager.displayLeaderboard('leaderboard', {
                 limit: 20,           // Top 20 joueurs
