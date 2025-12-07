@@ -31,6 +31,9 @@ class MultiplayerRace {
         this.raceStartTime = Date.now();
         this.myProgress = { wordsCompleted: 0, lettersCorrect: 0, totalLetters: 0 };
         this.players.clear();
+        
+        // Initialiser le score de course séparé (commence à 0)
+        this.currentRaceScore = 0;
 
         // Afficher le timer
         this.startTimer();
@@ -204,18 +207,22 @@ class MultiplayerRace {
         
         // Calculer le bonus selon le classement
         const finishedPlayers = Array.from(this.players.values()).filter(p => p.finishTime).length;
-        let bonus = 0;
-        if (finishedPlayers === 0) bonus = 500; // Premier
-        else if (finishedPlayers === 1) bonus = 300; // Deuxième
-        else if (finishedPlayers === 2) bonus = 100; // Troisième
+        let positionBonus = 0;
+        if (finishedPlayers === 0) positionBonus = 500; // Premier
+        else if (finishedPlayers === 1) positionBonus = 300; // Deuxième
+        else if (finishedPlayers === 2) positionBonus = 100; // Troisième
 
-        // Ajouter le bonus au score de course (séparé)
+        // Le score de course est séparé et accumule tous les points de la partie
+        this.currentRaceScore = this.game.score + positionBonus;
+        
+        // Ajouter au système de médailles de course
         if (typeof raceMedalSystem !== 'undefined') {
-            raceMedalSystem.addRacePoints(bonus + this.game.score);
-            console.log(`🏅 +${bonus + this.game.score} points de course bonus ajoutés !`);
+            raceMedalSystem.addRacePoints(this.currentRaceScore);
+            console.log(`🏅 +${this.currentRaceScore} points ajoutés au score de course !`);
         }
 
-        this.game.score += bonus;
+        // Bonus de partage : ajouter le bonus de position au score du jeu
+        this.game.score += positionBonus;
         const scoreEl = document.getElementById('score');
         if (scoreEl) scoreEl.textContent = this.game.score;
 
@@ -225,11 +232,12 @@ class MultiplayerRace {
 
         this.broadcastProgress('finish', {
             score: this.game.score,
+            raceScore: this.currentRaceScore,
             finishTime,
-            bonus
+            bonus: positionBonus
         });
 
-        this.chatSystem.showMessage(`🏁 Vous avez terminé en ${timeStr} ! +${bonus} pts bonus`, 'system');
+        this.chatSystem.showMessage(`🏁 Terminé en ${timeStr} ! +${positionBonus} pts bonus jeu | 🏅 ${this.currentRaceScore} pts course`, 'system');
     }
 
     // Terminer la course (temps écoulé)
@@ -522,17 +530,22 @@ class MultiplayerRace {
         // Calculer ma progression actuelle
         this.calculateProgress();
         
+        // Calculer le score de course actuel (sans modifier le score du jeu)
+        const currentGameScore = this.game.score;
+        
         // Créer la liste de tous les joueurs
         const allPlayers = [
             {
                 username: this.chatSystem.currentUser,
-                score: this.game.score,
+                score: currentGameScore,
+                raceScore: currentGameScore, // Score de course = score actuel de la partie
                 isMe: true,
                 stopped: this.hasStoppedRace
             },
             ...Array.from(this.players.values()).map(p => ({
                 username: p.username,
                 score: p.score || 0,
+                raceScore: p.raceScore || p.score || 0,
                 isMe: false,
                 stopped: p.stopped || false
             }))
@@ -552,8 +565,14 @@ class MultiplayerRace {
             return `
                 <div class="race-score-item ${meClass} ${leaderClass}">
                     <span class="race-score-avatar">${avatar}</span>
-                    <span class="race-score-name">${medal} ${player.username} ${stoppedIcon}</span>
-                    <span class="race-score-points">⭐${player.score}</span>
+                    <div class="race-score-info">
+                        <span class="race-score-name">${medal} ${player.username} ${stoppedIcon}</span>
+                        <div class="race-score-values">
+                            <span class="game-score" title="Score du jeu">⭐${player.score}</span>
+                            <span class="separator">|</span>
+                            <span class="race-score" title="Score de course">🏅${player.raceScore}</span>
+                        </div>
+                    </div>
                 </div>
             `;
         }).join('');

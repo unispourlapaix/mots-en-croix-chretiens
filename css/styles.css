@@ -403,9 +403,9 @@ body {
 .race-score-item {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     background: white;
-    padding: 6px 12px;
+    padding: 8px 14px;
     border-radius: 20px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
@@ -428,7 +428,14 @@ body {
 }
 
 .race-score-avatar {
-    font-size: 18px;
+    font-size: 20px;
+}
+
+.race-score-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .race-score-name {
@@ -437,10 +444,26 @@ body {
     font-weight: 600;
 }
 
-.race-score-points {
-    font-size: 14px;
+.race-score-values {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.race-score-values .game-score {
     color: #d97706;
     font-weight: bold;
+}
+
+.race-score-values .race-score {
+    color: #7c3aed;
+    font-weight: bold;
+}
+
+.race-score-values .separator {
+    color: #9ca3af;
+    font-weight: normal;
 }
 
 /* Boutons de course */
