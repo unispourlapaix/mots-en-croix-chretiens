@@ -289,6 +289,57 @@ class MultiplayerRace {
                 : player.stopped ? ' (arrêté)' : ' (incomplet)';
             this.chatSystem.showMessage(`${medal} ${player.username}: ${player.score} pts${timeStr}`, 'system');
         });
+
+        // Message spirituel final inspirant
+        setTimeout(() => {
+            this.showInspirationalMessage();
+        }, 2000);
+    }
+
+    // Afficher un message spirituel inspirant
+    showInspirationalMessage() {
+        const message = `
+🕊️ LA COURSE DE LA FOI 🕊️
+
+La course que nous courons est plus qu'une simple course.
+C'est le cheminement de nos âmes, nos choix, nos envies.
+Elle modélise notre parcours, nos directions.
+
+Cette course a plus de sens quand on la partage et qu'on passe le flambeau,
+la flamme et la passion de la vie : le vrai amour de Dieu, Jésus simplement.
+
+✨ Pour partager sa foi, il faut savoir aussi faire pause et écouter.
+
+L'orgueilleux reviendra aux lois, pour punir et toujours avoir raison.
+Jésus demande la miséricorde et la paix.
+
+Dans le respect des autres, on peut totalement faire l'œuvre d'un évangéliste.
+Mais sans amour, la haine progresse, avec le racisme communautaire,
+la division devient une doctrine qui arrête la course de beaucoup 
+de pauvres enfants de Dieu.
+
+⚠️ Veillez sur vos mots qu'ils ne deviennent pas des maux qui créent 
+des guerres sans sagesse de paix.
+
+Et fuyez celles et ceux qui vous prouvent par un seul verset 
+que Jésus n'est pas le Prince de Paix et que nous ne sommes pas 
+appelés fils de paix.
+
+Car à la fin de la course, c'est bien la paix qui nous attend.
+
+🌟 Alors avec espoir, persévérez, car l'éternité est de Dieu. 🌟
+
+"Courons avec persévérance l'épreuve qui nous est proposée,
+les yeux fixés sur Jésus." - Hébreux 12:1-2
+        `.trim();
+
+        // Afficher le message ligne par ligne avec un délai
+        const lines = message.split('\n').filter(line => line.trim());
+        lines.forEach((line, index) => {
+            setTimeout(() => {
+                this.chatSystem.showMessage(line, 'system');
+            }, index * 800); // 0.8 seconde entre chaque ligne
+        });
     }
     
     // Vérifier s'il y a un gagnant

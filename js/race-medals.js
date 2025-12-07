@@ -181,6 +181,26 @@ class RaceMedalSystem {
                 );
             }, index * 2000); // Décaler de 2 secondes entre chaque notification
         });
+
+        // Si c'est la 50ème médaille, afficher un message d'encouragement spécial
+        if (this.raceMedalsUnlocked.size === 50) {
+            setTimeout(() => {
+                this.showNotification(
+                    '🌟 Mi-parcours atteint !',
+                    'La course de la foi continue... Persévérez avec espoir !\n"Courons avec persévérance" - Hébreux 12:1'
+                );
+            }, medals.length * 2000 + 1000);
+        }
+
+        // Si toutes les médailles sont débloquées
+        if (this.raceMedalsUnlocked.size === 112) {
+            setTimeout(() => {
+                this.showNotification(
+                    '👑 Toutes les médailles débloquées !',
+                    'Vous avez parcouru toute la course de la foi !\nÀ la fin, c\'est bien la paix qui nous attend.\nL\'éternité est de Dieu. 🕊️'
+                );
+            }, medals.length * 2000 + 2000);
+        }
     }
 
     // Afficher une notification
