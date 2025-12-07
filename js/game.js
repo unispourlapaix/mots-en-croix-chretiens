@@ -1550,7 +1550,17 @@ class ChristianCrosswordGame {
         document.getElementById('achievementCount').textContent =
             `${stats.unlockedAchievements}/${stats.totalAchievements}`;
         document.getElementById('achievementPoints').textContent = stats.totalPoints;
-        document.getElementById('completionPercent').textContent = `${stats.completionPercentage}%`;
+
+        // Mettre à jour les stats de course si disponible
+        if (typeof raceMedalSystem !== 'undefined') {
+            const raceProgress = raceMedalSystem.getProgress();
+            document.getElementById('raceMedalCount').textContent = 
+                `${raceProgress.unlocked}/${raceProgress.total}`;
+            document.getElementById('racePoints').textContent = raceMedalSystem.getRaceScore();
+            
+            // Afficher les médailles de course
+            this.updateRaceMedalsDisplay();
+        }
 
         // Remplir la section des médailles de score
         this.updateScoreMedalsShowcase();
@@ -1633,6 +1643,47 @@ class ChristianCrosswordGame {
 
             scoreMedalsGrid.appendChild(medalItem);
         });
+    }
+
+    updateRaceMedalsDisplay() {
+        const raceMedalsGrid = document.getElementById('raceMedalsGrid');
+        if (!raceMedalsGrid || typeof raceMedalSystem === 'undefined') return;
+
+        raceMedalsGrid.innerHTML = '';
+        
+        const allMedals = raceMedalSystem.getAllMedals();
+        const raceScore = raceMedalSystem.getRaceScore();
+
+        // Afficher seulement les 20 premières et les 5 dernières débloquées
+        const unlockedMedals = allMedals.filter(m => m.unlocked).slice(-20);
+        const nextMedals = allMedals.filter(m => !m.unlocked).slice(0, 10);
+        const displayMedals = [...unlockedMedals, ...nextMedals];
+
+        displayMedals.forEach(medal => {
+            const progress = Math.min(100, (raceScore / medal.points) * 100);
+            
+            const medalItem = document.createElement('div');
+            medalItem.className = `race-medal-item ${medal.unlocked ? 'unlocked' : 'locked'}`;
+            medalItem.title = medal.meaning;
+
+            medalItem.innerHTML = `
+                <div class="race-medal-icon">${medal.unlocked ? medal.icon : '🔒'}</div>
+                <div class="race-medal-word">${medal.word}</div>
+                <div class="race-medal-points">${medal.points.toLocaleString()} pts</div>
+                ${!medal.unlocked ? `
+                    <div class="race-medal-progress">
+                        <div class="race-medal-progress-bar" style="width: ${progress}%"></div>
+                    </div>
+                ` : '<div class="race-medal-status">✓</div>'}
+            `;
+
+            raceMedalsGrid.appendChild(medalItem);
+        });
+
+        // Ajouter un message si toutes les médailles sont débloquées
+        if (allMedals.every(m => m.unlocked)) {
+            raceMedalsGrid.innerHTML = '<div class="all-medals-unlocked">🎉 Toutes les 112 médailles débloquées ! Champion !</div>';
+        }
     }
 
     filterAchievements(filter) {

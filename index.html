@@ -516,22 +516,29 @@
             <div class="achievements-stats">
                 <div class="stat-item">
                     <div class="stat-value" id="achievementCount">0/0</div>
-                    <div class="stat-label">Médailles</div>
+                    <div class="stat-label">Médailles Jeu</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-value" id="achievementPoints">0</div>
-                    <div class="stat-label">Points</div>
+                    <div class="stat-label">Points Jeu</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value" id="completionPercent">0%</div>
-                    <div class="stat-label">Complétion</div>
+                    <div class="stat-value" id="raceMedalCount">0/112</div>
+                    <div class="stat-label">Médailles Course</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="racePoints">0</div>
+                    <div class="stat-label">Points Course</div>
                 </div>
             </div>
 
-            <!-- Section Médailles de Score (mise en avant) -->
-            <div class="score-medals-showcase">
-                <h3 class="showcase-title">🎯 Médailles de Score</h3>
-                <div class="score-medals-grid" id="scoreMedalsGrid">
+            <!-- Section Médailles de Course (mise en avant) -->
+            <div class="race-medals-section">
+                <div class="section-header">
+                    <h3>🏃 Médailles de Score Course - Mots Inspirants</h3>
+                    <p class="section-description">Débloquez 112 médailles basées sur des mots chrétiens optimistes en jouant en mode course !</p>
+                </div>
+                <div class="race-medals-grid" id="raceMedalsGrid">
                     <!-- Généré dynamiquement -->
                 </div>
             </div>
@@ -619,6 +626,7 @@
     <script src="js/i18n.js"></script>
     <script src="js/gameData.js"></script>
     <script src="js/achievements.js"></script>
+    <script src="js/race-medals.js"></script>
     <script src="js/biblicalQuotes.js"></script>
     <script src="js/shareImage.js"></script>
     <script src="js/supabase.js"></script>

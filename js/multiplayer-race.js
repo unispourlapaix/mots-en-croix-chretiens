@@ -209,6 +209,12 @@ class MultiplayerRace {
         else if (finishedPlayers === 1) bonus = 300; // Deuxième
         else if (finishedPlayers === 2) bonus = 100; // Troisième
 
+        // Ajouter le bonus au score de course (séparé)
+        if (typeof raceMedalSystem !== 'undefined') {
+            raceMedalSystem.addRacePoints(bonus + this.game.score);
+            console.log(`🏅 +${bonus + this.game.score} points de course bonus ajoutés !`);
+        }
+
         this.game.score += bonus;
         const scoreEl = document.getElementById('score');
         if (scoreEl) scoreEl.textContent = this.game.score;
