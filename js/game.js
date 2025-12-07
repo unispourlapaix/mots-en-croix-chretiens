@@ -233,26 +233,8 @@ class ChristianCrosswordGame {
     initializeEventListeners() {
         document.getElementById('playButton').addEventListener('click', () => this.handlePlayButtonClick());
         
-        // Boutons multijoueur flottants (vérifier s'ils existent)
-        const floatingBtn = document.querySelector('.multiplayer-floating-btn .floating-btn');
-        if (floatingBtn) {
-            floatingBtn.addEventListener('click', () => this.toggleMultiplayerDropdown());
-        }
-        
-        const createRoomBtnFloat = document.getElementById('createRoomBtnFloat');
-        if (createRoomBtnFloat) {
-            createRoomBtnFloat.addEventListener('click', () => this.createMultiplayerRoomFloat());
-        }
-        
-        const joinRoomBtnFloat = document.getElementById('joinRoomBtnFloat');
-        if (joinRoomBtnFloat) {
-            joinRoomBtnFloat.addEventListener('click', () => this.joinMultiplayerRoomFloat());
-        }
-        
-        const copyCodeBtnFloat = document.getElementById('copyCodeBtnFloat');
-        if (copyCodeBtnFloat) {
-            copyCodeBtnFloat.addEventListener('click', () => this.copyRoomCodeFloat());
-        }
+        // Boutons multijoueur - Gérés par le nouveau système room-ui.js
+        // Les anciens boutons flottants et modals sont remplacés par le système de salles
         
         document.getElementById('checkButton').addEventListener('click', () => this.checkAnswers());
         document.getElementById('hintButton').addEventListener('click', () => this.showHint());
@@ -260,12 +242,11 @@ class ChristianCrosswordGame {
         document.getElementById('nextLevelButton').addEventListener('click', () => this.nextLevel());
         document.getElementById('resetButton').addEventListener('click', () => this.resetGame());
 
-        // Ancien multijoueur (garde pour compatibilité avec le modal existant)
-        document.getElementById('createRoomBtn').addEventListener('click', () => this.createMultiplayerRoom());
-        document.getElementById('joinRoomBtn').addEventListener('click', () => this.showJoinRoomInput());
-        document.getElementById('connectBtn').addEventListener('click', () => this.joinMultiplayerRoom());
-        document.getElementById('closeMultiplayerBtn').addEventListener('click', () => this.closeMultiplayerModal());
-        document.getElementById('copyCodeBtn').addEventListener('click', () => this.copyRoomCode());
+        // Nouveau système de salles - Les événements sont gérés par room-ui.js
+        const closeMultiplayerBtn = document.getElementById('closeMultiplayerBtn');
+        if (closeMultiplayerBtn) {
+            // Pas besoin d'ajouter l'événement ici, il est géré par room-ui.js
+        }
 
         // Modal kawaii
         document.getElementById('kawaiiModalBtn').addEventListener('click', () => this.closeKawaiiModal());
@@ -1846,10 +1827,15 @@ class ChristianCrosswordGame {
         document.getElementById('joinRoomInput').classList.add('hidden');
     }
 
+    // Fermer le modal multijoueur (compatible nouveau système)
     closeMultiplayerModal() {
-        document.getElementById('multiplayerModal').classList.add('hidden');
+        const modal = document.getElementById('multiplayerModal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
     }
 
+    /* ===== ANCIENNES MÉTHODES MULTIJOUEUR - COMMENTÉES =====
     async createMultiplayerRoom() {
         const playerName = document.getElementById('multiplayerPlayerName').value.trim();
         if (!playerName) {
@@ -1871,6 +1857,12 @@ class ChristianCrosswordGame {
         }
     }
 
+    /* ===== ANCIENNES MÉTHODES MULTIJOUEUR - OBSOLÈTES =====
+     * Ces méthodes sont remplacées par le nouveau système de salles (room-system.js + room-ui.js)
+     * Conservées temporairement pour référence, à supprimer plus tard
+     */
+    
+    /*
     // Nouvelles fonctions pour le bouton flottant
     toggleMultiplayerDropdown() {
         // Vérifier si l'utilisateur est authentifié
@@ -2035,6 +2027,9 @@ class ChristianCrosswordGame {
             await this.showKawaiiModal('Impossible de copier le code', '❌');
         }
     }
+    */
+    
+    /* FIN DES MÉTHODES OBSOLÈTES MULTIJOUEUR */
 
     // Gestion de la connexion
     async handleSignIn() {
