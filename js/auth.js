@@ -593,8 +593,12 @@ class AuthSystem {
                 }
                 
                 // Réinitialiser le formulaire
-                form.reset();
-                messageDiv.style.display = 'none';
+                if (form && typeof form.reset === 'function') {
+                    form.reset();
+                }
+                if (messageDiv) {
+                    messageDiv.style.display = 'none';
+                }
             });
         }
 
@@ -621,8 +625,12 @@ class AuthSystem {
                 toggleLink.textContent = 'connexion';
                 if (forgotPasswordLink) forgotPasswordLink.style.display = 'none';
                 
-                form.reset();
-                messageDiv.style.display = 'none';
+                if (form && typeof form.reset === 'function') {
+                    form.reset();
+                }
+                if (messageDiv) {
+                    messageDiv.style.display = 'none';
+                }
             });
         }
 
