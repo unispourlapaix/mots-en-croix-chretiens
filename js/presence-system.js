@@ -15,31 +15,6 @@ class PresenceSystem {
     }
     
     init() {
-        console.log('✅ Système de présence 100% P2P - GRATUIT À VIE');
-        
-        // BroadcastChannel pour sync locale entre onglets
-        try {
-            this.channel = new BroadcastChannel('crossword_presence');
-            this.channel.onmessage = (e) => this.handleChannelMessage(e.data);
-        } catch (err) {
-            console.warn('BroadcastChannel non supporté');
-        }
-        
-        // Écouter localStorage pour sync locale
-        window.addEventListener('storage', (e) => {
-            if (e.key === this.storageKey) {
-                this.syncFromStorage();
-            }
-        });
-        
-        // Sync initial
-        this.syncFromStorage();
-        
-        // Cleanup périodique
-        setInterval(() => this.cleanupInactive(), 5000);
-    }
-    
-    init() {
         console.log('✅ Système de partage familial/amis P2P');
         
         // BroadcastChannel pour sync locale entre onglets
@@ -84,25 +59,46 @@ class PresenceSystem {
         }
         
         const roomCode = this.generateRoomCode();
-        const roomPeerId = `ROOM-${roomCode}-${Date.now()}`;
         
         this.currentRoomCode = roomCode;
         
         console.log('🏠 Salle créée:', roomCode);
         console.log('📋 Partagez ce code avec vos amis/famille !');
         
-        // Sauvegarder info de la salle
-        localStorage.setItem('crossword_current_room', JSON.stringify({
-            code: roomCode,
-            peerId: roomPeerId,
-            host: this.myPresence.peerId,
-            createdAt: Date.now()
-        }));
+        // Enregistrer dans le registre de la salle
+        this.registerInRoom(roomCode);
+        
+        // Annoncer via BroadcastChannel
+        if (this.channel) {
+            this.channel.postMessage({
+                type: 'room_created',
+                roomCode: roomCode,
+                peerId: this.myPresence.peerId,
+                username: this.myPresence.username
+            });
+        }
         
         // Afficher le code à l'utilisateur
         this.showRoomCodeModal(roomCode);
         
+        // Vérifier périodiquement les nouveaux membres
+        this.startRoomMemberWatch();
+        
         return roomCode;
+    }
+    
+    // Surveiller l'arrivée de nouveaux membres
+    startRoomMemberWatch() {
+        // Éviter de créer plusieurs watchers
+        if (this.roomWatchInterval) {
+            clearInterval(this.roomWatchInterval);
+        }
+        
+        this.roomWatchInterval = setInterval(() => {
+            if (this.currentRoomCode) {
+                this.discoverRoomMembers(this.currentRoomCode);
+            }
+        }, 3000); // Vérifier toutes les 3s
     }
     
     // REJOINDRE une salle avec code
@@ -121,32 +117,146 @@ class PresenceSystem {
         
         console.log('🚪 Tentative de rejoindre salle:', roomCode);
         
-        // Se connecter au peer qui a créé la salle
-        // On essaie plusieurs variantes car l'hôte peut avoir plusieurs peers
-        const searchPatterns = [
-            `ROOM-${roomCode}-*`
-        ];
+        // Enregistrer ma présence dans cette salle
+        this.registerInRoom(roomCode);
         
-        // Annoncer qu'on cherche cette salle via broadcast local
+        // Annoncer via BroadcastChannel local (même navigateur)
         if (this.channel) {
             this.channel.postMessage({
-                type: 'room_search',
+                type: 'room_join',
                 roomCode: roomCode,
-                searcherPeerId: this.myPresence.peerId,
-                searcherUsername: this.myPresence.username
+                peerId: this.myPresence.peerId,
+                username: this.myPresence.username,
+                avatar: this.myPresence.avatar
             });
         }
         
-        // Sauvegarder qu'on est dans cette salle
-        localStorage.setItem('crossword_current_room', JSON.stringify({
-            code: roomCode,
-            joinedAt: Date.now()
-        }));
+        // Chercher les autres membres de la salle
+        this.discoverRoomMembers(roomCode);
         
         console.log('✅ Vous êtes dans la salle:', roomCode);
-        console.log('⏳ Attente de connexion avec les autres membres...');
+        console.log('⏳ Découverte des autres membres...');
         
         return roomCode;
+    }
+    
+    // Enregistrer dans le registre de la salle
+    registerInRoom(roomCode) {
+        const roomKey = `crossword_room_${roomCode}`;
+        
+        try {
+            let roomData = localStorage.getItem(roomKey);
+            let members = roomData ? JSON.parse(roomData) : {};
+            
+            // Ajouter ma présence
+            members[this.myPresence.peerId] = {
+                peerId: this.myPresence.peerId,
+                username: this.myPresence.username,
+                avatar: this.myPresence.avatar,
+                joinedAt: Date.now()
+            };
+            
+            localStorage.setItem(roomKey, JSON.stringify(members));
+            
+            // Aussi sauvegarder que je suis dans cette salle
+            localStorage.setItem('crossword_current_room', JSON.stringify({
+                code: roomCode,
+                joinedAt: Date.now()
+            }));
+            
+            console.log('📝 Enregistré dans la salle:', roomCode);
+        } catch (err) {
+            console.error('Erreur enregistrement salle:', err);
+        }
+    }
+    
+    // Découvrir les membres de la salle
+    async discoverRoomMembers(roomCode) {
+        const roomKey = `crossword_room_${roomCode}`;
+        
+        try {
+            const roomData = localStorage.getItem(roomKey);
+            if (!roomData) {
+                console.log('📭 Aucun membre trouvé pour le moment');
+                return;
+            }
+            
+            const members = JSON.parse(roomData);
+            console.log('👥 Membres trouvés:', Object.keys(members).length);
+            
+            // Se connecter à chaque membre (sauf soi-même)
+            for (const [peerId, member] of Object.entries(members)) {
+                if (peerId !== this.myPresence.peerId && !this.connectedPeers.has(peerId)) {
+                    console.log('🔗 Connexion à:', member.username);
+                    this.connectToPeer(peerId, member);
+                }
+            }
+        } catch (err) {
+            console.error('Erreur découverte membres:', err);
+        }
+    }
+    
+    // Se connecter activement à un peer
+    connectToPeer(peerId, memberInfo) {
+        if (!window.simpleChatSystem?.peer) return;
+        
+        try {
+            const conn = window.simpleChatSystem.peer.connect(peerId, {
+                reliable: true,
+                metadata: {
+                    type: 'room_member',
+                    roomCode: this.currentRoomCode,
+                    peerId: this.myPresence.peerId,
+                    username: this.myPresence.username,
+                    avatar: this.myPresence.avatar
+                }
+            });
+            
+            conn.on('open', () => {
+                console.log('✅ Connecté à:', peerId);
+                
+                this.connectedPeers.set(peerId, conn);
+                
+                // Ajouter aux joueurs en ligne
+                this.onlinePlayers.set(peerId, {
+                    peerId: peerId,
+                    username: memberInfo.username,
+                    avatar: memberInfo.avatar || '😊',
+                    acceptMode: 'auto', // Dans une salle, acceptation auto
+                    timestamp: Date.now()
+                });
+                
+                this.notifyPresenceUpdate();
+                
+                // Envoyer ma présence
+                conn.send({
+                    type: 'presence_announce',
+                    peerId: this.myPresence.peerId,
+                    username: this.myPresence.username,
+                    avatar: this.myPresence.avatar,
+                    roomCode: this.currentRoomCode,
+                    timestamp: Date.now()
+                });
+            });
+            
+            conn.on('data', (data) => {
+                this.handlePeerMessage(data, conn);
+            });
+            
+            conn.on('close', () => {
+                console.log('👋 Déconnecté de:', peerId);
+                this.connectedPeers.delete(peerId);
+                this.onlinePlayers.delete(peerId);
+                this.notifyPresenceUpdate();
+            });
+            
+            conn.on('error', (err) => {
+                console.warn('Erreur connexion à', peerId, ':', err);
+            });
+            
+        } catch (err) {
+            console.error('Erreur connexion peer:', err);
+        }
     }
     
     // Afficher modal avec code de salle
@@ -342,11 +452,21 @@ class PresenceSystem {
         
         console.log('🚪 Quitter salle:', this.currentRoomCode);
         
-        // Annoncer départ
+        // Arrêter le watcher
+        if (this.roomWatchInterval) {
+            clearInterval(this.roomWatchInterval);
+            this.roomWatchInterval = null;
+        }
+        
+        // Retirer du registre de la salle
+        this.unregisterFromRoom(this.currentRoomCode);
+        
+        // Annoncer départ aux autres
         this.broadcastToRoom({
             type: 'goodbye',
             peerId: this.myPresence.peerId,
-            username: this.myPresence.username
+            username: this.myPresence.username,
+            roomCode: this.currentRoomCode
         });
         
         // Fermer toutes les connexions
@@ -367,6 +487,29 @@ class PresenceSystem {
         this.notifyPresenceUpdate();
         
         console.log('✅ Salle quittée');
+    }
+    
+    // Se retirer du registre de la salle
+    unregisterFromRoom(roomCode) {
+        const roomKey = `crossword_room_${roomCode}`;
+        
+        try {
+            const roomData = localStorage.getItem(roomKey);
+            if (roomData) {
+                const members = JSON.parse(roomData);
+                delete members[this.myPresence.peerId];
+                
+                // Si plus personne, supprimer la salle
+                if (Object.keys(members).length === 0) {
+                    localStorage.removeItem(roomKey);
+                    console.log('🗑️ Salle vide supprimée');
+                } else {
+                    localStorage.setItem(roomKey, JSON.stringify(members));
+                }
+            }
+        } catch (err) {
+            console.error('Erreur désinscription salle:', err);
+        }
     }
 
     start(username, peerId) {
@@ -470,6 +613,16 @@ class PresenceSystem {
                 this.onlinePlayers.delete(message.peerId);
                 this.notifyPresenceUpdate();
                 console.log('👋 Joueur parti:', message.peerId);
+                break;
+                
+            case 'room_created':
+            case 'room_join':
+                // Quelqu'un a créé ou rejoint une salle
+                if (message.roomCode === this.currentRoomCode && 
+                    message.peerId !== this.myPresence?.peerId) {
+                    console.log('👋 Nouveau membre dans la salle:', message.username);
+                    // On va le découvrir via discoverRoomMembers()
+                }
                 break;
         }
     }
