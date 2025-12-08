@@ -1515,6 +1515,33 @@ body {
     background: linear-gradient(135deg, #c0c0c0 0%, #d3d3d3 100%);
 }
 
+/* Liens dans modal auth */
+#authToggleLink {
+    color: #ff69b4 !important;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+#authToggleLink:hover {
+    color: #ff85c1 !important;
+    text-decoration: underline;
+}
+
+#forgotPasswordBtn {
+    color: #667eea !important;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+#forgotPasswordBtn:hover {
+    color: #5568d3 !important;
+    text-decoration: underline;
+    transform: translateY(-1px);
+}
+
 #scoreForm {
     margin: 15px 0;
     display: flex;
