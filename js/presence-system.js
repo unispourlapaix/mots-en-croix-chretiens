@@ -192,17 +192,23 @@ class PresenceSystem {
             }
             
             const members = JSON.parse(roomData);
-            console.log('👥 Membres trouvés:', Object.keys(members).length);
+            const memberCount = Object.keys(members).length;
+            console.log('👥 Membres trouvés:', memberCount);
+            console.log('📋 Détails des membres:', members);
             
             // Se connecter à chaque membre (sauf soi-même)
             for (const [peerId, member] of Object.entries(members)) {
                 if (peerId !== this.myPresence.peerId && !this.connectedPeers.has(peerId)) {
-                    console.log('🔗 Connexion à:', member.username);
+                    console.log('🔗 Tentative connexion à:', member.username, '(', peerId, ')');
                     this.connectToPeer(peerId, member);
+                } else if (peerId === this.myPresence.peerId) {
+                    console.log('⏭️ Sauté (c\'est moi):', member.username);
+                } else {
+                    console.log('✅ Déjà connecté:', member.username);
                 }
             }
         } catch (err) {
-            console.error('Erreur découverte membres:', err);
+            console.error('❌ Erreur découverte membres:', err);
         }
     }
     
@@ -235,6 +241,9 @@ class PresenceSystem {
                     acceptMode: 'auto', // Dans une salle, acceptation auto
                     timestamp: Date.now()
                 });
+                
+                console.log('✅ Joueur ajouté à onlinePlayers:', memberInfo.username);
+                console.log('📊 Total joueurs en ligne:', this.onlinePlayers.size);
                 
                 this.notifyPresenceUpdate();
                 
@@ -767,7 +776,11 @@ class PresenceSystem {
                 }
             });
             
+            // Mettre à jour l'UI complète
+            window.roomSystem.updateAvailablePlayersList();
             window.roomSystem.updateChatBubble();
+            
+            console.log('✅ UI mise à jour -', this.onlinePlayers.size, 'joueurs en ligne');
         }
     }
     
