@@ -2,7 +2,7 @@
 class RoomSystem {
     constructor(chatSystem) {
         this.chatSystem = chatSystem;
-        this.acceptMode = 'manual'; // 'auto' (accepte tout) ou 'manual' (validation requise)
+        this.acceptMode = 'manual'; // 'auto' (accepte tout) ou 'manual' (validation hors salle CODE uniquement)
         this.playersInRoom = new Map(); // peerId -> {username, avatar, isHost}
         this.pendingRequests = new Map(); // peerId -> {username, avatar, conn}
         this.blockedPlayers = new Set(); // peerIds bloqués définitivement
@@ -753,10 +753,10 @@ class RoomSystem {
     // Obtenir l'icône du mode d'acceptation
     getAcceptModeIcon() {
         const icons = {
-            'auto': '✅ Acceptation automatique',
-            'manual': '✋ Validation manuelle'
+            'auto': '✅ Toujours accepter',
+            'manual': '✋ Manuel (Auto en salle CODE)'
         };
-        return icons[this.acceptMode] || '✋ Validation manuelle';
+        return icons[this.acceptMode] || '✋ Manuel (Auto en salle CODE)';
     }
 
     // Configurer les écouteurs d'événements
@@ -1043,9 +1043,9 @@ class RoomSystem {
             }[player.acceptMode] || '✋';
 
             const modeName = {
-                'auto': 'Acceptation auto',
-                'manual': 'Validation requise'
-            }[player.acceptMode] || 'Validation requise';
+                'auto': 'Toujours accepter',
+                'manual': 'Auto en salle CODE'
+            }[player.acceptMode] || 'Auto en salle CODE';
 
             // Afficher un badge "Vous" pour le joueur local
             const isMe = player.isMe || peerId === 'me';
