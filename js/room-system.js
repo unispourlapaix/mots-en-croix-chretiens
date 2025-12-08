@@ -1067,6 +1067,9 @@ class RoomSystem {
                             <button class="action-btn-mini btn-join-bubble" data-peer-id="${peerId}" data-username="${player.username}" title="Demander à rejoindre">
                                 🚪
                             </button>
+                            <button class="action-btn-mini btn-more-options" data-peer-id="${peerId}" data-username="${player.username}" title="Plus d'options">
+                                ⋮
+                            </button>
                         </div>
                     ` : `
                         <div class="player-actions-mini">

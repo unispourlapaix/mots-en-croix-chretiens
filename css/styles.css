@@ -3154,10 +3154,6 @@ body {
     max-width: 80%;
     font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
 }
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    animation: neonPulse 2s ease-in-out infinite;
-}
 
 .chat-sms-message .username {
     font-weight: bold;
@@ -4390,6 +4386,19 @@ body {
 .action-btn-mini:hover {
     transform: scale(1.1);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-more-options {
+    background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+    box-shadow: 0 2px 8px rgba(100, 116, 139, 0.3);
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.btn-more-options:hover {
+    background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+    box-shadow: 0 4px 12px rgba(100, 116, 139, 0.4);
 }
 
 .me-indicator {
