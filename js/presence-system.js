@@ -603,6 +603,25 @@ class PresenceSystem {
             }
         }
         
+        // NOUVEAU: Nettoyer immédiatement TOUS les anciens peer IDs avec le même username
+        const oldPeerIds = [];
+        this.onlinePlayers.forEach((player, pid) => {
+            if (player.username === username && pid !== peerId) {
+                oldPeerIds.push(pid);
+            }
+        });
+        
+        if (oldPeerIds.length > 0) {
+            console.log('🧹 Nettoyage immédiat de', oldPeerIds.length, 'ancien(s) peer ID(s) pour:', username);
+            oldPeerIds.forEach(pid => {
+                this.onlinePlayers.delete(pid);
+                if (window.roomSystem) {
+                    window.roomSystem.availablePlayers.delete(pid);
+                }
+                console.log('   🗑️ Retiré:', pid);
+            });
+        }
+        
         this.myPresence = {
             peerId,
             username,
