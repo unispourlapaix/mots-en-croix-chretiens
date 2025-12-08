@@ -1,11 +1,20 @@
 /**
  * IA d'Accueil du Jeu - Assistante virtuelle qui accueille et guide les joueurs
+ * Sophie peut aussi jouer en course contre les joueurs !
  */
 
 class WelcomeAI {
     constructor() {
         this.name = 'Sophie'; // Nom de l'IA
+        this.avatar = '👼';
         this.hasWelcomed = false;
+        this.isBot = true;
+        this.isPlaying = false;
+        this.score = 0;
+        this.wordsFound = [];
+        this.currentGame = null;
+        this.playSpeed = 2000; // 2 secondes entre chaque action
+        
         this.tips = [
             "💡 Astuce : Commence par les mots les plus courts, ils sont souvent plus faciles !",
             "✨ N'oublie pas d'utiliser les indices si tu es bloqué (bouton 💡)",
@@ -14,7 +23,8 @@ class WelcomeAI {
             "🙏 Les mots sont inspirés de la Bible et de messages d'encouragement chrétiens",
             "⭐ Plus tu complètes de niveaux, plus tu débloques de médailles !",
             "🎮 Le code de ta partie s'affiche dans le menu Chat pour inviter des amis",
-            "💝 Prends ton temps, ce jeu est fait pour te détendre et te bénir"
+            "💝 Prends ton temps, ce jeu est fait pour te détendre et te bénir",
+            "🏁 Tu veux faire une course ? Je peux jouer avec toi ! Tape /course"
         ];
         this.welcomeMessages = [
             "Bienvenue dans Mots En Croix Chrétiens ! 🙏✨",
@@ -137,17 +147,159 @@ class WelcomeAI {
             this.sendChatMessage(`🏆 FÉLICITATIONS ! Tu as terminé TOUS les niveaux ! Dieu te bénisse ! 🙏✨💕`, 'system');
         }
     }
+
+    // ===== FONCTIONNALITÉS DE COURSE =====
+    
+    // Rejoindre une course en tant que bot adversaire
+    joinRace() {
+        if (!window.multiplayerRace) {
+            this.sendChatMessage(`${this.name} : Je ne peux pas rejoindre, le mode course n'est pas actif ! 😅`, 'system');
+            return false;
+        }
+        
+        this.isPlaying = true;
+        this.score = 0;
+        this.wordsFound = [];
+        
+        // S'ajouter comme joueur disponible dans le système de présence
+        if (window.presenceSystem) {
+            window.presenceSystem.onlinePlayers.set('bot-sophie', {
+                peerId: 'bot-sophie',
+                username: this.name,
+                avatar: this.avatar,
+                isBot: true,
+                lastSeen: Date.now()
+            });
+        }
+        
+        this.sendChatMessage(`${this.avatar} ${this.name} : Allons-y ! Je suis prête pour la course ! 🏁`, 'system');
+        
+        // Commencer à simuler le jeu
+        this.startPlayingRace();
+        return true;
+    }
+    
+    // Quitter une course
+    leaveRace() {
+        this.isPlaying = false;
+        this.currentGame = null;
+        
+        if (window.presenceSystem) {
+            window.presenceSystem.onlinePlayers.delete('bot-sophie');
+        }
+        
+        this.sendChatMessage(`${this.avatar} ${this.name} : Bonne partie ! Dieu te bénisse ! 💕`, 'system');
+    }
+    
+    // Simuler le jeu en course
+    startPlayingRace() {
+        if (!this.isPlaying || !window.game) return;
+        
+        this.currentGame = window.game;
+        
+        // Jouer périodiquement
+        const playInterval = setInterval(() => {
+            if (!this.isPlaying) {
+                clearInterval(playInterval);
+                return;
+            }
+            
+            // Simuler une progression
+            this.makeRaceProgress();
+            
+        }, this.playSpeed + Math.random() * 1000); // 2-3 secondes entre actions
+    }
+    
+    // Simuler une progression en course
+    makeRaceProgress() {
+        if (!this.currentGame || !window.multiplayerRace) return;
+        
+        // Trouver un mot au hasard parmi ceux du niveau
+        const levelData = window.gameDataManager?.getLevelData(this.currentGame.currentLevel);
+        if (!levelData || !levelData.words) return;
+        
+        // Sélectionner un mot que Sophie n'a pas encore trouvé
+        const availableWords = levelData.words.filter(w => !this.wordsFound.includes(w.word));
+        if (availableWords.length === 0) {
+            // Tous les mots trouvés, terminer
+            this.leaveRace();
+            return;
+        }
+        
+        // Prendre un mot au hasard
+        const randomWord = availableWords[Math.floor(Math.random() * availableWords.length)];
+        this.wordsFound.push(randomWord.word);
+        
+        // Calculer un score
+        const wordScore = randomWord.word.length * 10 + 50; // 10pts/lettre + 50pts bonus
+        this.score += wordScore;
+        
+        // Envoyer la progression via le système de course
+        if (window.multiplayerRace && window.multiplayerRace.isRaceMode) {
+            // Simuler un événement de progression
+            const fakeProgressData = {
+                username: this.name,
+                level: this.currentGame.currentLevel,
+                progress: (this.wordsFound.length / levelData.words.length) * 100,
+                score: this.score,
+                avatar: this.avatar
+            };
+            
+            // Afficher la progression dans le chat
+            if (Math.random() < 0.3) { // 30% de chance de commenter
+                const comments = [
+                    "Ce mot était difficile ! 💪",
+                    "J'adore ce niveau ! ✨",
+                    "Dieu est avec nous ! 🙏",
+                    "Continue, tu progresses bien ! 💝"
+                ];
+                const randomComment = comments[Math.floor(Math.random() * comments.length)];
+                this.sendChatMessage(`${this.avatar} ${this.name} : ${randomComment}`, 'system');
+            }
+        }
+    }
+    
+    // Être disponible pour rejoindre des courses
+    makeAvailableForRace() {
+        if (window.roomSystem) {
+            window.roomSystem.availablePlayers.set('bot-sophie', {
+                username: this.name,
+                avatar: this.avatar,
+                acceptMode: 'auto',
+                playerCount: 1,
+                maxPlayers: 1,
+                lastSeen: Date.now(),
+                isBot: true
+            });
+            window.roomSystem.updateChatBubble();
+            
+            console.log('✅ Sophie est disponible pour les courses !');
+        }
+    }
 }
 
 // Instance globale
 const welcomeAI = new WelcomeAI();
 
+// Rendre Sophie disponible globalement
+window.welcomeAI = welcomeAI;
+
 // Initialiser au chargement
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         // Attendre que le chat soit initialisé
-        setTimeout(() => welcomeAI.init(), 1500);
+        setTimeout(() => {
+            welcomeAI.init();
+            // Rendre Sophie disponible pour les courses après 5 secondes
+            setTimeout(() => welcomeAI.makeAvailableForRace(), 5000);
+        }, 1500);
     });
 } else {
-    setTimeout(() => welcomeAI.init(), 1500);
+    setTimeout(() => {
+        welcomeAI.init();
+        // Rendre Sophie disponible pour les courses après 5 secondes
+        setTimeout(() => welcomeAI.makeAvailableForRace(), 5000);
+    }, 1500);
 }
+
+console.log('✅ Sophie (Bot IA) initialisée - Prête pour le chat et les courses !');
