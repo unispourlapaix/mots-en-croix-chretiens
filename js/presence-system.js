@@ -548,6 +548,17 @@ class PresenceSystem {
     
     // Annoncer ma présence (local + optionnel salle)
     async announcePresence(peerId, username, avatar = '😊', acceptMode = 'manual') {
+        // Si on change de peer ID, retirer l'ancien
+        if (this.myPresence && this.myPresence.peerId !== peerId) {
+            console.log('🔄 Changement de peer ID:', this.myPresence.peerId, '→', peerId);
+            this.onlinePlayers.delete(this.myPresence.peerId);
+            
+            // Retirer aussi de availablePlayers
+            if (window.roomSystem) {
+                window.roomSystem.availablePlayers.delete(this.myPresence.peerId);
+            }
+        }
+        
         this.myPresence = {
             peerId,
             username,
@@ -556,7 +567,7 @@ class PresenceSystem {
             timestamp: Date.now()
         };
         
-        console.log('📢 Présence enregistrée:', username);
+        console.log('📢 Présence enregistrée:', username, '(', peerId, ')');
         
         // Sauvegarder localement
         this.saveToStorage();
@@ -703,6 +714,7 @@ class PresenceSystem {
     // Cleanup joueurs inactifs
     cleanupInactive() {
         const now = Date.now();
+        const INACTIVE_TIMEOUT = 30000; // 30 secondes au lieu de 15
         let hasChanges = false;
         
         this.onlinePlayers.forEach((player, peerId) => {
@@ -711,8 +723,8 @@ class PresenceSystem {
                 return;
             }
             
-            // Supprimer si inactif > 15s
-            if (now - player.timestamp > 15000) {
+            // Supprimer si inactif > 30s
+            if (now - player.timestamp > INACTIVE_TIMEOUT) {
                 this.onlinePlayers.delete(peerId);
                 hasChanges = true;
                 console.log('🧹 Joueur inactif retiré:', player.username, '(dernier heartbeat:', Math.floor((now - player.timestamp) / 1000), 's)');
@@ -765,11 +777,26 @@ class PresenceSystem {
     // Notifier le système de salles
     notifyPresenceUpdate() {
         if (window.roomSystem) {
+            // D'abord, retirer tous les anciens peer IDs du même username (pour éviter doublons)
+            if (this.myPresence) {
+                window.roomSystem.availablePlayers.forEach((player, peerId) => {
+                    if (player.username === this.myPresence.username && peerId !== this.myPresence.peerId && peerId !== 'me') {
+                        console.log('🧹 Ancien peer ID retiré:', peerId, '(même username:', player.username, ')');
+                        window.roomSystem.availablePlayers.delete(peerId);
+                    }
+                });
+            }
+            
             // Mettre à jour availablePlayers avec les joueurs découverts
             this.onlinePlayers.forEach((player, peerId) => {
                 // Ne pas écraser le joueur local ('me')
                 if (peerId === 'me' || window.roomSystem.availablePlayers.has('me') && player.peerId === window.roomSystem.availablePlayers.get('me').peerId) {
                     return; // Skip le joueur local
+                }
+                
+                // Skip si c'est notre propre peer ID avec un username différent (ancien)
+                if (this.myPresence && peerId === this.myPresence.peerId && player.username !== this.myPresence.username) {
+                    return;
                 }
                 
                 if (!window.roomSystem.availablePlayers.has(peerId)) {
