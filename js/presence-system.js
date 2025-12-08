@@ -1,41 +1,70 @@
-// Système de présence GRATUIT avec BroadcastChannel + localStorage
-// Fonctionne sans serveur, totalement gratuit !
+// Système de présence GRATUIT avec PeerJS Lobby
+// Découverte mondiale via serveur PeerJS cloud gratuit !
 class PresenceSystem {
     constructor() {
-        this.channel = null;
+        this.LOBBY_ID = "LoveJesus"; // 🙏 Lobby global pour tous les joueurs
+        this.lobbyConnection = null;
         this.myPresence = null;
         this.onlinePlayers = new Map();
         this.heartbeatInterval = null;
-        this.cleanupInterval = null;
-        this.storageKey = 'crossword_online_players';
+        this.reconnectInterval = null;
+        this.isConnectedToLobby = false;
         
         this.init();
     }
     
     init() {
-        // Créer un canal de broadcast pour communiquer entre onglets
+        console.log('✅ Système de présence PeerJS initialisé');
+    }
+    
+    // Se connecter au lobby global
+    connectToLobby() {
+        if (!window.simpleChatSystem?.peer || this.isConnectedToLobby) return;
+        
+        console.log('🌍 Connexion au lobby mondial "LoveJesus"...');
+        
         try {
-            this.channel = new BroadcastChannel('crossword_presence');
-            this.channel.onmessage = (event) => this.handleBroadcastMessage(event);
-            console.log('✅ BroadcastChannel créé pour la présence');
+            // Se connecter au lobby
+            this.lobbyConnection = window.simpleChatSystem.peer.connect(this.LOBBY_ID, {
+                reliable: true,
+                metadata: {
+                    type: 'lobby',
+                    username: this.myPresence?.username,
+                    peerId: window.simpleChatSystem.peer.id
+                }
+            });
+            
+            this.lobbyConnection.on('open', () => {
+                console.log('✅ Connecté au lobby "LoveJesus"');
+                this.isConnectedToLobby = true;
+                
+                // Annoncer ma présence
+                if (this.myPresence) {
+                    this.broadcastPresence();
+                }
+            });
+            
+            this.lobbyConnection.on('data', (data) => {
+                this.handleLobbyMessage(data);
+            });
+            
+            this.lobbyConnection.on('close', () => {
+                console.log('❌ Déconnecté du lobby');
+                this.isConnectedToLobby = false;
+                // Reconnecter après 5 secondes
+                setTimeout(() => this.connectToLobby(), 5000);
+            });
+            
+            this.lobbyConnection.on('error', (err) => {
+                console.error('❌ Erreur lobby:', err);
+                this.isConnectedToLobby = false;
+            });
+            
         } catch (error) {
-            console.warn('⚠️ BroadcastChannel non supporté, fallback localStorage seul');
+            console.error('❌ Erreur connexion lobby:', error);
+            // Réessayer après 5 secondes
+            setTimeout(() => this.connectToLobby(), 5000);
         }
-        
-        // Écouter les changements de localStorage (entre onglets/fenêtres)
-        window.addEventListener('storage', (e) => {
-            if (e.key === this.storageKey) {
-                this.syncFromStorage();
-            }
-        });
-        
-        // Nettoyer les joueurs inactifs toutes les 5 secondes
-        this.cleanupInterval = setInterval(() => {
-            this.cleanupInactivePlayers();
-        }, 5000);
-        
-        // Synchroniser depuis le storage au démarrage
-        this.syncFromStorage();
     }
     
     // Annoncer ma présence (remplace start)
@@ -52,169 +81,106 @@ class PresenceSystem {
             acceptMode: window.roomSystem?.acceptMode || 'manual'
         };
         
-        // Broadcast via BroadcastChannel (même navigateur, différents onglets)
-        if (this.channel) {
-            this.channel.postMessage({
-                type: 'presence',
-                data: this.myPresence
-            });
-        }
+        console.log('📡 Présence annoncée:', username, peerId);
         
-        // Sauvegarder dans localStorage
-        this.saveToStorage();
+        // Se connecter au lobby
+        this.connectToLobby();
         
-        // Heartbeat toutes les 3 secondes
+        // Broadcast périodique
         if (this.heartbeatInterval) {
             clearInterval(this.heartbeatInterval);
         }
         
         this.heartbeatInterval = setInterval(() => {
-            this.myPresence.timestamp = Date.now();
-            this.saveToStorage();
-            
-            if (this.channel) {
-                this.channel.postMessage({
-                    type: 'heartbeat',
-                    data: { peerId, timestamp: Date.now() }
-                });
-            }
-        }, 3000);
-        
-        console.log('📡 Présence annoncée:', username, peerId);
+            this.broadcastPresence();
+        }, 10000); // Toutes les 10 secondes
     }
     
-    // Arrêter d'annoncer ma présence (remplace stop)
-    stop() {
-        this.stopAnnouncing();
-    }
-    
-    stopAnnouncing() {
-        if (this.heartbeatInterval) {
-            clearInterval(this.heartbeatInterval);
-            this.heartbeatInterval = null;
-        }
+    // Broadcast ma présence au lobby
+    broadcastPresence() {
+        if (!this.lobbyConnection || !this.isConnectedToLobby || !this.myPresence) return;
         
-        if (this.myPresence) {
-            // Broadcast déconnexion
-            if (this.channel) {
-                this.channel.postMessage({
-                    type: 'disconnect',
-                    data: { peerId: this.myPresence.peerId }
-                });
-            }
-            
-            // Retirer du storage
-            this.removeFromStorage(this.myPresence.peerId);
-            this.myPresence = null;
+        try {
+            this.lobbyConnection.send({
+                type: 'presence',
+                data: {
+                    ...this.myPresence,
+                    timestamp: Date.now()
+                }
+            });
+        } catch (error) {
+            console.error('❌ Erreur broadcast présence:', error);
         }
     }
     
-    // Gérer les messages broadcast
-    handleBroadcastMessage(event) {
-        const { type, data } = event.data;
+    // Gérer les messages du lobby
+    handleLobbyMessage(message) {
+        if (!message || typeof message !== 'object') return;
         
-        switch (type) {
+        switch (message.type) {
             case 'presence':
                 // Un joueur annonce sa présence
-                if (data.peerId !== this.myPresence?.peerId) {
-                    this.onlinePlayers.set(data.peerId, data);
+                if (message.data && message.data.peerId !== this.myPresence?.peerId) {
+                    this.onlinePlayers.set(message.data.peerId, message.data);
                     this.notifyPresenceUpdate();
+                    console.log('👋 Joueur détecté:', message.data.username);
                 }
                 break;
                 
-            case 'heartbeat':
-                // Mise à jour du timestamp
-                const player = this.onlinePlayers.get(data.peerId);
-                if (player) {
-                    player.timestamp = data.timestamp;
+            case 'player_list':
+                // Le lobby envoie la liste complète des joueurs
+                if (Array.isArray(message.data)) {
+                    console.log('📋 Liste des joueurs reçue:', message.data.length, 'joueurs');
+                    message.data.forEach(player => {
+                        if (player.peerId !== this.myPresence?.peerId) {
+                            this.onlinePlayers.set(player.peerId, player);
+                        }
+                    });
+                    this.notifyPresenceUpdate();
                 }
                 break;
                 
             case 'disconnect':
                 // Un joueur se déconnecte
-                this.onlinePlayers.delete(data.peerId);
-                this.notifyPresenceUpdate();
+                if (message.data?.peerId) {
+                    this.onlinePlayers.delete(message.data.peerId);
+                    this.notifyPresenceUpdate();
+                    console.log('👋 Joueur parti:', message.data.username || message.data.peerId);
+                }
                 break;
         }
     }
     
-    // Sauvegarder dans localStorage
-    saveToStorage() {
-        try {
-            const allPlayers = {};
-            
-            // Ajouter ma présence
-            if (this.myPresence) {
-                allPlayers[this.myPresence.peerId] = this.myPresence;
-            }
-            
-            // Ajouter les autres joueurs actifs (< 10 secondes)
-            const now = Date.now();
-            this.onlinePlayers.forEach((player, peerId) => {
-                if (now - player.timestamp < 10000) {
-                    allPlayers[peerId] = player;
-                }
-            });
-            
-            localStorage.setItem(this.storageKey, JSON.stringify(allPlayers));
-        } catch (error) {
-            console.error('Erreur sauvegarde présence:', error);
+    // Arrêter d'annoncer ma présence
+    stop() {
+        if (this.heartbeatInterval) {
+            clearInterval(this.heartbeatInterval);
+            this.heartbeatInterval = null;
         }
-    }
-    
-    // Retirer du storage
-    removeFromStorage(peerId) {
-        try {
-            const stored = localStorage.getItem(this.storageKey);
-            if (stored) {
-                const players = JSON.parse(stored);
-                delete players[peerId];
-                localStorage.setItem(this.storageKey, JSON.stringify(players));
-            }
-        } catch (error) {
-            console.error('Erreur retrait présence:', error);
-        }
-    }
-    
-    // Synchroniser depuis localStorage
-    syncFromStorage() {
-        try {
-            const stored = localStorage.getItem(this.storageKey);
-            if (!stored) return;
-            
-            const players = JSON.parse(stored);
-            const now = Date.now();
-            
-            // Mettre à jour la liste des joueurs en ligne
-            Object.entries(players).forEach(([peerId, data]) => {
-                // Ignorer ma propre présence et les joueurs trop vieux
-                if (peerId !== this.myPresence?.peerId && now - data.timestamp < 10000) {
-                    this.onlinePlayers.set(peerId, data);
-                }
-            });
-            
-            this.notifyPresenceUpdate();
-        } catch (error) {
-            console.error('Erreur sync présence:', error);
-        }
-    }
-    
-    // Nettoyer les joueurs inactifs (> 10 secondes)
-    cleanupInactivePlayers() {
-        const now = Date.now();
-        let hasChanges = false;
         
-        this.onlinePlayers.forEach((player, peerId) => {
-            if (now - player.timestamp > 10000) {
-                this.onlinePlayers.delete(peerId);
-                hasChanges = true;
+        // Annoncer la déconnexion au lobby
+        if (this.lobbyConnection && this.isConnectedToLobby && this.myPresence) {
+            try {
+                this.lobbyConnection.send({
+                    type: 'disconnect',
+                    data: { 
+                        peerId: this.myPresence.peerId,
+                        username: this.myPresence.username
+                    }
+                });
+            } catch (error) {
+                console.error('❌ Erreur annonce déconnexion:', error);
             }
-        });
-        
-        if (hasChanges) {
-            this.saveToStorage();
-            this.notifyPresenceUpdate();
         }
+        
+        // Fermer la connexion lobby
+        if (this.lobbyConnection) {
+            this.lobbyConnection.close();
+            this.lobbyConnection = null;
+        }
+        
+        this.isConnectedToLobby = false;
+        this.myPresence = null;
     }
     
     // Notifier le système de salles
@@ -254,15 +220,7 @@ class PresenceSystem {
     
     // Nettoyer avant fermeture
     cleanup() {
-        this.stopAnnouncing();
-        
-        if (this.cleanupInterval) {
-            clearInterval(this.cleanupInterval);
-        }
-        
-        if (this.channel) {
-            this.channel.close();
-        }
+        this.stop();
     }
 }
 
@@ -288,7 +246,7 @@ const initPresenceSystem = () => {
             // Attendre que le peer soit prêt
             if (chatSystem.peer && chatSystem.peer.id && chatSystem.currentUser) {
                 clearInterval(checkInit);
-                console.log('✅ Initialisation du système de présence...');
+                console.log('✅ Initialisation du système de présence "LoveJesus"...');
                 window.presenceSystem.start(chatSystem.currentUser, chatSystem.peer.id);
             }
         }
@@ -307,5 +265,5 @@ if (document.readyState === 'loading') {
     initPresenceSystem();
 }
 
-console.log('✅ Système de présence chargé (BroadcastChannel + localStorage)');
+console.log('✅ Système de présence PeerJS chargé - Lobby: "LoveJesus" 🙏');
 
