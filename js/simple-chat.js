@@ -29,6 +29,13 @@ class SimpleChatSystem {
                 this.updateUsername();
                 if (user && user.username) {
                     this.showMessage(`✅ Connecté en tant que ${user.username}`, 'system');
+                    
+                    // Mettre à jour le système de présence avec le nouveau username
+                    if (window.presenceSystem && window.presenceSystem.myPresence && this.peer?.id) {
+                        console.log('🔄 Mise à jour présence avec nouveau username:', user.username);
+                        window.presenceSystem.start(user.username, this.peer.id);
+                    }
+                    
                     this.initP2P();
                 }
             });
