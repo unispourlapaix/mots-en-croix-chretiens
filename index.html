@@ -96,7 +96,7 @@
         </div>
 
         <!-- Interface Chat simplifiée -->
-        <div id="chatSmsContainer" class="chat-sms-container">
+        <div id="chatSmsContainer" class="chat-sms-container hidden">
             <div class="chat-sms-input-container">
                 <input type="text" id="chatSmsInput" class="chat-sms-input" placeholder="Écrire ici..." maxlength="100">
                 <button id="chatSmsSend" class="chat-sms-send">📤</button>
@@ -383,18 +383,17 @@
                 <div class="menu-chat-header">
                     <div class="chat-header-info">
                         <span class="chat-icon">💬</span>
-                        <span class="chat-title">Chat P2P</span>
+                        <span class="chat-title">Chat Multijoueur</span>
                         <span id="chatParticipantCount" class="chat-participant-count">0 👥</span>
                     </div>
-                    <p id="chatUsername" style="font-size: 14px; color: #666; margin: 10px 0;">Non connecté</p>
                 </div>
 
                 <!-- Interface P2P simplifiée -->
                 <div id="chatRoomInterface" class="chat-room-interface">
                     <div class="chat-room-content">
-                        <div class="chat-room-icon">💬</div>
-                        <h3>Chat de Partie</h3>
-                        <p style="margin-bottom: 15px; color: #666;">Le chat est actif automatiquement pendant votre partie</p>
+                        <div class="chat-room-icon">🎮</div>
+                        <h3>Mode Multijoueur</h3>
+                        <p style="margin-bottom: 15px; color: #666;">Jouez et chattez en temps réel avec vos amis</p>
 
                         <!-- Code de partie pour inviter des amis -->
                         <div id="chatRoomCodeDisplay" style="padding: 15px; background: #fff5f9; border-radius: 8px; text-align: center;">
@@ -427,6 +426,28 @@
     </div>
 
     <!-- Modal Multijoueur -->
+    <!-- Bulle de chat flottante avec liste des connectés -->
+    <div id="chatBubble" class="chat-bubble">
+        <div class="chat-bubble-header">
+            <div class="header-title">
+                <span class="pulse-dot"></span>
+                <span>Joueurs en ligne</span>
+                <span class="online-count" id="onlineCount">0</span>
+            </div>
+            <button class="minimize-btn" id="toggleChatBubble">−</button>
+        </div>
+        <div class="chat-bubble-body" id="chatBubbleBody">
+            <!-- Barre de recherche -->
+            <div class="chat-search-bar">
+                <input type="text" id="playerSearchInput" class="player-search-input" placeholder="🔍 Rechercher un joueur...">
+            </div>
+            <!-- Liste des joueurs connectés -->
+            <div class="connected-players-list" id="connectedPlayersList">
+                <!-- Généré dynamiquement -->
+            </div>
+        </div>
+    </div>
+
     <div id="multiplayerModal" class="kawaii-modal hidden">
         <div class="kawaii-modal-overlay"></div>
         <div class="kawaii-modal-content room-system-modal">
@@ -437,38 +458,19 @@
                 <h3>Salles Multijoueur</h3>
                 <p>Chaque joueur a sa propre salle automatique !</p>
                 
-                <!-- Bulle de chat flottante avec liste des connectés -->
-                <div id="chatBubble" class="chat-bubble">
-                    <div class="chat-bubble-header">
-                        <div class="header-title">
-                            <span class="pulse-dot"></span>
-                            <span>Joueurs en ligne</span>
-                            <span class="online-count" id="onlineCount">0</span>
-                        </div>
-                        <button class="minimize-btn" id="toggleChatBubble">−</button>
-                    </div>
-                    <div class="chat-bubble-body" id="chatBubbleBody">
-                        <!-- Liste des joueurs connectés -->
-                        <div class="connected-players-list" id="connectedPlayersList">
-                            <!-- Généré dynamiquement -->
-                        </div>
-                    </div>
-                </div>
-                
                 <!-- Panel de contrôle hôte -->
                 <div id="hostControlPanel" class="host-panel hidden">
                     <div class="panel-section">
-                        <h4>🎛️ Ma Salle</h4>
+                        <h4>⚙️ Paramètres de Connexion</h4>
                         <div class="room-mode-selector">
-                            <label>Mode:</label>
-                            <select id="roomModeSelect" class="kawaii-input">
-                                <option value="open">🔓 Entrée Libre</option>
-                                <option value="invite">🎫 Sur Invitation</option>
-                                <option value="private">🔒 Privée</option>
+                            <label>Mode d'acceptation:</label>
+                            <select id="acceptModeSelect" class="kawaii-input">
+                                <option value="manual">✋ Validation manuelle (je valide chaque demande)</option>
+                                <option value="auto">✅ Acceptation automatique (tout le monde peut rejoindre)</option>
                             </select>
                         </div>
                         <div class="room-info">
-                            <span class="room-mode-display" id="roomModeDisplay">🔓 Entrée Libre</span>
+                            <span class="room-mode-display" id="roomModeDisplay">✋ Validation manuelle</span>
                             <span class="room-player-count">
                                 Joueurs: <strong id="roomPlayerCount">1/8</strong>
                             </span>
@@ -491,9 +493,6 @@
                 <!-- Liste des joueurs disponibles (pour joindre) -->
                 <div id="availablePlayersPanel" class="available-players-panel">
                     <!-- La liste est générée dynamiquement par room-system.js -->
-                </div>
-                    </div>
-                    <p class="help-text">Tapez le nom d'un joueur pour rejoindre sa salle</p>
                 </div>
             </div>
             <div class="kawaii-modal-footer">
@@ -634,6 +633,7 @@
     <script src="js/simple-chat.js"></script>
     <script src="js/room-system.js"></script>
     <script src="js/room-ui.js"></script>
+    <script src="js/ai-bots.js"></script>
     <script src="js/multiplayer-race.js"></script>
     <script src="js/race-ui.js"></script>
     <script src="js/menu-tabs.js"></script>

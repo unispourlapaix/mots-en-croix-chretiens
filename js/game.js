@@ -1529,6 +1529,14 @@ class ChristianCrosswordGame {
     closeMenu() {
         const modal = document.getElementById('menuModal');
         modal.classList.add('hidden');
+        
+        // Rouvrir la bulle de chat
+        const chatBubble = document.getElementById('chatBubble');
+        const toggleBtn = document.getElementById('toggleChatBubble');
+        if (chatBubble && chatBubble.classList.contains('minimized')) {
+            chatBubble.classList.remove('minimized');
+            if (toggleBtn) toggleBtn.textContent = '−';
+        }
     }
 
     openAchievements() {
@@ -1536,11 +1544,27 @@ class ChristianCrosswordGame {
         this.updateAchievementsDisplay();
         modal.classList.remove('hidden');
         this.closeMenu();
+        
+        // Minimiser la bulle de chat
+        const chatBubble = document.getElementById('chatBubble');
+        const toggleBtn = document.getElementById('toggleChatBubble');
+        if (chatBubble && !chatBubble.classList.contains('minimized')) {
+            chatBubble.classList.add('minimized');
+            if (toggleBtn) toggleBtn.textContent = '+';
+        }
     }
 
     closeAchievements() {
         const modal = document.getElementById('achievementsModal');
         modal.classList.add('hidden');
+        
+        // Rouvrir la bulle de chat
+        const chatBubble = document.getElementById('chatBubble');
+        const toggleBtn = document.getElementById('toggleChatBubble');
+        if (chatBubble && chatBubble.classList.contains('minimized')) {
+            chatBubble.classList.remove('minimized');
+            if (toggleBtn) toggleBtn.textContent = '−';
+        }
     }
 
     updateAchievementsDisplay(filter = 'all') {

@@ -63,8 +63,13 @@ class SimpleChatSystem {
 
     // Initialiser PeerJS
     initP2P() {
-        if (this.peer) return;
+        if (this.peer) {
+            console.log('✅ P2P déjà initialisé, skip');
+            return;
+        }
 
+        console.log('🚀 Initialisation P2P...');
+        
         // Mettre à jour le username depuis authSystem
         this.updateUsername();
 

@@ -11,36 +11,12 @@ class RoomUI {
     }
 
     setupEventListeners() {
-        // Sélecteur de mode de salle
-        const modeSelect = document.getElementById('roomModeSelect');
+        // Sélecteur de mode d'acceptation
+        const modeSelect = document.getElementById('acceptModeSelect');
         if (modeSelect) {
             modeSelect.addEventListener('change', (e) => {
                 if (window.roomSystem) {
-                    window.roomSystem.setRoomMode(e.target.value);
-                }
-            });
-        }
-
-        // Bouton rejoindre une salle
-        const joinBtn = document.getElementById('joinPlayerRoomBtn');
-        const targetInput = document.getElementById('targetUsername');
-        
-        if (joinBtn && targetInput) {
-            joinBtn.addEventListener('click', () => {
-                const targetUsername = targetInput.value.trim();
-                if (targetUsername) {
-                    this.joinPlayerRoom(targetUsername);
-                } else {
-                    if (window.chatSystem) {
-                        window.chatSystem.showMessage('❌ Entrez un nom de joueur', 'system');
-                    }
-                }
-            });
-
-            // Rejoindre avec Enter
-            targetInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    joinBtn.click();
+                    window.roomSystem.setAcceptMode(e.target.value);
                 }
             });
         }
@@ -59,8 +35,11 @@ class RoomUI {
         // Bouton fermer
         if (this.closeBtn) {
             this.closeBtn.addEventListener('click', () => {
+                console.log('🔴 Fermeture du modal multijoueur');
                 this.closeModal();
             });
+        } else {
+            console.warn('⚠️ Bouton closeMultiplayerBtn introuvable');
         }
 
         // Fermer avec overlay
@@ -72,30 +51,19 @@ class RoomUI {
         }
     }
 
-    // Rejoindre la salle d'un joueur
-    async joinPlayerRoom(targetUsername) {
-        if (!window.roomSystem || !window.chatSystem) {
-            console.error('Room system ou chat system non initialisé');
-            return;
-        }
-
-        // Pour l'instant, on demande le Peer ID
-        // TODO: Implémenter un serveur de signaling pour découverte automatique
-        const targetPeerId = prompt(`Peer ID de ${targetUsername} :\n(Le joueur doit vous donner son ID)`);
-        
-        if (!targetPeerId) {
-            window.chatSystem.showMessage('❌ Peer ID requis', 'system');
-            return;
-        }
-
-        await window.roomSystem.requestJoinRoom(targetUsername, targetPeerId);
-    }
-
     // Ouvrir le modal
     openModal() {
         if (this.modal) {
             this.modal.classList.remove('hidden');
             this.updateUI();
+            
+            // Minimiser la bulle de chat
+            const chatBubble = document.getElementById('chatBubble');
+            const toggleBtn = document.getElementById('toggleChatBubble');
+            if (chatBubble && !chatBubble.classList.contains('minimized')) {
+                chatBubble.classList.add('minimized');
+                if (toggleBtn) toggleBtn.textContent = '+';
+            }
         }
     }
 
@@ -103,6 +71,14 @@ class RoomUI {
     closeModal() {
         if (this.modal) {
             this.modal.classList.add('hidden');
+            
+            // Rouvrir la bulle de chat
+            const chatBubble = document.getElementById('chatBubble');
+            const toggleBtn = document.getElementById('toggleChatBubble');
+            if (chatBubble && chatBubble.classList.contains('minimized')) {
+                chatBubble.classList.remove('minimized');
+                if (toggleBtn) toggleBtn.textContent = '−';
+            }
         }
     }
 
@@ -173,9 +149,25 @@ Partagez cet ID pour que d'autres joueurs rejoignent !
 document.addEventListener('DOMContentLoaded', () => {
     // Attendre que chatSystem soit prêt
     const initRoomSystem = () => {
-        if (window.chatSystem) {
+        // Utiliser simpleChatSystem au lieu de chatSystem
+        const chatSystem = window.simpleChatSystem || window.chatSystem;
+        
+        // Vérifier que RoomSystem est défini
+        if (!window.RoomSystem || typeof RoomSystem === 'undefined') {
+            console.log('⏳ En attente de RoomSystem...');
+            setTimeout(initRoomSystem, 100);
+            return;
+        }
+        
+        if (chatSystem) {
+            console.log('🏠 Initialisation du Room System...');
             window.roomUI = new RoomUI();
-            window.roomSystem = new RoomSystem(window.chatSystem);
+            window.roomSystem = new RoomSystem(chatSystem);
+            
+            // Créer un alias pour compatibilité
+            if (!window.chatSystem) {
+                window.chatSystem = chatSystem;
+            }
             
             // Ajouter un bouton pour afficher l'ID de salle
             const hostPanel = document.getElementById('hostControlPanel');

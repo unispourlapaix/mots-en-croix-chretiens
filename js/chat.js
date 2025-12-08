@@ -691,6 +691,8 @@ class P2PChatSystem {
 // Instance globale
 const chatSystem = new P2PChatSystem();
 
+// Désactivé - On utilise maintenant simple-chat.js
+/*
 // Initialiser au chargement
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
@@ -709,3 +711,4 @@ setInterval(() => {
 window.addEventListener('beforeunload', () => {
     chatSystem.disconnect();
 });
+*/

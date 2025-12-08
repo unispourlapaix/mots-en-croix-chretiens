@@ -537,6 +537,11 @@ class AuthSystem {
         this.onAuthChangeCallbacks.forEach(cb => cb(this.currentUser));
         
         console.log('🔄 UI mise à jour avec utilisateur:', this.currentUser.username);
+        
+        // Mettre à jour le RoomSystem avec le nouveau username
+        if (window.roomSystem) {
+            window.roomSystem.updateUsername(this.currentUser.username);
+        }
     }
 
     // Initialiser l'UI

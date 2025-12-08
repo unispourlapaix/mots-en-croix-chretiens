@@ -2,13 +2,16 @@
 class RoomSystem {
     constructor(chatSystem) {
         this.chatSystem = chatSystem;
-        this.roomMode = 'open'; // 'open', 'private', 'invite'
+        this.acceptMode = 'manual'; // 'auto' (accepte tout) ou 'manual' (validation requise)
         this.playersInRoom = new Map(); // peerId -> {username, avatar, isHost}
-        this.pendingRequests = new Map(); // peerId -> {username, avatar}
-        this.kickedPlayers = new Set(); // peerIds exclus
+        this.pendingRequests = new Map(); // peerId -> {username, avatar, conn}
+        this.blockedPlayers = new Set(); // peerIds bloqués définitivement
         this.myRoomInfo = null; // Info de ma salle
         this.availablePlayers = new Map(); // Liste des joueurs en ligne
         this.presenceInterval = null; // Interval pour annoncer sa présence
+        
+        // Charger la liste des joueurs bloqués
+        this.loadBlockedPlayers();
         
         // Auto-créer ma salle au démarrage
         this.createMyRoom();
@@ -19,14 +22,20 @@ class RoomSystem {
 
     // Créer automatiquement ma salle
     createMyRoom() {
+        console.log('🏠 Tentative de création de room...');
+        console.log('👤 CurrentUser:', this.chatSystem.currentUser);
+        
         if (!this.chatSystem.currentUser) {
             console.warn('⚠️ Username non défini, attente...');
             setTimeout(() => this.createMyRoom(), 500);
             return;
         }
 
+        console.log('✅ Username OK, création de la room pour:', this.chatSystem.currentUser);
+
         // Initialiser P2P avec mon username comme ID de base
         if (!this.chatSystem.peer) {
+            console.log('📡 Initialisation P2P...');
             this.chatSystem.initP2P();
         }
 
@@ -35,14 +44,18 @@ class RoomSystem {
         // Attendre que le peer soit prêt
         const checkPeer = () => {
             if (this.chatSystem.peer && this.chatSystem.peer.id) {
+                console.log('🎯 Peer prêt avec ID:', this.chatSystem.peer.id);
+                
                 this.myRoomInfo = {
                     roomId: this.chatSystem.peer.id,
                     hostUsername: this.chatSystem.currentUser,
-                    mode: this.roomMode,
+                    acceptMode: this.acceptMode,
                     playerCount: 1,
                     maxPlayers: 8,
                     lastSeen: Date.now()
                 };
+                
+                console.log('📝 Room info créée:', this.myRoomInfo);
                 
                 // M'ajouter à ma propre salle
                 this.playersInRoom.set('me', {
@@ -51,17 +64,70 @@ class RoomSystem {
                     isHost: true
                 });
                 
-                this.chatSystem.showMessage(`🏠 Votre salle est créée ! Mode: ${this.getRoomModeIcon()}`, 'system');
+                console.log('👥 Ajouté à playersInRoom');
+                
+                // M'ajouter aussi à la liste des joueurs disponibles
+                this.availablePlayers.set('me', {
+                    username: this.chatSystem.currentUser,
+                    avatar: this.chatSystem.getUserAvatar(this.chatSystem.currentUser),
+                    acceptMode: this.acceptMode,
+                    playerCount: 1,
+                    maxPlayers: 8,
+                    lastSeen: Date.now(),
+                    isMe: true
+                });
+                
+                console.log('🌐 Ajouté à availablePlayers, total:', this.availablePlayers.size);
+                
+                this.chatSystem.showMessage(`🏠 Vous êtes en ligne ! Mode: ${this.getAcceptModeIcon()}`, 'system');
                 this.updateUI();
+                
+                // Mettre à jour la bulle de chat pour afficher le joueur local
+                console.log('🔄 Mise à jour de la bulle de chat...');
+                this.updateChatBubble();
                 
                 // Démarrer l'annonce de présence périodique
                 this.startPresenceBroadcast();
             } else {
+                console.log('⏳ En attente du peer...');
                 setTimeout(checkPeer, 200);
             }
         };
         
         checkPeer();
+    }
+
+    // Mettre à jour le username après connexion
+    updateUsername(newUsername) {
+        console.log('🔄 Mise à jour du username:', this.chatSystem.currentUser, '->', newUsername);
+        
+        // Mettre à jour dans chatSystem
+        this.chatSystem.currentUser = newUsername;
+        
+        // Mettre à jour dans myRoomInfo
+        if (this.myRoomInfo) {
+            this.myRoomInfo.hostUsername = newUsername;
+        }
+        
+        // Mettre à jour dans playersInRoom
+        const mePlayer = this.playersInRoom.get('me');
+        if (mePlayer) {
+            mePlayer.username = newUsername;
+            mePlayer.avatar = this.chatSystem.getUserAvatar(newUsername);
+        }
+        
+        // Mettre à jour dans availablePlayers
+        const meAvailable = this.availablePlayers.get('me');
+        if (meAvailable) {
+            meAvailable.username = newUsername;
+            meAvailable.avatar = this.chatSystem.getUserAvatar(newUsername);
+        }
+        
+        // Rafraîchir l'affichage
+        this.updateUI();
+        this.updateChatBubble();
+        
+        console.log('✅ Username mis à jour partout');
     }
 
     // Démarrer la diffusion périodique de présence
@@ -144,6 +210,11 @@ class RoomSystem {
         const staleThreshold = 30000; // 30 secondes
         
         this.availablePlayers.forEach((player, peerId) => {
+            // Ne pas nettoyer le joueur local ni les bots
+            if (player.isMe || player.isBot) {
+                return;
+            }
+            
             if (now - player.lastSeen > staleThreshold) {
                 console.log('🗑️ Retrait joueur inactif:', player.username);
                 this.availablePlayers.delete(peerId);
@@ -153,25 +224,25 @@ class RoomSystem {
         this.updateAvailablePlayersList();
     }
 
-    // Changer le mode de la salle
-    setRoomMode(mode) {
-        if (!['open', 'private', 'invite'].includes(mode)) {
+    // Changer le mode d'acceptation
+    setAcceptMode(mode) {
+        if (!['auto', 'manual'].includes(mode)) {
             console.error('Mode invalide:', mode);
             return;
         }
 
-        this.roomMode = mode;
+        this.acceptMode = mode;
         if (this.myRoomInfo) {
-            this.myRoomInfo.mode = mode;
+            this.myRoomInfo.acceptMode = mode;
         }
 
         // Notifier tous les joueurs du changement
         this.broadcastToRoom({
-            type: 'room-mode-changed',
+            type: 'accept-mode-changed',
             mode: mode
         });
 
-        this.chatSystem.showMessage(`🏠 Mode de salle: ${this.getRoomModeIcon()}`, 'system');
+        this.chatSystem.showMessage(`⚙️ Mode d'acceptation: ${this.getAcceptModeIcon()}`, 'system');
         this.updateUI();
     }
 
@@ -293,44 +364,91 @@ class RoomSystem {
     handleJoinRequest(conn, data) {
         const { username, avatar, peerId } = data;
 
-        // Vérifier si le joueur est exclu
-        if (this.kickedPlayers.has(peerId)) {
+        // Vérifier si le joueur est bloqué
+        if (this.blockedPlayers.has(peerId)) {
             conn.send({
                 type: 'join-refused',
-                reason: 'excluded'
+                reason: 'blocked'
             });
             conn.close();
             return;
         }
 
-        // Mode privé : refuser automatiquement
-        if (this.roomMode === 'private') {
+        // Vérifier la limite de joueurs
+        if (this.playersInRoom.size >= this.myRoomInfo.maxPlayers) {
             conn.send({
                 type: 'join-refused',
-                reason: 'private'
+                reason: 'full'
             });
             conn.close();
-            this.chatSystem.showMessage(`🚫 ${username} a tenté de rejoindre (salle privée)`, 'system');
+            this.chatSystem.showMessage(`❌ Salle pleine, ${username} ne peut pas rejoindre`, 'system');
             return;
         }
 
-        // Mode ouvert : accepter automatiquement
-        if (this.roomMode === 'open') {
+        // Mode automatique : accepter directement
+        if (this.acceptMode === 'auto') {
             this.acceptJoinRequest(conn, { username, avatar, peerId });
             return;
         }
 
-        // Mode invitation : ajouter à la liste des demandes
-        if (this.roomMode === 'invite') {
-            this.pendingRequests.set(peerId, {
-                username,
-                avatar,
-                conn
-            });
-            
-            this.chatSystem.showMessage(`🔔 ${username} demande à rejoindre`, 'system');
-            this.updateUI();
-        }
+        // Mode manuel : ajouter à la liste des demandes en attente
+        this.pendingRequests.set(peerId, {
+            username,
+            avatar,
+            conn
+        });
+        
+        this.chatSystem.showMessage(`🔔 ${username} demande à rejoindre`, 'system');
+        this.showJoinRequestNotification(username, peerId);
+        this.updateUI();
+    }
+    
+    // Afficher une notification pour demande entrante
+    showJoinRequestNotification(username, peerId) {
+        // Créer une notification visuelle
+        const notification = document.createElement('div');
+        notification.className = 'join-request-notification';
+        notification.innerHTML = `
+            <div class="notification-content">
+                <span class="notification-icon">🔔</span>
+                <span class="notification-text">${username} veut vous rejoindre</span>
+                <div class="notification-actions">
+                    <button class="btn-accept-notif" data-peer-id="${peerId}">✅ Accepter</button>
+                    <button class="btn-refuse-notif" data-peer-id="${peerId}">❌ Refuser</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Event listeners
+        notification.querySelector('.btn-accept-notif').addEventListener('click', () => {
+            const request = this.pendingRequests.get(peerId);
+            if (request) {
+                this.acceptJoinRequest(request.conn, {
+                    peerId,
+                    username: request.username,
+                    avatar: request.avatar
+                });
+            }
+            notification.remove();
+        });
+        
+        notification.querySelector('.btn-refuse-notif').addEventListener('click', () => {
+            this.refuseJoinRequest(peerId);
+            notification.remove();
+        });
+        
+        // Auto-fermer après 30 secondes
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+                // Refuser automatiquement si pas de réponse
+                if (this.pendingRequests.has(peerId)) {
+                    this.refuseJoinRequest(peerId);
+                }
+            }
+        }, 30000);
     }
 
     // Accepter une demande
@@ -631,6 +749,15 @@ class RoomSystem {
         };
         return icons[this.roomMode] || '🔓 Entrée Libre';
     }
+    
+    // Obtenir l'icône du mode d'acceptation
+    getAcceptModeIcon() {
+        const icons = {
+            'auto': '✅ Acceptation automatique',
+            'manual': '✋ Validation manuelle'
+        };
+        return icons[this.acceptMode] || '✋ Validation manuelle';
+    }
 
     // Configurer les écouteurs d'événements
     setupEventListeners() {
@@ -646,11 +773,52 @@ class RoomSystem {
         const chatBubble = document.getElementById('chatBubble');
         
         if (toggleBtn && chatBubble) {
-            toggleBtn.addEventListener('click', () => {
+            toggleBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 chatBubble.classList.toggle('minimized');
                 toggleBtn.textContent = chatBubble.classList.contains('minimized') ? '+' : '−';
             });
+            
+            // Empêcher la fermeture quand on clique dans la bulle
+            chatBubble.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+            
+            // Fermer la bulle quand on clique en dehors
+            document.addEventListener('click', (e) => {
+                if (!chatBubble.contains(e.target) && !chatBubble.classList.contains('minimized')) {
+                    chatBubble.classList.add('minimized');
+                    toggleBtn.textContent = '+';
+                }
+            });
         }
+        
+        // Ajouter la recherche de joueurs
+        const searchInput = document.getElementById('playerSearchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                this.filterPlayers(e.target.value);
+            });
+        }
+        
+        // Initialiser l'affichage de la bulle après un court délai pour s'assurer que le DOM est prêt
+        setTimeout(() => {
+            console.log('🔄 Première mise à jour de la bulle...');
+            this.updateChatBubble();
+            
+            // Ajouter quelques bots de démonstration après un délai
+            setTimeout(() => {
+                if (window.aiBotManager) {
+                    console.log('🤖 Ajout des bots à la liste...');
+                    window.aiBotManager.showBotsAsAvailable();
+                    // Forcer la mise à jour après l'ajout des bots
+                    setTimeout(() => {
+                        console.log('🔄 Mise à jour après ajout bots...');
+                        this.updateChatBubble();
+                    }, 100);
+                }
+            }, 2000);
+        }, 100);
     }
 
     // Mettre à jour l'interface
@@ -680,7 +848,7 @@ class RoomSystem {
         // Mettre à jour le mode
         const modeDisplay = document.getElementById('roomModeDisplay');
         if (modeDisplay) {
-            modeDisplay.textContent = this.getRoomModeIcon();
+            modeDisplay.textContent = this.getAcceptModeIcon();
         }
 
         // Mettre à jour le compteur de joueurs
@@ -847,10 +1015,15 @@ class RoomSystem {
         const bubbleList = document.getElementById('connectedPlayersList');
         const onlineCountEl = document.getElementById('onlineCount');
         
-        if (!bubbleList || !onlineCountEl) return;
+        if (!bubbleList || !onlineCountEl) {
+            console.warn('⚠️ Éléments de la bulle non trouvés');
+            return;
+        }
 
         const count = this.availablePlayers.size;
         onlineCountEl.textContent = count;
+        
+        console.log('🔄 Mise à jour bulle chat:', count, 'joueurs');
 
         if (count === 0) {
             bubbleList.innerHTML = `
@@ -865,33 +1038,41 @@ class RoomSystem {
         let bubbleHTML = '';
         this.availablePlayers.forEach((player, peerId) => {
             const modeIcon = {
-                'open': '🔓',
-                'private': '🔒',
-                'invite': '🎫'
-            }[player.roomMode] || '🔓';
+                'auto': '✅',
+                'manual': '✋'
+            }[player.acceptMode] || '✋';
 
             const modeName = {
-                'open': 'Entrée libre',
-                'private': 'Privée',
-                'invite': 'Sur invitation'
-            }[player.roomMode] || 'Public';
+                'auto': 'Acceptation auto',
+                'manual': 'Validation requise'
+            }[player.acceptMode] || 'Validation requise';
+
+            // Afficher un badge "Vous" pour le joueur local
+            const isMe = player.isMe || peerId === 'me';
+            const nameDisplay = isMe ? `${player.username} <span style="color: #667eea; font-weight: bold;">(Vous)</span>` : player.username;
 
             bubbleHTML += `
                 <div class="connected-player-item" data-peer-id="${peerId}">
                     <div class="player-avatar-mini">${player.avatar}</div>
                     <div class="player-details">
-                        <div class="player-name-mini">${player.username}</div>
+                        <div class="player-name-mini">${nameDisplay}</div>
                         <div class="player-status-mini">
                             <span class="status-indicator"></span>
                             <span>${player.playerCount}/${player.maxPlayers}</span>
                             <span class="room-mode-badge">${modeIcon} ${modeName}</span>
                         </div>
                     </div>
-                    <div class="player-actions-mini">
-                        <button class="action-btn-mini btn-join-bubble" data-peer-id="${peerId}" data-username="${player.username}" title="Rejoindre">
-                            🚪
-                        </button>
-                    </div>
+                    ${!isMe ? `
+                        <div class="player-actions-mini">
+                            <button class="action-btn-mini btn-join-bubble" data-peer-id="${peerId}" data-username="${player.username}" title="Demander à rejoindre">
+                                🚪
+                            </button>
+                        </div>
+                    ` : `
+                        <div class="player-actions-mini">
+                            <span class="me-indicator" title="C'est vous !">👤</span>
+                        </div>
+                    `}
                 </div>
             `;
         });
@@ -904,11 +1085,220 @@ class RoomSystem {
                 e.stopPropagation();
                 const peerId = e.target.dataset.peerId;
                 const username = e.target.dataset.username;
-                this.requestJoinRoom(username, peerId);
+                
+                // Vérifier si c'est un bot
+                if (peerId.startsWith('bot-')) {
+                    this.joinBotGame(username);
+                } else {
+                    this.requestJoinRoom(username, peerId);
+                }
+            });
+        });
+        
+        // Ajouter les écouteurs pour le bouton "plus d'options"
+        bubbleList.querySelectorAll('.btn-more-options').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const peerId = e.target.dataset.peerId;
+                const username = e.target.dataset.username;
+                this.showPlayerContextMenu(e, peerId, username);
             });
         });
     }
+    
+    // Afficher le menu contextuel pour un joueur
+    showPlayerContextMenu(event, peerId, username) {
+        // Supprimer les anciens menus
+        document.querySelectorAll('.player-context-menu').forEach(m => m.remove());
+        
+        const isBlocked = this.blockedPlayers.has(peerId);
+        const isBot = peerId.startsWith('bot-');
+        
+        const menu = document.createElement('div');
+        menu.className = 'player-context-menu';
+        menu.innerHTML = `
+            ${!isBot && !isBlocked ? `
+                <button class="context-menu-item" data-action="block">
+                    🚫 Bloquer ${username}
+                </button>
+            ` : ''}
+            ${!isBot && isBlocked ? `
+                <button class="context-menu-item" data-action="unblock">
+                    ✅ Débloquer ${username}
+                </button>
+            ` : ''}
+            ${!isBot ? `
+                <button class="context-menu-item" data-action="report">
+                    ⚠️ Signaler ${username}
+                </button>
+            ` : ''}
+        `;
+        
+        // Positionner le menu
+        const rect = event.target.getBoundingClientRect();
+        menu.style.position = 'fixed';
+        menu.style.top = `${rect.bottom + 5}px`;
+        menu.style.left = `${rect.left - 100}px`;
+        
+        document.body.appendChild(menu);
+        
+        // Event listeners
+        menu.querySelectorAll('.context-menu-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const action = item.dataset.action;
+                
+                switch(action) {
+                    case 'block':
+                        this.blockPlayer(peerId, username);
+                        break;
+                    case 'unblock':
+                        this.unblockPlayer(peerId, username);
+                        break;
+                    case 'report':
+                        this.reportPlayer(peerId, username);
+                        break;
+                }
+                
+                menu.remove();
+            });
+        });
+        
+        // Fermer au clic extérieur
+        setTimeout(() => {
+            const closeMenu = (e) => {
+                if (!menu.contains(e.target)) {
+                    menu.remove();
+                    document.removeEventListener('click', closeMenu);
+                }
+            };
+            document.addEventListener('click', closeMenu);
+        }, 100);
+    }
+    
+    // Bloquer un joueur
+    blockPlayer(peerId, username) {
+        if (confirm(`Bloquer ${username} ?\n\nCe joueur ne pourra plus vous envoyer de demandes.`)) {
+            this.blockedPlayers.add(peerId);
+            
+            // Déconnecter si connecté
+            const conn = this.chatSystem.connections.get(peerId);
+            if (conn) {
+                conn.close();
+                this.chatSystem.connections.delete(peerId);
+            }
+            
+            // Retirer des listes
+            this.playersInRoom.delete(peerId);
+            this.pendingRequests.delete(peerId);
+            
+            this.chatSystem.showMessage(`🚫 ${username} a été bloqué`, 'system');
+            this.updateChatBubble();
+            this.updateUI();
+            
+            // Sauvegarder dans localStorage
+            this.saveBlockedPlayers();
+        }
+    }
+    
+    // Débloquer un joueur
+    unblockPlayer(peerId, username) {
+        this.blockedPlayers.delete(peerId);
+        this.chatSystem.showMessage(`✅ ${username} a été débloqué`, 'system');
+        this.updateChatBubble();
+        
+        // Sauvegarder dans localStorage
+        this.saveBlockedPlayers();
+    }
+    
+    // Signaler un joueur
+    reportPlayer(peerId, username) {
+        const reason = prompt(`Signaler ${username}\n\nRaison du signalement :`);
+        
+        if (reason && reason.trim()) {
+            // Ici on pourrait envoyer à un serveur de modération
+            console.log(`🚨 Signalement: ${username} (${peerId}) - Raison: ${reason}`);
+            
+            this.chatSystem.showMessage(`⚠️ Signalement envoyé pour ${username}`, 'system');
+            
+            // Pour l'instant, juste bloquer automatiquement
+            if (confirm(`Voulez-vous également bloquer ${username} ?`)) {
+                this.blockedPlayers.add(peerId);
+                this.updateChatBubble();
+                this.saveBlockedPlayers();
+            }
+        }
+    }
+    
+    // Sauvegarder la liste des joueurs bloqués
+    saveBlockedPlayers() {
+        try {
+            const blocked = Array.from(this.blockedPlayers);
+            localStorage.setItem('blockedPlayers', JSON.stringify(blocked));
+        } catch (error) {
+            console.error('Erreur sauvegarde blocklist:', error);
+        }
+    }
+    
+    // Charger la liste des joueurs bloqués
+    loadBlockedPlayers() {
+        try {
+            const blocked = localStorage.getItem('blockedPlayers');
+            if (blocked) {
+                const list = JSON.parse(blocked);
+                this.blockedPlayers = new Set(list);
+            }
+        } catch (error) {
+            console.error('Erreur chargement blocklist:', error);
+        }
+    }
+    
+    // Filtrer les joueurs dans la bulle
+    filterPlayers(searchTerm) {
+        const term = searchTerm.toLowerCase().trim();
+        const playerItems = document.querySelectorAll('.connected-player-item');
+        
+        playerItems.forEach(item => {
+            const username = item.dataset.username?.toLowerCase() || '';
+            
+            if (!term || username.includes(term)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    // Rejoindre une partie avec un bot
+    joinBotGame(botName) {
+        console.log('🤖 Démarrage d\'une partie avec:', botName);
+        
+        // Afficher un message
+        if (this.chatSystem) {
+            this.chatSystem.showMessage(`🤖 Démarrage d'une partie avec ${botName}...`, 'system');
+        }
+        
+        // Fermer le modal si ouvert
+        const modal = document.getElementById('multiplayerModal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+        
+        // Démarrer le jeu avec le bot
+        if (window.game && window.aiBotManager) {
+            // Trouver le bot
+            const bot = window.aiBotManager.getBot(botName);
+            if (bot) {
+                // Démarrer le bot (il jouera automatiquement)
+                bot.startPlaying(window.game);
+                
+                this.chatSystem.showMessage(`🎮 ${botName} a rejoint la partie !`, 'ai');
+            }
+        }
+    }
 }
+
+// Exposer la classe globalement
+window.RoomSystem = RoomSystem;
 
 // Instance globale
 window.roomSystem = null;

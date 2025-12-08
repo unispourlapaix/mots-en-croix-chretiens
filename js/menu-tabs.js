@@ -76,6 +76,14 @@ class MenuTabSystem {
         const modal = document.getElementById('menuModal');
         if (modal) {
             modal.classList.remove('hidden');
+            
+            // Minimiser la bulle de chat
+            const chatBubble = document.getElementById('chatBubble');
+            const toggleBtn = document.getElementById('toggleChatBubble');
+            if (chatBubble && !chatBubble.classList.contains('minimized')) {
+                chatBubble.classList.add('minimized');
+                if (toggleBtn) toggleBtn.textContent = '+';
+            }
         }
 
         // Switcher vers l'onglet demandé
