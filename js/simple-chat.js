@@ -470,8 +470,9 @@ class SimpleChatSystem {
                 break;
                 
             case 'word_completed':
-                // Afficher quand un joueur complète un mot
-                this.showMessage(`🎉 ${username} a trouvé "${action.word}" ! (${action.score} pts)`, 'system');
+                // Afficher quand un joueur complète un mot (masqué pour ne pas spoiler)
+                const maskedWord = '*'.repeat(action.word.length);
+                this.showMessage(`🎉 ${username} a trouvé un mot de ${action.word.length} lettres (${maskedWord}) ! (${action.score} pts)`, 'system');
                 break;
         }
     }
