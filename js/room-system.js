@@ -1267,7 +1267,6 @@ class RoomSystem {
             }
         });
     }
-
     // Rejoindre une partie avec un bot
     joinBotGame(botName) {
         console.log('🤖 Démarrage d\'une partie avec:', botName);

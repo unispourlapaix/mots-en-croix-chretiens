@@ -393,31 +393,26 @@
                     <div class="chat-room-content">
                         <div class="chat-room-icon">🎮</div>
                         <h3>Mode Multijoueur</h3>
-                        <p style="margin-bottom: 15px; color: #666;">Jouez et chattez en temps réel avec vos amis</p>
+                        <p style="margin-bottom: 20px; color: #666; text-align: center;">
+                            Connectez-vous pour voir vos amis automatiquement ! 🎉
+                        </p>
 
-                        <!-- Code de partie pour inviter des amis -->
-                        <div id="chatRoomCodeDisplay" style="padding: 15px; background: #fff5f9; border-radius: 8px; text-align: center;">
-                            <p style="font-size: 13px; margin-bottom: 8px; color: #666;">🎮 <strong>Pour jouer avec un ami:</strong></p>
-                            <p style="font-size: 12px; margin-bottom: 10px; color: #888;">Partagez ce code:</p>
-                            <p id="chatRoomCode" style="font-size: 20px; color: #ff1493; font-weight: bold; user-select: all; margin-bottom: 12px; padding: 10px; background: white; border-radius: 8px;">En attente...</p>
-                            <button id="chatCopyCodeBtn" class="chat-room-btn" style="font-size: 13px; padding: 10px 20px;">
-                                📋 Copier le code
-                            </button>
-                        </div>
-
-                        <div class="chat-divider" style="margin: 20px 0;">─── OU ───</div>
-
-                        <!-- Rejoindre une partie -->
-                        <div style="text-align: center;">
-                            <p style="font-size: 13px; margin-bottom: 10px; color: #666;">Un ami vous a partagé un code?</p>
-                            <input type="text" id="chatRoomCodeInput" class="chat-room-input" placeholder="Entrez le code ici" maxlength="50" style="margin-bottom: 10px; text-align: center;">
-                            <button id="chatJoinRoomBtn" class="chat-room-btn join-btn">
-                                🔗 Rejoindre sa partie
-                            </button>
+                        <div style="text-align: center; padding: 20px; background: #fff5f9; border-radius: 12px;">
+                            <p style="font-size: 15px; margin-bottom: 12px; color: #666;">
+                                ✨ <strong>Nouveau système intuitif</strong>
+                            </p>
+                            <p style="font-size: 13px; color: #888; margin-bottom: 15px;">
+                                1️⃣ Connectez-vous<br>
+                                2️⃣ Vos amis apparaissent automatiquement<br>
+                                3️⃣ Cliquez sur "Rejoindre" → Accepter/Refuser
+                            </p>
+                            <p style="font-size: 12px; color: #999; margin-top: 15px;">
+                                💡 Plus besoin de partager des codes !
+                            </p>
                         </div>
 
                         <p style="font-size: 11px; color: #999; margin-top: 20px; text-align: center;">
-                            💡 Astuce: Chattez directement depuis la zone en haut de la grille!
+                            💬 Astuce: La bulle de chat à gauche montre tous les joueurs en ligne
                         </p>
                     </div>
                 </div>
@@ -631,6 +626,7 @@
     <script src="js/supabase.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/simple-chat.js"></script>
+    <script src="js/presence-system.js"></script>
     <script src="js/room-system.js"></script>
     <script src="js/room-ui.js"></script>
     <script src="js/ai-bots.js"></script>
