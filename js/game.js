@@ -1103,6 +1103,17 @@ class ChristianCrosswordGame {
                             if (window.multiplayerRace && window.multiplayerRace.isRaceMode) {
                                 window.multiplayerRace.shareProgress();
                             }
+                            
+                            // Partager l'action avec les joueurs connectés via chat
+                            if (window.simpleChatSystem && window.simpleChatSystem.connections.size > 0) {
+                                window.simpleChatSystem.broadcastGameAction({
+                                    type: 'cell_update',
+                                    row: i,
+                                    col: j,
+                                    letter: letter,
+                                    level: this.currentLevel
+                                });
+                            }
 
                             // Vérifier si correct
                             if (letter === this.solution[i][j]) {
@@ -1410,6 +1421,16 @@ class ChristianCrosswordGame {
                 // Notifier dans le chat
                 if (typeof window.simpleChatSystem !== 'undefined') {
                     window.simpleChatSystem.showMessage(`✨ Mot complété : "${wordData.word}" ! +${wordBonus} pts`, 'system');
+                    
+                    // Partager avec les autres joueurs connectés
+                    if (window.simpleChatSystem.connections.size > 0) {
+                        window.simpleChatSystem.broadcastGameAction({
+                            type: 'word_completed',
+                            word: wordData.word,
+                            score: this.score,
+                            level: this.currentLevel
+                        });
+                    }
                 }
                 
                 // Partager le mot trouvé avec les autres joueurs en mode course

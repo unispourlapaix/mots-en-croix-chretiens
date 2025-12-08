@@ -320,11 +320,29 @@ class SimpleChatSystem {
                 });
                 console.log('📤 État de course envoyé à', data.username, ':', raceState);
             }
+            
+            // Envoyer l'état actuel du jeu au nouveau joueur
+            if (window.game && window.game.gameStarted) {
+                conn.send({
+                    type: 'game_state',
+                    username: this.currentUser,
+                    level: window.game.currentLevel,
+                    grid: window.game.grid,
+                    score: window.game.score
+                });
+                console.log('📤 État du jeu envoyé à', data.username);
+            }
         } else if (data.type === 'race') {
             // Transmettre les messages de course au système multiplayer
             if (window.multiplayerRace) {
                 window.multiplayerRace.receiveProgress(data.username, data.action, data.data);
             }
+        } else if (data.type === 'game_action') {
+            // Recevoir une action de jeu d'un autre joueur
+            this.handleGameAction(data);
+        } else if (data.type === 'game_state') {
+            // Recevoir l'état complet du jeu
+            this.handleGameState(data);
         }
     }
 
@@ -416,6 +434,53 @@ class SimpleChatSystem {
     // Recevoir un message d'un autre joueur
     receiveMessage(username, text) {
         this.showMessage(text, 'message', username);
+    }
+    
+    // Diffuser une action de jeu à tous les joueurs connectés
+    broadcastGameAction(action) {
+        if (this.connections.size === 0) return;
+        
+        const message = {
+            type: 'game_action',
+            username: this.currentUser,
+            action: action,
+            timestamp: Date.now()
+        };
+        
+        this.connections.forEach((conn) => {
+            if (conn.open) {
+                conn.send(message);
+            }
+        });
+    }
+    
+    // Gérer une action de jeu reçue
+    handleGameAction(data) {
+        if (!window.game) return;
+        
+        const { action, username } = data;
+        
+        switch(action.type) {
+            case 'cell_update':
+                // Afficher dans le chat qu'un joueur a rempli une cellule
+                if (action.level === window.game.currentLevel) {
+                    // Message silencieux, juste pour debug si nécessaire
+                    // this.showMessage(`${username} joue... 🎮`, 'system');
+                }
+                break;
+                
+            case 'word_completed':
+                // Afficher quand un joueur complète un mot
+                this.showMessage(`🎉 ${username} a trouvé "${action.word}" ! (${action.score} pts)`, 'system');
+                break;
+        }
+    }
+    
+    // Gérer la réception de l'état du jeu
+    handleGameState(data) {
+        if (!window.game) return;
+        
+        this.showMessage(`📊 ${data.username} est au niveau ${data.level} avec ${data.score} points`, 'system');
     }
 
     // Déconnecter P2P
