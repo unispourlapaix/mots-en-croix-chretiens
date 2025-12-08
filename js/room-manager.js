@@ -49,6 +49,33 @@ class RoomManager {
             return;
         }
         
+        // S'assurer que PeerJS est initialisé
+        if (!window.simpleChatSystem?.peer) {
+            console.log('🚀 Initialisation P2P avant création salle...');
+            window.simpleChatSystem.initP2P();
+            
+            // Attendre que le peer soit prêt
+            await new Promise((resolve) => {
+                const checkPeer = setInterval(() => {
+                    if (window.simpleChatSystem?.peer?.id) {
+                        clearInterval(checkPeer);
+                        resolve();
+                    }
+                }, 100);
+                
+                // Timeout après 10 secondes
+                setTimeout(() => {
+                    clearInterval(checkPeer);
+                    resolve();
+                }, 10000);
+            });
+        }
+        
+        if (!window.simpleChatSystem?.peer) {
+            alert('❌ Impossible d\'initialiser la connexion P2P. Vérifiez votre connexion internet.');
+            return;
+        }
+
         try {
             const roomCode = await window.presenceSystem.createRoom();
             this.showCurrentRoom(roomCode);
@@ -85,6 +112,33 @@ class RoomManager {
             return;
         }
         
+        // S'assurer que PeerJS est initialisé
+        if (!window.simpleChatSystem?.peer) {
+            console.log('🚀 Initialisation P2P avant rejoindre salle...');
+            window.simpleChatSystem.initP2P();
+            
+            // Attendre que le peer soit prêt
+            await new Promise((resolve) => {
+                const checkPeer = setInterval(() => {
+                    if (window.simpleChatSystem?.peer?.id) {
+                        clearInterval(checkPeer);
+                        resolve();
+                    }
+                }, 100);
+                
+                // Timeout après 10 secondes
+                setTimeout(() => {
+                    clearInterval(checkPeer);
+                    resolve();
+                }, 10000);
+            });
+        }
+        
+        if (!window.simpleChatSystem?.peer) {
+            alert('❌ Impossible d\'initialiser la connexion P2P. Vérifiez votre connexion internet.');
+            return;
+        }
+
         try {
             await window.presenceSystem.joinRoom(roomCode);
             this.showCurrentRoom(roomCode);
