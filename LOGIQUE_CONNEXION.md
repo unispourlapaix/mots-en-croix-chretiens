@@ -1,6 +1,186 @@
 # 🔍 Test de Logique - Système de Salle
 
-## ✅ Logique Corrigée
+## 📊 ARCHITECTURE COMPLÈTE D'INTERCONNEXION
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                   SYSTÈME D'INTERCONNEXION P2P                    │
+└──────────────────────────────────────────────────────────────────┘
+
+[authSystem] ───────────────┐
+     │ username              │
+     ↓                       ↓
+[simpleChatSystem] ←────→ [presenceSystem]
+     │                       │
+     │ broadcastGameAction   │ broadcastToRoom
+     │ handleCommand         │ acceptMode: auto/manual
+     │                       │
+     ↓                       ↓
+[game.js] ──────────────→ [room-system.js]
+     │                       │
+     │ cell_update           │ player_block
+     │ word_completed        │ player_report
+     │                       │
+     ↓                       ↓
+[welcomeAI (Sophie)] ←──→ [multiplayerRace]
+     │                       │
+     │ joinRace()            │ shareProgress()
+     │ makeRaceProgress()    │ receiveProgress()
+     │                       │
+     └───────────────────────┘
+```
+
+## ✅ CONNEXIONS ACTIVES
+
+### 1. **authSystem → simpleChatSystem**
+- `onAuthChange()` détecte connexion/déconnexion
+- Met à jour `currentUser` automatiquement
+- Synchronise le pseudo partout
+
+### 2. **simpleChatSystem → presenceSystem**
+- Partage `peer.id` et `username`
+- `start(username, peerId)` pour synchroniser
+- Détecte automatiquement les joueurs en ligne
+
+### 3. **game.js → simpleChatSystem**
+- Input cellule : `broadcastGameAction({type: 'cell_update'})`
+- Mot complété : `broadcastGameAction({type: 'word_completed'})`
+- Anti-spoiler : masque mots avec `*****`
+
+### 4. **presenceSystem → room-system**
+- Mode auto en salle CODE : `setAcceptMode('auto')`
+- Mode manuel hors salles : `setAcceptMode('manual')`
+- Options joueurs : bloquer/débloquer/signaler
+
+### 5. **welcomeAI → simpleChatSystem + multiplayerRace**
+- Commande `/sophie` ou `/bot` : Rejoint course
+- `joinRace()` : S'ajoute comme adversaire
+- `makeRaceProgress()` : Simule progression réaliste
+- Commente pendant la course
+
+## 🎮 FLUX DE DONNÉES
+
+### Scénario 1 : Joueur remplit une cellule
+```
+Joueur tape lettre
+  ↓
+game.js (input event)
+  ↓
+broadcastGameAction({type: 'cell_update', row, col, letter, level})
+  ↓
+simpleChatSystem.connections.forEach(conn => conn.send())
+  ↓
+Autre joueur reçoit via handleMessage()
+  ↓
+handleGameAction() traite l'action
+  ↓
+(Pas d'affichage pour éviter spam)
+```
+
+### Scénario 2 : Joueur complète un mot
+```
+Joueur complète mot
+  ↓
+game.js checkCompletedWords()
+  ↓
+broadcastGameAction({
+    type: 'word_completed',
+    word: maskedWord ('*****'),
+    score: totalScore,
+    level: currentLevel
+})
+  ↓
+simpleChatSystem → connections.forEach()
+  ↓
+Autre joueur reçoit
+  ↓
+handleGameAction() affiche:
+"🎉 Alice a trouvé un mot de 5 lettres (*****) ! (50 pts)"
+```
+
+### Scénario 3 : Connexion authentifiée
+```
+Utilisateur se connecte
+  ↓
+authSystem.signIn() ou signUp()
+  ↓
+onAuthChange(user) déclenché
+  ↓
+simpleChatSystem.updateUsername()
+  → currentUser = user.username
+  ↓
+presenceSystem.start(username, peer.id)
+  ↓
+Tous les messages utilisent le pseudo authentifié
+  ↓
+Chat + Salles + Jeu = Même identité partout
+```
+
+### Scénario 4 : Course avec Sophie (Bot)
+```
+Joueur tape /sophie dans le chat
+  ↓
+simpleChatSystem.handleCommand('/sophie')
+  ↓
+welcomeAI.joinRace()
+  → isPlaying = true
+  → score = 0
+  → wordsFound = []
+  ↓
+presenceSystem.onlinePlayers.set('bot-sophie', {...})
+  ↓
+welcomeAI.startPlayingRace()
+  → setInterval(() => makeRaceProgress(), 2-3s)
+  ↓
+Simule découverte de mots au hasard
+  ↓
+multiplayerRace affiche progression des deux joueurs
+  ↓
+Chat affiche commentaires de Sophie :
+"Ce mot était difficile ! 💪"
+"Continue, tu progresses bien ! 💝"
+```
+
+## 🏁 COMMANDES DISPONIBLES
+
+### Chat
+- **Message normal** : Tapez et envoyez
+- **/sophie** ou **/bot** : Inviter Sophie à jouer en course
+- **/stop-sophie** : Arrêter Sophie
+- **/aide** ou **/help** : Afficher les commandes
+
+### Salles
+- **Créer salle CODE** : Mode auto, acceptation instantanée
+- **Rejoindre CODE** : Connexion automatique P2P
+- **Options joueurs** : Bouton ⋮ → Bloquer/Débloquer/Signaler
+
+## 🎯 AVANTAGES DE L'INTERCONNEXION
+
+### ✅ Un seul compte = Une seule identité
+- Pseudo authentifié partout (jeu, chat, salles)
+- Pas de désynchronisation
+
+### ✅ Synchronisation temps réel
+- Actions de jeu partagées instantanément
+- Mots complétés visibles par tous (masqués)
+- Course multijoueur fluide
+
+### ✅ Mode solo avec bot
+- Sophie peut jouer contre vous
+- Progression réaliste et commentaires
+- Pas besoin d'autres joueurs
+
+### ✅ Anti-spoiler automatique
+- Mots masqués : `*****`
+- Préserve la découverte personnelle
+- Partage l'excitation sans dévoiler
+
+### ✅ Acceptation intelligente
+- Auto en salle CODE (confiance)
+- Manuel hors salles (contrôle)
+- Options sociales (bloquer/signaler)
+
+## ✅ Logique Corrigée (Historique)
 
 ### Problèmes Identifiés
 
