@@ -537,6 +537,12 @@ class PresenceSystem {
     }
 
     start(username, peerId) {
+        // Ne pas réannoncer si déjà fait avec les mêmes infos
+        if (this.myPresence && this.myPresence.username === username && this.myPresence.peerId === peerId) {
+            console.log('⏭️ Présence déjà annoncée, skip');
+            return;
+        }
+        
         this.announcePresence(peerId, username, '😊');
     }
     
@@ -700,10 +706,16 @@ class PresenceSystem {
         let hasChanges = false;
         
         this.onlinePlayers.forEach((player, peerId) => {
+            // Ne jamais supprimer le joueur local
+            if (peerId === this.myPresence?.peerId) {
+                return;
+            }
+            
+            // Supprimer si inactif > 15s
             if (now - player.timestamp > 15000) {
                 this.onlinePlayers.delete(peerId);
                 hasChanges = true;
-                console.log('🧹 Joueur inactif retiré:', player.username);
+                console.log('🧹 Joueur inactif retiré:', player.username, '(dernier heartbeat:', Math.floor((now - player.timestamp) / 1000), 's)');
             }
         });
         
@@ -755,6 +767,11 @@ class PresenceSystem {
         if (window.roomSystem) {
             // Mettre à jour availablePlayers avec les joueurs découverts
             this.onlinePlayers.forEach((player, peerId) => {
+                // Ne pas écraser le joueur local ('me')
+                if (peerId === 'me' || window.roomSystem.availablePlayers.has('me') && player.peerId === window.roomSystem.availablePlayers.get('me').peerId) {
+                    return; // Skip le joueur local
+                }
+                
                 if (!window.roomSystem.availablePlayers.has(peerId)) {
                     window.roomSystem.availablePlayers.set(peerId, {
                         username: player.username,
@@ -766,12 +783,19 @@ class PresenceSystem {
                         isMe: false,
                         isBot: false
                     });
+                    console.log('➕ Nouveau joueur ajouté:', player.username, '(', peerId, ')');
+                } else {
+                    // Mettre à jour le timestamp
+                    const existing = window.roomSystem.availablePlayers.get(peerId);
+                    existing.lastSeen = player.timestamp;
+                    window.roomSystem.availablePlayers.set(peerId, existing);
                 }
             });
             
-            // Retirer les joueurs qui ne sont plus en ligne
+            // Retirer les joueurs qui ne sont plus en ligne (sauf 'me' et bots)
             window.roomSystem.availablePlayers.forEach((player, peerId) => {
-                if (!player.isMe && !player.isBot && !this.onlinePlayers.has(peerId)) {
+                if (!player.isMe && !player.isBot && peerId !== 'me' && !this.onlinePlayers.has(peerId)) {
+                    console.log('➖ Joueur retiré:', player.username, '(', peerId, ')');
                     window.roomSystem.availablePlayers.delete(peerId);
                 }
             });
@@ -780,7 +804,7 @@ class PresenceSystem {
             window.roomSystem.updateAvailablePlayersList();
             window.roomSystem.updateChatBubble();
             
-            console.log('✅ UI mise à jour -', this.onlinePlayers.size, 'joueurs en ligne');
+            console.log('✅ UI mise à jour -', this.onlinePlayers.size, 'joueurs en ligne,', window.roomSystem.availablePlayers.size, 'affichés');
         }
     }
     
