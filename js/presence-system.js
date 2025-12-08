@@ -65,6 +65,11 @@ class PresenceSystem {
         console.log('🏠 Salle créée:', roomCode);
         console.log('📋 Partagez ce code avec vos amis/famille !');
         
+        // Passer en mode acceptation automatique pour les salles avec CODE
+        if (window.roomSystem) {
+            window.roomSystem.setAcceptMode('auto');
+        }
+        
         // Enregistrer dans le registre de la salle
         this.registerInRoom(roomCode);
         
@@ -116,6 +121,11 @@ class PresenceSystem {
         this.currentRoomCode = roomCode;
         
         console.log('🚪 Tentative de rejoindre salle:', roomCode);
+        
+        // Passer en mode acceptation automatique pour les salles avec CODE
+        if (window.roomSystem) {
+            window.roomSystem.setAcceptMode('auto');
+        }
         
         // Enregistrer ma présence dans cette salle
         this.registerInRoom(roomCode);
@@ -481,6 +491,11 @@ class PresenceSystem {
         this.connectedPeers.clear();
         this.onlinePlayers.clear();
         this.currentRoomCode = null;
+        
+        // Revenir en mode manuel après avoir quitté une salle CODE
+        if (window.roomSystem) {
+            window.roomSystem.setAcceptMode('manual');
+        }
         
         localStorage.removeItem('crossword_current_room');
         
