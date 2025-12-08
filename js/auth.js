@@ -36,14 +36,16 @@ class AuthSystem {
                 console.error('❌ Erreur récupération session:', error);
             } else if (session && session.user) {
                 console.log('✅ Session restaurée depuis localStorage');
+                // IMPORTANT: Attendre que le profil soit chargé AVANT de marquer comme prêt
                 await this.loadUserProfile(session.user);
             } else {
                 console.log('ℹ️ Aucune session sauvegardée');
             }
             
-            // Marquer comme initialisé
+            // Marquer comme initialisé SEULEMENT après loadUserProfile terminé
             this.isInitialized = true;
             this.isCheckingAuth = false;
+            console.log('✅ Auth init terminée, username:', this.currentUser?.username || 'anonyme');
         } catch (err) {
             console.error('❌ Erreur vérification session:', err);
             this.isInitialized = true;

@@ -33,12 +33,13 @@ class RoomSystem {
         
         // NOUVEAU: Attendre que l'authentification soit vérifiée
         if (typeof authSystem !== 'undefined' && authSystem.isCheckingAuth) {
-            console.log('⏳ Attente vérification authentification...');
+            console.log('⏳ Attente vérification authentification... (currentUser:', this.chatSystem.currentUser + ')');
             setTimeout(() => this.createMyRoom(), 300);
             return;
         }
 
         console.log('✅ Username OK, création de la room pour:', this.chatSystem.currentUser);
+        console.log('🔍 Auth status - isCheckingAuth:', authSystem?.isCheckingAuth, 'isAuthenticated:', authSystem?.isAuthenticated());
 
         // Initialiser P2P avec mon username comme ID de base
         if (!this.chatSystem.peer) {

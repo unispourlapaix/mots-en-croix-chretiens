@@ -66,8 +66,11 @@ class PresenceSystem {
         console.log('📋 Partagez ce code avec vos amis/famille !');
         
         // Passer en mode acceptation automatique pour les salles avec CODE
-        if (window.roomSystem) {
+        if (window.roomSystem && typeof window.roomSystem.setAcceptMode === 'function') {
             window.roomSystem.setAcceptMode('auto');
+            console.log('✅ Mode acceptation auto activé pour salle CODE');
+        } else {
+            console.warn('⚠️ roomSystem pas encore initialisé');
         }
         
         // Enregistrer dans le registre de la salle
@@ -123,8 +126,11 @@ class PresenceSystem {
         console.log('🚪 Tentative de rejoindre salle:', roomCode);
         
         // Passer en mode acceptation automatique pour les salles avec CODE
-        if (window.roomSystem) {
+        if (window.roomSystem && typeof window.roomSystem.setAcceptMode === 'function') {
             window.roomSystem.setAcceptMode('auto');
+            console.log('✅ Mode acceptation auto activé pour salle CODE');
+        } else {
+            console.warn('⚠️ roomSystem pas encore initialisé');
         }
         
         // Enregistrer ma présence dans cette salle
@@ -183,6 +189,13 @@ class PresenceSystem {
     // Découvrir les membres de la salle
     async discoverRoomMembers(roomCode) {
         const roomKey = `crossword_room_${roomCode}`;
+        
+        // Vérifier que P2P est initialisé
+        if (!window.simpleChatSystem?.peer?.id) {
+            console.log('⏳ P2P pas encore prêt, réessai dans 500ms...');
+            setTimeout(() => this.discoverRoomMembers(roomCode), 500);
+            return;
+        }
         
         try {
             const roomData = localStorage.getItem(roomKey);
@@ -526,15 +539,22 @@ class PresenceSystem {
         this.currentRoomCode = null;
         
         // Revenir en mode manuel après avoir quitté une salle CODE
-        if (window.roomSystem) {
+        if (window.roomSystem && typeof window.roomSystem.setAcceptMode === 'function') {
             window.roomSystem.setAcceptMode('manual');
+            console.log('✅ Mode manuel restauré');
+        }
+        
+        // Nettoyer aussi simpleChatSystem.connections
+        if (window.simpleChatSystem) {
+            window.simpleChatSystem.connections.clear();
+            console.log('🧹 Connexions chat nettoyées');
         }
         
         localStorage.removeItem('crossword_current_room');
         
         this.notifyPresenceUpdate();
         
-        console.log('✅ Salle quittée');
+        console.log('✅ Salle quittée proprement');
     }
     
     // Se retirer du registre de la salle
