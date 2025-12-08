@@ -233,6 +233,12 @@ class PresenceSystem {
                 
                 this.connectedPeers.set(peerId, conn);
                 
+                // IMPORTANT: Ajouter aussi à simpleChatSystem pour les messages
+                if (window.simpleChatSystem) {
+                    window.simpleChatSystem.connections.set(peerId, conn);
+                    console.log('💬 Connexion ajoutée au chat');
+                }
+                
                 // Ajouter aux joueurs en ligne
                 this.onlinePlayers.set(peerId, {
                     peerId: peerId,
@@ -266,6 +272,12 @@ class PresenceSystem {
                 console.log('👋 Déconnecté de:', peerId);
                 this.connectedPeers.delete(peerId);
                 this.onlinePlayers.delete(peerId);
+                
+                // Retirer aussi de simpleChatSystem
+                if (window.simpleChatSystem) {
+                    window.simpleChatSystem.connections.delete(peerId);
+                }
+                
                 this.notifyPresenceUpdate();
             });
             
@@ -382,6 +394,12 @@ class PresenceSystem {
                 });
                 
                 this.connectedPeers.set(conn.peer, conn);
+                
+                // IMPORTANT: Ajouter aussi à simpleChatSystem pour les messages
+                if (window.simpleChatSystem) {
+                    window.simpleChatSystem.connections.set(conn.peer, conn);
+                    console.log('💬 Connexion entrante ajoutée au chat');
+                }
             });
             
             conn.on('data', (data) => {
@@ -392,6 +410,12 @@ class PresenceSystem {
                 console.log('👋 Connexion fermée:', conn.peer);
                 this.connectedPeers.delete(conn.peer);
                 this.onlinePlayers.delete(conn.peer);
+                
+                // Retirer aussi de simpleChatSystem
+                if (window.simpleChatSystem) {
+                    window.simpleChatSystem.connections.delete(conn.peer);
+                }
+                
                 this.notifyPresenceUpdate();
             });
         });
