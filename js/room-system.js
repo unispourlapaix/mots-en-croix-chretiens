@@ -30,6 +30,13 @@ class RoomSystem {
             setTimeout(() => this.createMyRoom(), 500);
             return;
         }
+        
+        // NOUVEAU: Attendre que l'authentification soit vérifiée
+        if (typeof authSystem !== 'undefined' && authSystem.isCheckingAuth) {
+            console.log('⏳ Attente vérification authentification...');
+            setTimeout(() => this.createMyRoom(), 300);
+            return;
+        }
 
         console.log('✅ Username OK, création de la room pour:', this.chatSystem.currentUser);
 

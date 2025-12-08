@@ -3,6 +3,8 @@ class AuthSystem {
     constructor() {
         this.currentUser = null;
         this.onAuthChangeCallbacks = [];
+        this.isInitialized = false;
+        this.isCheckingAuth = true; // En cours de vérification
     }
 
     // Initialiser l'authentification
@@ -18,6 +20,8 @@ class AuthSystem {
         if (typeof supabase === 'undefined' || supabase === null) {
             console.info('ℹ️ Auth System: Supabase non configuré, l\'authentification est désactivée');
             console.info('ℹ️ Le chat fonctionnera avec des pseudos anonymes');
+            this.isInitialized = true;
+            this.isCheckingAuth = false;
             this.initUI(); // Initialiser l'UI quand même
             return;
         }
@@ -36,8 +40,14 @@ class AuthSystem {
             } else {
                 console.log('ℹ️ Aucune session sauvegardée');
             }
+            
+            // Marquer comme initialisé
+            this.isInitialized = true;
+            this.isCheckingAuth = false;
         } catch (err) {
             console.error('❌ Erreur vérification session:', err);
+            this.isInitialized = true;
+            this.isCheckingAuth = false;
         }
 
         // PUIS écouter les changements d'auth
