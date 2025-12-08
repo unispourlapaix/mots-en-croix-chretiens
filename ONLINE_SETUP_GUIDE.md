@@ -1,207 +1,94 @@
-# 🌍 Système de Découverte P2P - 100% GRATUIT
+# 🏠 Système de Partage Familial/Amis - 100% GRATUIT
 
-Ce jeu utilise une architecture **100% décentralisée** avec PeerJS pour la découverte mondiale des joueurs.
+Ce jeu utilise un système de **CODE DE SALLE** pour jouer avec vos amis, famille ou groupe !
 
-## 🎯 Pourquoi PeerJS pur ?
+## 🎯 Concept Simple
 
-❌ **Supabase gratuit** = Limites strictes, risque de suspension  
-❌ **Base de données** = Coûts serveur, maintenance  
-❌ **API payante** = Limite d'utilisation
+Au lieu de chercher des joueurs au hasard dans le monde entier, vous **créez une salle privée** avec un code que vous partagez uniquement avec qui vous voulez.
 
-✅ **PeerJS P2P** = 0€ pour toujours, illimité, décentralisé !
+### ✅ Avantages
 
-## 🔧 Comment ça marche ?
+- **Privé** : Seuls ceux qui ont le code peuvent rejoindre
+- **Sécurisé** : Pas de joueurs inconnus
+- **Familial** : Parfait pour jouer en famille
+- **Entre amis** : Partagez le code sur WhatsApp/SMS
+- **Groupe église** : Jouez avec votre communauté
+- **100% gratuit** : 0€ pour toujours, aucune limite
 
-### Principe des "Salles de Découverte"
+## 🎮 Comment Jouer
 
-Au lieu d'une base de données centralisée, le jeu utilise des **salles de rendez-vous P2P** :
+### 1️⃣ Créer une Salle (Hôte)
 
-1. **Chaque joueur rejoint 5 salles communes** :
-   - `JESUS-CROSSWORD-ROOM-0`
-   - `JESUS-CROSSWORD-ROOM-1`
-   - `JESUS-CROSSWORD-ROOM-2`
-   - `JESUS-CROSSWORD-ROOM-3`
-   - `JESUS-CROSSWORD-ROOM-4`
+1. **Ouvrir le jeu** dans votre navigateur
+2. **Se connecter** avec votre compte
+3. **Cliquer sur la bulle** "Partage Famille/Amis" (coin gauche)
+4. **Cliquer sur "🏠 Créer une salle"**
+5. **Un code s'affiche** (ex: `ABC123`)
+6. **Copier le code** et le partager !
 
-2. **Quand 2 joueurs sont dans la même salle** :
-   - Ils se découvrent automatiquement
-   - Échangent leurs peer IDs
-   - Deviennent visibles l'un pour l'autre
+**Partager le code via** :
+- WhatsApp : "Rejoins-moi ! Code: ABC123"
+- SMS : "Code de jeu: ABC123"
+- Email : "Code pour jouer: ABC123"  
+- Discord/Telegram : "@family code: ABC123"
 
-3. **Effet "gossip" (propagation)** :
-   - Alice découvre Bob
-   - Bob découvre Charles
-   - Alice voit maintenant Charles aussi (via Bob)
-   - **Réseau mondial sans serveur !**
+### 2️⃣ Rejoindre une Salle (Invités)
 
-## 📊 Architecture
+1. **Ouvrir le jeu** dans votre navigateur
+2. **Se connecter** avec votre compte
+3. **Cliquer sur la bulle** "Partage Famille/Amis"
+4. **Entrer le code** reçu (6 caractères)
+5. **Cliquer "🚪 Rejoindre"**
+6. **Vous êtes connectés !** 🎉
 
+### 3️⃣ Jouer Ensemble
+
+Une fois dans la même salle :
+- ✅ Vous vous voyez dans la liste
+- ✅ Vous pouvez vous inviter en cliquant sur le nom
+- ✅ Vous pouvez chatter
+- ✅ Vous pouvez jouer ensemble sur la même grille
+
+## 📱 Exemple Réel
+
+**Papa** crée une salle :
 ```
-Joueur A          Joueur B          Joueur C
-   |                 |                 |
-   |--- Room-0 ------+                 |
-   |--- Room-1 ---------------------+  |
-   |--- Room-2 ------+              |  |
-   |                 |              |  |
-   |                 |--- Room-3 ------|
-   |                 |--- Room-4 ------|
-   |                 |                 |
-   ▼                 ▼                 ▼
-Découverte      Découverte        Découverte
-A ↔ B           B ↔ C             C ↔ A
-```
-
-**Résultat** : Tout le monde se voit, sans serveur central !
-
-## ✅ Installation
-
-**Aucune installation nécessaire !** Le système fonctionne automatiquement.
-
-### Vérification
-
-1. **Ouvrir le jeu dans 2 navigateurs différents**
-2. **Se connecter avec 2 comptes différents**
-3. **Ouvrir la console (F12)**
-4. **Chercher ces messages** :
-   ```
-   ✅ Système de présence P2P chargé - 100% GRATUIT
-   📢 Annonce présence P2P: Alice
-   🔍 Rejoindre salles de découverte P2P...
-   ✅ Connecté à salle 0
-   ✅ Connecté à salle 1
-   👋 Joueur découvert via P2P: Bob
-   ```
-
-## 🎮 Test Multi-Ordinateurs
-
-### Ordinateur A
-1. Ouvrir le jeu
-2. Se connecter
-3. Console : `window.presenceSystem.myPresence`
-   - Devrait afficher votre `peerId`
-
-### Ordinateur B
-1. Ouvrir le jeu (même URL)
-2. Se connecter avec un autre compte
-3. Attendre 5-10 secondes
-4. Console : `window.presenceSystem.getOnlinePlayers()`
-   - Devrait afficher le joueur de l'Ordinateur A
-
-### Si ça ne marche pas
-
-**Problème : "Salle vide ou inexistante"**
-- **Normal !** Les salles n'existent que quand quelqu'un s'y connecte
-- Solution : Assurez-vous que les 2 joueurs sont connectés **en même temps**
-
-**Problème : Ne se voient pas après 30s**
-- Vérifier que PeerJS fonctionne : `window.simpleChatSystem.peer.id`
-- Vérifier le firewall : PeerJS utilise WebRTC (ports UDP)
-- Essayer sur un autre réseau (4G/5G au lieu de WiFi)
-
-## 🔥 Avantages
-
-| Caractéristique | Supabase | PeerJS P2P |
-|----------------|----------|------------|
-| **Coût** | Gratuit puis payant | 0€ pour toujours |
-| **Limites** | 500MB, 2GB/mois | Illimité |
-| **Maintenance** | Risque suspension | Aucune |
-| **Latence** | 100-500ms | 50-200ms (direct) |
-| **Scalabilité** | Limitée free tier | Infinie |
-| **Vie privée** | Données centralisées | 100% P2P |
-
-## 🛠️ Configuration Avancée
-
-### Changer le nombre de salles
-
-Par défaut : **5 salles**
-
-**Modifier** dans `js/presence-system.js` ligne 12 :
-```javascript
-this.MAX_ROOMS = 10; // Plus de salles = plus de chances de découverte
+1. Clic "Créer salle"
+2. Code généré: XYZ789
+3. Envoie SMS à la famille: "Code jeu: XYZ789"
 ```
 
-**Trade-off** :
-- ✅ Plus de salles = plus de découvertes
-- ❌ Plus de connexions = plus de bande passante
-
-### Changer le préfixe des salles
-
-Par défaut : `JESUS-CROSSWORD-ROOM-`
-
-**Modifier** ligne 11 :
-```javascript
-this.DISCOVERY_ROOM_PREFIX = 'MON-JEU-CUSTOM-'; 
+**Maman, Fils, Fille** :
+```
+1. Ouvrent le jeu
+2. Entrent code: XYZ789
+3. Cliquent "Rejoindre"
+4. Tout le monde se voit !
 ```
 
-⚠️ **Important** : Tous les joueurs doivent utiliser le **même préfixe** pour se découvrir !
+**Résultat** : Famille connectée en 30 secondes ! 🎉
 
-### Heartbeat P2P
+## 🔒 Sécurité & Confidentialité
 
-Par défaut : **3 secondes**
+### Code de Salle
 
-**Modifier** dans `startHeartbeat()` :
-```javascript
-}, 5000); // Heartbeat toutes les 5s au lieu de 3s
-```
+- **6 caractères aléatoires** : Majuscules + Chiffres (ex: `A3X7K2`)
+- **Sans confusion** : Pas de I/O/0/1 (lisibilité)
+- **Unique** : Horodaté pour éviter collisions
+- **Temporaire** : Valide tant que l'hôte est connecté
 
-## 🐛 Dépannage
+### Qui Peut Rejoindre ?
 
-### Joueurs ne se découvrent pas
+**UNIQUEMENT** ceux qui ont le code ! Personne d'autre ne peut :
+- ❌ Trouver votre salle
+- ❌ Deviner le code (10 milliards de combinaisons)
+- ❌ Vous rejoindre par hasard
 
-**Causes possibles** :
-1. Firewall bloque WebRTC
-2. Pas connectés en même temps
-3. PeerJS serveur temporairement down
+### Données
 
-**Solutions** :
-1. Tester sans firewall/VPN
-2. Attendre 30s après connexion
-3. Vérifier `peer.open` dans console
-
-### Connexions P2P échouent
-
-**Symptôme** : Voir les joueurs mais impossible de les inviter
-
-**Cause** : NAT/Firewall strict
-
-**Solution** :
-- Activer UPnP sur le routeur
-- Utiliser connexion 4G/5G (pas de NAT)
-- Certains réseaux d'entreprise bloquent WebRTC
-
-### Performance réseau
-
-**Symptôme** : Lag dans le jeu partagé
-
-**Cause** : Trop de connexions P2P actives
-
-**Solution** :
-- Réduire `MAX_ROOMS` à 3 au lieu de 5
-- Fermer les onglets inutilisés
-- Limiter le nombre de joueurs simultanés
-
-## 📚 Ressources
-
-- **PeerJS** : [https://peerjs.com](https://peerjs.com)
-- **WebRTC** : [https://webrtc.org](https://webrtc.org)
-- **Serveur PeerJS gratuit** : `0.peerjs.com` (CloudFlare)
-
-## 🎉 Résumé
-
-Le système utilise des **salles de rendez-vous P2P** au lieu d'une base de données.
-
-**Avantages** :
-- ✅ 0€ pour toujours
-- ✅ Illimité
-- ✅ Décentralisé
-- ✅ Privé
-- ✅ Résilient
-
-**Inconvénients** :
-- ⚠️ Nécessite 2+ joueurs connectés en même temps
-- ⚠️ Firewall/NAT peuvent bloquer
-
-Pour un jeu chrétien communautaire, c'est **parfait** car les joueurs jouent ensemble en temps réel ! 🙏
+- **Aucune sauvegarde** : Le code existe uniquement en mémoire
+- **P2P direct** : Vos messages ne passent par aucun serveur
+- **Chiffrement WebRTC** : Communications sécurisées
 
 ---
 

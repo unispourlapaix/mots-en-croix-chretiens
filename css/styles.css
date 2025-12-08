@@ -4095,6 +4095,141 @@ body {
     border-radius: 10px;
 }
 
+/* === ACTIONS SALLE === */
+.room-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    margin-bottom: 12px;
+}
+
+.room-action-btn {
+    padding: 12px 16px;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.create-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.create-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.join-room-group {
+    display: flex;
+    gap: 8px;
+}
+
+.room-code-input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 2px solid rgba(102, 126, 234, 0.3);
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-family: monospace;
+    background: rgba(255, 255, 255, 0.9);
+    transition: all 0.3s ease;
+}
+
+.room-code-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+}
+
+.join-btn {
+    background: #4ade80;
+    color: white;
+    box-shadow: 0 4px 12px rgba(74, 222, 128, 0.3);
+}
+
+.join-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(74, 222, 128, 0.4);
+}
+
+.current-room-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    border: 2px solid rgba(102, 126, 234, 0.3);
+    border-radius: 12px;
+    animation: slideDown 0.3s ease;
+}
+
+.current-room-info .room-label {
+    font-size: 12px;
+    color: #667eea;
+    font-weight: 600;
+}
+
+.current-room-info .room-code {
+    font-size: 18px;
+    font-weight: 700;
+    color: #667eea;
+    letter-spacing: 3px;
+    font-family: monospace;
+}
+
+.leave-room-btn {
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.leave-room-btn:hover {
+    background: #cc0000;
+    transform: scale(1.1);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.empty-room-message {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+}
+
+.empty-room-message p:first-child {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+}
+
 .my-room-code-bar {
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
     padding: 12px;

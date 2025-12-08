@@ -426,19 +426,39 @@
         <div class="chat-bubble-header">
             <div class="header-title">
                 <span class="pulse-dot"></span>
-                <span>Joueurs en ligne</span>
+                <span>Partage Famille/Amis</span>
                 <span class="online-count" id="onlineCount">0</span>
             </div>
             <button class="minimize-btn" id="toggleChatBubble">−</button>
         </div>
         <div class="chat-bubble-body" id="chatBubbleBody">
+            <!-- Actions salle -->
+            <div class="room-actions">
+                <button id="createRoomBtn" class="room-action-btn create-btn">
+                    🏠 Créer une salle
+                </button>
+                <div class="join-room-group">
+                    <input type="text" id="roomCodeInput" class="room-code-input" placeholder="CODE" maxlength="6">
+                    <button id="joinRoomBtn" class="room-action-btn join-btn">
+                        🚪 Rejoindre
+                    </button>
+                </div>
+                <div id="currentRoomInfo" class="current-room-info hidden">
+                    <span class="room-label">Salle:</span>
+                    <span class="room-code" id="currentRoomCode">------</span>
+                    <button id="leaveRoomBtn" class="leave-room-btn">❌</button>
+                </div>
+            </div>
             <!-- Barre de recherche -->
             <div class="chat-search-bar">
                 <input type="text" id="playerSearchInput" class="player-search-input" placeholder="🔍 Rechercher un joueur...">
             </div>
             <!-- Liste des joueurs connectés -->
             <div class="connected-players-list" id="connectedPlayersList">
-                <!-- Généré dynamiquement -->
+                <div class="empty-room-message">
+                    <p>👥 Aucun joueur connecté</p>
+                    <p style="font-size: 0.9rem; color: #999;">Créez ou rejoignez une salle !</p>
+                </div>
             </div>
         </div>
     </div>
@@ -629,6 +649,7 @@
     <script src="js/auth.js"></script>
     <script src="js/simple-chat.js"></script>
     <script src="js/presence-system.js"></script>
+    <script src="js/room-manager.js"></script>
     <script src="js/room-system.js"></script>
     <script src="js/room-ui.js"></script>
     <script src="js/ai-bots.js"></script>
