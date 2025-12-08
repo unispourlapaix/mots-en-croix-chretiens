@@ -22,7 +22,7 @@
      │ word_completed        │ player_report
      │                       │
      ↓                       ↓
-[welcomeAI (Sophie)] ←──→ [multiplayerRace]
+[welcomeAI (Unisona)] ←──→ [multiplayerRace]
      │                       │
      │ joinRace()            │ shareProgress()
      │ makeRaceProgress()    │ receiveProgress()
@@ -53,7 +53,7 @@
 - Options joueurs : bloquer/débloquer/signaler
 
 ### 5. **welcomeAI → simpleChatSystem + multiplayerRace**
-- Commande `/sophie` ou `/bot` : Rejoint course
+- Commande `/unisona` ou `/bot` : Rejoint course
 - `joinRace()` : S'ajoute comme adversaire
 - `makeRaceProgress()` : Simule progression réaliste
 - Commente pendant la course
@@ -116,18 +116,18 @@ Tous les messages utilisent le pseudo authentifié
 Chat + Salles + Jeu = Même identité partout
 ```
 
-### Scénario 4 : Course avec Sophie (Bot)
+### Scénario 4 : Course avec Unisona (Bot)
 ```
-Joueur tape /sophie dans le chat
+Joueur tape /unisona dans le chat
   ↓
-simpleChatSystem.handleCommand('/sophie')
+simpleChatSystem.handleCommand('/unisona')
   ↓
 welcomeAI.joinRace()
   → isPlaying = true
   → score = 0
   → wordsFound = []
   ↓
-presenceSystem.onlinePlayers.set('bot-sophie', {...})
+presenceSystem.onlinePlayers.set('bot-unisona', {...})
   ↓
 welcomeAI.startPlayingRace()
   → setInterval(() => makeRaceProgress(), 2-3s)
@@ -136,7 +136,7 @@ Simule découverte de mots au hasard
   ↓
 multiplayerRace affiche progression des deux joueurs
   ↓
-Chat affiche commentaires de Sophie :
+Chat affiche commentaires d'Unisona :
 "Ce mot était difficile ! 💪"
 "Continue, tu progresses bien ! 💝"
 ```
@@ -145,8 +145,8 @@ Chat affiche commentaires de Sophie :
 
 ### Chat
 - **Message normal** : Tapez et envoyez
-- **/sophie** ou **/bot** : Inviter Sophie à jouer en course
-- **/stop-sophie** : Arrêter Sophie
+- **/unisona** ou **/bot** : Inviter Unisona à jouer en course
+- **/stop-unisona** : Arrêter Unisona
 - **/aide** ou **/help** : Afficher les commandes
 
 ### Salles
@@ -166,7 +166,7 @@ Chat affiche commentaires de Sophie :
 - Course multijoueur fluide
 
 ### ✅ Mode solo avec bot
-- Sophie peut jouer contre vous
+- Unisona peut jouer contre vous
 - Progression réaliste et commentaires
 - Pas besoin d'autres joueurs
 

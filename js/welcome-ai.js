@@ -1,11 +1,11 @@
 /**
  * IA d'Accueil du Jeu - Assistante virtuelle qui accueille et guide les joueurs
- * Sophie peut aussi jouer en course contre les joueurs !
+ * Unisona peut aussi jouer en course contre les joueurs !
  */
 
 class WelcomeAI {
     constructor() {
-        this.name = 'Sophie'; // Nom de l'IA
+        this.name = 'Unisona'; // Nom de l'IA
         this.avatar = '👼';
         this.hasWelcomed = false;
         this.isBot = true;
@@ -24,11 +24,11 @@ class WelcomeAI {
             "⭐ Plus tu complètes de niveaux, plus tu débloques de médailles !",
             "🎮 Le code de ta partie s'affiche dans le menu Chat pour inviter des amis",
             "💝 Prends ton temps, ce jeu est fait pour te détendre et te bénir",
-            "🏁 Tu veux faire une course ? Je peux jouer avec toi ! Tape /course"
+            "🏁 Tu veux faire une course ? Je peux jouer avec toi ! Tape /unisona"
         ];
         this.welcomeMessages = [
             "Bienvenue dans Mots En Croix Chrétiens ! 🙏✨",
-            "Je suis Sophie, ton assistante virtuelle 😊",
+            "Je suis Unisona, ton assistante virtuelle 😊",
             "Je suis là pour t'accompagner dans ce jeu inspirant !",
             "Que Dieu te bénisse dans cette aventure ! 💕"
         ];
@@ -83,7 +83,7 @@ class WelcomeAI {
     // Envoyer un message dans le chat
     sendChatMessage(message, type = 'ai') {
         if (typeof simpleChatSystem !== 'undefined') {
-            // Ajouter l'emoji de Sophie pour les messages système de l'IA
+            // Ajouter l'emoji d'Unisona pour les messages système de l'IA
             const aiMessage = `👼 ${message}`;
             simpleChatSystem.showMessage(aiMessage, type);
         }
@@ -163,8 +163,8 @@ class WelcomeAI {
         
         // S'ajouter comme joueur disponible dans le système de présence
         if (window.presenceSystem) {
-            window.presenceSystem.onlinePlayers.set('bot-sophie', {
-                peerId: 'bot-sophie',
+            window.presenceSystem.onlinePlayers.set('bot-unisona', {
+                peerId: 'bot-unisona',
                 username: this.name,
                 avatar: this.avatar,
                 isBot: true,
@@ -185,7 +185,7 @@ class WelcomeAI {
         this.currentGame = null;
         
         if (window.presenceSystem) {
-            window.presenceSystem.onlinePlayers.delete('bot-sophie');
+            window.presenceSystem.onlinePlayers.delete('bot-unisona');
         }
         
         this.sendChatMessage(`${this.avatar} ${this.name} : Bonne partie ! Dieu te bénisse ! 💕`, 'system');
@@ -262,7 +262,7 @@ class WelcomeAI {
     // Être disponible pour rejoindre des courses
     makeAvailableForRace() {
         if (window.roomSystem) {
-            window.roomSystem.availablePlayers.set('bot-sophie', {
+            window.roomSystem.availablePlayers.set('bot-unisona', {
                 username: this.name,
                 avatar: this.avatar,
                 acceptMode: 'auto',
@@ -273,7 +273,7 @@ class WelcomeAI {
             });
             window.roomSystem.updateChatBubble();
             
-            console.log('✅ Sophie est disponible pour les courses !');
+            console.log('✅ Unisona est disponible pour les courses !');
         }
     }
 }
@@ -284,22 +284,22 @@ const welcomeAI = new WelcomeAI();
 // Rendre Sophie disponible globalement
 window.welcomeAI = welcomeAI;
 
-// Initialiser au chargement
+// Lancer l'initialisation
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         // Attendre que le chat soit initialisé
         setTimeout(() => {
             welcomeAI.init();
-            // Rendre Sophie disponible pour les courses après 5 secondes
+            // Rendre Unisona disponible pour les courses après 5 secondes
             setTimeout(() => welcomeAI.makeAvailableForRace(), 5000);
         }, 1500);
     });
 } else {
     setTimeout(() => {
         welcomeAI.init();
-        // Rendre Sophie disponible pour les courses après 5 secondes
+        // Rendre Unisona disponible pour les courses après 5 secondes
         setTimeout(() => welcomeAI.makeAvailableForRace(), 5000);
     }, 1500);
 }
 
-console.log('✅ Sophie (Bot IA) initialisée - Prête pour le chat et les courses !');
+console.log('✅ Unisona (Bot IA) initialisée - Prête pour le chat et les courses !');

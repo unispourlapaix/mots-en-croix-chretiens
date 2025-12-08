@@ -448,44 +448,44 @@ class SimpleChatSystem {
     handleCommand(command) {
         const cmd = command.toLowerCase().trim();
         
-        if (cmd === '/sophie' || cmd === '/bot' || cmd === '/ia') {
-            // Inviter Sophie à rejoindre une course
+        if (cmd === '/unisona' || cmd === '/bot' || cmd === '/ia') {
+            // Inviter Unisona à rejoindre une course
             if (!window.game || !window.game.gameStarted) {
-                this.showMessage('⚠️ Lance d\'abord une partie pour jouer avec Sophie !', 'system');
+                this.showMessage('⚠️ Lance d\'abord une partie pour jouer avec Unisona !', 'system');
                 return;
             }
             
             if (!window.welcomeAI) {
-                this.showMessage('❌ Sophie n\'est pas disponible pour le moment', 'system');
+                this.showMessage('❌ Unisona n\'est pas disponible pour le moment', 'system');
                 return;
             }
             
             if (window.welcomeAI.isPlaying) {
-                this.showMessage('👼 Sophie joue déjà avec toi !', 'system');
+                this.showMessage('👼 Unisona joue déjà avec toi !', 'system');
                 return;
             }
             
-            // Sophie rejoint la course
+            // Unisona rejoint la course
             const joined = window.welcomeAI.joinRace();
             if (joined) {
-                this.showMessage('🏁 Sophie te défie ! Que la meilleure joueuse gagne ! 💪', 'system');
+                this.showMessage('🏁 Unisona te défie ! Que la meilleure joueuse gagne ! 💪', 'system');
             }
             
-        } else if (cmd === '/stop-sophie' || cmd === '/sophie-stop') {
-            // Arrêter Sophie
+        } else if (cmd === '/stop-unisona' || cmd === '/unisona-stop') {
+            // Arrêter Unisona
             if (!window.welcomeAI || !window.welcomeAI.isPlaying) {
-                this.showMessage('Sophie ne joue pas actuellement', 'system');
+                this.showMessage('Unisona ne joue pas actuellement', 'system');
                 return;
             }
             
             window.welcomeAI.leaveRace();
-            this.showMessage('👼 Sophie a quitté la partie', 'system');
+            this.showMessage('👼 Unisona a quitté la partie', 'system');
             
         } else if (cmd === '/aide' || cmd === '/help') {
             // Afficher l'aide
             this.showMessage('📝 Commandes disponibles :', 'system');
-            this.showMessage('/sophie ou /bot - Inviter Sophie à jouer en course', 'system');
-            this.showMessage('/stop-sophie - Arrêter Sophie', 'system');
+            this.showMessage('/unisona ou /bot - Inviter Unisona à jouer en course', 'system');
+            this.showMessage('/stop-unisona - Arrêter Unisona', 'system');
             this.showMessage('/aide ou /help - Afficher cette aide', 'system');
             
         } else {
