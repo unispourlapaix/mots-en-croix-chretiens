@@ -992,8 +992,14 @@ class PresenceSystem {
         }
     }
     
-    // Sauvegarder dans localStorage
+    // Sauvegarder dans localStorage (SEULEMENT pour onglets du même navigateur)
     saveToStorage() {
+        // IMPORTANT: Ne PAS sauvegarder dans localStorage pour les salles CODE
+        // Les salles CODE utilisent P2P pur pour éviter les doublons cross-browser
+        if (this.currentRoomCode) {
+            return; // Skip localStorage pour salles CODE
+        }
+        
         try {
             const allPlayers = {};
             
@@ -1014,8 +1020,15 @@ class PresenceSystem {
         }
     }
     
-    // Sync depuis localStorage
+    // Sync depuis localStorage (SEULEMENT pour onglets du même navigateur)
     syncFromStorage() {
+        // IMPORTANT: Ne PAS synchroniser via localStorage pour les salles CODE
+        // Les salles CODE utilisent P2P pur pour éviter les doublons cross-browser
+        if (this.currentRoomCode) {
+            console.log('⏭️ Skip localStorage sync (salle CODE active, P2P uniquement)');
+            return;
+        }
+        
         try {
             const stored = localStorage.getItem(this.storageKey);
             if (!stored) return;
@@ -1101,15 +1114,56 @@ class PresenceSystem {
     // Notifier le système de salles
     notifyPresenceUpdate() {
         if (window.roomSystem) {
-            // D'abord, retirer tous les anciens peer IDs du même username (pour éviter doublons)
-            if (this.myPresence) {
-                window.roomSystem.availablePlayers.forEach((player, peerId) => {
-                    if (player.username === this.myPresence.username && peerId !== this.myPresence.peerId && peerId !== 'me') {
-                        console.log('🧹 Ancien peer ID retiré:', peerId, '(même username:', player.username, ')');
+            // NOUVEAU: Nettoyer TOUS les doublons de username (garder seulement le plus récent)
+            const usernameMap = new Map(); // username -> [{peerId, timestamp}]
+            
+            // Collecter tous les peer IDs par username
+            this.onlinePlayers.forEach((player, peerId) => {
+                if (!usernameMap.has(player.username)) {
+                    usernameMap.set(player.username, []);
+                }
+                usernameMap.get(player.username).push({
+                    peerId: peerId,
+                    timestamp: player.timestamp,
+                    player: player
+                });
+            });
+            
+            // Pour chaque username, garder seulement le peer ID le plus récent
+            const validPeerIds = new Set();
+            usernameMap.forEach((peers, username) => {
+                if (peers.length > 1) {
+                    // Trier par timestamp décroissant
+                    peers.sort((a, b) => b.timestamp - a.timestamp);
+                    console.log('🧹 Doublons détectés pour', username + ':', peers.length, 'peer IDs');
+                    console.log('   ✅ Garder le plus récent:', peers[0].peerId);
+                    
+                    // Garder seulement le premier (plus récent)
+                    validPeerIds.add(peers[0].peerId);
+                    
+                    // Supprimer les anciens de onlinePlayers
+                    for (let i = 1; i < peers.length; i++) {
+                        console.log('   🗑️ Supprimer doublon:', peers[i].peerId);
+                        this.onlinePlayers.delete(peers[i].peerId);
+                    }
+                } else {
+                    validPeerIds.add(peers[0].peerId);
+                }
+            });
+            
+            // Retirer les anciens peer IDs de availablePlayers
+            window.roomSystem.availablePlayers.forEach((player, peerId) => {
+                if (peerId !== 'me' && !player.isBot && !validPeerIds.has(peerId)) {
+                    // Vérifier si c'est un doublon (même username mais peer ID différent)
+                    const hasNewerVersion = Array.from(this.onlinePlayers.values()).some(
+                        p => p.username === player.username
+                    );
+                    if (hasNewerVersion) {
+                        console.log('🧹 Ancien peer ID retiré de availablePlayers:', peerId, '(', player.username, ')');
                         window.roomSystem.availablePlayers.delete(peerId);
                     }
-                });
-            }
+                }
+            });
             
             // Mettre à jour availablePlayers avec les joueurs découverts
             this.onlinePlayers.forEach((player, peerId) => {
