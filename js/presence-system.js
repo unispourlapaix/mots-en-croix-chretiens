@@ -62,6 +62,19 @@ class PresenceSystem {
         const myPeerId = window.simpleChatSystem.peer.id;
         const roomCode = this.generateRoomCode();
         
+        // Initialiser myPresence si pas encore fait
+        if (!this.myPresence) {
+            const username = window.simpleChatSystem?.currentUser || 'Joueur';
+            console.log('🔧 Initialisation myPresence pour:', username);
+            this.myPresence = {
+                peerId: myPeerId,
+                username: username,
+                avatar: '😊',
+                acceptMode: 'auto',
+                timestamp: Date.now()
+            };
+        }
+        
         this.currentRoomCode = roomCode;
         this.isRoomHost = true;
         
@@ -114,6 +127,20 @@ class PresenceSystem {
         
         if (roomCode.length !== 6) {
             throw new Error('Code invalide (doit faire 6 caractères)');
+        }
+        
+        // Initialiser myPresence si pas encore fait
+        if (!this.myPresence) {
+            const username = window.simpleChatSystem?.currentUser || 'Joueur';
+            const myPeerId = window.simpleChatSystem.peer.id;
+            console.log('🔧 Initialisation myPresence pour:', username);
+            this.myPresence = {
+                peerId: myPeerId,
+                username: username,
+                avatar: '😊',
+                acceptMode: 'auto',
+                timestamp: Date.now()
+            };
         }
         
         // Lire le registre pour trouver le peer ID de l'hôte
