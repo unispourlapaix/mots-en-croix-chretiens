@@ -234,6 +234,12 @@ class PresenceSystem {
     
     // Se connecter directement à l'hôte de la salle (P2P cross-browser)
     async connectToRoomHost(hostPeerId, roomCode) {
+        // Protection: Ne pas tenter de connexion aux bots
+        if (hostPeerId.startsWith('bot-')) {
+            console.log('⏭️ Skip bot, pas de connexion P2P nécessaire:', hostPeerId);
+            return;
+        }
+        
         if (!window.simpleChatSystem?.peer?.id) {
             console.log('⏳ P2P pas encore prêt, réessai dans 500ms...');
             setTimeout(() => this.connectToRoomHost(hostPeerId, roomCode), 500);
@@ -369,8 +375,14 @@ class PresenceSystem {
             console.log('👥 Membres trouvés:', memberCount);
             console.log('📋 Détails des membres:', members);
             
-            // Se connecter à chaque membre (sauf soi-même)
+            // Se connecter à chaque membre (sauf soi-même et les bots)
             for (const [peerId, member] of Object.entries(members)) {
+                // Skip bots
+                if (peerId.startsWith('bot-')) {
+                    console.log('⏭️ Sauté (bot):', member.username);
+                    continue;
+                }
+                
                 if (peerId !== this.myPresence.peerId && !this.connectedPeers.has(peerId)) {
                     console.log('🔗 Tentative connexion à:', member.username, '(', peerId, ')');
                     this.connectToPeer(peerId, member);
@@ -387,6 +399,12 @@ class PresenceSystem {
     
     // Se connecter activement à un peer
     connectToPeer(peerId, memberInfo) {
+        // Protection: Ne pas tenter de connexion aux bots
+        if (peerId.startsWith('bot-')) {
+            console.log('⏭️ Skip bot, pas de connexion P2P nécessaire:', peerId);
+            return;
+        }
+        
         if (!window.simpleChatSystem?.peer) return;
         
         try {
@@ -848,7 +866,8 @@ class PresenceSystem {
         // NOUVEAU: Nettoyer immédiatement TOUS les anciens peer IDs avec le même username
         const oldPeerIds = [];
         this.onlinePlayers.forEach((player, pid) => {
-            if (player.username === username && pid !== peerId) {
+            // Ne pas nettoyer les bots
+            if (player.username === username && pid !== peerId && !pid.startsWith('bot-')) {
                 oldPeerIds.push(pid);
             }
         });
@@ -1023,8 +1042,8 @@ class PresenceSystem {
         let hasChanges = false;
         
         this.onlinePlayers.forEach((player, peerId) => {
-            // Ne jamais supprimer le joueur local
-            if (peerId === this.myPresence?.peerId) {
+            // Ne jamais supprimer: le joueur local, les bots
+            if (peerId === this.myPresence?.peerId || peerId.startsWith('bot-')) {
                 return;
             }
             
