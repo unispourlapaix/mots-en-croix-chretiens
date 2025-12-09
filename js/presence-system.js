@@ -61,9 +61,24 @@ class PresenceSystem {
         const roomCode = this.generateRoomCode();
         
         this.currentRoomCode = roomCode;
+        this.isRoomHost = true;
+        
+        // IMPORTANT: L'hôte utilise le CODE comme peer ID pour être découvrable
+        const hostPeerId = `room-${roomCode}`;
         
         console.log('🏠 Salle créée:', roomCode);
         console.log('📋 Partagez ce code avec vos amis/famille !');
+        console.log('🆔 Peer ID hôte:', hostPeerId);
+        
+        // Fermer le peer actuel et créer un nouveau avec l'ID de salle
+        const currentPeer = window.simpleChatSystem.peer;
+        if (currentPeer) {
+            console.log('🔄 Recréation du peer avec ID salle...');
+            currentPeer.destroy();
+        }
+        
+        // Créer nouveau peer avec ID spécifique
+        await this.createHostPeer(hostPeerId);
         
         // Passer en mode acceptation automatique pour les salles avec CODE
         if (window.roomSystem && typeof window.roomSystem.setAcceptMode === 'function') {
@@ -73,15 +88,15 @@ class PresenceSystem {
             console.warn('⚠️ roomSystem pas encore initialisé');
         }
         
-        // Enregistrer dans le registre de la salle
+        // Enregistrer dans le registre de la salle (localStorage local uniquement)
         this.registerInRoom(roomCode);
         
-        // Annoncer via BroadcastChannel
+        // Annoncer via BroadcastChannel (même navigateur seulement)
         if (this.channel) {
             this.channel.postMessage({
                 type: 'room_created',
                 roomCode: roomCode,
-                peerId: this.myPresence.peerId,
+                peerId: hostPeerId,
                 username: this.myPresence.username
             });
         }
@@ -89,10 +104,68 @@ class PresenceSystem {
         // Afficher le code à l'utilisateur
         this.showRoomCodeModal(roomCode);
         
-        // Vérifier périodiquement les nouveaux membres
-        this.startRoomMemberWatch();
+        // PAS de watch localStorage - on attend les connexions directes P2P
+        console.log('⏳ En attente de connexions P2P directes...');
         
         return roomCode;
+    }
+    
+    // Créer un peer avec ID spécifique pour l'hôte
+    async createHostPeer(peerId) {
+        return new Promise((resolve, reject) => {
+            try {
+                const peerConfig = {
+                    config: {
+                        iceServers: [
+                            { urls: 'stun:stun.l.google.com:19302' },
+                            { urls: 'stun:global.stun.twilio.com:3478' }
+                        ]
+                    }
+                };
+                
+                // Créer peer avec ID spécifique
+                window.simpleChatSystem.peer = new Peer(peerId, peerConfig);
+                
+                window.simpleChatSystem.peer.on('open', (id) => {
+                    console.log('✅ Peer hôte créé avec ID:', id);
+                    
+                    // Mettre à jour myPresence avec le nouveau peer ID
+                    if (this.myPresence) {
+                        this.myPresence.peerId = id;
+                        this.saveToStorage();
+                    }
+                    
+                    // Réinitialiser les connexions entrantes
+                    this.setupIncomingConnections();
+                    
+                    resolve(id);
+                });
+                
+                window.simpleChatSystem.peer.on('error', (err) => {
+                    console.error('❌ Erreur création peer hôte:', err);
+                    if (err.type === 'unavailable-id') {
+                        console.error('❌ ID déjà utilisé - la salle existe déjà');
+                        window.simpleChatSystem.showMessage('❌ Ce code de salle est déjà utilisé', 'system');
+                    }
+                    reject(err);
+                });
+                
+                // Gérer les connexions entrantes
+                window.simpleChatSystem.peer.on('connection', (conn) => {
+                    console.log('📞 Connexion entrante dans la salle');
+                    window.simpleChatSystem.handleConnection(conn);
+                });
+                
+                // Gérer déconnexion serveur
+                window.simpleChatSystem.peer.on('disconnected', () => {
+                    console.log('⚠️ Peer déconnecté du serveur');
+                });
+                
+            } catch (err) {
+                console.error('❌ Erreur création peer:', err);
+                reject(err);
+            }
+        });
     }
     
     // Surveiller l'arrivée de nouveaux membres
@@ -122,6 +195,7 @@ class PresenceSystem {
         }
         
         this.currentRoomCode = roomCode;
+        this.isRoomHost = false;
         
         console.log('🚪 Tentative de rejoindre salle:', roomCode);
         
@@ -133,7 +207,7 @@ class PresenceSystem {
             console.warn('⚠️ roomSystem pas encore initialisé');
         }
         
-        // Enregistrer ma présence dans cette salle
+        // Enregistrer ma présence dans cette salle (localStorage local uniquement)
         this.registerInRoom(roomCode);
         
         // Annoncer via BroadcastChannel local (même navigateur)
@@ -147,13 +221,99 @@ class PresenceSystem {
             });
         }
         
-        // Chercher les autres membres de la salle
-        this.discoverRoomMembers(roomCode);
+        // IMPORTANT: Se connecter directement à l'hôte via son peer ID
+        const hostPeerId = `room-${roomCode}`;
+        console.log('🔗 Connexion directe à l\'hôte:', hostPeerId);
+        
+        await this.connectToRoomHost(hostPeerId, roomCode);
         
         console.log('✅ Vous êtes dans la salle:', roomCode);
-        console.log('⏳ Découverte des autres membres...');
         
         return roomCode;
+    }
+    
+    // Se connecter directement à l'hôte de la salle (P2P cross-browser)
+    async connectToRoomHost(hostPeerId, roomCode) {
+        if (!window.simpleChatSystem?.peer?.id) {
+            console.log('⏳ P2P pas encore prêt, réessai dans 500ms...');
+            setTimeout(() => this.connectToRoomHost(hostPeerId, roomCode), 500);
+            return;
+        }
+        
+        // Vérifier si déjà connecté
+        if (this.connectedPeers.has(hostPeerId)) {
+            console.log('✅ Déjà connecté à l\'hôte');
+            return;
+        }
+        
+        try {
+            console.log('📡 Connexion P2P à l\'hôte:', hostPeerId);
+            
+            const conn = window.simpleChatSystem.peer.connect(hostPeerId, {
+                reliable: true,
+                metadata: {
+                    type: 'room_join',
+                    roomCode: roomCode,
+                    peerId: this.myPresence.peerId,
+                    username: this.myPresence.username,
+                    avatar: this.myPresence.avatar
+                }
+            });
+            
+            let connectionTimeout = setTimeout(() => {
+                if (!conn.open) {
+                    console.error('❌ Timeout connexion à l\'hôte');
+                    conn.close();
+                    window.simpleChatSystem.showMessage('❌ Impossible de rejoindre la salle - Code invalide ou hôte absent', 'system');
+                }
+            }, 10000);
+            
+            conn.on('open', () => {
+                clearTimeout(connectionTimeout);
+                console.log('✅ Connecté à l\'hôte de la salle !');
+                
+                this.connectedPeers.set(hostPeerId, conn);
+                
+                // Ajouter au chat
+                if (window.simpleChatSystem) {
+                    window.simpleChatSystem.connections.set(hostPeerId, conn);
+                    console.log('💬 Connexion ajoutée au chat');
+                }
+                
+                // Envoyer ma présence à l'hôte
+                conn.send({
+                    type: 'guest_hello',
+                    peerId: this.myPresence.peerId,
+                    username: this.myPresence.username,
+                    avatar: this.myPresence.avatar,
+                    roomCode: roomCode,
+                    timestamp: Date.now()
+                });
+                
+                window.simpleChatSystem.showMessage(`✅ Connecté à la salle ${roomCode}`, 'system');
+            });
+            
+            conn.on('data', (data) => {
+                this.handleRoomMessage(conn, data);
+            });
+            
+            conn.on('close', () => {
+                console.log('❌ Connexion à l\'hôte fermée');
+                this.connectedPeers.delete(hostPeerId);
+                if (window.simpleChatSystem) {
+                    window.simpleChatSystem.connections.delete(hostPeerId);
+                }
+            });
+            
+            conn.on('error', (err) => {
+                console.error('❌ Erreur connexion hôte:', err);
+                clearTimeout(connectionTimeout);
+            });
+            
+        } catch (err) {
+            console.error('❌ Erreur connexion hôte:', err);
+            window.simpleChatSystem.showMessage('❌ Erreur lors de la connexion à la salle', 'system');
+        }
     }
     
     // Enregistrer dans le registre de la salle
@@ -378,12 +538,36 @@ class PresenceSystem {
         window.simpleChatSystem.peer.on('connection', (conn) => {
             console.log('📞 Connexion entrante de:', conn.peer);
             
+            // Vérifier si c'est un membre de salle avec metadata
+            if (conn.metadata && conn.metadata.type === 'room_join') {
+                console.log('🏠 Membre salle détecté:', conn.metadata.username, 'pour room:', conn.metadata.roomCode);
+                
+                // Vérifier que c'est bien notre salle
+                if (this.currentRoomCode === conn.metadata.roomCode) {
+                    console.log('✅ Code salle valide, acceptation automatique');
+                } else {
+                    console.warn('⚠️ Code salle différent:', conn.metadata.roomCode, 'vs', this.currentRoomCode);
+                }
+            }
+            
             conn.on('open', () => {
                 console.log('✅ Connexion établie avec:', conn.peer);
                 
+                // Ajouter le peer aux joueurs en ligne
+                if (conn.metadata && conn.metadata.username) {
+                    this.onlinePlayers.set(conn.peer, {
+                        peerId: conn.peer,
+                        username: conn.metadata.username,
+                        avatar: conn.metadata.avatar || '😊',
+                        acceptMode: 'auto',
+                        timestamp: Date.now()
+                    });
+                    console.log('✅ Ajouté aux joueurs en ligne:', conn.metadata.username);
+                }
+                
                 // Envoyer ma présence
                 conn.send({
-                    type: 'presence_announce',
+                    type: 'host_hello',
                     peerId: this.myPresence.peerId,
                     username: this.myPresence.username,
                     avatar: this.myPresence.avatar,
@@ -413,6 +597,13 @@ class PresenceSystem {
                     window.simpleChatSystem.connections.set(conn.peer, conn);
                     console.log('💬 Connexion entrante ajoutée au chat');
                 }
+                
+                // Notifier l'UI
+                this.notifyPresenceUpdate();
+                
+                if (conn.metadata && conn.metadata.username) {
+                    window.simpleChatSystem.showMessage(`✅ ${conn.metadata.username} a rejoint la salle`, 'system');
+                }
             });
             
             conn.on('data', (data) => {
@@ -439,6 +630,57 @@ class PresenceSystem {
         if (!data || !data.type) return;
         
         switch (data.type) {
+            case 'guest_hello':
+                // Un invité se présente
+                console.log('👋 Invité rejoint:', data.username);
+                
+                this.onlinePlayers.set(data.peerId, {
+                    peerId: data.peerId,
+                    username: data.username,
+                    avatar: data.avatar || '😊',
+                    acceptMode: 'auto',
+                    timestamp: data.timestamp || Date.now()
+                });
+                
+                this.notifyPresenceUpdate();
+                
+                // Envoyer confirmation + liste autres joueurs
+                conn.send({
+                    type: 'host_hello',
+                    peerId: this.myPresence.peerId,
+                    username: this.myPresence.username,
+                    avatar: this.myPresence.avatar,
+                    roomCode: this.currentRoomCode,
+                    timestamp: Date.now()
+                });
+                
+                // Propager aux autres membres
+                this.broadcastToRoom({
+                    type: 'presence_announce',
+                    peerId: data.peerId,
+                    username: data.username,
+                    avatar: data.avatar,
+                    acceptMode: 'auto',
+                    timestamp: data.timestamp
+                }, conn.peer);
+                
+                break;
+                
+            case 'host_hello':
+                // L'hôte répond
+                console.log('👋 Hôte répond:', data.username);
+                
+                this.onlinePlayers.set(data.peerId, {
+                    peerId: data.peerId,
+                    username: data.username,
+                    avatar: data.avatar || '😊',
+                    acceptMode: 'auto',
+                    timestamp: data.timestamp || Date.now()
+                });
+                
+                this.notifyPresenceUpdate();
+                break;
+                
             case 'presence_announce':
                 // Un joueur s'annonce
                 if (data.peerId && data.peerId !== this.myPresence?.peerId) {
