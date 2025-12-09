@@ -54,8 +54,25 @@ class PresenceSystem {
     
     // CRÉER une salle (hôte)
     async createRoom() {
+        // Attendre que PeerJS soit prêt (avec retry)
         if (!window.simpleChatSystem?.peer?.id) {
-            throw new Error('PeerJS non initialisé');
+            console.log('⏳ En attente de PeerJS...');
+            
+            // Tenter d'initialiser si pas fait
+            if (!window.simpleChatSystem?.peer) {
+                window.simpleChatSystem?.initP2P();
+            }
+            
+            // Attendre jusqu'à 5 secondes
+            let attempts = 0;
+            while (!window.simpleChatSystem?.peer?.id && attempts < 50) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                attempts++;
+            }
+            
+            if (!window.simpleChatSystem?.peer?.id) {
+                throw new Error('PeerJS non initialisé après 5 secondes. Vérifiez votre connexion internet.');
+            }
         }
         
         // Utiliser le peer existant (NE PAS recréer)
@@ -119,8 +136,25 @@ class PresenceSystem {
     
     // REJOINDRE une salle avec code
     async joinRoom(roomCode) {
+        // Attendre que PeerJS soit prêt (avec retry)
         if (!window.simpleChatSystem?.peer?.id) {
-            throw new Error('PeerJS non initialisé');
+            console.log('⏳ En attente de PeerJS...');
+            
+            // Tenter d'initialiser si pas fait
+            if (!window.simpleChatSystem?.peer) {
+                window.simpleChatSystem?.initP2P();
+            }
+            
+            // Attendre jusqu'à 5 secondes
+            let attempts = 0;
+            while (!window.simpleChatSystem?.peer?.id && attempts < 50) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                attempts++;
+            }
+            
+            if (!window.simpleChatSystem?.peer?.id) {
+                throw new Error('PeerJS non initialisé après 5 secondes. Vérifiez votre connexion internet.');
+            }
         }
         
         roomCode = roomCode.toUpperCase().trim();
