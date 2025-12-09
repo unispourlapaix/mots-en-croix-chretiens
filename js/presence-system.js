@@ -300,7 +300,7 @@ class PresenceSystem {
             });
             
             conn.on('data', (data) => {
-                this.handleRoomMessage(conn, data);
+                this.handlePeerMessage(data, conn);
             });
             
             conn.on('close', () => {
