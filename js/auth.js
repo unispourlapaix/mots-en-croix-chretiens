@@ -114,13 +114,13 @@ class AuthSystem {
                     username: data.username,
                     created_at: data.created_at
                 };
-                console.log('✅ Profil chargé:', this.currentUser);
+                console.log('✅ Profil chargé:', this.currentUser.username);
                 
                 // Mettre à jour l'UI immédiatement
                 this.updateUIWithUser();
             } else {
                 // Profil inexistant - créer un profil automatiquement
-                console.log('⚠️ Profil non trouvé pour user:', user.id, '- Création automatique...');
+                console.log('⚠️ Profil non trouvé - Création automatique...');
                 
                 // Générer un username unique basé sur l'email + ID partiel
                 const emailPart = user.email?.split('@')[0]?.substring(0, 10) || 'Joueur';
@@ -158,7 +158,7 @@ class AuthSystem {
                             username: newProfile.username,
                             created_at: newProfile.created_at
                         };
-                        console.log('✅ Profil créé automatiquement:', this.currentUser);
+                        console.log('✅ Profil créé automatiquement:', this.currentUser.username);
                     }
                 } catch (createErr) {
                     console.error('❌ Erreur création profil:', createErr);
@@ -271,7 +271,7 @@ class AuthSystem {
 
     // Se connecter avec email et mot de passe
     async signIn(email, password) {
-        console.log('🔐 Tentative de connexion pour:', email);
+        console.log('🔐 Tentative de connexion...');
         
         if (!supabase) {
             console.error('❌ Supabase non disponible');
@@ -305,7 +305,7 @@ class AuthSystem {
                 };
             }
 
-            console.log('✅ Connexion réussie:', data);
+            console.log('✅ Connexion réussie');
             return {
                 success: true,
                 message: 'Connexion réussie !'
