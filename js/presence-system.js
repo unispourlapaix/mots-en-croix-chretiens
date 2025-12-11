@@ -493,7 +493,6 @@ class PresenceSystem {
         // Copier le code
         document.getElementById('copyRoomCode').onclick = () => {
             navigator.clipboard.writeText(roomCode);
-            alert('✅ Code copié !');
         };
         
         // Fermer modal

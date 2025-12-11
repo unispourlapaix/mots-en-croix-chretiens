@@ -2072,9 +2072,7 @@ class ChristianCrosswordGame {
 
     copyRoomCodeFloat() {
         const roomCode = document.getElementById('roomCodeFloat').textContent;
-        navigator.clipboard.writeText(roomCode).then(() => {
-            this.showKawaiiModal('Code copié ! 📋', '✅');
-        }).catch(err => {
+        navigator.clipboard.writeText(roomCode).catch(err => {
             console.error('Erreur lors de la copie:', err);
         });
     }
