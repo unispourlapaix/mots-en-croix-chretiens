@@ -353,9 +353,34 @@
                     <!-- Section profil (visible quand connecté) -->
                     <div id="profileInfo" class="profile-info" style="display: none;">
                         <div class="menu-section" style="text-align: center;">
-                            <div style="margin-bottom: 15px;">
-                                <span style="font-size: 48px;">👤</span>
+                            <!-- Avatar personnalisable -->
+                            <div style="margin-bottom: 15px; position: relative;">
+                                <div id="currentAvatar" style="font-size: 64px; cursor: pointer; display: inline-block; transition: transform 0.2s;" onclick="document.getElementById('avatarSelector').style.display = document.getElementById('avatarSelector').style.display === 'none' ? 'block' : 'none'">👤</div>
+                                <div style="font-size: 11px; color: #999; margin-top: 5px;">✨ Cliquez pour changer</div>
                             </div>
+                            
+                            <!-- Sélecteur d'avatars -->
+                            <div id="avatarSelector" class="avatar-selector" style="display: none; background: #fff; border: 2px solid #ff69b4; border-radius: 15px; padding: 15px; margin-bottom: 15px;">
+                                <p style="font-size: 13px; color: #666; margin-bottom: 10px; font-weight: bold;">Choisissez votre avatar</p>
+                                <div class="avatar-grid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;">
+                                    <div class="avatar-option" data-avatar="😊" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">😊</div>
+                                    <div class="avatar-option" data-avatar="😇" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">😇</div>
+                                    <div class="avatar-option" data-avatar="🥰" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🥰</div>
+                                    <div class="avatar-option" data-avatar="😎" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">😎</div>
+                                    <div class="avatar-option" data-avatar="🤗" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🤗</div>
+                                    <div class="avatar-option" data-avatar="🌸" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🌸</div>
+                                    <div class="avatar-option" data-avatar="🌟" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🌟</div>
+                                    <div class="avatar-option" data-avatar="💝" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">💝</div>
+                                    <div class="avatar-option" data-avatar="🦋" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🦋</div>
+                                    <div class="avatar-option" data-avatar="🐰" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐰</div>
+                                    <div class="avatar-option" data-avatar="🐱" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐱</div>
+                                    <div class="avatar-option" data-avatar="🐶" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐶</div>
+                                    <div class="avatar-option" data-avatar="🐼" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐼</div>
+                                    <div class="avatar-option" data-avatar="🦊" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🦊</div>
+                                    <div class="avatar-option" data-avatar="🌈" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🌈</div>
+                                </div>
+                            </div>
+                            
                             <p id="connectedUsername" style="font-size: 18px; font-weight: bold; color: #ff1493; margin-bottom: 5px;">Utilisateur</p>
                             <p id="connectedEmail" style="font-size: 14px; color: #666; margin-bottom: 20px;">email@example.com</p>
                             

@@ -2268,6 +2268,35 @@ body {
     box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
 }
 
+/* Avatar selector styles */
+.avatar-selector {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.avatar-option:hover {
+    background: #fff5f9;
+    transform: scale(1.15);
+}
+
+.avatar-option:active {
+    transform: scale(1.05);
+}
+
+#currentAvatar:hover {
+    transform: scale(1.1) rotate(5deg);
+}
+
 /* Menu language selector */
 .menu-language-selector {
     display: flex;

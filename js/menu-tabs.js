@@ -28,6 +28,48 @@ class MenuTabSystem {
                 this.switchTab(tabName);
             });
         });
+
+        // Initialiser le système d'avatars
+        this.initAvatarSelector();
+    }
+
+    initAvatarSelector() {
+        // Gérer la sélection d'avatar
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('avatar-option')) {
+                const avatar = e.target.dataset.avatar;
+                const currentAvatar = document.getElementById('currentAvatar');
+                const avatarSelector = document.getElementById('avatarSelector');
+                
+                if (currentAvatar) {
+                    currentAvatar.textContent = avatar;
+                    // Sauvegarder l'avatar dans le profil utilisateur
+                    if (typeof authSystem !== 'undefined' && authSystem.isAuthenticated()) {
+                        // Mettre à jour l'avatar dans le système de chat
+                        if (typeof window.simpleChatSystem !== 'undefined') {
+                            window.simpleChatSystem.updateAvatar(avatar);
+                        }
+                    }
+                }
+                
+                if (avatarSelector) {
+                    avatarSelector.style.display = 'none';
+                }
+            }
+        });
+
+        // Fermer le sélecteur si on clique ailleurs
+        document.addEventListener('click', (e) => {
+            const avatarSelector = document.getElementById('avatarSelector');
+            const currentAvatar = document.getElementById('currentAvatar');
+            
+            if (avatarSelector && currentAvatar && 
+                !avatarSelector.contains(e.target) && 
+                !currentAvatar.contains(e.target) &&
+                avatarSelector.style.display !== 'none') {
+                avatarSelector.style.display = 'none';
+            }
+        });
     }
 
     switchTab(tabName) {
@@ -157,10 +199,19 @@ class MenuTabSystem {
             const usernameEl = document.getElementById('connectedUsername');
             const emailEl = document.getElementById('connectedEmail');
             const maxScoreEl = document.getElementById('userMaxScore');
+            const currentAvatar = document.getElementById('currentAvatar');
 
             if (usernameEl) usernameEl.textContent = user.username || 'Utilisateur';
             if (emailEl) emailEl.textContent = user.email || '';
             if (maxScoreEl) maxScoreEl.textContent = user.max_score || 0;
+            
+            // Charger l'avatar personnalisé
+            if (currentAvatar && typeof window.simpleChatSystem !== 'undefined') {
+                const userAvatar = window.simpleChatSystem.getUserAvatar(user.username);
+                if (userAvatar) {
+                    currentAvatar.textContent = userAvatar;
+                }
+            }
         } else {
             authForm.style.display = 'block';
             profileInfo.style.display = 'none';
