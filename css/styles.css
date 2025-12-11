@@ -711,6 +711,119 @@ body {
     font-weight: 700;
 }
 
+/* Sélecteur de Mode */
+.mode-selector {
+    position: relative;
+    margin: 10px auto;
+    padding: 8px;
+    max-width: 250px;
+}
+
+.mode-dropdown-btn {
+    width: 100%;
+    background: white;
+    border: 2px solid #ffe8f0;
+    border-radius: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.mode-dropdown-btn:hover {
+    border-color: #ffc0db;
+    background: #fffbfd;
+}
+
+.mode-current-icon {
+    font-size: 1.1rem;
+}
+
+.mode-current-name {
+    flex: 1;
+    text-align: left;
+    font-weight: 600;
+    color: #ff1493;
+}
+
+.mode-current-count {
+    font-size: 0.8rem;
+    color: #999;
+}
+
+.dropdown-arrow {
+    font-size: 0.7rem;
+    color: #ff69b4;
+    transition: transform 0.2s ease;
+}
+
+.mode-dropdown-btn.open .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.mode-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid #ffe8f0;
+    border-radius: 8px;
+    margin-top: 4px;
+    box-shadow: 0 4px 15px rgba(255, 105, 180, 0.15);
+    display: none;
+    z-index: 1000;
+}
+
+.mode-dropdown-menu.open {
+    display: block;
+}
+
+.mode-option {
+    width: 100%;
+    background: white;
+    border: none;
+    border-bottom: 1px solid #ffe8f0;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-align: left;
+}
+
+.mode-option:last-child {
+    border-bottom: none;
+}
+
+.mode-option:hover {
+    background: #fffbfd;
+}
+
+.mode-option.active {
+    background: linear-gradient(135deg, #fff5f7 0%, #ffe8f0 100%);
+}
+
+.mode-option .mode-icon {
+    font-size: 1.2rem;
+}
+
+.mode-option .mode-name {
+    flex: 1;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #ff1493;
+}
+
+.mode-option .mode-desc {
+    font-size: 0.75rem;
+    color: #999;
+}
+
 .play-button {
     background: linear-gradient(135deg, #ff85c1 0%, #ff69b4 100%);
     color: white;

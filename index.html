@@ -68,7 +68,7 @@
                 <div class="info-fixed">
                     <div class="info-stat">
                         <span class="info-stat-icon">📊</span>
-                        <span>Niveau <span class="info-stat-value" id="infoBannerLevel">1</span>/77</span>
+                        <span>Niveau <span class="info-stat-value" id="infoBannerLevel">1</span>/<span id="infoBannerMaxLevel">77</span></span>
                     </div>
                     <div class="info-stat">
                         <span class="info-stat-icon">⭐</span>
@@ -488,6 +488,29 @@
                     👤 Connexion
                 </button>
             </div>
+            
+            <!-- Sélecteur de Mode -->
+            <div class="mode-selector">
+                <button class="mode-dropdown-btn" id="modeDropdownBtn">
+                    <span class="mode-current-icon">🙏</span>
+                    <span class="mode-current-name">Mode Normal</span>
+                    <span class="mode-current-count">(77)</span>
+                    <span class="dropdown-arrow">▼</span>
+                </button>
+                <div class="mode-dropdown-menu" id="modeDropdownMenu">
+                    <button class="mode-option active" data-mode="normal">
+                        <span class="mode-icon">🙏</span>
+                        <span class="mode-name">Normal</span>
+                        <span class="mode-desc">(77 niveaux)</span>
+                    </button>
+                    <button class="mode-option" data-mode="couple">
+                        <span class="mode-icon">💕</span>
+                        <span class="mode-name">Couple</span>
+                        <span class="mode-desc">(122 niveaux)</span>
+                    </button>
+                </div>
+            </div>
+            
             <!-- Actions salle -->
             <div class="room-actions">
                 <button id="createRoomBtn" class="room-action-btn create-btn">
@@ -691,13 +714,20 @@
     </div>
 
     <!-- Modules JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <!-- Trystero: P2P décentralisé sans serveur (BitTorrent trackers) -->
+    <script type="module">
+        import { joinRoom } from 'https://cdn.jsdelivr.net/npm/trystero@0.19.2/+esm';
+        window.joinRoom = joinRoom;
+        console.log('✅ Trystero chargé');
+    </script>
+    <script src="js/trystero-adapter.js"></script>
     <!-- Supabase v2 avec bundle UMD pour éviter les erreurs de module -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
     <script src="js/audio.js"></script>
     <script src="js/config.js"></script>
     <script src="js/i18n.js"></script>
     <script src="js/gameData.js"></script>
+    <script src="js/coupleChretienData.js"></script>
     <script src="js/achievements.js"></script>
     <script src="js/race-medals.js"></script>
     <script src="js/biblicalQuotes.js"></script>

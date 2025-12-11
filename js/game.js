@@ -7,6 +7,7 @@ class ChristianCrosswordGame {
         this.maxScore = 0;       // Meilleur score jamais atteint
         this.raceScore = 0;      // Score en mode course
         this.gameStarted = false;
+        this.gameMode = 'normal'; // 'normal' ou 'couple'
         this.grid = Array(config.gridSize).fill().map(() => Array(config.gridSize).fill(''));
         this.solution = Array(config.gridSize).fill().map(() => Array(config.gridSize).fill(''));
         this.blocked = Array(config.gridSize).fill().map(() => Array(config.gridSize).fill(false));
@@ -33,6 +34,9 @@ class ChristianCrosswordGame {
         this.initializeEventListeners();
         this.setupMenuLanguageSelector();
         this.updateUIText();
+        
+        // Mettre à jour le niveau max selon le mode
+        this.updateMaxLevelDisplay();
 
         // Écouter les changements d'authentification pour mettre à jour le bouton cloud
         if (typeof authSystem !== 'undefined') {
@@ -232,6 +236,44 @@ class ChristianCrosswordGame {
 
     initializeEventListeners() {
         document.getElementById('playButton').addEventListener('click', () => this.handlePlayButtonClick());
+        
+        // Menu déroulant de sélection de mode
+        const modeDropdownBtn = document.getElementById('modeDropdownBtn');
+        const modeDropdownMenu = document.getElementById('modeDropdownMenu');
+        
+        if (modeDropdownBtn && modeDropdownMenu) {
+            // Toggle du menu
+            modeDropdownBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                modeDropdownBtn.classList.toggle('open');
+                modeDropdownMenu.classList.toggle('open');
+            });
+            
+            // Fermer le menu en cliquant ailleurs
+            document.addEventListener('click', () => {
+                modeDropdownBtn.classList.remove('open');
+                modeDropdownMenu.classList.remove('open');
+            });
+            
+            // Options de mode
+            const modeOptions = modeDropdownMenu.querySelectorAll('.mode-option');
+            modeOptions.forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const mode = option.dataset.mode;
+                    this.switchGameMode(mode);
+                    modeDropdownBtn.classList.remove('open');
+                    modeDropdownMenu.classList.remove('open');
+                });
+            });
+        }
+        
+        // Charger le mode sauvegardé
+        const savedMode = localStorage.getItem('gameMode');
+        if (savedMode && (savedMode === 'normal' || savedMode === 'couple')) {
+            this.gameMode = savedMode;
+            this.updateModeButtons();
+        }
         
         // Boutons multijoueur - Gérés par le nouveau système room-ui.js
         // Les anciens boutons flottants et modals sont remplacés par le système de salles
@@ -893,6 +935,96 @@ class ChristianCrosswordGame {
             wordElement.style.animationDelay = `${index * 0.2}s`;
             wordsContainer.appendChild(wordElement);
         }
+    }
+
+    /**
+     * Met à jour l'affichage du nombre maximum de niveaux
+     */
+    updateMaxLevelDisplay() {
+        const maxLevelEl = document.getElementById('infoBannerMaxLevel');
+        if (maxLevelEl) {
+            maxLevelEl.textContent = gameDataManager.getTotalLevels();
+        }
+    }
+
+    /**
+     * Change le mode de jeu (normal ou couple)
+     * @param {string} mode - 'normal' ou 'couple'
+     */
+    switchGameMode(mode) {
+        if (mode !== 'normal' && mode !== 'couple') {
+            console.error('Mode invalide:', mode);
+            return;
+        }
+
+        // Si on est déjà dans ce mode, ne rien faire
+        if (this.gameMode === mode) {
+            return;
+        }
+
+        // Sauvegarder le nouveau mode
+        this.gameMode = mode;
+        localStorage.setItem('gameMode', mode);
+
+        // Mettre à jour l'affichage des boutons
+        this.updateModeButtons();
+
+        // Si le jeu a déjà commencé, on réinitialise
+        if (this.gameStarted) {
+            // Réinitialiser la progression
+            this.currentLevel = 1;
+            this.score = 0;
+            this.totalClicks = 0;
+            this.totalHintsUsed = 0;
+            
+            // Recharger le niveau
+            this.setupLevel();
+            this.saveGame();
+            
+            // Message de confirmation
+            if (window.audioSystem) {
+                window.audioSystem.playClick();
+            }
+        }
+
+        // Mettre à jour l'affichage du niveau max
+        this.updateMaxLevelDisplay();
+
+        console.log(`✨ Mode changé: ${mode} (${gameDataManager.getTotalLevels()} niveaux)`);
+    }
+
+    /**
+     * Met à jour l'état visuel du menu déroulant de mode
+     */
+    updateModeButtons() {
+        const dropdownBtn = document.getElementById('modeDropdownBtn');
+        const modeOptions = document.querySelectorAll('.mode-option');
+        
+        // Mettre à jour le bouton principal
+        if (dropdownBtn) {
+            const icon = dropdownBtn.querySelector('.mode-current-icon');
+            const name = dropdownBtn.querySelector('.mode-current-name');
+            const count = dropdownBtn.querySelector('.mode-current-count');
+            
+            if (this.gameMode === 'normal') {
+                if (icon) icon.textContent = '🙏';
+                if (name) name.textContent = 'Mode Normal';
+                if (count) count.textContent = '(77)';
+            } else if (this.gameMode === 'couple') {
+                if (icon) icon.textContent = '💕';
+                if (name) name.textContent = 'Mode Couple';
+                if (count) count.textContent = '(122)';
+            }
+        }
+        
+        // Mettre à jour les options actives
+        modeOptions.forEach(option => {
+            if (option.dataset.mode === this.gameMode) {
+                option.classList.add('active');
+            } else {
+                option.classList.remove('active');
+            }
+        });
     }
 
     async startGame() {

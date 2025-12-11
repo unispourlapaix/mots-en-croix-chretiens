@@ -4717,6 +4717,18 @@ class GameDataManager {
      * @returns {Object|null} - Données du niveau ou null
      */
     getLevelData(levelNumber) {
+        // Déterminer la source de données selon le mode de jeu
+        const gameMode = window.game?.gameMode || 'normal';
+        
+        // Mode Couple: utiliser les données spécifiques
+        if (gameMode === 'couple' && typeof coupleChretienData !== 'undefined') {
+            if (levelNumber < 1 || levelNumber > coupleChretienData.levels.length) {
+                return null;
+            }
+            return coupleChretienData.levels[levelNumber - 1];
+        }
+
+        // Mode Normal: utiliser les données standards
         if (levelNumber < 1 || levelNumber > 77) {
             return null;
         }
@@ -4738,11 +4750,18 @@ class GameDataManager {
     }
 
     /**
-     * Récupère le nombre total de niveaux (toujours 77, le total en français)
+     * Récupère le nombre total de niveaux selon le mode de jeu
      * @returns {number} - Nombre total de niveaux
      */
     getTotalLevels() {
-        // Toujours retourner le nombre total de niveaux disponibles (en français)
+        const gameMode = window.game?.gameMode || 'normal';
+        
+        // Mode Couple: 88 niveaux
+        if (gameMode === 'couple' && typeof coupleChretienData !== 'undefined') {
+            return coupleChretienData.levels.length;
+        }
+        
+        // Mode Normal: 77 niveaux (toujours en français)
         return this.data[this.fallbackLanguage]?.levels.length || 77;
     }
 
