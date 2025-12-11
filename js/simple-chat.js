@@ -355,14 +355,21 @@ class SimpleChatSystem {
 
     // Générer un avatar icône basé sur le username
     getUserAvatar(username) {
+        if (!username) return '👤';
+        
+        // Vérifier s'il y a un avatar personnalisé sauvegardé
+        const customAvatar = localStorage.getItem(`avatar_${username}`);
+        if (customAvatar) {
+            return customAvatar;
+        }
+        
+        // Sinon, générer un avatar par défaut
         const avatars = [
             '👨', '👩', '👦', '👧', '🧑', '👴', '👵', '👶',
             '👨‍🦰', '👩‍🦰', '👨‍🦱', '👩‍🦱', '👨‍🦳', '👩‍🦳', '👨‍🦲', '👩‍🦲',
             '🥷', '👸', '🤴', '🧙', '🧚', '🧛', '🧜', '🧝',
             '😇', '😎', '🤓', '🤩', '🥳', '😊', '😁', '😄'
         ];
-        
-        if (!username) return '👤';
         
         // Utiliser le hash du username pour choisir un avatar constant
         let hash = 0;
@@ -371,6 +378,12 @@ class SimpleChatSystem {
         }
         const index = Math.abs(hash) % avatars.length;
         return avatars[index];
+    }
+
+    // Sauvegarder l'avatar personnalisé
+    setUserAvatar(username, avatar) {
+        if (!username) return;
+        localStorage.setItem(`avatar_${username}`, avatar);
     }
 
     showMessage(text, type = 'message', username = null) {

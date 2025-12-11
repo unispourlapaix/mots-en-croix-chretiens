@@ -53,9 +53,10 @@ class MenuTabSystem {
                     currentAvatar.textContent = avatar;
                     // Sauvegarder l'avatar dans le profil utilisateur
                     if (typeof authSystem !== 'undefined' && authSystem.isAuthenticated()) {
+                        const user = authSystem.getCurrentUser();
                         // Mettre à jour l'avatar dans le système de chat
-                        if (typeof window.simpleChatSystem !== 'undefined') {
-                            window.simpleChatSystem.updateAvatar(avatar);
+                        if (typeof window.simpleChatSystem !== 'undefined' && user) {
+                            window.simpleChatSystem.setUserAvatar(user.username, avatar);
                         }
                     }
                 }
