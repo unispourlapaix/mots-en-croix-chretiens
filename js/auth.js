@@ -102,7 +102,8 @@ class AuthSystem {
                 this.currentUser = {
                     id: user.id,
                     email: user.email,
-                    username: null
+                    username: null,
+                    max_score: 0
                 };
                 return;
             }
@@ -112,7 +113,8 @@ class AuthSystem {
                     id: user.id,
                     email: user.email,
                     username: data.username,
-                    created_at: data.created_at
+                    created_at: data.created_at,
+                    max_score: data.max_score || 0
                 };
                 console.log('✅ Profil chargé:', this.currentUser.username);
                 
@@ -149,14 +151,16 @@ class AuthSystem {
                         this.currentUser = {
                             id: user.id,
                             email: user.email,
-                            username: defaultUsername
+                            username: defaultUsername,
+                            max_score: 0
                         };
                     } else {
                         this.currentUser = {
                             id: user.id,
                             email: user.email,
                             username: newProfile.username,
-                            created_at: newProfile.created_at
+                            created_at: newProfile.created_at,
+                            max_score: newProfile.max_score || 0
                         };
                         console.log('✅ Profil créé automatiquement:', this.currentUser.username);
                     }
@@ -165,7 +169,8 @@ class AuthSystem {
                     this.currentUser = {
                         id: user.id,
                         email: user.email,
-                        username: defaultUsername
+                        username: defaultUsername,
+                        max_score: 0
                     };
                 }
             }
@@ -174,7 +179,8 @@ class AuthSystem {
             this.currentUser = {
                 id: user.id,
                 email: user.email,
-                username: null
+                username: null,
+                max_score: 0
             };
         }
     }
