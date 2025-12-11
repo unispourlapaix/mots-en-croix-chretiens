@@ -45,6 +45,13 @@ class RoomManager {
         // Vérifier si on était dans une salle
         this.checkExistingRoom();
         
+        // Écouter les changements d'authentification
+        if (typeof authSystem !== 'undefined') {
+            authSystem.onAuthChange(() => this.updateConnexionButton());
+            // Mise à jour initiale
+            this.updateConnexionButton();
+        }
+        
         console.log('✅ Room Manager initialisé');
     }
     
@@ -223,6 +230,34 @@ class RoomManager {
         }
     }
     
+    updateConnexionButton() {
+        const chatConnexionBtn = document.getElementById('chatConnexionBtn');
+        if (!chatConnexionBtn) return;
+        
+        if (typeof authSystem !== 'undefined' && authSystem.isAuthenticated()) {
+            const user = authSystem.getCurrentUser();
+            let avatar = '👤';
+            
+            // Récupérer l'avatar de l'utilisateur
+            if (typeof window.simpleChatSystem !== 'undefined') {
+                const userAvatar = window.simpleChatSystem.getUserAvatar(user.username);
+                if (userAvatar) avatar = userAvatar;
+            }
+            
+            // Bouton devient "Mon Profil" avec l'avatar
+            chatConnexionBtn.innerHTML = `${avatar} ${user.username}`;
+            chatConnexionBtn.classList.remove('connexion-btn');
+            chatConnexionBtn.classList.add('profile-btn');
+            chatConnexionBtn.title = 'Mon profil';
+        } else {
+            // Bouton "Connexion" par défaut
+            chatConnexionBtn.innerHTML = '👤 Connexion';
+            chatConnexionBtn.classList.remove('profile-btn');
+            chatConnexionBtn.classList.add('connexion-btn');
+            chatConnexionBtn.title = 'Se connecter';
+        }
+    }
+
     openConnexionTab() {
         // Ouvrir le menu principal
         const menuModal = document.getElementById('menuModal');

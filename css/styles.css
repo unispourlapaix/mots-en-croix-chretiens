@@ -4207,6 +4207,18 @@ body {
     box-shadow: 0 6px 16px rgba(255, 20, 147, 0.4);
 }
 
+.profile-btn {
+    background: linear-gradient(135deg, #9b87f5 0%, #7c3aed 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    font-weight: 600;
+}
+
+.profile-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.4);
+}
+
 .current-room-info {
     display: flex;
     align-items: center;
