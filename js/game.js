@@ -2167,7 +2167,6 @@ class ChristianCrosswordGame {
         if (typeof authSystem !== 'undefined') {
             const result = await authSystem.signIn(email, password);
             if (result.success) {
-                await this.showKawaiiModal('Connexion réussie ! 🎉', '✅');
                 if (typeof menuTabSystem !== 'undefined') {
                     menuTabSystem.updateConnexionTab();
                 }
