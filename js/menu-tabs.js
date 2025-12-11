@@ -160,36 +160,104 @@ class MenuTabSystem {
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, size, size);
         
-        // Fonction pour dessiner des cœurs géométriques
-        const drawGeometricHeart = (x, y, size, color, rotation = 0) => {
+        // Mots "amour" en 14 langues en filigrane
+        const loveWords = [
+            'Love', 'Amour', 'Amor', 'Amore', 'Liebe', 
+            'Любовь', '愛', 'المحبة', 'Αγάπη', 'Cariad',
+            'אהבה', 'Sevgi', 'Kärlek', 'Rakkaus'
+        ];
+        
+        ctx.save();
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.font = 'bold 36px Arial, sans-serif';
+        ctx.textAlign = 'left';
+        
+        // Disposer les mots en filigrane dans tout le fond
+        const wordPositions = [
+            {word: loveWords[0], x: 80, y: 200, rotation: -0.1},
+            {word: loveWords[1], x: 850, y: 280, rotation: 0.15},
+            {word: loveWords[2], x: 120, y: 450, rotation: 0.08},
+            {word: loveWords[3], x: 880, y: 650, rotation: -0.12},
+            {word: loveWords[4], x: 200, y: 820, rotation: 0.1},
+            {word: loveWords[5], x: 750, y: 920, rotation: -0.08},
+            {word: loveWords[6], x: 920, y: 450, rotation: 0.12},
+            {word: loveWords[7], x: 140, y: 650, rotation: -0.15},
+            {word: loveWords[8], x: 780, y: 180, rotation: 0.08},
+            {word: loveWords[9], x: 320, y: 980, rotation: -0.1},
+            {word: loveWords[10], x: 650, y: 1000, rotation: 0.12},
+            {word: loveWords[11], x: 100, y: 320, rotation: 0.15},
+            {word: loveWords[12], x: 860, y: 800, rotation: -0.1},
+            {word: loveWords[13], x: 380, y: 150, rotation: 0.08}
+        ];
+        
+        wordPositions.forEach(pos => {
+            ctx.save();
+            ctx.translate(pos.x, pos.y);
+            ctx.rotate(pos.rotation);
+            ctx.fillText(pos.word, 0, 0);
+            ctx.restore();
+        });
+        
+        ctx.restore();
+        
+        // Fonction pour dessiner des cœurs détaillés avec contour
+        const drawDetailedHeart = (x, y, heartSize, color, rotation = 0) => {
             ctx.save();
             ctx.translate(x, y);
             ctx.rotate(rotation);
+            
+            // Ombre douce du cœur
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+            ctx.shadowBlur = 8;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 3;
+            
+            // Remplissage du cœur
             ctx.fillStyle = color;
             ctx.beginPath();
             // Partie supérieure (deux demi-cercles)
-            ctx.arc(-size/4, -size/4, size/4, 0, Math.PI, true);
-            ctx.arc(size/4, -size/4, size/4, 0, Math.PI, true);
-            // Partie inférieure (triangle)
-            ctx.lineTo(0, size/2);
+            ctx.arc(-heartSize/4, -heartSize/4, heartSize/4, 0, Math.PI, true);
+            ctx.arc(heartSize/4, -heartSize/4, heartSize/4, 0, Math.PI, true);
+            // Partie inférieure (triangle arrondi)
+            ctx.lineTo(0, heartSize/2);
             ctx.closePath();
             ctx.fill();
+            
+            // Contour rose foncé
+            ctx.shadowColor = 'transparent';
+            ctx.strokeStyle = 'rgba(255, 20, 147, 0.3)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(-heartSize/4, -heartSize/4, heartSize/4, 0, Math.PI, true);
+            ctx.arc(heartSize/4, -heartSize/4, heartSize/4, 0, Math.PI, true);
+            ctx.lineTo(0, heartSize/2);
+            ctx.closePath();
+            ctx.stroke();
+            
+            // Reflet brillant en haut du cœur
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.beginPath();
+            ctx.arc(-heartSize/6, -heartSize/3, heartSize/8, 0, Math.PI * 2);
+            ctx.fill();
+            
             ctx.restore();
         };
         
-        // Dessiner des cœurs géométriques en arrière-plan
+        // Dessiner des cœurs détaillés en arrière-plan
         const heartPositions = [
-            {x: 100, y: 100, size: 60, color: 'rgba(255, 105, 180, 0.15)', rotation: 0.3},
-            {x: 950, y: 150, size: 80, color: 'rgba(255, 20, 147, 0.12)', rotation: -0.2},
-            {x: 150, y: 900, size: 70, color: 'rgba(255, 182, 193, 0.2)', rotation: 0.5},
-            {x: 900, y: 950, size: 90, color: 'rgba(255, 105, 180, 0.1)', rotation: -0.4},
-            {x: size/2, y: 100, size: 50, color: 'rgba(255, 20, 147, 0.08)', rotation: 0},
-            {x: 200, y: 500, size: 45, color: 'rgba(255, 182, 193, 0.15)', rotation: 0.8},
-            {x: 880, y: 520, size: 55, color: 'rgba(255, 105, 180, 0.12)', rotation: -0.6}
+            {x: 100, y: 100, size: 60, color: 'rgba(255, 105, 180, 0.2)', rotation: 0.3},
+            {x: 950, y: 150, size: 80, color: 'rgba(255, 20, 147, 0.18)', rotation: -0.2},
+            {x: 150, y: 900, size: 70, color: 'rgba(255, 182, 193, 0.25)', rotation: 0.5},
+            {x: 900, y: 950, size: 90, color: 'rgba(255, 105, 180, 0.15)', rotation: -0.4},
+            {x: size/2, y: 100, size: 50, color: 'rgba(255, 20, 147, 0.12)', rotation: 0},
+            {x: 200, y: 500, size: 45, color: 'rgba(255, 182, 193, 0.2)', rotation: 0.8},
+            {x: 880, y: 520, size: 55, color: 'rgba(255, 105, 180, 0.18)', rotation: -0.6},
+            {x: 550, y: 250, size: 48, color: 'rgba(255, 105, 180, 0.15)', rotation: 0.4},
+            {x: 300, y: 780, size: 52, color: 'rgba(255, 20, 147, 0.16)', rotation: -0.3}
         ];
         
         heartPositions.forEach(h => {
-            drawGeometricHeart(h.x, h.y, h.size, h.color, h.rotation);
+            drawDetailedHeart(h.x, h.y, h.size, h.color, h.rotation);
         });
         
         // Logo étoile kawaii en haut
@@ -308,13 +376,27 @@ class MenuTabSystem {
         ctx.font = '30px Arial, sans-serif';
         ctx.fillText('🎮 Rejoins-moi pour jouer ensemble ! 🙏', size/2, 940);
         
-        // URL en bas avec fond semi-transparent
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        ctx.fillRect(0, size - 80, size, 80);
+        // Section liens en bas avec fond semi-transparent
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+        ctx.fillRect(0, size - 110, size, 110);
         
+        // Lien principal du jeu
         ctx.fillStyle = '#ff69b4';
         ctx.font = 'bold 24px Arial, sans-serif';
-        ctx.fillText('unispourlapaix.github.io/mots-en-croix-chretiens', size/2, size - 42);
+        ctx.fillText('unispourlapaix.github.io/mots-en-croix-chretiens', size/2, size - 68);
+        
+        // Ligne séparatrice
+        ctx.strokeStyle = 'rgba(255, 182, 193, 0.4)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(size*0.25, size - 50);
+        ctx.lineTo(size*0.75, size - 50);
+        ctx.stroke();
+        
+        // Lien emmanuel.gallery avec emoji
+        ctx.fillStyle = '#ff1493';
+        ctx.font = '22px Arial, sans-serif';
+        ctx.fillText('🎨 emmanuel.gallery', size/2, size - 22);
         
         // Convertir en blob et partager
         canvas.toBlob(async (blob) => {
