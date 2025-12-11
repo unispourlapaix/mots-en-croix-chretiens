@@ -77,7 +77,7 @@ class RoomSystem {
                 // M'ajouter aussi à la liste des joueurs disponibles
                 this.availablePlayers.set('me', {
                     username: this.chatSystem.currentUser,
-                    avatar: this.chatSystem.getUserAvatar(this.chatSystem.currentUser),
+                    avatar: this.chatSystem.getUserAvatar(this.chatSystem.currentUser) || '👤',
                     acceptMode: this.acceptMode,
                     playerCount: 1,
                     maxPlayers: 8,
@@ -128,7 +128,8 @@ class RoomSystem {
         const meAvailable = this.availablePlayers.get('me');
         if (meAvailable) {
             meAvailable.username = newUsername;
-            meAvailable.avatar = this.chatSystem.getUserAvatar(newUsername);
+            meAvailable.avatar = this.chatSystem.getUserAvatar(newUsername) || '👤';
+            meAvailable.acceptMode = this.acceptMode; // Garder le mode actuel
         }
         
         // Rafraîchir l'affichage
@@ -1062,7 +1063,7 @@ class RoomSystem {
 
             bubbleHTML += `
                 <div class="connected-player-item" data-peer-id="${peerId}">
-                    <div class="player-avatar-mini">${player.avatar}</div>
+                    <div class="player-avatar-mini">${player.avatar || '👤'}</div>
                     <div class="player-details">
                         <div class="player-name-mini">${nameDisplay}</div>
                         <div class="player-status-mini">
