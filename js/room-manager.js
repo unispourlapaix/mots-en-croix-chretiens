@@ -10,6 +10,7 @@ class RoomManager {
         const joinRoomBtn = document.getElementById('joinRoomBtn');
         const leaveRoomBtn = document.getElementById('leaveRoomBtn');
         const roomCodeInput = document.getElementById('roomCodeInput');
+        const chatConnexionBtn = document.getElementById('chatConnexionBtn');
         
         if (createRoomBtn) {
             createRoomBtn.addEventListener('click', () => this.handleCreateRoom());
@@ -21,6 +22,10 @@ class RoomManager {
         
         if (leaveRoomBtn) {
             leaveRoomBtn.addEventListener('click', () => this.handleLeaveRoom());
+        }
+        
+        if (chatConnexionBtn) {
+            chatConnexionBtn.addEventListener('click', () => this.openConnexionTab());
         }
         
         // Enter pour rejoindre
@@ -216,6 +221,30 @@ class RoomManager {
                 console.warn('Erreur lecture salle stockée');
             }
         }
+    }
+    
+    openConnexionTab() {
+        // Ouvrir le menu principal
+        const menuModal = document.getElementById('menuModal');
+        if (menuModal) {
+            menuModal.classList.remove('hidden');
+        }
+        
+        // Activer l'onglet connexion
+        const connexionTab = document.querySelector('.menu-tab[data-tab="connexion"]');
+        const connexionContent = document.getElementById('connexionTabContent');
+        
+        if (connexionTab && connexionContent) {
+            // Désactiver tous les onglets
+            document.querySelectorAll('.menu-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.menu-tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Activer l'onglet connexion
+            connexionTab.classList.add('active');
+            connexionContent.classList.add('active');
+        }
+        
+        console.log('👤 Ouverture onglet connexion');
     }
 }
 
