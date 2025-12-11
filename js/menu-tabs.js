@@ -145,53 +145,180 @@ class MenuTabSystem {
         const username = user.username || 'Joueur';
         const avatar = window.simpleChatSystem?.getUserAvatar(username) || '😊';
         
-        // Créer un canvas pour l'image
+        // Créer un canvas CARRÉ pour l'image
         const canvas = document.createElement('canvas');
-        canvas.width = 800;
-        canvas.height = 600;
+        const size = 1080; // Format Instagram parfait
+        canvas.width = size;
+        canvas.height = size;
         const ctx = canvas.getContext('2d');
         
-        // Fond dégradé rose
-        const gradient = ctx.createLinearGradient(0, 0, 800, 600);
-        gradient.addColorStop(0, '#fff5f7');
-        gradient.addColorStop(0.5, '#ffe8f0');
-        gradient.addColorStop(1, '#ffd9e8');
+        // Fond dégradé rose kawaii
+        const gradient = ctx.createLinearGradient(0, 0, size, size);
+        gradient.addColorStop(0, '#FFD3E1');
+        gradient.addColorStop(0.5, '#FFC0DB');
+        gradient.addColorStop(1, '#FFB3D9');
         ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, 800, 600);
+        ctx.fillRect(0, 0, size, size);
         
-        // Titre
+        // Fonction pour dessiner des cœurs géométriques
+        const drawGeometricHeart = (x, y, size, color, rotation = 0) => {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(rotation);
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            // Partie supérieure (deux demi-cercles)
+            ctx.arc(-size/4, -size/4, size/4, 0, Math.PI, true);
+            ctx.arc(size/4, -size/4, size/4, 0, Math.PI, true);
+            // Partie inférieure (triangle)
+            ctx.lineTo(0, size/2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        };
+        
+        // Dessiner des cœurs géométriques en arrière-plan
+        const heartPositions = [
+            {x: 100, y: 100, size: 60, color: 'rgba(255, 105, 180, 0.15)', rotation: 0.3},
+            {x: 950, y: 150, size: 80, color: 'rgba(255, 20, 147, 0.12)', rotation: -0.2},
+            {x: 150, y: 900, size: 70, color: 'rgba(255, 182, 193, 0.2)', rotation: 0.5},
+            {x: 900, y: 950, size: 90, color: 'rgba(255, 105, 180, 0.1)', rotation: -0.4},
+            {x: size/2, y: 100, size: 50, color: 'rgba(255, 20, 147, 0.08)', rotation: 0},
+            {x: 200, y: 500, size: 45, color: 'rgba(255, 182, 193, 0.15)', rotation: 0.8},
+            {x: 880, y: 520, size: 55, color: 'rgba(255, 105, 180, 0.12)', rotation: -0.6}
+        ];
+        
+        heartPositions.forEach(h => {
+            drawGeometricHeart(h.x, h.y, h.size, h.color, h.rotation);
+        });
+        
+        // Logo étoile kawaii en haut
+        const drawKawaiiLogo = (x, y, logoSize) => {
+            ctx.save();
+            ctx.translate(x, y);
+            
+            // Cercle rose du logo
+            ctx.fillStyle = '#ff69b4';
+            ctx.beginPath();
+            ctx.arc(0, 0, logoSize/2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Croix en X blanche
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = logoSize * 0.05;
+            ctx.lineCap = 'round';
+            
+            ctx.beginPath();
+            ctx.moveTo(-logoSize * 0.42, -logoSize * 0.42);
+            ctx.lineTo(logoSize * 0.42, logoSize * 0.42);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(logoSize * 0.42, -logoSize * 0.42);
+            ctx.lineTo(-logoSize * 0.42, logoSize * 0.42);
+            ctx.stroke();
+            
+            // Étoile blanche
+            const starRadius = logoSize * 0.40;
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowColor = 'rgba(255, 20, 147, 0.4)';
+            ctx.shadowBlur = 8;
+            
+            ctx.beginPath();
+            for (let i = 0; i < 5; i++) {
+                const angle = (Math.PI * 2 * i) / 5 - Math.PI / 2;
+                const x = Math.cos(angle) * starRadius;
+                const y = Math.sin(angle) * starRadius;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+                
+                const innerAngle = angle + Math.PI / 5;
+                const innerX = Math.cos(innerAngle) * (starRadius * 0.38);
+                const innerY = Math.sin(innerAngle) * (starRadius * 0.38);
+                ctx.lineTo(innerX, innerY);
+            }
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.shadowColor = 'transparent';
+            ctx.restore();
+        };
+        
+        // Dessiner le logo en haut
+        drawKawaiiLogo(size/2, 140, 180);
+        
+        // Titre avec ombre
+        ctx.shadowColor = 'rgba(255, 105, 180, 0.3)';
+        ctx.shadowBlur = 15;
+        ctx.shadowOffsetY = 3;
         ctx.fillStyle = '#ff1493';
-        ctx.font = 'bold 48px Arial';
+        ctx.font = 'bold 58px Arial, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('Mots Croisés Chrétiens', 400, 100);
+        ctx.fillText('Mots Croisés', size/2, 310);
+        ctx.fillText('Chrétiens', size/2, 380);
+        ctx.shadowColor = 'transparent';
         
-        // Avatar (grand)
-        ctx.font = '120px Arial';
-        ctx.fillText(avatar, 400, 250);
+        // Carte blanche centrale avec ombre pour le contenu principal
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+        ctx.shadowBlur = 30;
+        ctx.shadowOffsetY = 10;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx.beginPath();
+        ctx.roundRect(size*0.12, 440, size*0.76, 420, 40);
+        ctx.fill();
+        ctx.shadowColor = 'transparent';
+        
+        // Avatar (très grand)
+        ctx.font = '140px Arial';
+        ctx.fillText(avatar, size/2, 590);
         
         // Nom du joueur
         ctx.fillStyle = '#333';
-        ctx.font = 'bold 42px Arial';
-        ctx.fillText(username, 400, 330);
+        ctx.font = 'bold 48px Arial, sans-serif';
+        ctx.fillText(username, size/2, 680);
         
-        // Score
+        // Ligne décorative
+        ctx.strokeStyle = '#FFB3D9';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(size*0.3, 720);
+        ctx.lineTo(size*0.7, 720);
+        ctx.stroke();
+        
+        // Score avec fond rose
+        const scoreText = `${score} points`;
+        ctx.font = 'bold 76px Arial, sans-serif';
+        const scoreWidth = ctx.measureText(scoreText).width;
+        
         ctx.fillStyle = '#ff1493';
-        ctx.font = 'bold 72px Arial';
-        ctx.fillText(`${score} points`, 400, 430);
+        ctx.beginPath();
+        ctx.roundRect((size - scoreWidth)/2 - 30, 740, scoreWidth + 60, 95, 15);
+        ctx.fill();
         
-        // Message
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(scoreText, size/2, 810);
+        
+        // Étoiles décoratives autour du score
+        ctx.font = '32px Arial';
+        ctx.fillText('✨', size/2 - scoreWidth/2 - 60, 795);
+        ctx.fillText('✨', size/2 + scoreWidth/2 + 60, 795);
+        
+        // Message avec emoji
         ctx.fillStyle = '#666';
-        ctx.font = '28px Arial';
-        ctx.fillText('Rejoignez-moi pour jouer ensemble !', 400, 510);
+        ctx.font = '30px Arial, sans-serif';
+        ctx.fillText('🎮 Rejoins-moi pour jouer ensemble ! 🙏', size/2, 940);
         
-        // URL
-        ctx.fillStyle = '#999';
-        ctx.font = '20px Arial';
-        ctx.fillText('unispourlapaix.github.io/mots-en-croix-chretiens', 400, 560);
+        // URL en bas avec fond semi-transparent
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.fillRect(0, size - 80, size, 80);
+        
+        ctx.fillStyle = '#ff69b4';
+        ctx.font = 'bold 24px Arial, sans-serif';
+        ctx.fillText('unispourlapaix.github.io/mots-en-croix-chretiens', size/2, size - 42);
         
         // Convertir en blob et partager
         canvas.toBlob(async (blob) => {
-            const file = new File([blob], 'mon-score.png', { type: 'image/png' });
+            const file = new File([blob], 'mon-score-mots-croises.png', { type: 'image/png' });
             
             if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                 try {
