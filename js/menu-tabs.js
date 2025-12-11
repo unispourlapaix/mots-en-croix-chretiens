@@ -29,6 +29,14 @@ class MenuTabSystem {
             });
         });
 
+        // Écouter les changements d'authentification
+        if (typeof authSystem !== 'undefined') {
+            authSystem.onAuthChange(() => {
+                // Rafraîchir le tab connexion quand l'état d'auth change
+                this.updateConnexionTab();
+            });
+        }
+
         // Initialiser le système d'avatars
         this.initAvatarSelector();
     }
