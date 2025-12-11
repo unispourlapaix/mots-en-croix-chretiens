@@ -426,7 +426,6 @@ class MenuTabSystem {
         link.download = 'mon-score-mots-croises.png';
         link.href = canvas.toDataURL();
         link.click();
-        alert('📥 Image téléchargée ! Vous pouvez maintenant la partager sur vos réseaux sociaux.');
     }
 
     switchTab(tabName) {
