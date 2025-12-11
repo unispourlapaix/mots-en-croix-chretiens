@@ -862,7 +862,8 @@ class RoomSystem {
         // Mettre à jour le compteur de joueurs
         const playerCount = document.getElementById('roomPlayerCount');
         if (playerCount) {
-            playerCount.textContent = `${this.playersInRoom.size}/${this.myRoomInfo?.maxPlayers || 8}`;
+            const maxPlayers = this.myRoomInfo?.maxPlayers || 8;
+            playerCount.textContent = `${this.playersInRoom.size}/${maxPlayers}`;
         }
     }
 
@@ -1066,7 +1067,7 @@ class RoomSystem {
                         <div class="player-name-mini">${nameDisplay}</div>
                         <div class="player-status-mini">
                             <span class="status-indicator"></span>
-                            <span>${player.playerCount}/${player.maxPlayers}</span>
+                            <span>${player.playerCount || 1}/${player.maxPlayers || 8}</span>
                             <span class="room-mode-badge">${modeIcon} ${modeName}</span>
                         </div>
                     </div>
