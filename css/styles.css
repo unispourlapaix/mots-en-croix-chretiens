@@ -4129,10 +4129,12 @@ body {
 .join-room-group {
     display: flex;
     gap: 8px;
+    align-items: stretch;
 }
 
 .room-code-input {
     flex: 1;
+    min-width: 0;
     padding: 10px 12px;
     border: 2px solid rgba(102, 126, 234, 0.3);
     border-radius: 10px;
@@ -4156,6 +4158,8 @@ body {
     background: #4ade80;
     color: white;
     box-shadow: 0 4px 12px rgba(74, 222, 128, 0.3);
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .join-btn:hover {
