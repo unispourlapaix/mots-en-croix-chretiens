@@ -2023,6 +2023,38 @@ body {
     }
 }
 
+/* Audio toggle button */
+.audio-toggle-button {
+    background: white;
+    color: #ff69b4;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.2rem;
+    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.4);
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 1000;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.audio-toggle-button:hover {
+    background: rgba(255, 255, 255, 0.95);
+    transform: scale(1.1);
+    box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
+}
+
+.audio-toggle-button.disabled {
+    opacity: 0.5;
+}
+
 /* Menu button */
 .menu-button {
     background: white;

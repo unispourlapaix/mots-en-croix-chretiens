@@ -416,6 +416,11 @@ class SimpleChatSystem {
         }
 
         messagesDiv.prepend(messageDiv);
+        
+        // Son de message reçu (sauf pour ses propres messages et système)
+        if (type !== 'own' && type !== 'system' && window.audioSystem) {
+            window.audioSystem.playMessageReceived();
+        }
 
         // Limiter à 30 messages max (10 visibles + 20 en scroll)
         const messages = messagesDiv.children;

@@ -42,9 +42,21 @@ class MenuTabSystem {
     }
 
     initAvatarSelector() {
+        // Mettre à jour les avatars verrouillés/déverrouillés
+        this.updateAvatarLocks();
+        
         // Gérer la sélection d'avatar
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('avatar-option')) {
+                const unlockScore = parseInt(e.target.dataset.unlock) || 0;
+                const userScore = (authSystem && authSystem.isAuthenticated()) ? (authSystem.getCurrentUser().max_score || 0) : 0;
+                
+                // Vérifier si l'avatar est déverrouillé
+                if (unlockScore > userScore) {
+                    alert(`🔒 Cet avatar est verrouillé ! Atteignez ${unlockScore} points pour le débloquer.`);
+                    return;
+                }
+                
                 const avatar = e.target.dataset.avatar;
                 const currentAvatar = document.getElementById('currentAvatar');
                 const avatarSelector = document.getElementById('avatarSelector');
@@ -79,9 +91,141 @@ class MenuTabSystem {
                 avatarSelector.style.display = 'none';
             }
         });
+        
+        // Bouton de partage score
+        const shareScoreBtn = document.getElementById('shareScoreBtn');
+        if (shareScoreBtn) {
+            shareScoreBtn.addEventListener('click', () => this.shareScore());
+        }
+    }
+    
+    updateAvatarLocks() {
+        const userScore = (authSystem && authSystem.isAuthenticated()) ? (authSystem.getCurrentUser().max_score || 0) : 0;
+        const avatarOptions = document.querySelectorAll('.avatar-option');
+        
+        avatarOptions.forEach(option => {
+            const unlockScore = parseInt(option.dataset.unlock) || 0;
+            
+            if (unlockScore > userScore) {
+                // Avatar verrouillé
+                option.style.opacity = '0.4';
+                option.style.filter = 'grayscale(100%)';
+                option.style.position = 'relative';
+                option.title = `Débloqué à ${unlockScore} pts`;
+                
+                // Ajouter un cadenas si pas déjà présent
+                if (!option.querySelector('.lock-icon')) {
+                    const lock = document.createElement('div');
+                    lock.className = 'lock-icon';
+                    lock.innerHTML = '🔒';
+                    lock.style.cssText = 'position: absolute; top: 2px; right: 2px; font-size: 12px;';
+                    option.appendChild(lock);
+                }
+            } else {
+                // Avatar déverrouillé
+                option.style.opacity = '1';
+                option.style.filter = 'none';
+                option.title = `Déverrouillé (${unlockScore} pts)`;
+                
+                // Retirer le cadenas si présent
+                const lock = option.querySelector('.lock-icon');
+                if (lock) lock.remove();
+            }
+        });
+    }
+    
+    async shareScore() {
+        if (!authSystem || !authSystem.isAuthenticated()) {
+            alert('Connectez-vous pour partager votre score !');
+            return;
+        }
+        
+        const user = authSystem.getCurrentUser();
+        const score = user.max_score || 0;
+        const username = user.username || 'Joueur';
+        const avatar = window.simpleChatSystem?.getUserAvatar(username) || '😊';
+        
+        // Créer un canvas pour l'image
+        const canvas = document.createElement('canvas');
+        canvas.width = 800;
+        canvas.height = 600;
+        const ctx = canvas.getContext('2d');
+        
+        // Fond dégradé rose
+        const gradient = ctx.createLinearGradient(0, 0, 800, 600);
+        gradient.addColorStop(0, '#fff5f7');
+        gradient.addColorStop(0.5, '#ffe8f0');
+        gradient.addColorStop(1, '#ffd9e8');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 800, 600);
+        
+        // Titre
+        ctx.fillStyle = '#ff1493';
+        ctx.font = 'bold 48px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Mots Croisés Chrétiens', 400, 100);
+        
+        // Avatar (grand)
+        ctx.font = '120px Arial';
+        ctx.fillText(avatar, 400, 250);
+        
+        // Nom du joueur
+        ctx.fillStyle = '#333';
+        ctx.font = 'bold 42px Arial';
+        ctx.fillText(username, 400, 330);
+        
+        // Score
+        ctx.fillStyle = '#ff1493';
+        ctx.font = 'bold 72px Arial';
+        ctx.fillText(`${score} points`, 400, 430);
+        
+        // Message
+        ctx.fillStyle = '#666';
+        ctx.font = '28px Arial';
+        ctx.fillText('Rejoignez-moi pour jouer ensemble !', 400, 510);
+        
+        // URL
+        ctx.fillStyle = '#999';
+        ctx.font = '20px Arial';
+        ctx.fillText('unispourlapaix.github.io/mots-en-croix-chretiens', 400, 560);
+        
+        // Convertir en blob et partager
+        canvas.toBlob(async (blob) => {
+            const file = new File([blob], 'mon-score.png', { type: 'image/png' });
+            
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        title: 'Mon Score - Mots Croisés Chrétiens',
+                        text: `J'ai fait ${score} points aux Mots Croisés Chrétiens ! Rejoignez-moi !`,
+                        files: [file]
+                    });
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        this.downloadScoreImage(canvas);
+                    }
+                }
+            } else {
+                // Fallback: télécharger l'image
+                this.downloadScoreImage(canvas);
+            }
+        });
+    }
+    
+    downloadScoreImage(canvas) {
+        const link = document.createElement('a');
+        link.download = 'mon-score-mots-croises.png';
+        link.href = canvas.toDataURL();
+        link.click();
+        alert('📥 Image téléchargée ! Vous pouvez maintenant la partager sur vos réseaux sociaux.');
     }
 
     switchTab(tabName) {
+        // Son de changement d'onglet
+        if (window.audioSystem) {
+            window.audioSystem.playTabSwitch();
+        }
+        
         // Mettre à jour l'onglet actif
         const tabs = document.querySelectorAll('.menu-tab');
         tabs.forEach(tab => {
@@ -221,6 +365,9 @@ class MenuTabSystem {
                     currentAvatar.textContent = userAvatar;
                 }
             }
+            
+            // Mettre à jour les avatars verrouillés/déverrouillés selon le score
+            this.updateAvatarLocks();
         } else {
             authForm.style.display = 'block';
             profileInfo.style.display = 'none';

@@ -312,6 +312,12 @@ class AuthSystem {
             }
 
             console.log('✅ Connexion réussie');
+            
+            // Son de connexion réussie
+            if (window.audioSystem) {
+                window.audioSystem.playLoginSuccess();
+            }
+            
             return {
                 success: true,
                 message: 'Connexion réussie !'

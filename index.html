@@ -56,6 +56,9 @@
             <button id="menuButton" class="menu-button">
                 ☰ Menu
             </button>
+            <button id="audioToggleButton" class="audio-toggle-button" title="Activer/Désactiver le son">
+                🔊
+            </button>
         </div>
 
         <!-- Bandeau Info défilant -->
@@ -363,41 +366,48 @@
                             <div id="avatarSelector" class="avatar-selector" style="display: none; background: #fff; border: 2px solid #ff69b4; border-radius: 15px; padding: 15px; margin-bottom: 15px; max-height: 300px; overflow-y: auto;">
                                 <p style="font-size: 13px; color: #666; margin-bottom: 10px; font-weight: bold;">Choisissez votre avatar</p>
                                 <div class="avatar-grid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;">
-                                    <div class="avatar-option" data-avatar="😊" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">😊</div>
-                                    <div class="avatar-option" data-avatar="😇" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">😇</div>
-                                    <div class="avatar-option" data-avatar="🥰" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🥰</div>
-                                    <div class="avatar-option" data-avatar="😎" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">😎</div>
-                                    <div class="avatar-option" data-avatar="🤗" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🤗</div>
-                                    <div class="avatar-option" data-avatar="😍" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">😍</div>
-                                    <div class="avatar-option" data-avatar="🤩" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🤩</div>
-                                    <div class="avatar-option" data-avatar="😋" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">😋</div>
-                                    <div class="avatar-option" data-avatar="😺" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">😺</div>
-                                    <div class="avatar-option" data-avatar="🥳" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🥳</div>
-                                    <div class="avatar-option" data-avatar="🌸" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🌸</div>
-                                    <div class="avatar-option" data-avatar="🌺" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🌺</div>
-                                    <div class="avatar-option" data-avatar="🌻" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🌻</div>
-                                    <div class="avatar-option" data-avatar="🌷" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🌷</div>
-                                    <div class="avatar-option" data-avatar="🌹" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🌹</div>
-                                    <div class="avatar-option" data-avatar="🌟" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🌟</div>
-                                    <div class="avatar-option" data-avatar="⭐" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">⭐</div>
-                                    <div class="avatar-option" data-avatar="✨" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">✨</div>
-                                    <div class="avatar-option" data-avatar="💫" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">💫</div>
-                                    <div class="avatar-option" data-avatar="🌈" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🌈</div>
-                                    <div class="avatar-option" data-avatar="💝" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">💝</div>
-                                    <div class="avatar-option" data-avatar="💖" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">💖</div>
-                                    <div class="avatar-option" data-avatar="💗" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">💗</div>
-                                    <div class="avatar-option" data-avatar="💕" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">💕</div>
-                                    <div class="avatar-option" data-avatar="🦋" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🦋</div>
-                                    <div class="avatar-option" data-avatar="🐰" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐰</div>
-                                    <div class="avatar-option" data-avatar="🐱" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐱</div>
-                                    <div class="avatar-option" data-avatar="🐶" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐶</div>
-                                    <div class="avatar-option" data-avatar="🐼" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐼</div>
-                                    <div class="avatar-option" data-avatar="🦊" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🦊</div>
-                                    <div class="avatar-option" data-avatar="🐻" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐻</div>
-                                    <div class="avatar-option" data-avatar="🐨" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐨</div>
-                                    <div class="avatar-option" data-avatar="🐯" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐯</div>
-                                    <div class="avatar-option" data-avatar="🦁" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🦁</div>
-                                    <div class="avatar-option" data-avatar="🐵" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐵</div>
+                                    <!-- Avatars gratuits (0 points) -->
+                                    <div class="avatar-option" data-avatar="😊" data-unlock="0" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">😊</div>
+                                    <div class="avatar-option" data-avatar="😇" data-unlock="0" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">😇</div>
+                                    <div class="avatar-option" data-avatar="🥰" data-unlock="0" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🥰</div>
+                                    <div class="avatar-option" data-avatar="😎" data-unlock="0" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">😎</div>
+                                    <div class="avatar-option" data-avatar="🤗" data-unlock="0" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🤗</div>
+                                    <!-- 100 points -->
+                                    <div class="avatar-option" data-avatar="😍" data-unlock="100" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">😍</div>
+                                    <div class="avatar-option" data-avatar="🤩" data-unlock="100" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🤩</div>
+                                    <div class="avatar-option" data-avatar="😋" data-unlock="100" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">😋</div>
+                                    <div class="avatar-option" data-avatar="😺" data-unlock="100" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">😺</div>
+                                    <div class="avatar-option" data-avatar="🥳" data-unlock="100" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🥳</div>
+                                    <!-- 250 points - Fleurs -->
+                                    <div class="avatar-option" data-avatar="🌸" data-unlock="250" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🌸</div>
+                                    <div class="avatar-option" data-avatar="🌺" data-unlock="250" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🌺</div>
+                                    <div class="avatar-option" data-avatar="🌻" data-unlock="250" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🌻</div>
+                                    <div class="avatar-option" data-avatar="🌷" data-unlock="250" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🌷</div>
+                                    <div class="avatar-option" data-avatar="🌹" data-unlock="250" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🌹</div>
+                                    <!-- 500 points - Étoiles -->
+                                    <div class="avatar-option" data-avatar="🌟" data-unlock="500" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🌟</div>
+                                    <div class="avatar-option" data-avatar="⭐" data-unlock="500" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">⭐</div>
+                                    <div class="avatar-option" data-avatar="✨" data-unlock="500" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">✨</div>
+                                    <div class="avatar-option" data-avatar="💫" data-unlock="500" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">💫</div>
+                                    <div class="avatar-option" data-avatar="🌈" data-unlock="500" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🌈</div>
+                                    <!-- 750 points - Cœurs -->
+                                    <div class="avatar-option" data-avatar="💝" data-unlock="750" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">💝</div>
+                                    <div class="avatar-option" data-avatar="💖" data-unlock="750" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">💖</div>
+                                    <div class="avatar-option" data-avatar="💗" data-unlock="750" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">💗</div>
+                                    <div class="avatar-option" data-avatar="💕" data-unlock="750" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">💕</div>
+                                    <div class="avatar-option" data-avatar="🦋" data-unlock="750" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🦋</div>
+                                    <!-- 1000 points - Animaux premium -->
+                                    <div class="avatar-option" data-avatar="🐰" data-unlock="1000" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐰</div>
+                                    <div class="avatar-option" data-avatar="🐱" data-unlock="1000" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐱</div>
+                                    <div class="avatar-option" data-avatar="🐶" data-unlock="1000" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐶</div>
+                                    <div class="avatar-option" data-avatar="🐼" data-unlock="1000" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐼</div>
+                                    <div class="avatar-option" data-avatar="🦊" data-unlock="1000" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🦊</div>
+                                    <!-- 1500 points - Animaux légendaires -->
+                                    <div class="avatar-option" data-avatar="🐻" data-unlock="1500" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐻</div>
+                                    <div class="avatar-option" data-avatar="🐨" data-unlock="1500" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐨</div>
+                                    <div class="avatar-option" data-avatar="🐯" data-unlock="1500" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐯</div>
+                                    <div class="avatar-option" data-avatar="🦁" data-unlock="1500" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🦁</div>
+                                    <div class="avatar-option" data-avatar="🐵" data-unlock="1500" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐵</div>
                                 </div>
                             </div>
                             
@@ -409,6 +419,9 @@
                                 <p id="userMaxScore" style="font-size: 32px; font-weight: bold; color: #ff1493;">0</p>
                             </div>
                             
+                            <button id="shareScoreBtn" class="menu-cloud-btn" style="width: 100%; margin-bottom: 10px; background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);">
+                                📤 Partager mon score
+                            </button>
                             <button id="editProfileBtn" class="menu-cloud-btn" style="width: 100%; margin-bottom: 10px;">
                                 ✏️ Modifier pseudo
                             </button>
@@ -685,6 +698,7 @@
     <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <!-- Supabase v2 avec bundle UMD pour éviter les erreurs de module -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+    <script src="js/audio.js"></script>
     <script src="js/config.js"></script>
     <script src="js/i18n.js"></script>
     <script src="js/gameData.js"></script>

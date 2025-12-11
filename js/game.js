@@ -272,6 +272,23 @@ class ChristianCrosswordGame {
             cloudOverlay.addEventListener('click', () => this.closeCloudModal());
         }
 
+        // Audio toggle button
+        const audioToggleBtn = document.getElementById('audioToggleButton');
+        if (audioToggleBtn) {
+            audioToggleBtn.addEventListener('click', () => {
+                if (window.audioSystem) {
+                    const enabled = window.audioSystem.toggle();
+                    audioToggleBtn.textContent = enabled ? '🔊' : '🔇';
+                    audioToggleBtn.classList.toggle('disabled', !enabled);
+                }
+            });
+            // Initialiser l'icône selon l'état
+            if (window.audioSystem && !window.audioSystem.isEnabled()) {
+                audioToggleBtn.textContent = '🔇';
+                audioToggleBtn.classList.add('disabled');
+            }
+        }
+        
         // Menu modal
         document.getElementById('menuButton').addEventListener('click', () => this.openMenu());
         document.getElementById('closeMenuBtn').addEventListener('click', () => this.closeMenu());
@@ -1093,6 +1110,11 @@ class ChristianCrosswordGame {
                         if (letter && /[A-Z]/.test(letter)) {
                             letterSpan.textContent = letter;
                             this.grid[i][j] = letter;
+                            
+                            // Son de placement de lettre
+                            if (window.audioSystem) {
+                                window.audioSystem.playLetterPlace();
+                            }
 
                             // Envoyer la mise à jour en multijoueur
                             if (this.multiplayerMode && this.multiplayerManager) {
@@ -1407,6 +1429,11 @@ class ChristianCrosswordGame {
             if (wordComplete) {
                 this.completedWords.add(wordKey);
                 
+                // Son de mot valide
+                if (window.audioSystem) {
+                    window.audioSystem.playWordValid();
+                }
+                
                 // Ajouter les points bonus
                 const wordBonus = 50;
                 this.score += wordBonus;
@@ -1482,6 +1509,11 @@ class ChristianCrosswordGame {
 
         // Si tout est correct, passer au niveau suivant automatiquement
         if (allCorrect && totalCells > 0) {
+            // Son de victoire
+            if (window.audioSystem) {
+                window.audioSystem.playVictory();
+            }
+            
             // Féliciter le joueur avec l'IA
             if (typeof welcomeAI !== 'undefined') {
                 welcomeAI.congratulate();
