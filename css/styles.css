@@ -2273,6 +2273,24 @@ body {
     animation: fadeIn 0.3s ease;
 }
 
+.avatar-selector::-webkit-scrollbar {
+    width: 8px;
+}
+
+.avatar-selector::-webkit-scrollbar-track {
+    background: #fff5f9;
+    border-radius: 10px;
+}
+
+.avatar-selector::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+    border-radius: 10px;
+}
+
+.avatar-selector::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #ff1493 0%, #ff69b4 100%);
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
