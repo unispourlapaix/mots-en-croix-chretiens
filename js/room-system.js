@@ -763,9 +763,9 @@ class RoomSystem {
     getAcceptModeIcon() {
         const icons = {
             'auto': '✅ Toujours accepter',
-            'manual': '✋ Manuel (Auto en salle CODE)'
+            'manual': '✋ Privée'
         };
-        return icons[this.acceptMode] || '✋ Manuel (Auto en salle CODE)';
+        return icons[this.acceptMode] || '✋ Privée';
     }
 
     // Configurer les écouteurs d'événements
@@ -1054,8 +1054,8 @@ class RoomSystem {
 
             const modeName = {
                 'auto': 'Toujours accepter',
-                'manual': 'Auto en salle CODE'
-            }[player.acceptMode] || 'Auto en salle CODE';
+                'manual': 'Privée'
+            }[player.acceptMode] || 'Privée';
 
             // Afficher un badge "Vous" pour le joueur local
             const isMe = player.isMe || peerId === 'me';
