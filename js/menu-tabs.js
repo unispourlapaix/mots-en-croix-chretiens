@@ -142,6 +142,7 @@ class MenuTabSystem {
     updateConnexionTab() {
         const authForm = document.getElementById('authForm');
         const profileInfo = document.getElementById('profileInfo');
+        const chatMultiplayerSection = document.getElementById('chatMultiplayerSection');
 
         if (!authForm || !profileInfo) return;
 
@@ -150,6 +151,7 @@ class MenuTabSystem {
             const user = authSystem.getCurrentUser();
             authForm.style.display = 'none';
             profileInfo.style.display = 'block';
+            if (chatMultiplayerSection) chatMultiplayerSection.style.display = 'block';
 
             // Mettre à jour les infos du profil
             const usernameEl = document.getElementById('connectedUsername');
@@ -162,6 +164,7 @@ class MenuTabSystem {
         } else {
             authForm.style.display = 'block';
             profileInfo.style.display = 'none';
+            if (chatMultiplayerSection) chatMultiplayerSection.style.display = 'none';
         }
     }
 }

@@ -240,9 +240,6 @@
                 <button class="menu-tab" data-tab="connexion">
                     👤 Connexion
                 </button>
-                <button class="menu-tab" data-tab="chat">
-                    💬 Chat
-                </button>
             </div>
 
             <!-- Contenu Onglet Menu -->
@@ -376,45 +373,46 @@
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Contenu Onglet Chat -->
-            <div id="chatTabContent" class="menu-tab-content">
-                <div class="menu-chat-header">
-                    <div class="chat-header-info">
-                        <span class="chat-icon">💬</span>
-                        <span class="chat-title">Chat Multijoueur</span>
-                        <span id="chatParticipantCount" class="chat-participant-count">0 👥</span>
+                <!-- Section Chat Multijoueur (visible quand connecté) -->
+                <div id="chatMultiplayerSection" class="menu-section" style="display: none; margin-top: 20px; border-top: 2px solid #ffe0f0; padding-top: 20px;">
+                    <div class="menu-chat-header">
+                        <div class="chat-header-info">
+                            <span class="chat-icon">💬</span>
+                            <span class="chat-title">Chat Multijoueur</span>
+                            <span id="chatParticipantCount" class="chat-participant-count">0 👥</span>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Interface P2P simplifiée -->
-                <div id="chatRoomInterface" class="chat-room-interface">
-                    <div class="chat-room-content">
-                        <div class="chat-room-icon">🎮</div>
-                        <h3>Mode Multijoueur</h3>
-                        <p style="margin-bottom: 20px; color: #666; text-align: center;">
-                            Connectez-vous pour voir vos amis automatiquement ! 🎉
-                        </p>
+                    <!-- Interface P2P simplifiée -->
+                    <div id="chatRoomInterface" class="chat-room-interface">
+                        <div class="chat-room-content">
+                            <div class="chat-room-icon">🎮</div>
+                            <h3>Mode Multijoueur</h3>
+                            <p style="margin-bottom: 20px; color: #666; text-align: center;">
+                                Connectez-vous pour voir vos amis automatiquement ! 🎉
+                            </p>
 
-                        <div style="text-align: center; padding: 20px; background: #fff5f9; border-radius: 12px;">
-                            <p style="font-size: 15px; margin-bottom: 12px; color: #666;">
-                                ✨ <strong>Nouveau système intuitif</strong>
-                            </p>
-                            <p style="font-size: 13px; color: #888; margin-bottom: 15px;">
-                                1️⃣ Connectez-vous et partagez votre code par email, SMS, message privé
-                            </p>
-                            <p style="font-size: 12px; color: #999; margin-top: 15px;">
-                                💡 Simple, rapide et sécurisé !
+                            <div style="text-align: center; padding: 20px; background: #fff5f9; border-radius: 12px;">
+                                <p style="font-size: 15px; margin-bottom: 12px; color: #666;">
+                                    ✨ <strong>Nouveau système intuitif</strong>
+                                </p>
+                                <p style="font-size: 13px; color: #888; margin-bottom: 15px;">
+                                    1️⃣ Connectez-vous et partagez votre code par email, SMS, message privé
+                                </p>
+                                <p style="font-size: 12px; color: #999; margin-top: 15px;">
+                                    💡 Simple, rapide et sécurisé !
+                                </p>
+                            </div>
+
+                            <p style="font-size: 11px; color: #999; margin-top: 20px; text-align: center;">
+                                💬 Astuce: La bulle de chat à gauche montre tous les joueurs en ligne
                             </p>
                         </div>
-
-                        <p style="font-size: 11px; color: #999; margin-top: 20px; text-align: center;">
-                            💬 Astuce: La bulle de chat à gauche montre tous les joueurs en ligne
-                        </p>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 
