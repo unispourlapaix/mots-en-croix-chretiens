@@ -14,64 +14,25 @@ class TutorialSystem {
         this.steps = [
             {
                 id: 'welcome',
-                message: "Bienvenue ! Je suis Unisona 🤖✨ Je vais vous guider pour vos premiers pas ! Prêt(e) ?",
-                action: () => this.showWelcome(),
-                waitForUser: true
-            },
-            {
-                id: 'grid',
-                message: "Voici la grille de mots croisés ! Cliquez sur une case pour commencer à écrire 📝",
-                highlight: '#crosswordGrid',
-                action: () => this.waitForCellClick(),
-                waitForUser: true
-            },
-            {
-                id: 'typing',
-                message: "Parfait ! Tapez une lettre au clavier. Pas besoin de cliquer dans la case, tapez directement ⌨️",
-                action: () => this.waitForLetterInput(),
-                waitForUser: true
+                message: "Bienvenue ! Je suis Unisona 🤖✨ Cliquez sur une case de la grille pour commencer à jouer ! 📝",
+                delay: 5000
             },
             {
                 id: 'navigation',
-                message: "Super ! Le curseur avance automatiquement. Utilisez Backspace pour effacer, les flèches ← → ↑ ↓ pour vous déplacer 🎯",
-                action: () => this.showNavigation(),
-                delay: 3000
-            },
-            {
-                id: 'clues',
-                message: "Les indices sont affichés ici 👇 Horizontal → et Vertical ↓. Chaque mot a son numéro.",
-                highlight: '.clues-container',
-                delay: 3000
-            },
-            {
-                id: 'intersection',
-                message: "ASTUCE : Aux intersections avec lettres différentes, vous verrez deux lettres séparées par une diagonale. Appuyez sur TAB pour changer de direction ! 🔄",
-                highlight: '.intersection-cell',
-                delay: 4000
-            },
-            {
-                id: 'modes',
-                message: "3 modes de jeu : 👫 Couple (vertical bleu), 🎯 Normal, 🏁 Course. Changez-les ici !",
-                highlight: '.mode-switcher',
-                delay: 3000
+                message: "Tapez au clavier pour remplir les cases. Utilisez Backspace pour effacer, les flèches ← → ↑ ↓ pour naviguer 🎯",
+                delay: 5000
             },
             {
                 id: 'hints',
-                message: "Besoin d'aide ? Cliquez sur 💡 Indice pour révéler une lettre. Mais attention, ça réduit votre score ! 😉",
+                message: "Besoin d'aide ? Cliquez sur 💡 Indice pour révéler une lettre. Les indices sont sur la droite 👉",
                 highlight: '#hintButton',
-                delay: 3000
-            },
-            {
-                id: 'multiplayer',
-                message: "Vous pouvez aussi jouer en multijoueur ! Créez une salle ou rejoignez des amis pour des courses de mots croisés 🏃‍♂️💨",
-                highlight: '#roomButton',
-                delay: 3000
+                delay: 5000
             },
             {
                 id: 'complete',
-                message: "Voilà ! Vous savez tout 🎉 Bon jeu, et n'hésitez pas à me demander de l'aide dans le chat ! 💬",
+                message: "Bon jeu ! N'hésitez pas à me demander de l'aide dans le chat 💬",
                 action: () => this.completeTutorial(),
-                delay: 2000
+                delay: 3000
             }
         ];
     }
@@ -141,8 +102,8 @@ class TutorialSystem {
             step.action();
         }
 
-        // Si l'étape ne nécessite pas d'attendre l'utilisateur, passer à la suivante après le délai
-        if (!step.waitForUser && step.delay) {
+        // Passer automatiquement à l'étape suivante
+        if (step.delay) {
             setTimeout(() => {
                 this.nextStep();
             }, step.delay);
@@ -220,52 +181,6 @@ class TutorialSystem {
             el.remove();
         });
         this.highlightedElements = [];
-    }
-
-    showWelcome() {
-        // Attendre que l'utilisateur réponde dans le chat ou clique sur "Continuer"
-        // Pour simplifier, on passe automatiquement après 5 secondes
-        setTimeout(() => {
-            this.nextStep();
-        }, 5000);
-    }
-
-    waitForCellClick() {
-        const grid = document.getElementById('crosswordGrid');
-        if (!grid) {
-            this.nextStep();
-            return;
-        }
-
-        const handler = (e) => {
-            const cell = e.target.closest('.cell:not(.blocked)');
-            if (cell) {
-                grid.removeEventListener('click', handler);
-                setTimeout(() => {
-                    this.nextStep();
-                }, 500);
-            }
-        };
-
-        grid.addEventListener('click', handler);
-    }
-
-    waitForLetterInput() {
-        const handler = (e) => {
-            if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
-                document.removeEventListener('keydown', handler);
-                setTimeout(() => {
-                    this.nextStep();
-                }, 1000);
-            }
-        };
-
-        document.addEventListener('keydown', handler);
-    }
-
-    showNavigation() {
-        // Juste montrer, pas d'interaction requise
-        // L'étape suivante se déclenchera automatiquement
     }
 
     completeTutorial() {
