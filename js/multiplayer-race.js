@@ -51,11 +51,6 @@ class MultiplayerRace {
         });
         this.chatSystem.showMessage('🏁 Course démarrée ! 5 minutes pour compléter la grille !', 'system');
 
-        // Envoyer des mises à jour régulières
-        this.progressInterval = setInterval(() => {
-            this.sendProgressUpdate();
-        }, 5000); // Toutes les 5 secondes
-        
         // Mettre à jour l'affichage des joueurs régulièrement
         this.playersUpdateInterval = setInterval(() => {
             this.updatePlayersDisplay();
@@ -141,6 +136,26 @@ class MultiplayerRace {
             });
             this.lastProgressShare = now;
         }
+    }
+    
+    // Partager la progression au niveau complété
+    shareLevelCompleted(level, score) {
+        if (!this.isRaceMode || this.raceFinished) return;
+        
+        // Calculer la progression actuelle
+        this.calculateProgress();
+        
+        // Calculer le score de course
+        const raceScore = score - this.startGameScore;
+        
+        this.broadcastProgress('level_progress', {
+            level: level,
+            score: score,
+            raceScore: raceScore,
+            wordsCompleted: this.myProgress.wordsCompleted,
+            lettersCorrect: this.myProgress.lettersCorrect,
+            totalLetters: this.myProgress.totalLetters
+        });
     }
     
     // Partager un mot trouvé
@@ -251,7 +266,6 @@ class MultiplayerRace {
     // Terminer la course (temps écoulé)
     endRace() {
         clearInterval(this.raceTimer);
-        clearInterval(this.progressInterval);
         clearInterval(this.playersUpdateInterval);
         this.isRaceMode = false;
 
@@ -485,20 +499,35 @@ les yeux fixés sur Jésus." - Hébreux 12:1-2
                 this.updateScoreBox();
                 break;
 
-            case 'update':
+            case 'level_progress':
+                // Progression au niveau complété
                 player.score = data.score || 0;
                 player.raceScore = data.raceScore || 0;
                 player.wordsCompleted = data.wordsCompleted || 0;
+                player.level = data.level || 0;
                 const progress = data.totalLetters > 0 
                     ? Math.round((data.lettersCorrect / data.totalLetters) * 100)
                     : 0;
                 player.progress = progress;
 
-                // Notifier les jalons importants
-                if (data.wordsCompleted > 0 && data.wordsCompleted % 3 === 0 && data.wordsCompleted !== player.lastNotifiedWords) {
-                    player.lastNotifiedWords = data.wordsCompleted;
-                    this.chatSystem.showMessage(`⭐ ${username} : ${data.wordsCompleted} mots complétés !`, 'system');
-                }
+                // Notifier le niveau complété
+                this.chatSystem.showMessage(`🏆 ${username} : Niveau ${data.level} terminé ! (${data.raceScore} pts course)`, 'system');
+                
+                // Mettre à jour l'affichage
+                this.updatePlayersDisplay();
+                this.updateScoreBox();
+                break;
+                
+            case 'update':
+                // Mise à jour manuelle (conservé pour compatibilité)
+                player.score = data.score || 0;
+                player.raceScore = data.raceScore || 0;
+                player.wordsCompleted = data.wordsCompleted || 0;
+                const updateProgress = data.totalLetters > 0 
+                    ? Math.round((data.lettersCorrect / data.totalLetters) * 100)
+                    : 0;
+                player.progress = updateProgress;
+                
                 // Mettre à jour l'affichage
                 this.updatePlayersDisplay();
                 this.updateScoreBox();

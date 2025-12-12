@@ -3,7 +3,8 @@ class ChristianCrosswordGame {
     constructor() {
         this.clickCount = 0;
         this.currentLevel = 1;
-        this.score = 0;          // Score de la partie en cours
+        this.score = 0;          // Score du mode en cours (repart à 0 à chaque mode)
+        this.totalScore = 0;     // Score total cumulé de tous les modes
         this.maxScore = 0;       // Meilleur score jamais atteint
         this.raceScore = 0;      // Score en mode course
         this.gameStarted = false;
@@ -134,6 +135,13 @@ class ChristianCrosswordGame {
             this.clickCount = data.clickCount || 0;
             this.gameStarted = true;
             this.completedWords = new Set(data.completedWords || []);
+            
+            // Charger le score total
+            const savedTotalScore = localStorage.getItem('christianCrosswordTotalScore');
+            if (savedTotalScore) {
+                this.totalScore = parseInt(savedTotalScore, 10) || 0;
+                console.log('🎯 Score total chargé:', this.totalScore);
+            }
                 
             setTimeout(() => {
                     try {
@@ -952,8 +960,31 @@ class ChristianCrosswordGame {
      * @param {string} mode - 'normal' ou 'couple'
      */
     switchGameMode(mode) {
-        if (mode !== 'normal' && mode !== 'couple') {
+        if (mode !== 'normal' && mode !== 'couple' && mode !== 'race') {
             console.error('Mode invalide:', mode);
+            return;
+        }
+        
+        // Le mode course nécessite d'être en salle multijoueur
+        if (mode === 'race') {
+            if (!window.simpleChatSystem || !window.simpleChatSystem.isInRoom()) {
+                if (window.simpleChatSystem) {
+                    window.simpleChatSystem.showMessage('⚠️ Le mode Course nécessite d\'être en salle multijoueur. Créez ou rejoignez une salle d\'abord !', 'system');
+                }
+                return;
+            }
+            
+            // Démarrer le mode course
+            if (window.multiplayerRace) {
+                window.multiplayerRace.startRace();
+                
+                // Mettre à jour l'interface
+                this.updateModeButtons();
+                
+                if (window.audioSystem) {
+                    window.audioSystem.playClick();
+                }
+            }
             return;
         }
 
@@ -971,15 +1002,23 @@ class ChristianCrosswordGame {
 
         // Si le jeu a déjà commencé, on réinitialise
         if (this.gameStarted) {
-            // Réinitialiser la progression
+            // Réinitialiser la progression du mode
             this.currentLevel = 1;
-            this.score = 0;
+            this.score = 0; // Score du mode repart à 0
             this.totalClicks = 0;
             this.totalHintsUsed = 0;
+            this.completedWords = new Set();
             
             // Recharger le niveau
             this.setupLevel();
             this.saveGame();
+            
+            // Notifier le changement de mode
+            if (window.simpleChatSystem) {
+                const modeIcon = mode === 'couple' ? '💕' : '🏆';
+                const modeName = mode === 'couple' ? 'Couple' : 'Normal';
+                window.simpleChatSystem.showMessage(`${modeIcon} Changement de mode : ${modeName} (${gameDataManager.getTotalLevels()} niveaux)`, 'system');
+            }
             
             // Message de confirmation
             if (window.audioSystem) {
@@ -1014,6 +1053,10 @@ class ChristianCrosswordGame {
                 if (icon) icon.textContent = '💕';
                 if (name) name.textContent = 'Mode Couple';
                 if (count) count.textContent = '(122)';
+            } else if (this.gameMode === 'race') {
+                if (icon) icon.textContent = '🏁';
+                if (name) name.textContent = 'Mode Course';
+                if (count) count.textContent = '(5 min)';
             }
         }
         
@@ -1253,21 +1296,8 @@ class ChristianCrosswordGame {
                                 this.multiplayerManager.sendCellUpdate(i, j, letter);
                             }
                             
-                            // Partager la progression en mode course
-                            if (window.multiplayerRace && window.multiplayerRace.isRaceMode) {
-                                window.multiplayerRace.shareProgress();
-                            }
-                            
-                            // Partager l'action avec les joueurs connectés via chat
-                            if (window.simpleChatSystem && window.simpleChatSystem.connections.size > 0) {
-                                window.simpleChatSystem.broadcastGameAction({
-                                    type: 'cell_update',
-                                    row: i,
-                                    col: j,
-                                    letter: letter,
-                                    level: this.currentLevel
-                                });
-                            }
+                            // Ne plus partager chaque lettre (trop fréquent)
+                            // La progression sera partagée seulement lors des mots complets
 
                             // Vérifier si correct
                             if (letter === this.solution[i][j]) {
@@ -1587,7 +1617,10 @@ class ChristianCrosswordGame {
                             type: 'word_completed',
                             word: wordData.word,
                             score: this.score,
-                            level: this.currentLevel
+                            level: this.currentLevel,
+                            gameMode: this.gameMode,
+                            wordsCompleted: completedCount,
+                            totalWords: levelData.words.length
                         });
                     }
                 }
@@ -1665,6 +1698,22 @@ class ChristianCrosswordGame {
             // Notifier dans le chat
             if (typeof window.simpleChatSystem !== 'undefined') {
                 window.simpleChatSystem.showMessage(`🏆 Niveau ${this.currentLevel} terminé ! +${bonusPoints} points bonus`, 'system');
+                
+                // Partager la complétion du niveau avec les autres joueurs
+                if (window.simpleChatSystem.connections.size > 0) {
+                    window.simpleChatSystem.broadcastGameAction({
+                        type: 'level_completed',
+                        level: this.currentLevel,
+                        score: this.score,
+                        gameMode: this.gameMode,
+                        bonusPoints: bonusPoints
+                    });
+                }
+            }
+            
+            // Partager la progression en mode course (au niveau complété)
+            if (window.multiplayerRace && window.multiplayerRace.isRaceMode) {
+                window.multiplayerRace.shareLevelCompleted(this.currentLevel, this.score);
             }
 
             // Sauvegarder automatiquement sur le cloud si connecté
@@ -1674,6 +1723,71 @@ class ChristianCrosswordGame {
             setTimeout(async () => {
                 const totalLevels = gameDataManager.getTotalLevels();
                 if (this.currentLevel < totalLevels) {
+                    // Si des joueurs sont connectés, attendre tout le monde
+                    if (window.simpleChatSystem && window.simpleChatSystem.connections.size > 0) {
+                        // Initialiser le système de classement si nécessaire
+                        if (!this.levelFinishers) {
+                            this.levelFinishers = [];
+                        }
+                        
+                        // Marquer ce joueur comme prêt
+                        this.waitingForPlayers = true;
+                        this.readyForNextLevel = true;
+                        
+                        // Enregistrer l'ordre d'arrivée
+                        const finishPosition = this.levelFinishers.length + 1;
+                        this.levelFinishers.push({
+                            username: window.simpleChatSystem.currentUser,
+                            position: finishPosition,
+                            timestamp: Date.now()
+                        });
+                        
+                        // Calculer le bonus selon la position (seulement en mode Normal)
+                        let positionBonus = 0;
+                        if (this.gameMode === 'normal') {
+                            if (finishPosition === 1) {
+                                positionBonus = 200; // Premier
+                                this.score += positionBonus;
+                                const scoreEl = document.getElementById('infoBannerScore');
+                                if (scoreEl) scoreEl.textContent = this.score;
+                            } else if (finishPosition === 2) {
+                                positionBonus = 100; // Deuxième
+                                this.score += positionBonus;
+                                const scoreEl = document.getElementById('infoBannerScore');
+                                if (scoreEl) scoreEl.textContent = this.score;
+                            } else if (finishPosition === 3) {
+                                positionBonus = 50; // Troisième
+                                this.score += positionBonus;
+                                const scoreEl = document.getElementById('infoBannerScore');
+                                if (scoreEl) scoreEl.textContent = this.score;
+                            }
+                        }
+                        
+                        // Notifier les autres qu'on est prêt avec la position
+                        window.simpleChatSystem.broadcastGameAction({
+                            type: 'ready_next_level',
+                            level: this.currentLevel,
+                            nextLevel: this.currentLevel + 1,
+                            gameMode: this.gameMode,
+                            position: finishPosition,
+                            positionBonus: positionBonus
+                        });
+                        
+                        // Message différent selon le mode
+                        const modeIcon = this.gameMode === 'couple' ? '💕' : '🏆';
+                        const positionText = positionBonus > 0 ? `\n\n🎉 +${positionBonus} points bonus (${finishPosition === 1 ? '1er' : finishPosition === 2 ? '2ème' : '3ème'})!` : '';
+                        await this.showKawaiiModal(`${modeIcon} Niveau terminé !${positionText}\n\n⏳ Attente des autres joueurs...`, '🎉');
+                        
+                        if (typeof window.simpleChatSystem !== 'undefined') {
+                            const bonusMsg = positionBonus > 0 ? ` (+${positionBonus} pts)` : '';
+                            window.simpleChatSystem.showMessage(`${modeIcon} Vous êtes prêt !${bonusMsg} En attente des autres joueurs...`, 'system');
+                        }
+                        
+                        // La suite sera gérée par handleGameAction quand tous seront prêts
+                        return;
+                    }
+                    
+                    // Pas de joueurs connectés : passage automatique
                     // Afficher un message de félicitations rapide
                     await this.showKawaiiModal(i18n.t('congratulations') + '\n' + i18n.t('nextLevel'), '🎉');
                     this.currentLevel++;
@@ -1687,21 +1801,70 @@ class ChristianCrosswordGame {
                     // Sauvegarder le progrès
                     this.saveGame();
                 } else {
+                    // Fin du mode - Ajouter le score du mode au score total
+                    const modeScore = this.score;
+                    this.totalScore += modeScore;
+                    
+                    // Sauvegarder le score total
+                    localStorage.setItem('christianCrosswordTotalScore', this.totalScore.toString());
+                    
+                    // Notifier les autres joueurs
+                    if (window.simpleChatSystem && window.simpleChatSystem.connections.size > 0) {
+                        const modeIcon = this.gameMode === 'couple' ? '💕' : '🏆';
+                        const modeName = this.gameMode === 'couple' ? 'Couple' : 'Normal';
+                        window.simpleChatSystem.broadcastGameAction({
+                            type: 'mode_completed',
+                            gameMode: this.gameMode,
+                            modeScore: modeScore,
+                            totalScore: this.totalScore
+                        });
+                        window.simpleChatSystem.showMessage(`🎆 Mode ${modeName} terminé ! ${modeScore} pts ajoutés au score total (${this.totalScore} pts)`, 'system');
+                    }
+                    
                     // Fin du jeu
                     if (this.cloudConnected) {
+                        // Sauvegarder le score total sur le cloud
+                        await this.saveScoreToCloud();
+                        
                         // Si connecté au cloud, juste afficher un message de félicitations
+                        const modeIcon = this.gameMode === 'couple' ? '💕' : '🏆';
+                        const modeName = this.gameMode === 'couple' ? 'Couple' : 'Normal';
                         await this.showKawaiiModal(
-                            `🎉 Félicitations ! Vous avez terminé tous les niveaux !\n\nScore final: ${this.score} points\n\n✅ Score sauvegardé automatiquement sur le cloud`,
+                            `🎉 Félicitations ! Vous avez terminé le mode ${modeName} !\n\nScore du mode: ${modeScore} points\nScore total: ${this.totalScore} points\n\n✅ Score sauvegardé automatiquement sur le cloud`,
                             '🏆'
                         );
                     } else {
-                        // Sinon, proposer de sauvegarder le score
-                        this.showScoreModal(this.score);
+                        // Sinon, proposer de sauvegarder le score total
+                        this.showScoreModal(this.totalScore);
                     }
-                    // Effacer la sauvegarde car le jeu est terminé
+                    // Effacer la sauvegarde du mode car il est terminé
                     this.clearSave();
                 }
             }, 500);
+        }
+    }
+
+    // Passer au niveau suivant (après attente des joueurs)
+    proceedToNextLevel() {
+        if (!this.waitingForPlayers || !this.readyForNextLevel) return;
+        
+        this.waitingForPlayers = false;
+        this.readyForNextLevel = false;
+        this.levelFinishers = []; // Réinitialiser pour le prochain niveau
+        
+        this.currentLevel++;
+        
+        // Célébrer les jalons avec l'IA
+        if (typeof welcomeAI !== 'undefined') {
+            welcomeAI.celebrateMilestone(this.currentLevel);
+        }
+        
+        this.setupLevel();
+        // Sauvegarder le progrès
+        this.saveGame();
+        
+        if (typeof window.simpleChatSystem !== 'undefined') {
+            window.simpleChatSystem.showMessage('🚀 Tous les joueurs sont prêts ! Passage au niveau ' + this.currentLevel, 'system');
         }
     }
 
@@ -1709,6 +1872,14 @@ class ChristianCrosswordGame {
     openMenu() {
         const modal = document.getElementById('menuModal');
         modal.classList.remove('hidden');
+        
+        // Minimiser la bulle de chat
+        const chatBubble = document.getElementById('chatBubble');
+        const toggleBtn = document.getElementById('toggleChatBubble');
+        if (chatBubble && !chatBubble.classList.contains('minimized')) {
+            chatBubble.classList.add('minimized');
+            if (toggleBtn) toggleBtn.textContent = '+';
+        }
     }
 
     closeMenu() {
@@ -1994,6 +2165,17 @@ class ChristianCrosswordGame {
 
             // Tracker l'utilisation d'un indice pour les achievements
             this.hintsUsedThisLevel++;
+            
+            // Notifier les autres joueurs de l'utilisation d'un indice
+            if (window.simpleChatSystem && window.simpleChatSystem.connections.size > 0) {
+                window.simpleChatSystem.broadcastGameAction({
+                    type: 'hint_used',
+                    level: this.currentLevel,
+                    gameMode: this.gameMode,
+                    hintsUsed: this.hintsUsedThisLevel,
+                    scoreAfterHint: Math.max(0, this.score)
+                });
+            }
             
             // Encourager le joueur avec l'IA
             if (typeof welcomeAI !== 'undefined') {

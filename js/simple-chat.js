@@ -541,18 +541,70 @@ class SimpleChatSystem {
         const { action, username } = data;
         
         switch(action.type) {
-            case 'cell_update':
-                // Afficher dans le chat qu'un joueur a rempli une cellule
-                if (action.level === window.game.currentLevel) {
-                    // Message silencieux, juste pour debug si nécessaire
-                    // this.showMessage(`${username} joue... 🎮`, 'system');
-                }
-                break;
-                
             case 'word_completed':
                 // Afficher quand un joueur complète un mot (masqué pour ne pas spoiler)
                 const maskedWord = '*'.repeat(action.word.length);
-                this.showMessage(`🎉 ${username} a trouvé un mot de ${action.word.length} lettres (${maskedWord}) ! (${action.score} pts)`, 'system');
+                const modeIcon = action.gameMode === 'couple' ? '💕' : '🙏';
+                const progress = action.totalWords ? ` (${action.wordsCompleted}/${action.totalWords})` : '';
+                this.showMessage(`🎉 ${modeIcon} ${username} a trouvé un mot de ${action.word.length} lettres${progress} ! (${action.score} pts)`, 'system');
+                break;
+                
+            case 'level_completed':
+                // Afficher quand un joueur complète un niveau
+                const levelModeIcon = action.gameMode === 'couple' ? '💕' : '🙏';
+                const bonusInfo = action.bonusPoints ? ` (+${action.bonusPoints} bonus)` : '';
+                this.showMessage(`🏆 ${levelModeIcon} ${username} a complété le niveau ${action.level}${bonusInfo} ! (${action.score} pts total)`, 'system');
+                break;
+                
+            case 'hint_used':
+                // Afficher quand un joueur utilise un indice
+                const hintModeIcon = action.gameMode === 'couple' ? '💕' : '🙏';
+                const hintCount = action.hintsUsed > 1 ? ` (${action.hintsUsed}ème indice)` : '';
+                this.showMessage(`💡 ${hintModeIcon} ${username} a utilisé un indice${hintCount} (-5 pts → ${action.scoreAfterHint} pts)`, 'system');
+                break;
+                
+            case 'mode_completed':
+                // Afficher quand un joueur termine un mode complet
+                const completedModeIcon = action.gameMode === 'couple' ? '💕' : '🏆';
+                const completedModeName = action.gameMode === 'couple' ? 'Couple' : 'Normal';
+                this.showMessage(`🎆 ${completedModeIcon} ${username} a terminé le mode ${completedModeName} ! (${action.modeScore} pts → Total: ${action.totalScore} pts)`, 'system');
+                break;
+                
+            case 'ready_next_level':
+                // Un joueur est prêt pour le niveau suivant
+                const modeIcon = action.gameMode === 'couple' ? '💕' : '🏆';
+                
+                // Enregistrer l'ordre d'arrivée de ce joueur
+                if (window.game && window.game.levelFinishers) {
+                    window.game.levelFinishers.push({
+                        username: username,
+                        position: action.position,
+                        timestamp: Date.now()
+                    });
+                }
+                
+                // Message avec position et bonus
+                let readyMsg = `✅ ${modeIcon} ${username} est prêt pour le niveau ${action.nextLevel}`;
+                if (action.position === 1) {
+                    readyMsg += ` 🥇 Premier ! (+${action.positionBonus} pts)`;
+                } else if (action.position === 2) {
+                    readyMsg += ` 🥈 Deuxième (+${action.positionBonus} pts)`;
+                } else if (action.position === 3) {
+                    readyMsg += ` 🥉 Troisième (+${action.positionBonus} pts)`;
+                } else if (action.position) {
+                    readyMsg += ` (${action.position}ème)`;
+                }
+                this.showMessage(readyMsg, 'system');
+                
+                // Vérifier si tous les joueurs sont prêts (simplifié: si je suis prêt aussi)
+                if (window.game && window.game.waitingForPlayers && window.game.readyForNextLevel) {
+                    // Tous prêts, démarrer le niveau suivant
+                    setTimeout(() => {
+                        if (window.game && window.game.waitingForPlayers) {
+                            window.game.proceedToNextLevel();
+                        }
+                    }, 1000);
+                }
                 break;
         }
     }

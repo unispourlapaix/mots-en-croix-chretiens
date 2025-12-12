@@ -12,12 +12,12 @@ const coupleChretienData = {
                 {
                     word: "EGALITE",
                     clue: "Dans le Christ, homme et femme sont égaux en dignité et en valeur",
-                    path: [[0,0], [0,1], [0,2], [0,3], [0,4], [0,5], [0,6]]
+                    path: [[2,1], [2,2], [2,3], [2,4], [2,5], [2,6], [2,7]]
                 },
                 {
                     word: "RESPECT",
                     clue: "Fondement de toute relation authentique",
-                    path: [[0,0], [1,0], [2,0], [3,0], [4,0], [5,0], [6,0]]
+                    path: [[0,3], [1,3], [2,3], [3,3], [4,3], [5,3], [6,3]]
                 }
             ]
         },
@@ -26,12 +26,12 @@ const coupleChretienData = {
                 {
                     word: "AMOUR",
                     clue: "Agapè - L'amour inconditionnel qui construit le couple",
-                    path: [[1,1], [1,2], [1,3], [1,4], [1,5]]
+                    path: [[3,2], [3,3], [3,4], [3,5], [3,6]]
                 },
                 {
                     word: "HONNEUR",
                     clue: "Chacun doit honorer l'autre comme un cadeau de Dieu",
-                    path: [[1,1], [2,1], [3,1], [4,1], [5,1], [6,1], [7,1]]
+                    path: [[1,4], [2,4], [3,4], [4,4], [5,4], [6,4], [7,4]]
                 }
             ]
         },
@@ -45,7 +45,7 @@ const coupleChretienData = {
                 {
                     word: "UNITE",
                     clue: "Deux deviennent un, mais gardent leur identité",
-                    path: [[2,2], [3,2], [4,2], [5,2], [6,2]]
+                    path: [[0,4], [1,4], [2,4], [3,4], [4,4]]
                 }
             ]
         },
@@ -54,12 +54,12 @@ const coupleChretienData = {
                 {
                     word: "ECOUTE",
                     clue: "Entendre vraiment l'autre, avec le cœur",
-                    path: [[1,0], [1,1], [1,2], [1,3], [1,4], [1,5]]
+                    path: [[2,1], [2,2], [2,3], [2,4], [2,5], [2,6]]
                 },
                 {
                     word: "DIALOGUE",
                     clue: "Communication ouverte et honnête",
-                    path: [[1,0], [2,0], [3,0], [4,0], [5,0], [6,0], [7,0], [8,0]]
+                    path: [[0,3], [1,3], [2,3], [3,3], [4,3], [5,3], [6,3], [7,3]]
                 }
             ]
         },
@@ -68,12 +68,12 @@ const coupleChretienData = {
                 {
                     word: "PARTENAIRES",
                     clue: "Équipiers, pas adversaires dans la vie",
-                    path: [[0,1], [1,1], [2,1], [3,1], [4,1], [5,1], [6,1], [7,1], [8,1], [9,1], [9,2]]
+                    path: [[1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2], [9,2], [9,3], [9,4]]
                 },
                 {
                     word: "COMPLEMENTS",
                     clue: "Différents mais complémentaires, pas inférieurs/supérieurs",
-                    path: [[0,1], [0,2], [0,3], [0,4], [0,5], [0,6], [0,7], [0,8], [0,9], [1,9], [2,9]]
+                    path: [[0,5], [1,5], [2,5], [3,5], [4,5], [5,5], [6,5], [7,5], [8,5], [9,5], [9,6]]
                 }
             ]
         },
@@ -84,12 +84,12 @@ const coupleChretienData = {
                 {
                     word: "CHEVALIER",
                     clue: "Femme, si tu cherches un chevalier servant parfait, passe ton chemin",
-                    path: [[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2]]
+                    path: [[1,1], [2,1], [3,1], [4,1], [5,1], [6,1], [7,1], [8,1], [9,1]]
                 },
                 {
                     word: "REALISTE",
                     clue: "Sois réaliste, cherche un homme imparfait mais sincère",
-                    path: [[0,2], [0,3], [0,4], [0,5], [0,6], [0,7], [0,8], [0,9]]
+                    path: [[2,0], [2,1], [2,2], [2,3], [2,4], [2,5], [2,6], [2,7]]
                 }
             ]
         },
@@ -103,7 +103,7 @@ const coupleChretienData = {
                 {
                     word: "HUMAIN",
                     clue: "Accepte son humanité comme il accepte la tienne",
-                    path: [[0,1], [1,1], [2,1], [3,1], [4,1], [5,1]]
+                    path: [[0,3], [1,3], [2,3], [3,3], [4,3], [5,3]]
                 }
             ]
         },
@@ -112,12 +112,12 @@ const coupleChretienData = {
                 {
                     word: "DIGNITE",
                     clue: "La femme a une dignité inviolable, image de Dieu",
-                    path: [[1,1], [1,2], [1,3], [1,4], [1,5], [1,6], [1,7]]
+                    path: [[2,2], [2,3], [2,4], [2,5], [2,6], [2,7], [2,8]]
                 },
                 {
                     word: "VALEUR",
                     clue: "Sa valeur ne dépend pas de son rôle de mère",
-                    path: [[1,1], [2,1], [3,1], [4,1], [5,1], [6,1]]
+                    path: [[0,4], [1,4], [2,4], [3,4], [4,4], [5,4]]
                 }
             ]
         },
@@ -126,12 +126,12 @@ const coupleChretienData = {
                 {
                     word: "PASOBJET",
                     clue: "La femme n'est pas un objet de procréation",
-                    path: [[0,0], [0,1], [0,2], [0,3], [0,4], [0,5], [0,6], [0,7]]
+                    path: [[1,1], [1,2], [1,3], [1,4], [1,5], [1,6], [1,7], [1,8]]
                 },
                 {
                     word: "PERSONNE",
                     clue: "Elle est une personne complète avec ses rêves et dons",
-                    path: [[0,0], [1,0], [2,0], [3,0], [4,0], [5,0], [6,0], [7,0]]
+                    path: [[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2]]
                 }
             ]
         },
@@ -140,12 +140,12 @@ const coupleChretienData = {
                 {
                     word: "AUTONOMIE",
                     clue: "La femme garde son autonomie dans le couple",
-                    path: [[1,0], [1,1], [1,2], [1,3], [1,4], [1,5], [1,6], [1,7], [1,8]]
+                    path: [[2,2], [2,3], [2,4], [2,5], [2,6], [2,7], [2,8], [2,9], [3,9]]
                 },
                 {
                     word: "IDENTITE",
                     clue: "Elle ne perd pas son identité en se mariant",
-                    path: [[1,0], [2,0], [3,0], [4,0], [5,0], [6,0], [7,0], [8,0]]
+                    path: [[0,4], [1,4], [2,4], [3,4], [4,4], [5,4], [6,4], [7,4]]
                 }
             ]
         },
