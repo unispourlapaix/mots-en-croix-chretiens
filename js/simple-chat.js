@@ -572,7 +572,7 @@ class SimpleChatSystem {
                 
             case 'ready_next_level':
                 // Un joueur est prêt pour le niveau suivant
-                const modeIcon = action.gameMode === 'couple' ? '💕' : '🏆';
+                const readyModeIcon = action.gameMode === 'couple' ? '💕' : '🏆';
                 
                 // Enregistrer l'ordre d'arrivée de ce joueur
                 if (window.game && window.game.levelFinishers) {
@@ -584,7 +584,7 @@ class SimpleChatSystem {
                 }
                 
                 // Message avec position et bonus
-                let readyMsg = `✅ ${modeIcon} ${username} est prêt pour le niveau ${action.nextLevel}`;
+                let readyMsg = `✅ ${readyModeIcon} ${username} est prêt pour le niveau ${action.nextLevel}`;
                 if (action.position === 1) {
                     readyMsg += ` 🥇 Premier ! (+${action.positionBonus} pts)`;
                 } else if (action.position === 2) {

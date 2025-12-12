@@ -278,7 +278,7 @@ class ChristianCrosswordGame {
         
         // Charger le mode sauvegardé
         const savedMode = localStorage.getItem('gameMode');
-        if (savedMode && (savedMode === 'normal' || savedMode === 'couple')) {
+        if (savedMode && (savedMode === 'normal' || savedMode === 'couple' || savedMode === 'race')) {
             this.gameMode = savedMode;
             this.updateModeButtons();
         }
