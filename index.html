@@ -826,5 +826,16 @@
     </script>
     <script src="js/ai-simulator.js"></script>
     <script src="js/welcome-ai.js"></script>
+    <script src="js/tutorial-system.js"></script>
+    <script>
+        // Démarrer le tutorial au premier chargement
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                if (window.tutorialSystem) {
+                    tutorialSystem.start();
+                }
+            }, 2000); // Attendre 2 secondes que tout soit chargé
+        });
+    </script>
 </body>
 </html>

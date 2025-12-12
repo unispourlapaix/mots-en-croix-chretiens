@@ -1223,6 +1223,105 @@ body {
     pointer-events: none;
 }
 
+/* Couleurs spécifiques en mode Couple */
+.cell .cell-letter.vertical-letter {
+    color: #00BFFF; /* Bleu ciel pour les lettres verticales */
+}
+
+.cell .cell-letter.horizontal-letter {
+    color: #ff69b4; /* Rose pour les lettres horizontales */
+}
+
+/* Style pour les cellules d'intersection */
+.cell.intersection-cell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+}
+
+/* Ligne diagonale de séparation */
+.cell.intersection-cell::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom right, 
+        transparent 0%, 
+        transparent calc(50% - 1px), 
+        #ff69b4 calc(50% - 1px), 
+        #ff69b4 calc(50% + 1px), 
+        transparent calc(50% + 1px), 
+        transparent 100%);
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Conteneur pour les deux lettres d'intersection */
+.intersection-letters {
+    display: block;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    z-index: 3;
+    pointer-events: none;
+}
+
+/* Lettre horizontale (triangle supérieur gauche) */
+.cell-letter-horiz {
+    position: absolute;
+    top: 25%;
+    left: 25%;
+    font-size: 11px;
+    font-weight: 600;
+    color: #ff1493;
+    text-shadow: 0 0 2px rgba(255, 255, 255, 0.9);
+    transform: translate(-50%, -50%);
+}
+
+.cell-letter-horiz::before {
+    content: '→';
+    position: absolute;
+    left: -14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 8px;
+    color: #ff1493;
+    font-weight: bold;
+}
+
+/* Lettre verticale (triangle inférieur droit) */
+.cell-letter-vert {
+    position: absolute;
+    bottom: 25%;
+    right: 25%;
+    font-size: 11px;
+    font-weight: 600;
+    color: #00BFFF;
+    text-shadow: 0 0 2px rgba(255, 255, 255, 0.9);
+    transform: translate(50%, 50%);
+}
+
+.cell-letter-vert::before {
+    content: '↓';
+    position: absolute;
+    right: -14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 8px;
+    color: #00BFFF;
+    font-weight: bold;
+}
+
+/* Input spécial pour intersection */
+.intersection-input {
+    font-size: 14px !important;
+    color: transparent !important;
+}
+
 .cell.focused {
     outline: none;
     border-color: #ff1493;
@@ -4913,6 +5012,304 @@ body {
     }
 
     .join-room-input button {
+        width: 100%;
+    }
+}
+
+/* ==========================================
+   MODAL DE REPRISE DE PARTIE
+   ========================================== */
+
+.resume-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.resume-modal.show {
+    opacity: 1;
+}
+
+.resume-modal-content {
+    background: linear-gradient(135deg, #ffffff 0%, #fff5f7 100%);
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 600px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(255, 105, 180, 0.3);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    border: 3px solid rgba(255, 105, 180, 0.3);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.resume-modal.show .resume-modal-content {
+    transform: scale(1);
+}
+
+.resume-modal-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.resume-modal-header h2 {
+    color: #ff69b4;
+    font-size: 24px;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(255, 105, 180, 0.2);
+    margin-bottom: 8px;
+}
+
+.resume-subtitle {
+    color: #666;
+    font-size: 14px;
+    margin: 0;
+}
+
+/* Liste des sauvegardes */
+.resume-saves-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.resume-save-item {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    border: 2px solid rgba(255, 105, 180, 0.2);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.resume-save-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 105, 180, 0.2);
+}
+
+.resume-save-item.most-recent {
+    border-color: #4CAF50;
+    background: linear-gradient(135deg, #ffffff 0%, #f0fff0 100%);
+}
+
+.recent-badge {
+    position: absolute;
+    top: -10px;
+    right: 15px;
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
+}
+
+.resume-save-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.resume-save-mode {
+    font-size: 18px;
+    font-weight: 700;
+    color: #ff69b4;
+}
+
+.resume-save-date {
+    font-size: 12px;
+    color: #999;
+}
+
+.resume-save-stats {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.resume-stat {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    background: rgba(255, 105, 180, 0.05);
+    border-radius: 10px;
+}
+
+.resume-stat-label {
+    display: block;
+    font-size: 11px;
+    color: #999;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.resume-stat-value {
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+    color: #ff69b4;
+}
+
+.resume-save-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.resume-save-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.resume-continue-btn {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+}
+
+.resume-continue-btn:hover {
+    background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+    transform: translateY(-1px);
+}
+
+.resume-delete-btn {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    color: white;
+}
+
+.resume-delete-btn:hover {
+    background: linear-gradient(135deg, #ee5a52 0%, #e04b42 100%);
+    transform: translateY(-1px);
+}
+
+/* Footer */
+.resume-modal-footer {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.resume-btn {
+    padding: 15px 25px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.resume-btn-new {
+    background: linear-gradient(135deg, #ff6b9d 0%, #ff1493 100%);
+    color: white;
+}
+
+.resume-btn-new:hover {
+    background: linear-gradient(135deg, #ff1493 0%, #e00080 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(255, 20, 147, 0.3);
+}
+
+.resume-btn-back {
+    background: linear-gradient(135deg, #999 0%, #777 100%);
+    color: white;
+}
+
+.resume-btn-back:hover {
+    background: linear-gradient(135deg, #777 0%, #555 100%);
+    transform: translateY(-2px);
+}
+
+/* Sélection de mode */
+.mode-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.mode-card {
+    background: white;
+    border: 3px solid rgba(255, 105, 180, 0.2);
+    border-radius: 15px;
+    padding: 25px 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.mode-card:hover {
+    transform: translateY(-5px);
+    border-color: #ff69b4;
+    box-shadow: 0 8px 20px rgba(255, 105, 180, 0.3);
+}
+
+.mode-card-icon {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+
+.mode-card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #ff69b4;
+    margin-bottom: 8px;
+}
+
+.mode-card-desc {
+    font-size: 12px;
+    color: #999;
+}
+
+@media (max-width: 600px) {
+    .resume-modal-content {
+        padding: 20px;
+    }
+    
+    .resume-modal-header h2 {
+        font-size: 20px;
+    }
+    
+    .resume-save-stats {
+        flex-wrap: wrap;
+    }
+    
+    .resume-stat {
+        min-width: 80px;
+    }
+    
+    .mode-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .resume-modal-footer {
+        flex-direction: column;
+    }
+    
+    .resume-btn {
         width: 100%;
     }
 }

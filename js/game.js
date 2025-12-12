@@ -8,6 +8,8 @@ class ChristianCrosswordGame {
         this.maxScore = 0;       // Meilleur score jamais atteint
         this.raceScore = 0;      // Score en mode course
         this.gameStarted = false;
+        this.currentWordIndex = null; // Index du mot en cours de saisie
+        this.lastMoveDirection = null; // Direction du dernier mouvement (horizontal/vertical)
         this.gameMode = 'normal'; // 'normal' ou 'couple'
         this.grid = Array(config.gridSize).fill().map(() => Array(config.gridSize).fill(''));
         this.solution = Array(config.gridSize).fill().map(() => Array(config.gridSize).fill(''));
@@ -28,8 +30,8 @@ class ChristianCrosswordGame {
         this.multiplayerMode = false;
         this.multiplayerManager = null;
 
-        // Charger la sauvegarde SEULEMENT si elle existe ET que le jeu était démarré
-        this.loadGame();
+        // Vérifier s'il y a une sauvegarde et demander à l'utilisateur
+        this.checkAndAskForResumeOrRestart();
         this.loadAudioSettings();
 
         this.initializeEventListeners();
@@ -91,24 +93,80 @@ class ChristianCrosswordGame {
             return;
         }
         
-        // Sauvegarder de manière minimale : level, score et mots complétés
+        // Mode Race ne sauvegarde pas la progression (seulement le score)
+        if (this.gameMode === 'race') {
+            console.log('🏁 Mode Race: pas de sauvegarde de progression');
+            return;
+        }
+        
+        // Sauvegarder la progression complète
         const saveData = {
             currentLevel: this.currentLevel,
             score: this.score,
             clickCount: this.clickCount,
             gameStarted: this.gameStarted,
-            completedWords: Array.from(this.completedWords || []), // Mots déjà complétés
+            gameMode: this.gameMode,
+            completedWords: Array.from(this.completedWords || []),
+            grid: this.grid, // Sauvegarder la grille en cours
+            currentWordIndex: this.currentWordIndex,
+            lastMoveDirection: this.lastMoveDirection,
+            hintsUsedThisLevel: this.hintsUsedThisLevel,
             timestamp: Date.now()
         };
-        localStorage.setItem('christianCrosswordSave', JSON.stringify(saveData));
+        
+        // Sauvegarder avec une clé spécifique au mode de jeu
+        const saveKey = `christianCrosswordSave_${this.gameMode}`;
+        localStorage.setItem(saveKey, JSON.stringify(saveData));
+        console.log(`💾 Partie sauvegardée [${this.gameMode.toUpperCase()}] - Niveau ${this.currentLevel} - Score ${this.score}`);
+        
+        // Partager la progression en multijoueur si on est l'hôte
+        if (this.multiplayerManager && this.multiplayerManager.isHost && this.multiplayerManager.isConnected) {
+            this.multiplayerManager.shareGameProgress();
+        }
+        
+        // Envoyer le score mis à jour en multijoueur
+        if (this.multiplayerManager && this.multiplayerManager.isConnected) {
+            this.multiplayerManager.sendScoreUpdate();
+        }
     }
 
     loadGame() {
-        const savedData = localStorage.getItem('christianCrosswordSave');
+        // Mode Race ne charge pas de progression
+        if (this.gameMode === 'race') {
+            console.log('🏁 Mode Race: pas de chargement de progression');
+            return;
+        }
         
-        // Si pas de sauvegarde, rester en mode premier démarrage
+        // Charger la sauvegarde du mode actuel (ou du mode par défaut)
+        const currentMode = this.gameMode || localStorage.getItem('gameMode') || 'normal';
+        const saveKey = `christianCrosswordSave_${currentMode}`;
+        const savedData = localStorage.getItem(saveKey);
+        
+        // Si pas de sauvegarde pour ce mode, vérifier l'ancienne clé (migration)
         if (!savedData) {
-            console.log('📂 Aucune sauvegarde - Première visite');
+            const oldSave = localStorage.getItem('christianCrosswordSave');
+            if (oldSave) {
+                try {
+                    const oldData = JSON.parse(oldSave);
+                    // Migrer vers la nouvelle clé selon le mode sauvegardé
+                    const oldMode = oldData.gameMode || 'normal';
+                    const newKey = `christianCrosswordSave_${oldMode}`;
+                    localStorage.setItem(newKey, oldSave);
+                    localStorage.removeItem('christianCrosswordSave');
+                    console.log(`🔄 Migration sauvegarde vers mode ${oldMode}`);
+                    
+                    // Si c'est le mode actuel, continuer le chargement
+                    if (oldMode === currentMode) {
+                        this.loadGameFromData(oldData);
+                        return;
+                    }
+                } catch (e) {
+                    console.error('❌ Erreur migration:', e);
+                }
+            }
+            
+            console.log(`📂 Aucune sauvegarde pour le mode [${currentMode.toUpperCase()}]`);
+            this.checkOtherModeSaves();
             return;
         }
         
@@ -117,24 +175,92 @@ class ChristianCrosswordGame {
             
             // CRITICAL: Charger SEULEMENT si le jeu était vraiment démarré
             if (!data.gameStarted) {
-                console.log('📂 Sauvegarde existe mais jeu non démarré - Ignorer');
+                console.log(`📂 Sauvegarde [${currentMode.toUpperCase()}] existe mais jeu non démarré - Ignorer`);
                 return;
             }
             
-            console.log('📂 Restauration partie en cours:', {
-                level: data.currentLevel,
-                score: data.score,
-                completedWordsCount: data.completedWords?.length || 0
+            this.loadGameFromData(data);
+        } catch (e) {
+            console.error('❌ Erreur chargement sauvegarde:', e);
+            // En cas d'erreur de parsing, effacer la sauvegarde corrompue
+            localStorage.removeItem(saveKey);
+        }
+    }
+
+    checkOtherModeSaves() {
+        // Vérifier s'il existe des sauvegardes dans d'autres modes (seulement Normal et Couple)
+        const modes = ['normal', 'couple'];
+        const availableSaves = [];
+        
+        modes.forEach(mode => {
+            const saveKey = `christianCrosswordSave_${mode}`;
+            const save = localStorage.getItem(saveKey);
+            if (save) {
+                try {
+                    const data = JSON.parse(save);
+                    if (data.gameStarted) {
+                        availableSaves.push({
+                            mode,
+                            level: data.currentLevel,
+                            score: data.score,
+                            timestamp: data.timestamp
+                        });
+                    }
+                } catch (e) {
+                    // Ignorer les sauvegardes corrompues
+                }
+            }
+        });
+        
+        if (availableSaves.length > 0) {
+            console.log('💡 Parties disponibles dans d\'autres modes:');
+            availableSaves.forEach(save => {
+                const modeEmoji = save.mode === 'couple' ? '👫' : save.mode === 'race' ? '🏁' : '🎯';
+                console.log(`   ${modeEmoji} ${save.mode.toUpperCase()}: Niveau ${save.level}, Score ${save.score}`);
             });
-                
-            // Restaurer l'état du jeu
-            this.currentLevel = data.currentLevel || 1;
-            this.score = data.score || 0;
-            this.maxScore = data.maxScore || this.score; // Utiliser maxScore sauvegardé ou score actuel
-            this.raceScore = data.raceScore || 0;
+            
+            // Afficher un message dans le chat si disponible
+            if (window.simpleChatSystem) {
+                const modeNames = availableSaves.map(s => {
+                    const emoji = s.mode === 'couple' ? '👫' : s.mode === 'race' ? '🏁' : '🎯';
+                    return `${emoji} ${s.mode} (niv.${s.level})`;
+                }).join(', ');
+                window.simpleChatSystem.showMessage(
+                    `💡 Vous avez des parties en cours: ${modeNames}. Changez de mode pour les reprendre !`,
+                    'system'
+                );
+            }
+        }
+    }
+
+    loadGameFromData(data) {
+        console.log(`📂 Restauration partie [${data.gameMode?.toUpperCase() || 'NORMAL'}]:`, {
+            level: data.currentLevel,
+            score: data.score,
+            completedWordsCount: data.completedWords?.length || 0
+        });
+            
+        // Restaurer l'état du jeu
+        this.currentLevel = data.currentLevel || 1;
+        this.score = data.score || 0;
+        this.maxScore = data.maxScore || this.score; // Utiliser maxScore sauvegardé ou score actuel
+        this.raceScore = data.raceScore || 0;
             this.clickCount = data.clickCount || 0;
             this.gameStarted = true;
+            this.gameMode = data.gameMode || 'normal';
             this.completedWords = new Set(data.completedWords || []);
+            this.currentWordIndex = data.currentWordIndex || null;
+            this.lastMoveDirection = data.lastMoveDirection || null;
+            this.hintsUsedThisLevel = data.hintsUsedThisLevel || 0;
+            
+            // Restaurer la grille si elle existe
+            if (data.grid) {
+                this.grid = data.grid;
+                console.log('📝 Grille restaurée avec', 
+                    this.grid.flat().filter(cell => cell && cell !== '').length, 
+                    'lettres'
+                );
+            }
             
             // Charger le score total
             const savedTotalScore = localStorage.getItem('christianCrosswordTotalScore');
@@ -161,6 +287,9 @@ class ChristianCrosswordGame {
                         // Recharger le niveau complètement
                         this.setupLevel();
                         
+                        // Restaurer les lettres saisies
+                        this.restoreGridLetters();
+                        
                         // Compléter automatiquement les mots déjà complétés
                         this.restoreCompletedWords();
                         
@@ -171,15 +300,11 @@ class ChristianCrosswordGame {
                         document.getElementById('startScreen').classList.remove('hidden');
                         document.getElementById('gameScreen').classList.add('hidden');
                         document.getElementById('playButton').style.display = 'inline-block';
-                        // Effacer la sauvegarde corrompue
-                        localStorage.removeItem('christianCrosswordSave');
+                        // Effacer la sauvegarde corrompue du mode actuel
+                        const saveKey = `christianCrosswordSave_${this.gameMode}`;
+                        localStorage.removeItem(saveKey);
                     }
                 }, 100);
-        } catch (e) {
-            console.error('❌ Erreur chargement sauvegarde:', e);
-            // En cas d'erreur de parsing, effacer la sauvegarde corrompue
-            localStorage.removeItem('christianCrosswordSave');
-        }
     }
 
     clearSave() {
@@ -195,14 +320,291 @@ class ChristianCrosswordGame {
         this.raceScore = 0;
         this.clickCount = 0;
         
-        // Effacer localStorage
+        // Effacer toutes les sauvegardes de tous les modes
+        const modes = ['normal', 'couple', 'race'];
+        modes.forEach(mode => {
+            const saveKey = `christianCrosswordSave_${mode}`;
+            localStorage.removeItem(saveKey);
+        });
+        // Effacer aussi l'ancienne clé pour migration
         localStorage.removeItem('christianCrosswordSave');
         
         // Marquer qu'on a effacé pour éviter que le cloud recharge
         this.saveCleared = true;
         
-        console.log('🗑️ Sauvegarde locale effacée - Remise à zéro complète');
+        console.log('🗑️ Toutes les sauvegardes effacées (Normal, Couple, Race)');
         console.log('🔒 Blocage des sauvegardes activé');
+    }
+
+    checkAndAskForResumeOrRestart() {
+        // Récupérer toutes les sauvegardes disponibles (Normal et Couple uniquement)
+        const modes = ['normal', 'couple'];
+        const availableSaves = [];
+        
+        modes.forEach(mode => {
+            const saveKey = `christianCrosswordSave_${mode}`;
+            const save = localStorage.getItem(saveKey);
+            if (save) {
+                try {
+                    const data = JSON.parse(save);
+                    if (data.gameStarted) {
+                        availableSaves.push({
+                            mode,
+                            data,
+                            saveKey,
+                            timestamp: data.timestamp || 0
+                        });
+                    }
+                } catch (e) {
+                    console.error(`❌ Erreur lecture sauvegarde ${mode}:`, e);
+                }
+            }
+        });
+        
+        // Vérifier aussi l'ancienne clé pour migration
+        const oldSave = localStorage.getItem('christianCrosswordSave');
+        if (oldSave && availableSaves.length === 0) {
+            try {
+                const oldData = JSON.parse(oldSave);
+                if (oldData.gameStarted) {
+                    const oldMode = oldData.gameMode || 'normal';
+                    availableSaves.push({
+                        mode: oldMode,
+                        data: oldData,
+                        saveKey: 'christianCrosswordSave',
+                        timestamp: oldData.timestamp || 0,
+                        needsMigration: true
+                    });
+                }
+            } catch (e) {
+                console.error('❌ Erreur lecture ancienne sauvegarde:', e);
+            }
+        }
+        
+        if (availableSaves.length === 0) {
+            console.log('📂 Aucune sauvegarde - Première visite');
+            return;
+        }
+        
+        // Trier par timestamp décroissant (plus récent en premier)
+        availableSaves.sort((a, b) => b.timestamp - a.timestamp);
+        
+        // Afficher la modal de choix
+        this.showResumeModal(availableSaves);
+    }
+
+    showResumeModal(availableSaves) {
+        const modal = document.createElement('div');
+        modal.className = 'resume-modal';
+        
+        // Créer la liste des parties disponibles
+        const savesHTML = availableSaves.map((save, index) => {
+            const modeEmoji = save.mode === 'couple' ? '👫' : save.mode === 'race' ? '🏁' : '🎯';
+            const modeName = save.mode === 'couple' ? 'Couple' : save.mode === 'race' ? 'Course' : 'Normal';
+            const lettresCount = save.data.grid ? save.data.grid.flat().filter(cell => cell && cell !== '').length : 0;
+            const isRecent = index === 0;
+            const date = save.timestamp ? new Date(save.timestamp).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+            
+            return `
+                <div class="resume-save-item ${isRecent ? 'most-recent' : ''}" data-mode="${save.mode}">
+                    ${isRecent ? '<div class="recent-badge">Plus récent</div>' : ''}
+                    <div class="resume-save-header">
+                        <span class="resume-save-mode">${modeEmoji} ${modeName}</span>
+                        ${date ? `<span class="resume-save-date">${date}</span>` : ''}
+                    </div>
+                    <div class="resume-save-stats">
+                        <div class="resume-stat">
+                            <span class="resume-stat-label">Niveau</span>
+                            <span class="resume-stat-value">${save.data.currentLevel}</span>
+                        </div>
+                        <div class="resume-stat">
+                            <span class="resume-stat-label">Score</span>
+                            <span class="resume-stat-value">${save.data.score}</span>
+                        </div>
+                        ${lettresCount > 0 ? `
+                        <div class="resume-stat">
+                            <span class="resume-stat-label">Lettres</span>
+                            <span class="resume-stat-value">${lettresCount}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                    <div class="resume-save-actions">
+                        <button class="resume-save-btn resume-continue-btn" data-index="${index}">
+                            ▶️ Continuer
+                        </button>
+                        <button class="resume-save-btn resume-delete-btn" data-index="${index}">
+                            🗑️ Supprimer
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        modal.innerHTML = `
+            <div class="resume-modal-content">
+                <div class="resume-modal-header">
+                    <h2>🎮 Parties sauvegardées</h2>
+                    <p class="resume-subtitle">Choisissez une partie à reprendre ou commencez une nouvelle</p>
+                </div>
+                <div class="resume-modal-body">
+                    <div class="resume-saves-list">
+                        ${savesHTML}
+                    </div>
+                </div>
+                <div class="resume-modal-footer">
+                    <button class="resume-btn resume-btn-new" id="resumeNewGame">
+                        ✨ Nouvelle partie
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Gérer les boutons de continuation
+        modal.querySelectorAll('.resume-continue-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = parseInt(e.target.dataset.index);
+                const save = availableSaves[index];
+                
+                // Migrer si nécessaire
+                if (save.needsMigration) {
+                    const newKey = `christianCrosswordSave_${save.mode}`;
+                    localStorage.setItem(newKey, JSON.stringify(save.data));
+                    localStorage.removeItem('christianCrosswordSave');
+                    console.log(`🔄 Migration sauvegarde vers ${save.mode}`);
+                }
+                
+                // Définir le mode avant de charger
+                this.gameMode = save.mode;
+                localStorage.setItem('gameMode', save.mode);
+                
+                modal.remove();
+                this.loadGameFromData(save.data);
+                
+                if (window.simpleChatSystem) {
+                    window.simpleChatSystem.showMessage(
+                        `▶️ Reprise de la partie ${save.mode === 'couple' ? '👫' : save.mode === 'race' ? '🏁' : '🎯'} ${save.mode.toUpperCase()} - Niveau ${save.data.currentLevel}`,
+                        'system'
+                    );
+                }
+            });
+        });
+        
+        // Gérer les boutons de suppression
+        modal.querySelectorAll('.resume-delete-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = parseInt(e.target.dataset.index);
+                const save = availableSaves[index];
+                
+                if (confirm(`Êtes-vous sûr de vouloir supprimer la partie ${save.mode.toUpperCase()} ?`)) {
+                    localStorage.removeItem(save.saveKey);
+                    availableSaves.splice(index, 1);
+                    
+                    if (availableSaves.length === 0) {
+                        modal.remove();
+                        console.log('🗑️ Toutes les sauvegardes supprimées');
+                    } else {
+                        // Rafraîchir la modal
+                        modal.remove();
+                        this.showResumeModal(availableSaves);
+                    }
+                    
+                    if (window.simpleChatSystem) {
+                        window.simpleChatSystem.showMessage(
+                            `🗑️ Partie ${save.mode.toUpperCase()} supprimée`,
+                            'system'
+                        );
+                    }
+                }
+            });
+        });
+        
+        // Gérer le bouton "Nouvelle partie"
+        document.getElementById('resumeNewGame').addEventListener('click', () => {
+            modal.remove();
+            // Afficher une sous-modal pour choisir le mode
+            this.showNewGameModeSelection();
+        });
+        
+        // Animation d'entrée
+        setTimeout(() => modal.classList.add('show'), 10);
+    }
+
+    showNewGameModeSelection() {
+        const modal = document.createElement('div');
+        modal.className = 'resume-modal';
+        modal.innerHTML = `
+            <div class="resume-modal-content mode-selection">
+                <div class="resume-modal-header">
+                    <h2>✨ Nouvelle partie</h2>
+                    <p class="resume-subtitle">Choisissez un mode de jeu</p>
+                </div>
+                <div class="resume-modal-body">
+                    <div class="mode-cards">
+                        <div class="mode-card" data-mode="normal">
+                            <div class="mode-card-icon">🎯</div>
+                            <div class="mode-card-title">Normal</div>
+                            <div class="mode-card-desc">Mode classique pour découvrir</div>
+                        </div>
+                        <div class="mode-card" data-mode="couple">
+                            <div class="mode-card-icon">👫</div>
+                            <div class="mode-card-title">Couple</div>
+                            <div class="mode-card-desc">Mots d'amour et d'unité</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="resume-modal-footer">
+                    <button class="resume-btn resume-btn-back" id="backToSaves">
+                        ← Retour
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Gérer le clic sur les cartes de mode
+        modal.querySelectorAll('.mode-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const mode = card.dataset.mode;
+                
+                // Vérifier s'il existe déjà une sauvegarde pour ce mode
+                const saveKey = `christianCrosswordSave_${mode}`;
+                const existingSave = localStorage.getItem(saveKey);
+                
+                if (existingSave) {
+                    if (confirm(`Une partie ${mode.toUpperCase()} existe déjà. La supprimer pour recommencer ?`)) {
+                        localStorage.removeItem(saveKey);
+                    } else {
+                        modal.remove();
+                        return;
+                    }
+                }
+                
+                // Définir le mode et commencer
+                this.gameMode = mode;
+                localStorage.setItem('gameMode', mode);
+                
+                modal.remove();
+                
+                if (window.simpleChatSystem) {
+                    const modeEmoji = mode === 'couple' ? '👫' : mode === 'race' ? '🏁' : '🎯';
+                    window.simpleChatSystem.showMessage(
+                        `${modeEmoji} Nouvelle partie en mode ${mode.toUpperCase()} !`,
+                        'system'
+                    );
+                }
+            });
+        });
+        
+        // Bouton retour
+        document.getElementById('backToSaves').addEventListener('click', () => {
+            modal.remove();
+            this.checkAndAskForResumeOrRestart();
+        });
+        
+        setTimeout(() => modal.classList.add('show'), 10);
     }
 
     restoreCompletedWords() {
@@ -240,6 +642,56 @@ class ChristianCrosswordGame {
         });
         
         console.log('✅ Mots restaurés');
+    }
+
+    restoreGridLetters() {
+        // Restaurer toutes les lettres saisies dans la grille
+        if (!this.grid) return;
+        
+        console.log('🔄 Restauration des lettres saisies...');
+        let restoredCount = 0;
+        
+        for (let i = 0; i < config.gridSize; i++) {
+            for (let j = 0; j < config.gridSize; j++) {
+                const cellValue = this.grid[i][j];
+                if (cellValue && cellValue !== '') {
+                    const cellElement = document.querySelector(`[data-row="${i}"][data-col="${j}"]`);
+                    if (!cellElement) continue;
+                    
+                    // Gérer les intersections (format "A/B")
+                    if (cellValue.includes('/')) {
+                        const [letter1, letter2] = cellValue.split('/');
+                        const letter1Span = cellElement.querySelector('.cell-letter-horiz');
+                        const letter2Span = cellElement.querySelector('.cell-letter-vert');
+                        
+                        if (letter1Span && letter1) letter1Span.textContent = letter1;
+                        if (letter2Span && letter2) letter2Span.textContent = letter2;
+                        
+                        // Vérifier si les deux sont correctes
+                        const expected1 = letter1Span?.dataset.expected;
+                        const expected2 = letter2Span?.dataset.expected;
+                        if (letter1 === expected1 && letter2 === expected2) {
+                            cellElement.classList.add('correct');
+                        }
+                    } 
+                    // Gérer les cases normales
+                    else {
+                        const letterSpan = cellElement.querySelector('.cell-letter');
+                        if (letterSpan) {
+                            letterSpan.textContent = cellValue;
+                            
+                            // Vérifier si correcte
+                            if (cellValue === this.solution[i][j]) {
+                                cellElement.classList.add('correct');
+                            }
+                        }
+                    }
+                    restoredCount++;
+                }
+            }
+        }
+        
+        console.log(`✅ ${restoredCount} lettres restaurées`);
     }
 
     initializeEventListeners() {
@@ -993,16 +1445,50 @@ class ChristianCrosswordGame {
             return;
         }
 
-        // Sauvegarder le nouveau mode
+        const previousMode = this.gameMode;
+        
+        // Sauvegarder la partie en cours du mode actuel avant de changer
+        if (this.gameStarted) {
+            this.saveGame();
+        }
+
+        // Changer le mode
         this.gameMode = mode;
         localStorage.setItem('gameMode', mode);
 
         // Mettre à jour l'affichage des boutons
         this.updateModeButtons();
 
-        // Si le jeu a déjà commencé, on réinitialise
+        // Si le jeu a déjà commencé, essayer de charger la sauvegarde du nouveau mode
         if (this.gameStarted) {
-            // Réinitialiser la progression du mode
+            const saveKey = `christianCrosswordSave_${mode}`;
+            const savedData = localStorage.getItem(saveKey);
+            
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+                    if (data.gameStarted) {
+                        // Charger la partie sauvegardée du nouveau mode
+                        console.log(`🔄 Changement de mode: ${previousMode} → ${mode} (reprise partie)`);
+                        this.loadGameFromData(data);
+                        
+                        // Notifier
+                        if (window.simpleChatSystem) {
+                            const modeEmoji = mode === 'couple' ? '👫' : mode === 'race' ? '🏁' : '🎯';
+                            window.simpleChatSystem.showMessage(
+                                `${modeEmoji} Mode ${mode.toUpperCase()} - Partie reprise au niveau ${data.currentLevel} !`,
+                                'system'
+                            );
+                        }
+                        return;
+                    }
+                } catch (e) {
+                    console.error('❌ Erreur chargement sauvegarde du mode', mode, ':', e);
+                }
+            }
+            
+            // Pas de sauvegarde pour ce mode, réinitialiser
+            console.log(`🔄 Changement de mode: ${previousMode} → ${mode} (nouvelle partie)`);
             this.currentLevel = 1;
             this.score = 0; // Score du mode repart à 0
             this.totalClicks = 0;
@@ -1103,12 +1589,22 @@ class ChristianCrosswordGame {
         const levelData = gameDataManager.getLevelData(this.currentLevel);
 
         if (levelData) {
-            // Sauvegarder les mots du niveau pour pouvoir les restaurer
-            this.words = levelData.words;
+            // Enrichir les mots avec la direction détectée si elle n'existe pas
+            this.words = levelData.words.map((wordData, index) => {
+                if (!wordData.direction && wordData.path) {
+                    const detectedDirection = this.detectWordDirection(wordData.path);
+                    console.log(`🔍 Mot #${index} "${wordData.word}": direction détectée = ${detectedDirection}`);
+                    return {
+                        ...wordData,
+                        direction: detectedDirection
+                    };
+                }
+                return wordData;
+            });
             
-            this.placeWords(levelData.words);
-            this.createGrid(levelData.words);
-            this.displayClues(levelData.words);
+            this.placeWords(this.words);
+            this.createGrid(this.words);
+            this.displayClues(this.words);
             const currentLevelEl = document.getElementById('infoBannerLevel');
             if (currentLevelEl) currentLevelEl.textContent = this.currentLevel;
         }
@@ -1121,24 +1617,96 @@ class ChristianCrosswordGame {
     }
 
     placeWords(words) {
-        words.forEach(wordData => {
+        // Initialiser un tableau pour détecter les intersections
+        this.intersections = Array(config.gridSize).fill().map(() => Array(config.gridSize).fill(null));
+        
+        words.forEach((wordData, wordIndex) => {
             const { word, path, start, direction } = wordData;
 
             // Support des mots coudés avec path (nouveau système)
             if (path && Array.isArray(path)) {
                 for (let i = 0; i < word.length && i < path.length; i++) {
                     const [row, col] = path[i];
-                    this.solution[row][col] = word[i];
+                    const currentLetter = word[i];
+                    
+                    // Détecter intersection avec lettre différente
+                    if (this.solution[row][col] && this.solution[row][col] !== currentLetter) {
+                        const existingSolution = this.solution[row][col];
+                        const existingLetter = existingSolution.includes('/') ? existingSolution.split('/')[0] : existingSolution;
+                        
+                        // Vérifier que direction est bien définie
+                        if (!direction) {
+                            console.error(`⚠️ Mot #${wordIndex} "${word}" n'a pas de direction définie!`);
+                        }
+                        
+                        // Déterminer quelle lettre est horizontale et verticale
+                        let horizLetter, vertLetter;
+                        if (direction === 'horizontal') {
+                            horizLetter = currentLetter;
+                            vertLetter = existingLetter;
+                        } else if (direction === 'vertical') {
+                            horizLetter = existingLetter;
+                            vertLetter = currentLetter;
+                        } else {
+                            // Fallback pour mots coudés : ne pas créer d'intersection spéciale
+                            console.warn(`⚠️ Intersection ignorée pour mot coudé "${word}" à [${row},${col}]`);
+                            continue;
+                        }
+                        
+                        // Stocker avec les directions explicites
+                        this.intersections[row][col] = {
+                            horizontal: horizLetter,
+                            vertical: vertLetter,
+                            letter1: horizLetter,  // Pour compatibilité
+                            letter2: vertLetter     // Pour compatibilité
+                        };
+                        // Format solution : horizontal/vertical
+                        this.solution[row][col] = `${horizLetter}/${vertLetter}`;
+                        console.log(`📍 Intersection à [${row},${col}]: H="${horizLetter}" V="${vertLetter}" (mot: ${word})`);
+                    } else if (!this.solution[row][col]) {
+                        this.solution[row][col] = currentLetter;
+                    }
                 }
             }
             // Support des mots droits (ancien système pour compatibilité)
             else if (start && direction) {
                 const [row, col] = start;
                 for (let i = 0; i < word.length; i++) {
+                    const currentLetter = word[i];
+                    let targetRow = row, targetCol = col;
+                    
                     if (direction === 'horizontal') {
-                        this.solution[row][col + i] = word[i];
+                        targetCol = col + i;
                     } else {
-                        this.solution[row + i][col] = word[i];
+                        targetRow = row + i;
+                    }
+                    
+                    // Détecter intersection avec lettre différente
+                    if (this.solution[targetRow][targetCol] && this.solution[targetRow][targetCol] !== currentLetter) {
+                        const existingSolution = this.solution[targetRow][targetCol];
+                        const existingLetter = existingSolution.includes('/') ? existingSolution.split('/')[0] : existingSolution;
+                        
+                        // Déterminer quelle lettre est horizontale et verticale
+                        let horizLetter, vertLetter;
+                        if (direction === 'horizontal') {
+                            horizLetter = currentLetter;
+                            vertLetter = existingLetter;
+                        } else {
+                            horizLetter = existingLetter;
+                            vertLetter = currentLetter;
+                        }
+                        
+                        // Stocker avec les directions explicites
+                        this.intersections[targetRow][targetCol] = {
+                            horizontal: horizLetter,
+                            vertical: vertLetter,
+                            letter1: horizLetter,  // Pour compatibilité
+                            letter2: vertLetter     // Pour compatibilité
+                        };
+                        // Format solution : horizontal/vertical
+                        this.solution[targetRow][targetCol] = `${horizLetter}/${vertLetter}`;
+                    } else if (!this.solution[targetRow][targetCol]) {
+                        this.solution[targetRow][targetCol] = currentLetter;
                     }
                 }
             }
@@ -1254,25 +1822,127 @@ class ChristianCrosswordGame {
                         cell.appendChild(iconSpan);
                     }
 
-                    // Créer un span visible pour afficher la lettre
-                    const letterSpan = document.createElement('span');
-                    letterSpan.className = 'cell-letter';
-                    cell.appendChild(letterSpan);
+                    // Vérifier si c'est une intersection avec lettres différentes
+                    const isIntersection = this.intersections[i][j] !== null;
+                    
+                    // Déclarer input et letterSpan avant le bloc if/else pour la portée
+                    let input;
+                    let letterSpan = null;
+                    
+                    if (isIntersection) {
+                        // Case d'intersection spéciale
+                        cell.classList.add('intersection-cell');
+                        
+                        // Créer deux spans pour les deux lettres
+                        const letterContainer = document.createElement('div');
+                        letterContainer.className = 'intersection-letters';
+                        
+                        const letter1Span = document.createElement('span');
+                        letter1Span.className = 'cell-letter-horiz';
+                        letter1Span.dataset.expected = this.intersections[i][j].horizontal || this.intersections[i][j].letter1;
+                        letter1Span.dataset.direction = 'horizontal';
+                        letterContainer.appendChild(letter1Span);
+                        
+                        const letter2Span = document.createElement('span');
+                        letter2Span.className = 'cell-letter-vert';
+                        letter2Span.dataset.expected = this.intersections[i][j].vertical || this.intersections[i][j].letter2;
+                        letter2Span.dataset.direction = 'vertical';
+                        letterContainer.appendChild(letter2Span);
+                        
+                        cell.appendChild(letterContainer);
+                        
+                        // Input acceptant 2 caractères pour intersection
+                        input = document.createElement('input');
+                        input.type = 'text';
+                        input.maxLength = 2;
+                        input.className = 'cell-input intersection-input';
+                        input.autocomplete = 'off';
+                        input.autocorrect = 'off';
+                        input.autocapitalize = 'characters';
+                        input.placeholder = '2';
+                        cell.appendChild(input);
+                    } else {
+                        // Case normale
+                        letterSpan = document.createElement('span');
+                        letterSpan.className = 'cell-letter';
+                        
+                        // En mode Couple, ajouter une classe selon la direction du mot
+                        if (this.gameMode === 'couple') {
+                            // Trouver la direction du mot contenant cette case
+                            const wordData = words.find(w => 
+                                w.path && w.path.some(([r, c]) => r === i && c === j)
+                            );
+                            if (wordData && wordData.path) {
+                                // Détecter la direction en analysant le path
+                                const direction = this.detectWordDirection(wordData.path);
+                                if (direction === 'vertical') {
+                                    letterSpan.classList.add('vertical-letter');
+                                } else if (direction === 'horizontal') {
+                                    letterSpan.classList.add('horizontal-letter');
+                                }
+                            }
+                        }
+                        
+                        cell.appendChild(letterSpan);
 
-                    // Créer un input transparent pour la saisie
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.maxLength = 1;
-                    input.className = 'cell-input';
-                    input.autocomplete = 'off';
-                    input.autocorrect = 'off';
-                    input.autocapitalize = 'characters';
-                    cell.appendChild(input);
+                        // Créer un input transparent pour la saisie
+                        input = document.createElement('input');
+                        input.type = 'text';
+                        input.maxLength = 1;
+                        input.className = 'cell-input';
+                        input.autocomplete = 'off';
+                        input.autocorrect = 'off';
+                        input.autocapitalize = 'characters';
+                        cell.appendChild(input);
+                    }
 
                     // Gérer le focus
                     input.addEventListener('focus', () => {
                         document.querySelectorAll('.cell.focused').forEach(c => c.classList.remove('focused'));
                         cell.classList.add('focused');
+                        
+                        // Déterminer le mot en cours quand on clique sur une case
+                        // Utiliser this.words (version enrichie avec directions) au lieu de levelData.words
+                        if (this.words && this.words.length > 0) {
+                            // Trouver tous les mots contenant cette case
+                            const wordsAtCell = this.words
+                                .map((wordData, index) => ({
+                                    wordData,
+                                    index,
+                                    cellIndex: wordData.path ? wordData.path.findIndex(([r, c]) => r === i && c === j) : -1
+                                }))
+                                .filter(w => w.cellIndex !== -1);
+                            
+                            if (wordsAtCell.length > 0) {
+                                let selectedWord = null;
+                                
+                                // Si lastMoveDirection est défini, privilégier cette direction
+                                if (this.lastMoveDirection) {
+                                    const wordInDirection = wordsAtCell.find(w => w.wordData.direction === this.lastMoveDirection);
+                                    selectedWord = wordInDirection || wordsAtCell[0];
+                                } else {
+                                    // En mode Couple, privilégier le vertical (bleu)
+                                    // En mode Normal/Race, privilégier l'horizontal
+                                    if (this.gameMode === 'couple') {
+                                        const verticalWord = wordsAtCell.find(w => w.wordData.direction === 'vertical');
+                                        selectedWord = verticalWord || wordsAtCell[0];
+                                    } else {
+                                        const horizontalWord = wordsAtCell.find(w => w.wordData.direction === 'horizontal');
+                                        selectedWord = horizontalWord || wordsAtCell[0];
+                                    }
+                                }
+                                
+                                // Mettre à jour l'index ET la direction
+                                this.currentWordIndex = selectedWord.index;
+                                this.lastMoveDirection = selectedWord.wordData.direction;
+                                console.log(`🎯 Focus: Mot #${this.currentWordIndex} "${selectedWord.wordData.word}" direction=${this.lastMoveDirection} à [${i},${j}]`);
+                            } else {
+                                // Aucun mot trouvé à cette case (cas rare, probablement une case bloquée)
+                                console.warn('⚠️ Aucun mot trouvé à la case', i, j);
+                                this.currentWordIndex = null;
+                                this.lastMoveDirection = null;
+                            }
+                        }
                     });
 
                     input.addEventListener('blur', () => {
@@ -1281,50 +1951,217 @@ class ChristianCrosswordGame {
 
                     // Gérer l'input
                     input.addEventListener('input', (e) => {
-                        const letter = e.target.value.toUpperCase();
-                        if (letter && /[A-Z]/.test(letter)) {
-                            letterSpan.textContent = letter;
-                            this.grid[i][j] = letter;
+                        const value = e.target.value.toUpperCase();
+                        const isIntersection = cell.classList.contains('intersection-cell');
+                        
+                        if (isIntersection) {
+                            // Gérer intersection avec 2 lettres
+                            // Déterminer quelle lettre saisir en fonction du mot en cours
+                            let currentWord = null;
                             
-                            // Son de placement de lettre
-                            if (window.audioSystem) {
-                                window.audioSystem.playLetterPlace();
-                            }
-
-                            // Envoyer la mise à jour en multijoueur
-                            if (this.multiplayerMode && this.multiplayerManager) {
-                                this.multiplayerManager.sendCellUpdate(i, j, letter);
+                            if (this.currentWordIndex !== null && this.words && this.words[this.currentWordIndex]) {
+                                currentWord = this.words[this.currentWordIndex];
+                            } else if (this.words && this.words.length > 0) {
+                                // Fallback : trouver le premier mot à cette intersection
+                                const wordsAtCell = this.words
+                                    .map((wordData, index) => ({ wordData, index }))
+                                    .filter(w => w.wordData.path && w.wordData.path.some(([r, c]) => r === i && c === j));
+                                
+                                if (wordsAtCell.length > 0) {
+                                    currentWord = wordsAtCell[0].wordData;
+                                    this.currentWordIndex = wordsAtCell[0].index;
+                                    this.lastMoveDirection = currentWord.direction;
+                                    console.warn('⚠️ Mot actuel non défini à l\'intersection, utilisation du fallback:', currentWord.word);
+                                }
                             }
                             
-                            // Ne plus partager chaque lettre (trop fréquent)
-                            // La progression sera partagée seulement lors des mots complets
-
-                            // Vérifier si correct
-                            if (letter === this.solution[i][j]) {
-                                cell.classList.add('correct');
-                                // Vérifier les mots complétés en temps réel
-                                this.checkCompletedWords();
-                            } else {
-                                cell.classList.remove('correct');
+                            // Si on saisit qu'une seule lettre et qu'on a un mot en cours
+                            if (value.length === 1 && /[A-Z]/.test(value) && currentWord) {
+                                const letter = value[0];
+                                const letter1Span = cell.querySelector('.cell-letter-horiz');
+                                const letter2Span = cell.querySelector('.cell-letter-vert');
+                                
+                                // Mettre à jour seulement la lettre correspondant au mot en cours
+                                if (currentWord.direction === 'horizontal') {
+                                    letter1Span.textContent = letter;
+                                    // Garder letter2 tel quel si déjà rempli
+                                    const currentValue = this.grid[i][j];
+                                    if (currentValue && currentValue.includes('/')) {
+                                        const [, existingLetter2] = currentValue.split('/');
+                                        this.grid[i][j] = `${letter}/${existingLetter2 || ''}`;
+                                    } else {
+                                        this.grid[i][j] = `${letter}/`;
+                                    }
+                                } else {
+                                    letter2Span.textContent = letter;
+                                    // Garder letter1 tel quel si déjà rempli
+                                    const currentValue = this.grid[i][j];
+                                    if (currentValue && currentValue.includes('/')) {
+                                        const [existingLetter1] = currentValue.split('/');
+                                        this.grid[i][j] = `${existingLetter1 || ''}/${letter}`;
+                                    } else {
+                                        this.grid[i][j] = `/${letter}`;
+                                    }
+                                }
+                                
+                                // Son de placement de lettre
+                                if (window.audioSystem) {
+                                    window.audioSystem.playLetterPlace();
+                                }
+                                
+                                // Vérifier si correct
+                                const expected1 = letter1Span.dataset.expected;
+                                const expected2 = letter2Span.dataset.expected;
+                                const [inputLetter1, inputLetter2] = this.grid[i][j].split('/');
+                                
+                                if ((inputLetter1 || '') === expected1 && (inputLetter2 || '') === expected2) {
+                                    cell.classList.add('correct');
+                                    this.checkCompletedWords();
+                                } else if (currentWord.direction === 'horizontal' && inputLetter1 === expected1) {
+                                    // Partiellement correct pour ce mot
+                                    this.checkCompletedWords();
+                                } else if (currentWord.direction === 'vertical' && inputLetter2 === expected2) {
+                                    // Partiellement correct pour ce mot
+                                    this.checkCompletedWords();
+                                }
+                                
+                                // Vider l'input et avancer
+                                input.value = '';
+                                setTimeout(() => {
+                                    this.moveToNextCell(i, j);
+                                    this.checkIfLevelComplete();
+                                    this.saveGame(); // 💾 Sauvegarde auto
+                                }, 50);
                             }
+                            // Gérer la saisie de 2 lettres (remplissage complet de l'intersection)
+                            else if (value.length >= 2 && /[A-Z]{2}/.test(value)) {
+                                const letter1 = value[0];
+                                const letter2 = value[1];
+                                
+                                const letter1Span = cell.querySelector('.cell-letter-horiz');
+                                const letter2Span = cell.querySelector('.cell-letter-vert');
+                                
+                                letter1Span.textContent = letter1;
+                                letter2Span.textContent = letter2;
+                                
+                                this.grid[i][j] = `${letter1}/${letter2}`;
+                                
+                                // Son de placement de lettre
+                                if (window.audioSystem) {
+                                    window.audioSystem.playLetterPlace();
+                                }
+                                
+                                // Vérifier si correct
+                                const expected1 = letter1Span.dataset.expected;
+                                const expected2 = letter2Span.dataset.expected;
+                                
+                                if (letter1 === expected1 && letter2 === expected2) {
+                                    cell.classList.add('correct');
+                                    this.checkCompletedWords();
+                                } else {
+                                    cell.classList.remove('correct');
+                                }
+                                
+                                // Vider l'input et avancer
+                                input.value = '';
+                                setTimeout(() => {
+                                    this.moveToNextCell(i, j);
+                                    this.checkIfLevelComplete();
+                                    this.saveGame(); // 💾 Sauvegarde auto
+                                }, 50);
+                            }
+                        } else {
+                            // Gérer case normale avec 1 lettre
+                            const letter = value;
+                            if (letter && /[A-Z]/.test(letter)) {
+                                const letterSpan = cell.querySelector('.cell-letter');
+                                letterSpan.textContent = letter;
+                                this.grid[i][j] = letter;
+                                
+                                // Son de placement de lettre
+                                if (window.audioSystem) {
+                                    window.audioSystem.playLetterPlace();
+                                }
 
-                            // Vider l'input et avancer
-                            input.value = '';
-                            setTimeout(() => {
-                                this.moveToNextCell(i, j);
-                                // Vérifier si le niveau est complet après le déplacement
-                                this.checkIfLevelComplete();
-                            }, 50);
+                                // Envoyer la mise à jour en multijoueur
+                                if (this.multiplayerMode && this.multiplayerManager) {
+                                    this.multiplayerManager.sendCellUpdate(i, j, letter);
+                                }
+                                
+                                // Ne plus partager chaque lettre (trop fréquent)
+                                // La progression sera partagée seulement lors des mots complets
+
+                                // Vérifier si correct
+                                if (letter === this.solution[i][j]) {
+                                    cell.classList.add('correct');
+                                    // Vérifier les mots complétés en temps réel
+                                    this.checkCompletedWords();
+                                } else {
+                                    cell.classList.remove('correct');
+                                }
+
+                                // Vider l'input et avancer
+                                input.value = '';
+                                setTimeout(() => {
+                                    this.moveToNextCell(i, j);
+                                    // Vérifier si le niveau est complet après le déplacement
+                                    this.saveGame(); // 💾 Sauvegarde auto
+                                    this.checkIfLevelComplete();
+                                }, 50);
+                            }
                         }
                     });
 
                     // Gérer les touches spéciales
                     input.addEventListener('keydown', (e) => {
+                        // Tab ou Espace : Changer de direction à une intersection
+                        if ((e.key === 'Tab' || e.key === ' ') && cell.classList.contains('intersection-cell')) {
+                            e.preventDefault();
+                            
+                            // Trouver tous les mots à cette intersection
+                            if (this.words && this.words.length > 0) {
+                                const wordsAtCell = this.words
+                                    .map((wordData, index) => ({
+                                        wordData,
+                                        index,
+                                        cellIndex: wordData.path ? wordData.path.findIndex(([r, c]) => r === i && c === j) : -1
+                                    }))
+                                    .filter(w => w.cellIndex !== -1);
+                                
+                                if (wordsAtCell.length > 1) {
+                                    // Trouver le mot actuel
+                                    const currentIdx = this.currentWordIndex;
+                                    const currentInList = wordsAtCell.findIndex(w => w.index === currentIdx);
+                                    
+                                    // Passer au suivant (ou au premier si on est au dernier)
+                                    const nextIdx = (currentInList + 1) % wordsAtCell.length;
+                                    const nextWord = wordsAtCell[nextIdx];
+                                    
+                                    this.currentWordIndex = nextWord.index;
+                                    this.lastMoveDirection = nextWord.wordData.direction;
+                                    
+                                    // Feedback visuel
+                                    const directionText = nextWord.wordData.direction === 'horizontal' ? 'Horizontal →' : 'Vertical ↓';
+                                    console.log(`🔄 Direction changée: ${directionText}`);
+                                }
+                            }
+                            return;
+                        }
+                        
                         if (e.key === 'Backspace' || e.key === 'Delete') {
                             e.preventDefault();
                             const currentValue = this.grid[i][j];
-
-                            letterSpan.textContent = '';
+                            
+                            // Gérer l'effacement pour les intersections
+                            if (cell.classList.contains('intersection-cell')) {
+                                const letter1Span = cell.querySelector('.cell-letter-horiz');
+                                const letter2Span = cell.querySelector('.cell-letter-vert');
+                                if (letter1Span) letter1Span.textContent = '';
+                                if (letter2Span) letter2Span.textContent = '';
+                            } else if (letterSpan) {
+                                letterSpan.textContent = '';
+                            }
+                            
                             this.grid[i][j] = '';
                             cell.classList.remove('correct');
                             input.value = '';
@@ -1363,6 +2200,28 @@ class ChristianCrosswordGame {
         return ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'];
     }
 
+    detectWordDirection(path) {
+        // Analyser le path pour déterminer si le mot est horizontal, vertical ou coudé
+        if (!path || path.length < 2) return null;
+        
+        let isHorizontal = true;
+        let isVertical = true;
+        
+        for (let i = 1; i < path.length; i++) {
+            const [prevRow, prevCol] = path[i - 1];
+            const [currRow, currCol] = path[i];
+            
+            // Si la ligne change, ce n'est pas horizontal
+            if (prevRow !== currRow) isHorizontal = false;
+            // Si la colonne change, ce n'est pas vertical
+            if (prevCol !== currCol) isVertical = false;
+        }
+        
+        if (isHorizontal) return 'horizontal';
+        if (isVertical) return 'vertical';
+        return 'bent'; // Mot coudé
+    }
+
     moveTo(row, col) {
         if (this.blocked[row][col]) return;
 
@@ -1378,22 +2237,94 @@ class ChristianCrosswordGame {
     }
 
     moveToNextCell(row, col) {
-        // Essayer d'abord à droite (horizontal)
-        if (col + 1 < config.gridSize && !this.blocked[row][col + 1]) {
-            this.moveTo(row, col + 1);
+        // TOUJOURS suivre le path du mot actuel
+        if (!this.words || this.words.length === 0) return;
+        
+        // 1. Si on a un mot en cours défini, le suivre en priorité
+        if (this.currentWordIndex !== null && this.words[this.currentWordIndex]) {
+            const wordData = this.words[this.currentWordIndex];
+            if (wordData.path) {
+                const cellIndex = wordData.path.findIndex(([r, c]) => r === row && c === col);
+                if (cellIndex !== -1 && cellIndex < wordData.path.length - 1) {
+                    // Aller à la prochaine case du même mot (suit le path exact)
+                    const [nextRow, nextCol] = wordData.path[cellIndex + 1];
+                    this.lastMoveDirection = wordData.direction;
+                    console.log(`➡️ NextCell: Suite mot #${this.currentWordIndex} "${wordData.word}" [${row},${col}] → [${nextRow},${nextCol}] direction=${wordData.direction}`);
+                    this.moveTo(nextRow, nextCol);
+                    return;
+                } else if (cellIndex === wordData.path.length - 1) {
+                    // Fin du mot actuel - chercher un autre mot à cette position
+                    const otherWords = this.words
+                        .map((w, idx) => ({
+                            wordData: w,
+                            idx: idx,
+                            cellIndex: w.path ? w.path.findIndex(([r, c]) => r === row && c === col) : -1
+                        }))
+                        .filter(w => w.idx !== this.currentWordIndex && w.cellIndex !== -1);
+                    
+                    if (otherWords.length > 0) {
+                        // Prendre le premier autre mot à cette intersection
+                        const nextWord = otherWords[0];
+                        this.currentWordIndex = nextWord.idx;
+                        this.lastMoveDirection = nextWord.wordData.direction;
+                        
+                        // Continuer sur ce nouveau mot
+                        if (nextWord.cellIndex < nextWord.wordData.path.length - 1) {
+                            const [nextRow, nextCol] = nextWord.wordData.path[nextWord.cellIndex + 1];
+                            this.moveTo(nextRow, nextCol);
+                            return;
+                        }
+                    }
+                    
+                    // Plus de mots à continuer
+                    this.currentWordIndex = null;
+                    this.lastMoveDirection = null;
+                    return;
+                }
+            }
+        }
+        
+        // 2. Chercher TOUS les mots contenant cette case
+        const candidateWords = [];
+        for (let idx = 0; idx < this.words.length; idx++) {
+            const wordData = this.words[idx];
+            if (wordData.path) {
+                const cellIndex = wordData.path.findIndex(([r, c]) => r === row && c === col);
+                if (cellIndex !== -1 && cellIndex < wordData.path.length - 1) {
+                    candidateWords.push({ idx, wordData, cellIndex });
+                }
+            }
+        }
+        
+        // 3. Sélectionner le meilleur candidat
+        if (candidateWords.length > 0) {
+            let selectedWord = candidateWords[0];
+            
+            // Privilégier le mot dans la même direction si définie
+            if (this.lastMoveDirection && candidateWords.length > 1) {
+                const wordInSameDirection = candidateWords.find(
+                    w => w.wordData.direction === this.lastMoveDirection
+                );
+                if (wordInSameDirection) {
+                    selectedWord = wordInSameDirection;
+                }
+            }
+            
+            // Suivre le path exact du mot sélectionné
+            const [nextRow, nextCol] = selectedWord.wordData.path[selectedWord.cellIndex + 1];
+            this.currentWordIndex = selectedWord.idx;
+            this.lastMoveDirection = selectedWord.wordData.direction;
+            this.moveTo(nextRow, nextCol);
             return;
         }
-
-        // Sinon essayer en bas (vertical)
-        if (row + 1 < config.gridSize && !this.blocked[row + 1][col]) {
-            this.moveTo(row + 1, col);
-            return;
-        }
-
-        // Chercher la prochaine cellule non bloquée
+        
+        // 4. Aucun mot trouvé - chercher la prochaine cellule non bloquée (fallback rare)
+        console.warn('⚠️ Aucun mot trouvé pour continuer depuis', row, col);
         for (let i = row; i < config.gridSize; i++) {
             for (let j = (i === row ? col + 1 : 0); j < config.gridSize; j++) {
                 if (!this.blocked[i][j]) {
+                    this.currentWordIndex = null;
+                    this.lastMoveDirection = null;
                     this.moveTo(i, j);
                     return;
                 }
@@ -1402,22 +2333,65 @@ class ChristianCrosswordGame {
     }
 
     moveToPreviousCell(row, col) {
-        // Essayer d'abord à gauche (horizontal)
-        if (col - 1 >= 0 && !this.blocked[row][col - 1]) {
-            this.moveTo(row, col - 1);
+        // TOUJOURS suivre le path du mot actuel en arrière
+        if (!this.words || this.words.length === 0) return;
+        
+        // 1. Si on a un mot en cours défini, le suivre en priorité
+        if (this.currentWordIndex !== null && this.words[this.currentWordIndex]) {
+            const wordData = this.words[this.currentWordIndex];
+            if (wordData.path) {
+                const cellIndex = wordData.path.findIndex(([r, c]) => r === row && c === col);
+                if (cellIndex > 0) {
+                    // Aller à la case précédente du même mot (suit le path exact)
+                    const [prevRow, prevCol] = wordData.path[cellIndex - 1];
+                    this.lastMoveDirection = wordData.direction;
+                    this.moveTo(prevRow, prevCol);
+                    return;
+                }
+            }
+        }
+        
+        // 2. Chercher TOUS les mots contenant cette case
+        const candidateWords = [];
+        for (let idx = 0; idx < this.words.length; idx++) {
+            const wordData = this.words[idx];
+            if (wordData.path) {
+                const cellIndex = wordData.path.findIndex(([r, c]) => r === row && c === col);
+                if (cellIndex > 0) {
+                    candidateWords.push({ idx, wordData, cellIndex });
+                }
+            }
+        }
+        
+        // 3. Sélectionner le meilleur candidat
+        if (candidateWords.length > 0) {
+            let selectedWord = candidateWords[0];
+            
+            // Privilégier le mot dans la même direction si définie
+            if (this.lastMoveDirection && candidateWords.length > 1) {
+                const wordInSameDirection = candidateWords.find(
+                    w => w.wordData.direction === this.lastMoveDirection
+                );
+                if (wordInSameDirection) {
+                    selectedWord = wordInSameDirection;
+                }
+            }
+            
+            // Suivre le path exact du mot sélectionné en arrière
+            const [prevRow, prevCol] = selectedWord.wordData.path[selectedWord.cellIndex - 1];
+            this.currentWordIndex = selectedWord.idx;
+            this.lastMoveDirection = selectedWord.wordData.direction;
+            this.moveTo(prevRow, prevCol);
             return;
         }
-
-        // Sinon essayer en haut (vertical)
-        if (row - 1 >= 0 && !this.blocked[row - 1][col]) {
-            this.moveTo(row - 1, col);
-            return;
-        }
-
-        // Si aucune cellule précédente n'est disponible, chercher la cellule non bloquée précédente
+        
+        // 4. Aucun mot trouvé - chercher la cellule non bloquée précédente (fallback rare)
+        console.warn('⚠️ Aucun mot trouvé pour revenir depuis', row, col);
         for (let i = row; i >= 0; i--) {
             for (let j = (i === row ? col - 1 : config.gridSize - 1); j >= 0; j--) {
                 if (!this.blocked[i][j]) {
+                    this.currentWordIndex = null;
+                    this.lastMoveDirection = null;
                     this.moveTo(i, j);
                     return;
                 }
@@ -1473,22 +2447,36 @@ class ChristianCrosswordGame {
             for (let j = 0; j < config.gridSize; j++) {
                 if (!this.blocked[i][j]) {
                     totalCells++;
-                    if (this.grid[i][j] === this.solution[i][j]) {
-                        correctCells++;
+                    const cellValue = this.grid[i][j];
+                    const solutionValue = this.solution[i][j];
+                    
+                    // Gérer les intersections
+                    if (solutionValue && solutionValue.includes('/')) {
+                        const [letter1, letter2] = solutionValue.split('/');
+                        if (cellValue && cellValue.includes('/')) {
+                            const [inputLetter1, inputLetter2] = cellValue.split('/');
+                            if (inputLetter1 === letter1 && inputLetter2 === letter2) {
+                                correctCells++;
+                            }
+                        }
+                    } else {
+                        if (cellValue === solutionValue) {
+                            correctCells++;
+                        }
                     }
                 }
             }
         }
 
         // Vérifier les mots complets
-        const levelData = gameDataManager.getLevelData(this.currentLevel);
-        if (levelData && levelData.words) {
-            levelData.words.forEach(wordData => {
+        if (this.words && this.words.length > 0) {
+            this.words.forEach(wordData => {
                 let wordComplete = true;
                 if (wordData.path) {
                     for (let i = 0; i < wordData.word.length && i < wordData.path.length; i++) {
                         const [row, col] = wordData.path[i];
-                        if (this.grid[row][col] !== wordData.word[i]) {
+                        const expectedLetter = wordData.word[i];
+                        if (!this.isCellCorrect(row, col, expectedLetter, wordData.direction)) {
                             wordComplete = false;
                             break;
                         }
@@ -1559,12 +2547,42 @@ class ChristianCrosswordGame {
     }
 
     // Vérifier les mots complétés en temps réel
+    // Fonction utilitaire pour vérifier si une cellule correspond à la solution
+    isCellCorrect(row, col, expectedLetter, wordDirection) {
+        const cellValue = this.grid[row][col];
+        const solutionValue = this.solution[row][col];
+        
+        // Si la solution contient "/" (intersection avec deux lettres différentes)
+        if (solutionValue && solutionValue.includes('/')) {
+            const [horizLetter, vertLetter] = solutionValue.split('/');
+            
+            // Si la cellule contient aussi "/" (les deux lettres sont remplies)
+            if (cellValue && cellValue.includes('/')) {
+                const [inputHoriz, inputVert] = cellValue.split('/');
+                // Les deux lettres doivent correspondre
+                return inputHoriz === horizLetter && inputVert === vertLetter;
+            }
+            
+            // Sinon, vérifier juste la lettre appropriée selon la direction du mot
+            if (wordDirection === 'horizontal') {
+                return cellValue === horizLetter;
+            } else if (wordDirection === 'vertical') {
+                return cellValue === vertLetter;
+            }
+            
+            // Si pas de direction spécifiée, vérifier si c'est l'une des deux lettres
+            return cellValue === horizLetter || cellValue === vertLetter;
+        }
+        
+        // Case normale : comparaison directe
+        return cellValue === solutionValue;
+    }
+
     checkCompletedWords() {
-        const levelData = gameDataManager.getLevelData(this.currentLevel);
-        if (!levelData || !levelData.words) return;
+        if (!this.words || this.words.length === 0) return;
 
         // Vérifier chaque mot
-        levelData.words.forEach(wordData => {
+        this.words.forEach(wordData => {
             // Vérifier si ce mot était déjà marqué comme complété
             if (!this.completedWords) {
                 this.completedWords = new Set();
@@ -1580,7 +2598,26 @@ class ChristianCrosswordGame {
             if (wordData.path) {
                 for (let i = 0; i < wordData.word.length && i < wordData.path.length; i++) {
                     const [row, col] = wordData.path[i];
-                    if (this.grid[row][col] !== wordData.word[i]) {
+                    const expectedLetter = wordData.word[i];
+                    const cellValue = this.grid[row][col];
+                    
+                    // Gérer les intersections avec format "A/B"
+                    let isCorrect = false;
+                    if (cellValue && cellValue.includes('/')) {
+                        // C'est une intersection, vérifier si la lettre attendue est dans l'une des deux
+                        const [letter1, letter2] = cellValue.split('/');
+                        // Déterminer quelle lettre utiliser selon la direction du mot
+                        if (wordData.direction === 'horizontal') {
+                            isCorrect = letter1 === expectedLetter;
+                        } else {
+                            isCorrect = letter2 === expectedLetter;
+                        }
+                    } else {
+                        // Case normale
+                        isCorrect = cellValue === expectedLetter;
+                    }
+                    
+                    if (!isCorrect) {
                         wordComplete = false;
                         break;
                     }
@@ -1662,10 +2699,33 @@ class ChristianCrosswordGame {
             for (let j = 0; j < config.gridSize; j++) {
                 if (!this.blocked[i][j]) {
                     totalCells++;
-                    // Vérifier si la cellule est remplie et correcte
-                    if (this.grid[i][j] === '' || this.grid[i][j] !== this.solution[i][j]) {
+                    const cellValue = this.grid[i][j];
+                    const solutionValue = this.solution[i][j];
+                    
+                    // Vérifier si la cellule est remplie
+                    if (!cellValue || cellValue === '') {
                         allCorrect = false;
                         break;
+                    }
+                    
+                    // Vérifier si correcte (gérer les intersections)
+                    if (solutionValue && solutionValue.includes('/')) {
+                        const [letter1, letter2] = solutionValue.split('/');
+                        if (cellValue.includes('/')) {
+                            const [inputLetter1, inputLetter2] = cellValue.split('/');
+                            if (inputLetter1 !== letter1 || inputLetter2 !== letter2) {
+                                allCorrect = false;
+                                break;
+                            }
+                        } else {
+                            allCorrect = false;
+                            break;
+                        }
+                    } else {
+                        if (cellValue !== solutionValue) {
+                            allCorrect = false;
+                            break;
+                        }
                     }
                 }
             }
