@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mots En Croix Chrétiens - Kit Réseaux Sociaux</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #FF1493 0%, #FF69B4 50%, #FFB6C1 100%);
+      color: white;
+      padding: 40px 20px;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(135deg, #ffffff, #FFB6C1);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      color: #fff;
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+    
+    .formats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 30px;
+      margin-bottom: 60px;
+    }
+    
+    .format-card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 24px;
+      padding: 30px;
+      border: 3px solid #FF69B4;
+      transition: transform 0.3s;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 30px rgba(255, 20, 147, 0.3);
+    }
+    
+    .format-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(255, 20, 147, 0.5);
+    }
+    
+    .format-card h2 {
+      color: #FF1493;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .format-info {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+    
+    .preview-container {
+      background: white;
+      border-radius: 12px;
+      padding: 10px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 300px;
+      overflow: hidden;
+      position: relative;
+      border: 2px solid #FFB6C1;
+    }
+    
+    .preview-container canvas {
+      max-width: 100%;
+      max-height: 280px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+    }
+    
+    .verse-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .verse-btn {
+      padding: 8px 14px;
+      background: #FF69B4;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    
+    .verse-btn:hover {
+      background: #FF1493;
+      transform: scale(1.05);
+    }
+    
+    .verse-btn.active {
+      background: #FF1493;
+      box-shadow: 0 0 0 3px rgba(255, 20, 147, 0.3);
+    }
+    
+    .download-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .download-btn {
+      flex: 1;
+      padding: 15px;
+      background: linear-gradient(135deg, #FF1493, #FF69B4);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .download-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 10px 30px rgba(255, 20, 147, 0.5);
+    }
+    
+    .download-btn.jpg {
+      background: linear-gradient(135deg, #FFB6C1, #FF69B4);
+    }
+    
+    .caption-box {
+      background: #FFF0F5;
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 10px;
+      border-left: 4px solid #FF1493;
+    }
+    
+    .caption-box h4 {
+      color: #FF1493;
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .caption-text {
+      color: #666;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      font-style: italic;
+    }
+    
+    .copy-caption-btn {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: #FF69B4;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .copy-caption-btn:hover {
+      background: #FF1493;
+      transform: scale(1.05);
+    }
+    
+    .hashtags-section {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 24px;
+      padding: 30px;
+      margin-top: 40px;
+      border: 3px solid #FF69B4;
+    }
+    
+    .hashtags-section h2 {
+      color: #FF1493;
+      margin-bottom: 20px;
+    }
+    
+    .hashtags-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    
+    .hashtag-card {
+      background: #FFF0F5;
+      padding: 20px;
+      border-radius: 12px;
+      border-left: 4px solid #FF69B4;
+    }
+    
+    .hashtag-card h3 {
+      color: #FF1493;
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+    
+    .hashtag-list {
+      color: #666;
+      font-size: 0.9rem;
+      line-height: 1.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🌟 Mots En Croix Chrétiens - Kit Réseaux Sociaux 🙏</h1>
+      <p class="subtitle">Images avec versets bibliques inspirants pour partager votre progression</p>
+    </header>
+
+    <div class="formats-grid">
+      <!-- Carré Social Media -->
+      <div class="format-card">
+        <h2>📱 Social Media Carré</h2>
+        <div class="format-info">1080×1080px • Format carré (Instagram, Facebook, Twitter)</div>
+        <div class="preview-container">
+          <canvas id="mobile-canvas" width="1080" height="1080"></canvas>
+        </div>
+        <div class="verse-selector" id="mobile-verses"></div>
+        <div class="download-buttons">
+          <button class="download-btn" onclick="downloadFormat('mobile', 'png')">
+            🖼️ PNG
+          </button>
+          <button class="download-btn jpg" onclick="downloadFormat('mobile', 'jpg')">
+            📷 JPG
+          </button>
+        </div>
+        <div class="caption-box">
+          <h4>✍️ Texte d'accroche</h4>
+          <div class="caption-text" id="mobile-caption"></div>
+          <button class="copy-caption-btn" onclick="copyCaptions('mobile')">
+            📋 Copier le texte
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Hashtags -->
+    <div class="hashtags-section">
+      <h2>🏷️ Hashtags Recommandés</h2>
+      <div class="hashtags-grid">
+        <div class="hashtag-card">
+          <h3>✝️ Foi Chrétienne</h3>
+          <div class="hashtag-list">
+            #MotsCroisésChrétiens<br>
+            #BiblicalWords #Foi<br>
+            #ChristianLife #Jésus
+          </div>
+        </div>
+        
+        <div class="hashtag-card">
+          <h3>📖 Bible</h3>
+          <div class="hashtag-list">
+            #Bible #Versets<br>
+            #ParoleDeDieu #Scripture<br>
+            #BibleStudy #BibleVerse
+          </div>
+        </div>
+        
+        <div class="hashtag-card">
+          <h3>🎮 Jeux</h3>
+          <div class="hashtag-list">
+            #JeuChrétien #Crossword<br>
+            #ChristianGames #WordGame<br>
+            #MotsCroisés #Puzzle
+          </div>
+        </div>
+        
+        <div class="hashtag-card">
+          <h3>💕 Kawaii</h3>
+          <div class="hashtag-list">
+            #Kawaii #Cute<br>
+            #KawaiiCross #Pink<br>
+            #ChristianKawaii
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Versets bibliques inspirants (les mêmes que dans shareImage.js)
+    const bibleVerses = [
+      { ref: "Philippiens 4:13", text: "Je puis tout par celui qui me fortifie" },
+      { ref: "1 Corinthiens 13:8", text: "L'amour ne périt jamais" },
+      { ref: "Psaume 23:1", text: "L'Éternel est mon berger, je ne manquerai de rien" },
+      { ref: "Jean 3:16", text: "Car Dieu a tant aimé le monde..." },
+      { ref: "Proverbes 3:5-6", text: "Confie-toi en l'Éternel de tout ton cœur" },
+      { ref: "Matthieu 11:28", text: "Venez à moi, vous tous qui êtes fatigués" },
+      { ref: "Romains 8:28", text: "Toutes choses concourent au bien" },
+      { ref: "Josué 1:9", text: "Fortifie-toi et prends courage" },
+      { ref: "Ésaïe 41:10", text: "Ne crains rien, car je suis avec toi" },
+      { ref: "Psaume 46:2", text: "Dieu est notre refuge et notre force" },
+      { ref: "Jean 14:6", text: "Je suis le chemin, la vérité et la vie" },
+      { ref: "Matthieu 5:14", text: "Vous êtes la lumière du monde" },
+      { ref: "Galates 5:22", text: "Le fruit de l'Esprit est amour, joie, paix" },
+      { ref: "Colossiens 3:23", text: "Tout ce que vous faites, faites-le de bon cœur" },
+      { ref: "Hébreux 11:1", text: "La foi est une ferme assurance" }
+    ];
+
+    // État actuel pour chaque format
+    const currentVerse = {
+      mobile: 0
+    };
+
+    // Générer les boutons de versets
+    function initVerseButtons() {
+      const formats = ['mobile'];
+      
+      formats.forEach(format => {
+        const container = document.getElementById(`${format}-verses`);
+        bibleVerses.forEach((verse, index) => {
+          const btn = document.createElement('button');
+          btn.className = 'verse-btn' + (currentVerse[format] === index ? ' active' : '');
+          btn.textContent = verse.ref;
+          btn.onclick = () => selectVerse(format, index);
+          container.appendChild(btn);
+        });
+      });
+    }
+
+    // Sélectionner un verset
+    function selectVerse(format, index) {
+      currentVerse[format] = index;
+      
+      // Mettre à jour les boutons
+      const container = document.getElementById(`${format}-verses`);
+      const buttons = container.querySelectorAll('.verse-btn');
+      buttons.forEach((btn, i) => {
+        btn.classList.toggle('active', i === index);
+      });
+      
+      // Redessiner le canvas
+      drawFormat(format);
+      
+      // Mettre à jour le caption
+      updateCaption(format);
+    }
+
+    // Dessiner l'étoile kawaii
+    function drawKawaiiStar(ctx, x, y, size) {
+      const centerX = x;
+      const centerY = y;
+      const scale = size / 512;
+      
+      // Cercle rose de fond
+      ctx.fillStyle = '#ff69b4';
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, size / 2, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Croix en X blanche
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.lineWidth = 24 * scale;
+      ctx.lineCap = 'round';
+      
+      ctx.beginPath();
+      ctx.moveTo(centerX - size * 0.42, centerY - size * 0.42);
+      ctx.lineTo(centerX + size * 0.42, centerY + size * 0.42);
+      ctx.stroke();
+      
+      ctx.beginPath();
+      ctx.moveTo(centerX + size * 0.42, centerY - size * 0.42);
+      ctx.lineTo(centerX - size * 0.42, centerY + size * 0.42);
+      ctx.stroke();
+      
+      // Étoile blanche
+      const starRadius = size * 0.40;
+      ctx.save();
+      ctx.translate(centerX, centerY);
+      
+      ctx.shadowColor = 'rgba(255, 20, 147, 0.4)';
+      ctx.shadowBlur = 10 * scale;
+      ctx.shadowOffsetY = 3 * scale;
+      
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const angle = (Math.PI * 2 * i) / 5 - Math.PI / 2;
+        const x = Math.cos(angle) * starRadius;
+        const y = Math.sin(angle) * starRadius;
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+        const innerAngle = angle + Math.PI / 5;
+        const innerX = Math.cos(innerAngle) * (starRadius * 0.38);
+        const innerY = Math.sin(innerAngle) * (starRadius * 0.38);
+        ctx.lineTo(innerX, innerY);
+      }
+      ctx.closePath();
+      ctx.fill();
+      
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      
+      // Visage kawaii
+      const eyeOffset = starRadius * 0.25;
+      const eyeSize = 8 * scale;
+      
+      ctx.fillStyle = '#333';
+      ctx.beginPath();
+      ctx.arc(-eyeOffset, -5 * scale, eyeSize, 0, Math.PI * 2);
+      ctx.arc(eyeOffset, -5 * scale, eyeSize, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 4 * scale;
+      ctx.beginPath();
+      ctx.arc(0, 5 * scale, 25 * scale, 0.2, Math.PI - 0.2);
+      ctx.stroke();
+      
+      ctx.fillStyle = 'rgba(255, 182, 193, 0.6)';
+      ctx.beginPath();
+      ctx.arc(-starRadius * 0.55, 10 * scale, 15 * scale, 0, Math.PI * 2);
+      ctx.arc(starRadius * 0.55, 10 * scale, 15 * scale, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.restore();
+    }
+
+    // Dessiner chaque format
+    function drawFormat(format) {
+      const canvas = document.getElementById(`${format}-canvas`);
+      const ctx = canvas.getContext('2d');
+      const verse = bibleVerses[currentVerse[format]];
+      
+      // Fond gradient rose
+      const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      bgGradient.addColorStop(0, '#FF1493');
+      bgGradient.addColorStop(0.5, '#FF69B4');
+      bgGradient.addColorStop(1, '#FFB6C1');
+      ctx.fillStyle = bgGradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Formes géométriques décoratives
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.beginPath();
+      ctx.arc(canvas.width * 0.15, canvas.height * 0.15, 100, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.beginPath();
+      ctx.arc(canvas.width * 0.85, canvas.height * 0.85, 120, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Configuration selon le format
+      let starSize, starY, titleY, verseY, refY, levelY, fontSize;
+      
+      if (format === 'mobile') {
+        starSize = 280;
+        starY = 280;
+        titleY = 580;
+        verseY = 720;
+        refY = 840;
+        levelY = 980;
+        fontSize = 42;
+      }
+      
+      // Dessiner l'étoile
+      drawKawaiiStar(ctx, canvas.width / 2, starY, starSize);
+      
+      // Textes
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+      ctx.shadowBlur = 15;
+      ctx.shadowOffsetY = 3;
+      
+      // Titre
+      ctx.fillStyle = 'white';
+      ctx.font = `bold ${fontSize * 1.3}px Comic Sans MS, Arial`;
+      ctx.textAlign = 'center';
+      ctx.fillText('🌟 Mots En Croix Chrétiens 🙏', canvas.width / 2, titleY);
+      
+      // Verset (avec retour à la ligne si trop long)
+      ctx.font = `italic bold ${fontSize}px Comic Sans MS, Arial`;
+      const maxWidth = canvas.width * 0.85;
+      const words = verse.text.split(' ');
+      let line = '';
+      let y = verseY;
+      
+      ctx.fillStyle = 'white';
+      for (let i = 0; i < words.length; i++) {
+        const testLine = line + words[i] + ' ';
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && i > 0) {
+          ctx.fillText(line, canvas.width / 2, y);
+          line = words[i] + ' ';
+          y += fontSize * 1.3;
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line, canvas.width / 2, y);
+      
+      // Référence
+      ctx.font = `bold ${fontSize * 0.9}px Comic Sans MS, Arial`;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.fillText(`- ${verse.ref}`, canvas.width / 2, refY);
+      
+      // Niveau complété
+      ctx.font = `bold ${fontSize * 0.75}px Comic Sans MS, Arial`;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.fillText('✨ Niveau complété avec succès! ✨', canvas.width / 2, levelY);
+    }
+
+    // Mettre à jour le caption
+    function updateCaption(format) {
+      const verse = bibleVerses[currentVerse[format]];
+      const captionElement = document.getElementById(`${format}-caption`);
+      
+      const caption = `🙏 ${verse.text}\n- ${verse.ref}\n\n✨ Je viens de compléter un niveau de Mots En Croix Chrétiens!\n\n💕 Un jeu de mots croisés kawaii pour découvrir la Bible de manière ludique\n🌟 77 niveaux avec mots bibliques et messages d'encouragement\n\n#MotsCroisésChrétiens #Foi #Bible #ChristianGames`;
+      
+      if (captionElement) {
+        captionElement.textContent = caption;
+      }
+    }
+
+    // Copier le caption
+    function copyCaptions(format) {
+      const verse = bibleVerses[currentVerse[format]];
+      const caption = `🙏 ${verse.text}\n- ${verse.ref}\n\n✨ Je viens de compléter un niveau de Mots En Croix Chrétiens!\n\n💕 Un jeu de mots croisés kawaii pour découvrir la Bible de manière ludique\n🌟 77 niveaux avec mots bibliques et messages d'encouragement\n\n#MotsCroisésChrétiens #Foi #Bible #ChristianGames`;
+      
+      navigator.clipboard.writeText(caption).then(() => {
+        alert('✅ Texte copié dans le presse-papier!\n\nVous pouvez maintenant le coller dans votre post 📱');
+      }).catch(err => {
+        console.error('Erreur copie:', err);
+        alert('❌ Erreur lors de la copie. Sélectionnez manuellement le texte.');
+      });
+    }
+
+    // Télécharger un format
+    function downloadFormat(format, imageFormat = 'png') {
+      const canvas = document.getElementById(`${format}-canvas`);
+      const verse = bibleVerses[currentVerse[format]];
+      const verseRef = verse.ref.replace(/[^a-zA-Z0-9]/g, '-');
+      
+      const mimeType = imageFormat === 'jpg' ? 'image/jpeg' : 'image/png';
+      const extension = imageFormat === 'jpg' ? 'jpg' : 'png';
+      const quality = imageFormat === 'jpg' ? 0.95 : undefined;
+      
+      const link = document.createElement('a');
+      link.download = `mots-croix-${format}-${verseRef}.${extension}`;
+      link.href = canvas.toDataURL(mimeType, quality);
+      link.click();
+      
+      const formatEmoji = imageFormat === 'jpg' ? '📷' : '🖼️';
+      alert(`✅ Image téléchargée!\n\n${formatEmoji} Format: ${imageFormat.toUpperCase()}\n📱 Réseau: ${format}\n📖 Verset: ${verse.ref}\n\n💡 N'oubliez pas d'ajouter le texte d'accroche!`);
+    }
+
+    // Initialiser
+    initVerseButtons();
+    ['mobile'].forEach(format => {
+      drawFormat(format);
+      updateCaption(format);
+    });
+  </script>
+</body>
+</html>

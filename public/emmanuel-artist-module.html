@@ -1,0 +1,2343 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title id="page-title">Emmanuel Payet - Artiste Chrétien</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .module-container {
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 1400px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .module-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+            animation: rainbow 3s linear infinite;
+        }
+
+        @keyframes rainbow {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .language-selector {
+            position: absolute;
+            top: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .lang-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .lang-current {
+            padding: 10px 16px;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+        }
+
+        .lang-current:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+        }
+
+        .lang-arrow {
+            font-size: 0.7em;
+            transition: transform 0.3s ease;
+        }
+
+        .lang-dropdown.open .lang-arrow {
+            transform: rotate(180deg);
+        }
+
+        .lang-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            padding: 8px;
+            min-width: 200px;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: all 0.3s ease;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+            z-index: 2000;
+        }
+
+        .lang-dropdown.open .lang-menu {
+            max-height: 400px;
+            opacity: 1;
+        }
+
+        .lang-option {
+            padding: 10px 14px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            color: #7f8c8d;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .lang-option:hover {
+            border-color: #3498db;
+            background: #ebf5fb;
+            transform: translateX(4px);
+        }
+
+        .lang-option.active {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border-color: #2980b9;
+        }
+
+        .lang-option.lang-rtl {
+            direction: rtl;
+            text-align: right;
+        }
+
+        .main-title {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: #7f8c8d;
+            font-weight: 300;
+        }
+
+        .platforms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .platform-card {
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .platform-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        .platform-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .platform-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            border-color: #3498db;
+        }
+
+        .platform-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            color: white;
+            font-weight: bold;
+        }
+
+        .gallery-icon { background: linear-gradient(45deg, #e74c3c, #c0392b); }
+        .art-icon { background: linear-gradient(45deg, #9b59b6, #8e44ad); }
+        .music-icon { background: linear-gradient(45deg, #3498db, #2980b9); }
+        .shop-icon { background: linear-gradient(45deg, #f39c12, #e67e22); }
+
+        .platform-title {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .platform-description {
+            color: #7f8c8d;
+            font-size: 0.95em;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .platform-url {
+            font-weight: 600;
+            color: #3498db;
+            text-decoration: none;
+            font-size: 0.9em;
+            padding: 8px 16px;
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 20px;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .platform-url:hover {
+            background: #3498db;
+            color: white;
+            transform: scale(1.05);
+        }
+
+
+
+        .inspiring-quote {
+            margin-top: 40px;
+            padding: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            text-align: center;
+            color: white;
+            font-style: italic;
+            font-size: 1.1em;
+            position: relative;
+        }
+
+        .inspiring-quote::before {
+            content: '"';
+            font-size: 4em;
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            opacity: 0.3;
+        }
+
+        .inspiring-quote::after {
+            content: '"';
+            font-size: 4em;
+            position: absolute;
+            bottom: -40px;
+            right: 20px;
+            opacity: 0.3;
+        }
+
+        @media (max-width: 768px) {
+            .module-container {
+                padding: 25px;
+            }
+            
+            .language-selector {
+                position: static;
+                display: flex;
+                justify-content: center;
+                margin-bottom: 15px;
+            }
+
+            .lang-menu {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .lang-option {
+                padding: 8px 10px;
+                font-size: 0.75em;
+            }
+            
+            .main-title {
+                font-size: 2em;
+            }
+            
+            .platforms-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Styles pour le Top 10000 */
+        .leaderboard-section {
+            margin: 30px 0 40px 0;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .leaderboard-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .leaderboard-title {
+            font-size: 2em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .leaderboard-subtitle {
+            color: #7f8c8d;
+            font-size: 1em;
+        }
+
+        .leaderboard-stats {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            margin-bottom: 20px;
+            flex-wrap: nowrap;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 15px 30px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            flex: 0 0 auto;
+            min-width: auto;
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .stat-divider {
+            width: 2px;
+            height: 30px;
+            background: #e0e0e0;
+            margin: 0 15px;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #3498db;
+            display: inline-block;
+        }
+
+        .stat-label {
+            font-size: 2em;
+            margin: 0;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .leaderboard-table {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            display: grid;
+            grid-template-columns: 60px 60px 1fr 120px;
+            gap: 15px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 60px 60px 1fr 120px;
+            gap: 15px;
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .table-row:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .table-row.top-3 {
+            background: linear-gradient(90deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+            font-weight: 600;
+        }
+
+        .rank {
+            font-size: 16px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .rank.medal {
+            font-size: 22px;
+        }
+
+        .avatar {
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .player-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .player-level {
+            font-size: 11px;
+            color: #7f8c8d;
+            margin-top: 3px;
+        }
+
+        .badges {
+            display: flex;
+            gap: 5px;
+            font-size: 14px;
+        }
+
+        .score-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #3b82f6;
+            text-align: right;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .page-btn {
+            padding: 8px 12px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #2c3e50;
+            transition: all 0.3s ease;
+        }
+
+        .page-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .page-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .load-more-btn {
+            display: block;
+            margin: 0 auto;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .load-more-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .load-more-btn:disabled {
+            opacity: 0.6;
+            cursor: wait;
+            transform: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+
+        /* 📱 OPTIMISATIONS MOBILE - Résolution adaptative */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .module-container {
+                padding: 20px 15px;
+                border-radius: 15px;
+            }
+
+            .header {
+                margin-bottom: 25px;
+            }
+
+            .main-title {
+                font-size: 1.8em;
+            }
+
+            .subtitle {
+                font-size: 1em;
+            }
+
+            .platforms-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .platform-card {
+                padding: 20px;
+            }
+
+            .platform-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5em;
+                margin-bottom: 15px;
+            }
+
+            .platform-title {
+                font-size: 1.2em;
+            }
+
+            .platform-description {
+                font-size: 0.85em;
+                line-height: 1.5;
+            }
+
+            .inspiring-quote {
+                font-size: 0.95em;
+                padding: 20px;
+                margin-top: 25px;
+            }
+
+            .inspiring-quote::before,
+            .inspiring-quote::after {
+                font-size: 3em;
+            }
+
+            /* Leaderboard mobile */
+            .leaderboard-section {
+                padding: 15px 10px;
+                margin: 20px 0 30px 0;
+            }
+
+            .leaderboard-title {
+                font-size: 1.4em;
+            }
+
+            .leaderboard-subtitle {
+                font-size: 0.85em;
+            }
+
+            .leaderboard-stats {
+                flex-direction: row;
+                gap: 0;
+            }
+
+            .stat-box {
+                padding: 10px 15px;
+                gap: 5px;
+            }
+
+            .stat-value {
+                font-size: 1.3em;
+            }
+
+            .stat-label {
+                font-size: 1.5em;
+            }
+
+            .stat-divider {
+                height: 20px;
+                margin: 0 10px;
+            }
+
+            .search-box {
+                padding: 10px 15px;
+                font-size: 12px;
+            }
+
+            .table-header,
+            .table-row {
+                grid-template-columns: 40px 40px 1fr 70px;
+                gap: 5px;
+                font-size: 10px;
+                padding: 8px 10px;
+            }
+
+            .player-level,
+            .badges {
+                display: none !important;
+            }
+
+            .player-name {
+                font-size: 11px;
+            }
+
+            .avatar {
+                font-size: 18px;
+            }
+
+            .rank {
+                font-size: 13px;
+            }
+
+            .rank.medal {
+                font-size: 18px;
+            }
+
+            .score-value {
+                font-size: 13px;
+            }
+
+            .pagination {
+                gap: 4px;
+            }
+
+            .page-btn {
+                padding: 5px 8px;
+                font-size: 11px;
+            }
+
+            .load-more-btn {
+                padding: 12px 30px;
+                font-size: 14px;
+            }
+        }
+
+        /* 📱 EXTRA PETITS ÉCRANS (iPhone SE, etc.) */
+        @media (max-width: 380px) {
+            .module-container {
+                padding: 15px 10px;
+            }
+
+            .language-selector {
+                position: static;
+                justify-content: center;
+                margin-bottom: 20px;
+            }
+
+            .lang-current {
+                padding: 8px 12px;
+                font-size: 0.8em;
+            }
+
+            .lang-menu {
+                grid-template-columns: repeat(2, 1fr);
+                min-width: 160px;
+            }
+
+            .lang-option {
+                padding: 6px 8px;
+                font-size: 0.7em;
+            }
+
+            .main-title {
+                font-size: 1.5em;
+            }
+
+            .subtitle {
+                font-size: 0.9em;
+            }
+
+            .platform-card {
+                padding: 15px;
+            }
+
+            .platform-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.3em;
+            }
+
+            .platform-title {
+                font-size: 1.1em;
+            }
+
+            .platform-description {
+                font-size: 0.8em;
+            }
+
+            .platform-url {
+                font-size: 0.8em;
+                padding: 6px 12px;
+            }
+
+            .leaderboard-title {
+                font-size: 1.2em;
+            }
+
+            .table-header,
+            .table-row {
+                padding: 6px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="module-container">
+        <div class="header">
+            <div class="language-selector">
+                <div class="lang-dropdown">
+                    <div class="lang-current">
+                        <span class="lang-flag">🇫🇷</span>
+                        <span class="lang-code">FR</span>
+                        <span class="lang-arrow">▼</span>
+                    </div>
+                    <div class="lang-menu">
+                        <div class="lang-option" data-lang="fr" data-flag="🇫🇷">🇫🇷 Français</div>
+                        <div class="lang-option" data-lang="en" data-flag="🇬🇧">🇬🇧 English</div>
+                        <div class="lang-option" data-lang="es" data-flag="🇪🇸">🇪🇸 Español</div>
+                        <div class="lang-option" data-lang="de" data-flag="🇩🇪">🇩🇪 Deutsch</div>
+                        <div class="lang-option" data-lang="it" data-flag="🇮🇹">🇮🇹 Italiano</div>
+                        <div class="lang-option" data-lang="pt" data-flag="🇵🇹">🇵🇹 Português</div>
+                        <div class="lang-option" data-lang="ru" data-flag="🇷🇺">🇷🇺 Русский</div>
+                        <div class="lang-option" data-lang="zh" data-flag="🇨🇳">🇨🇳 中文</div>
+                        <div class="lang-option" data-lang="ja" data-flag="🇯🇵">🇯🇵 日本語</div>
+                        <div class="lang-option" data-lang="ko" data-flag="🇰🇷">🇰🇷 한국어</div>
+                        <div class="lang-option" data-lang="hi" data-flag="🇮🇳">🇮🇳 हिन्दी</div>
+                        <div class="lang-option" data-lang="pl" data-flag="🇵🇱">🇵🇱 Polski</div>
+                        <div class="lang-option" data-lang="sw" data-flag="🇰🇪">🇰🇪 Kiswahili</div>
+                        <div class="lang-option lang-rtl" data-lang="ar" data-flag="🇸🇦">🇸🇦 العربية</div>
+                    </div>
+                </div>
+            </div>
+            <h1 class="main-title pulse" id="main-title">Emmanuel Payet</h1>
+            <p class="subtitle" id="subtitle">Artiste Chrétien • Créateur • Inspirateur</p>
+        </div>
+
+        <!-- Section Top 10000 -->
+        <div class="leaderboard-section">
+            <div class="leaderboard-header">
+                <h2 class="leaderboard-title">🏆 Classement Mots En Croix Chrétiens</h2>
+                <p class="leaderboard-subtitle">Les meilleurs joueurs du jeu de mots croisés chrétiens</p>
+            </div>
+
+            <!-- 🕊️ Section Score Dove of Hope -->
+            <div id="doveScoreSection" style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);border-radius:15px;padding:20px;margin-bottom:25px;color:white;text-align:center;">
+                <h3 id="dove-game-title" style="margin:0 0 15px 0;font-size:1.4em;">🕊️ Dove of Hope : Sky Blessing</h3>
+                <div id="doveScoreContent" style="font-size:1.1em;">
+                    <p style="margin:0;opacity:0.9;">Chargement...</p>
+                </div>
+            </div>
+
+            <div class="leaderboard-stats">
+                <div class="stat-box">
+                    <span class="stat-label" title="Joueurs">👥</span>
+                    <span class="stat-value" id="totalPlayers">-</span>
+                    <div class="stat-divider"></div>
+                    <span class="stat-label" title="Meilleur Score">🏆</span>
+                    <span class="stat-value" id="topScore">-</span>
+                </div>
+            </div>
+
+            <input type="text" id="searchInput" class="search-box" placeholder="🔍 Rechercher un joueur...">
+
+            <div class="leaderboard-table">
+                <div class="table-header">
+                    <div>Rang</div>
+                    <div>Avatar</div>
+                    <div>Joueur</div>
+                    <div>Score</div>
+                </div>
+                <div id="leaderboardContent">
+                    <div class="loading" id="loadingMessage">⏳ Chargement des scores...</div>
+                </div>
+            </div>
+
+            <div id="loadMoreContainer" style="margin: 20px 0;"></div>
+            <div class="pagination" id="pagination"></div>
+        </div>
+
+        <div class="platforms-grid">
+            <div class="platform-card">
+                <div class="platform-icon gallery-icon">◆</div>
+                <h3 class="platform-title" id="games-title">Jeux & Déco</h3>
+                <p class="platform-description" id="games-desc">Découvre mes créations visuelles, jeux interactifs et décorations artistiques qui célèbrent la foi et la beauté.</p>
+                <a href="https://emmanuel.gallery" class="platform-url" target="_blank">emmanuel.gallery</a>
+            </div>
+
+            <div class="platform-card">
+                <div class="platform-icon art-icon">▲</div>
+                <h3 class="platform-title" id="books-title">Livres & Art</h3>
+                <p class="platform-description" id="books-desc">Plonge dans mes œuvres littéraires et artistiques, créées avec ma fille Béthanie, pour nourrir l'âme et l'esprit.</p>
+                <a href="https://emmanuelpayet.art" class="platform-url" target="_blank">emmanuelpayet.art</a>
+            </div>
+
+            <div class="platform-card">
+                <div class="platform-icon music-icon">●</div>
+                <h3 class="platform-title" id="music-title">Gospel Gratuit</h3>
+                <p class="platform-description" id="music-desc">Écoute mes compositions gospel sur AudioMack, des mélodies qui louent Dieu et inspirent l'unité dans la diversité.</p>
+                <a href="https://audiomack.com/emmanuelpayet888" class="platform-url" target="_blank">AudioMack - emmanuelpayet888</a>
+            </div>
+
+            <div class="platform-card">
+                <div class="platform-icon shop-icon">■</div>
+                <h3 class="platform-title" id="shop-title">La Bonne Heure</h3>
+                <p class="platform-description" id="shop-desc">C'est maintenant ! Découvre ma boutique Redbubble avec des designs uniques et des créations inspirantes à porter.</p>
+                <a href="https://www.redbubble.com/fr/people/h777plx/shop" class="platform-url" target="_blank">Redbubble Shop</a>
+            </div>
+        </div>
+
+        <div class="inspiring-quote" id="inspiring-quote">
+            L'art chrétien unit les cœurs au-delà des différences, célébrant la beauté de la création divine dans toute sa diversité.
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px; font-size: 0.8em; color: #95a5a6; font-style: italic;" id="credits">
+            Codé par Claude • Idée originale Emmanuel Payet
+        </div>
+    </div>
+
+    <script type="module">
+        // Configuration Supabase - UTILISER LE MÊME QUE LE JEU
+        const SUPABASE_URL = 'https://dmszyxowetilvsanqsxm.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtc3p5eG93ZXRpbHZzYW5xc3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3NzM0NDUsImV4cCI6MjA3NTM0OTQ0NX0.EukDYFVt0sCrDb0_V4ZPMv5B4gkD43V8Cw7CEuvl0C8';
+        
+        // Import Supabase (optionnel - fallback sur scores locaux si échec)
+        let supabaseClient = null;
+        
+        try {
+            if (typeof supabase !== 'undefined' && supabase.createClient) {
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                console.log('✅ Supabase chargé avec succès');
+            } else {
+                throw new Error('Supabase UMD bundle not loaded');
+            }
+        } catch (error) {
+            console.warn('⚠️ Supabase non disponible, utilisation scores locaux uniquement:', error);
+            supabaseClient = null;
+        }
+
+        let currentPage = 1;
+        const perPage = 100;
+        let totalScores = 0;
+        let allScores = [];
+        let loadedCount = 0;
+        const initialLoad = 100;
+        const loadMoreIncrement = 200;
+        
+        // ⚡ Déclarer currentLang AVANT les fonctions (sera mis à jour après)
+        let currentLang = 'fr'; // Valeur par défaut temporaire
+
+        // Niveaux de sagesse
+        const niveauxSagesse = [
+            { min: 0, max: 99, key: 'beginner', icone: '🌱' },
+            { min: 100, max: 299, key: 'apprentice', icone: '🌿' },
+            { min: 300, max: 599, key: 'adept', icone: '🍀' },
+            { min: 600, max: 999, key: 'sage', icone: '✨' },
+            { min: 1000, max: 1499, key: 'master', icone: '🌟' },
+            { min: 1500, max: 2099, key: 'enlightened', icone: '💫' },
+            { min: 2100, max: 9999, key: 'illuminated', icone: '🔮' }
+        ];
+
+        function getNiveauSagesse(sagesse) {
+            const niveau = niveauxSagesse.find(n => sagesse >= n.min && sagesse <= n.max) || niveauxSagesse[0];
+            // Retourner juste la clé et l'icône, pas le titre traduit
+            return niveau;
+        }
+
+        function getBadges(donnees, isFirst, enigmes) {
+            const badges = [];
+            if (isFirst) badges.push('👑');
+            if (enigmes >= 18) badges.push('🎓');
+            if (donnees.niveau_atteint >= 23) badges.push('🏁');
+            return badges;
+        }
+
+        async function loadScores() {
+            try {
+                const t = translations[currentLang] || translations['fr'];
+                document.getElementById('leaderboardContent').innerHTML = `<div class="loading">${t.loading}</div>`;
+
+                allScores = [];
+
+                // 1️⃣ CHARGER LES SCORES DU JEU MOTS EN CROIX CHRÉTIENS (SUPABASE)
+                if (supabaseClient) {
+                    try {
+                        const { data, error } = await supabaseClient
+                            .from('mots_croix_scores')
+                            .select('*')
+                            .eq('game_prefix', 'mots-en-croix-chretiens')
+                            .order('score', { ascending: false })
+                            .limit(initialLoad);
+
+                        if (!error && data && data.length > 0) {
+                            console.log('🌐 Scores en ligne trouvés:', data.length);
+                            allScores = data.map(entry => ({
+                                id: entry.id,
+                                score: entry.score,
+                                created_at: entry.created_at,
+                                users: {
+                                    pseudo: entry.player_name,
+                                    avatar: '🙏',
+                                    pays: null
+                                },
+                                _email: entry.player_email
+                            }));
+                        }
+                    } catch (err) {
+                        console.warn('⚠️ Erreur chargement scores en ligne:', err);
+                    }
+                }
+
+                // 2️⃣ Si aucun score, créer des données de test
+                if (allScores.length === 0) {
+                    console.log('📝 Aucun score trouvé, utilisation données de test');
+                    allScores = createTestScores();
+                }
+
+                // 3️⃣ Trier par score décroissant
+                allScores.sort((a, b) => b.score - a.score);
+
+                loadedCount = allScores.length;
+                totalScores = allScores.length;
+
+                // Si pas de scores, afficher un message
+                if (allScores.length === 0) {
+                    document.getElementById('leaderboardContent').innerHTML = `<div class="loading">${t.noResults || 'Aucun score enregistré'}</div>`;
+                    return;
+                }
+
+                console.log('✅ Scores chargés:', allScores.length);
+
+                updateStats();
+                renderPage();
+            } catch (error) {
+                console.error('❌ Erreur chargement scores:', error);
+                document.getElementById('leaderboardContent').innerHTML = `<div class="loading">Erreur de chargement</div>`;
+            }
+        }
+
+        // 💾 Récupérer les scores localStorage (meilleur score uniquement)
+        function getLocalScores() {
+            try {
+                const t = translations[currentLang] || translations['fr'];
+                const data = localStorage.getItem('petit_bateau_local_scores');
+                if (!data) return [];
+
+                const scores = JSON.parse(data);
+                if (!scores || scores.length === 0) return [];
+
+                // Trouver le meilleur score (score le plus élevé)
+                const bestScore = scores.reduce((best, current) => {
+                    return (current.score > best.score) ? current : best;
+                }, scores[0]);
+
+                // Retourner uniquement le meilleur score
+                return [{
+                    score: bestScore.score,
+                    niveau_atteint: bestScore.niveau_atteint,
+                    temps_jeu: bestScore.temps_jeu,
+                    created_at: bestScore.created_at,
+                    donnees_extra: bestScore.donnees_extra,
+                    game_id: bestScore.game_id,
+                    users: {
+                        pseudo: bestScore.user?.pseudo || t.anonymous,
+                        avatar: bestScore.user?.avatar || '👤',
+                        pays: bestScore.user?.pays || null
+                    },
+                    _isLocal: true
+                }];
+            } catch (e) {
+                console.error('❌ Erreur lecture localStorage:', e);
+                return [];
+            }
+        }
+
+        function createTestScores() {
+            const pseudos = ['Marie', 'Pierre', 'Jean', 'Sophie', 'Paul', 'Anne', 'Luc', 'Marthe', 'Thomas', 'Ruth'];
+            const avatars = ['🙏', '✝️', '🕊️', '⛪', '📿', '✨', '💫', '🌟', '🙌', '❤️'];
+
+            // Scores pour un jeu de mots croisés (basé sur 77 niveaux)
+            const maxTestScore = 7700; // 100 points par niveau
+
+            const testScores = [];
+            for (let i = 0; i < 30; i++) {
+                const pseudoIdx = i % pseudos.length;
+                // Score décroissant
+                const score = maxTestScore - (i * 100);
+
+                testScores.push({
+                    id: `test-${i}`,
+                    score: score,
+                    users: {
+                        pseudo: pseudos[pseudoIdx] + (i > 9 ? ` ${Math.floor(i / 10)}` : ''),
+                        avatar: avatars[pseudoIdx],
+                        pays: null
+                    },
+                    created_at: new Date(Date.now() - i * 86400000).toISOString()
+                });
+            }
+            console.log('🧪 Données de test créées:', testScores.length, 'scores (max:', maxTestScore, ')');
+            console.log('📝 Les scores de test sont en secours si Supabase est vide');
+            return testScores;
+        }
+
+        async function loadMoreScores() {
+            try {
+                const t = translations[currentLang] || translations['fr'];
+                const loadMoreBtn = document.getElementById('loadMoreBtn');
+                if (loadMoreBtn) {
+                    loadMoreBtn.disabled = true;
+                    loadMoreBtn.innerHTML = t.loading;
+                }
+
+                const start = loadedCount;
+                const end = Math.min(loadedCount + loadMoreIncrement - 1, totalScores - 1);
+
+                const { data, error } = await supabaseClient
+                    .from('mots_croix_scores')
+                    .select('*')
+                    .eq('game_prefix', 'mots-en-croix-chretiens')
+                    .order('score', { ascending: false })
+                    .range(start, end);
+
+                if (error) throw error;
+
+                const newData = Array.isArray(data) ? data.map(entry => ({
+                    id: entry.id,
+                    score: entry.score,
+                    created_at: entry.created_at,
+                    users: {
+                        pseudo: entry.player_name,
+                        avatar: '🙏',
+                        pays: null
+                    },
+                    _email: entry.player_email
+                })) : [];
+                allScores = [...allScores, ...newData];
+                loadedCount = allScores.length;
+
+                console.log('✅ Chargement progressif:', loadedCount, 'scores');
+                renderPage();
+            } catch (error) {
+                console.error('Erreur chargement supplémentaire:', error);
+                const t = translations[currentLang] || translations['fr'];
+                alert(`❌ ${t.errorLoading}: ${error.message}`);
+                const loadMoreBtn = document.getElementById('loadMoreBtn');
+                if (loadMoreBtn) {
+                    loadMoreBtn.disabled = false;
+                    loadMoreBtn.innerHTML = `📥 ${t.loadMore}`;
+                }
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('totalPlayers').textContent = totalScores.toLocaleString();
+            
+            if (allScores.length > 0) {
+                const topScore = allScores[0].score;
+                
+                document.getElementById('topScore').textContent = topScore.toLocaleString();
+            }
+        }
+
+        function renderPage() {
+            console.log('📄 renderPage() appelé - currentLang:', currentLang, '- allScores:', allScores?.length);
+            const start = (currentPage - 1) * perPage;
+            const end = start + perPage;
+            
+            const t = translations[currentLang] || translations['fr'];
+            
+            if (!Array.isArray(allScores)) {
+                document.getElementById('leaderboardContent').innerHTML = `<div class="loading" style="color: #e74c3c;">❌ ${t.errorCorrupted}</div>`;
+                return;
+            }
+            
+            const pageScores = allScores.slice(start, end);
+
+            let html = '';
+            pageScores.forEach((entry, index) => {
+                const globalRank = start + index + 1;
+                const donnees = entry.donnees_extra || {};
+                const pseudo = entry.users?.pseudo || donnees.pseudo || t.anonymous;
+                const avatar = entry.users?.avatar || donnees.avatar || '👤';
+                
+                let medal = `${globalRank}.`;
+                let rankClass = '';
+                
+                if (globalRank === 1) {
+                    medal = '🥇';
+                    rankClass = 'medal';
+                } else if (globalRank === 2) {
+                    medal = '🥈';
+                    rankClass = 'medal';
+                } else if (globalRank === 3) {
+                    medal = '🥉';
+                    rankClass = 'medal';
+                }
+
+                const rowClass = globalRank <= 3 ? 'table-row top-3' : 'table-row';
+
+                let levelInfo = '';
+                if (donnees.sagesse) {
+                    const niveau = getNiveauSagesse(donnees.sagesse);
+                    // ✨ Utiliser la fonction de traduction
+                    const titreNiveau = translateWisdomLevel(niveau.key);
+                    const enigmesInfo = donnees.enigmes ? ` • ${donnees.enigmes}/18🧩` : '';
+                    levelInfo = `
+                        <div class="player-name">${pseudo}</div>
+                        <div class="player-level">${niveau.icone} ${titreNiveau}${enigmesInfo}</div>
+                    `;
+                } else {
+                    levelInfo = `<div class="player-name">${pseudo}</div>`;
+                }
+
+                const badges = getBadges(donnees, globalRank === 1, donnees.enigmes);
+                const badgesHtml = badges.join(' ');
+
+                html += `
+                    <div class="${rowClass}">
+                        <div class="rank ${rankClass}">${medal}</div>
+                        <div class="avatar">${avatar}</div>
+                        <div>${levelInfo}</div>
+                        <div class="score-value">${entry.score.toLocaleString()}</div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('leaderboardContent').innerHTML = html || `<div class="loading">${t.noResults}</div>`;
+            
+            // Afficher le bouton "Voir plus" si nécessaire
+            renderLoadMoreButton();
+            renderPagination();
+        }
+
+        function renderLoadMoreButton() {
+            const loadMoreContainer = document.getElementById('loadMoreContainer');
+            if (!loadMoreContainer) return;
+
+            if (loadedCount < totalScores) {
+                const remaining = totalScores - loadedCount;
+                const nextLoad = Math.min(loadMoreIncrement, remaining);
+                const t = translations[currentLang] || translations['fr'];
+                loadMoreContainer.innerHTML = `
+                    <button id="loadMoreBtn" class="load-more-btn" onclick="window.loadMoreScores()">
+                        ${t.loadMoreScores} ${nextLoad} ${t.moreScores} (${loadedCount.toLocaleString()} / ${totalScores.toLocaleString()})
+                    </button>
+                `;
+            } else {
+                // Tous les scores chargés - ne rien afficher
+                loadMoreContainer.innerHTML = '';
+            }
+        }
+
+        function renderPagination() {
+            const maxPossiblePages = Math.ceil(loadedCount / perPage);
+            const totalPages = maxPossiblePages;
+            let html = '';
+
+            html += `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="window.goToPage(1)">«</button>`;
+            html += `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="window.goToPage(${currentPage - 1})">‹</button>`;
+
+            const range = 3;
+            let start = Math.max(1, currentPage - range);
+            let end = Math.min(totalPages, currentPage + range);
+
+            if (start > 1) {
+                html += `<button class="page-btn" onclick="window.goToPage(1)">1</button>`;
+                if (start > 2) html += `<span class="page-btn" disabled>...</span>`;
+            }
+
+            for (let i = start; i <= end; i++) {
+                html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="window.goToPage(${i})">${i}</button>`;
+            }
+
+            if (end < totalPages) {
+                if (end < totalPages - 1) html += `<span class="page-btn" disabled>...</span>`;
+                html += `<button class="page-btn" onclick="window.goToPage(${totalPages})">${totalPages}</button>`;
+            }
+
+            html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="window.goToPage(${currentPage + 1})">›</button>`;
+            html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="window.goToPage(${totalPages})">»</button>`;
+
+            document.getElementById('pagination').innerHTML = html;
+        }
+
+        window.goToPage = function(page) {
+            const maxPossiblePages = Math.ceil(loadedCount / perPage);
+            if (page < 1 || page > maxPossiblePages) return;
+            
+            // Si on essaie d'aller sur une page non chargée, proposer de charger plus
+            const neededScores = page * perPage;
+            if (neededScores > loadedCount && loadedCount < totalScores) {
+                const t = translations[currentLang] || translations['fr'];
+                if (confirm(`${t.confirmLoadMore} ${loadMoreIncrement} ${t.moreScoresQuestion}`)) {
+                    loadMoreScores().then(() => {
+                        if (page <= Math.ceil(loadedCount / perPage)) {
+                            currentPage = page;
+                            renderPage();
+                            document.querySelector('.leaderboard-section').scrollIntoView({ behavior: 'smooth' });
+                        }
+                    });
+                }
+                return;
+            }
+            
+            currentPage = page;
+            renderPage();
+            document.querySelector('.leaderboard-section').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        window.loadMoreScores = loadMoreScores;
+
+        // Recherche
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const search = e.target.value.toLowerCase();
+            if (search && Array.isArray(allScores)) {
+                const filtered = allScores.filter(entry => {
+                    const pseudo = entry.users?.pseudo || entry.donnees_extra?.pseudo || '';
+                    return pseudo.toLowerCase().includes(search);
+                });
+                
+                let html = '';
+                filtered.slice(0, 100).forEach((entry, index) => {
+                    // Trouver le rang réel dans allScores
+                    const globalRank = allScores.findIndex(s => s.id === entry.id) + 1;
+                    const donnees = entry.donnees_extra || {};
+                    const pseudo = entry.users?.pseudo || donnees.pseudo || 'Anonyme';
+                    const avatar = entry.users?.avatar || donnees.avatar || '👤';
+                    
+                    let levelInfo = '';
+                    if (donnees.sagesse) {
+                        const niveau = getNiveauSagesse(donnees.sagesse);
+                        // ✨ Utiliser la fonction de traduction
+                        const titreNiveau = translateWisdomLevel(niveau.key);
+                        const enigmesInfo = donnees.enigmes ? ` • ${donnees.enigmes}/18🧩` : '';
+                        levelInfo = `
+                            <div class="player-name">${pseudo}</div>
+                            <div class="player-level">${niveau.icone} ${titreNiveau}${enigmesInfo}</div>
+                        `;
+                    } else {
+                        levelInfo = `<div class="player-name">${pseudo}</div>`;
+                    }
+
+                    const badges = getBadges(donnees, globalRank === 1, donnees.enigmes);
+                    const badgesHtml = badges.join(' ');
+
+                    html += `
+                        <div class="table-row">
+                            <div class="rank">${globalRank}.</div>
+                            <div class="avatar">${avatar}</div>
+                            <div>${levelInfo}</div>
+                            <div class="score-value">${entry.score.toLocaleString()}</div>
+                        </div>
+                    `;
+                });
+                
+                const t = translations[currentLang] || translations['fr'];
+                document.getElementById('leaderboardContent').innerHTML = html || `<div class="loading">${t.noResults}</div>`;
+                document.getElementById('pagination').innerHTML = '';
+            } else {
+                renderPage();
+            }
+        });
+
+        // Chargement initial des scores
+        loadScores();
+
+        // 🕊️ Charger et afficher les 30 meilleurs scores de Dove of Hope
+        async function loadDoveScore() {
+            try {
+                const doveContent = document.getElementById('doveScoreContent');
+                const t = translations[currentLang] || translations['fr'];
+
+                // Afficher un état de chargement
+                doveContent.innerHTML = `<p style="margin:0;opacity:0.6;">⏳ ${t.loading || 'Chargement...'}</p>`;
+
+                let leaderboard = [];
+
+                // 1️⃣ Essayer de charger depuis Supabase en premier
+                if (supabaseClient) {
+                    try {
+                        const { data: leaderboardData, error } = await supabaseClient
+                            .from('dove_leaderboard')
+                            .select('high_score, highest_level_reached, total_clouds_destroyed, star_stock, nickname')
+                            .order('high_score', { ascending: false })
+                            .limit(30);
+
+                        if (!error && leaderboardData && leaderboardData.length > 0) {
+                            console.log(`✅ ${leaderboardData.length} scores Dove chargés depuis Supabase`);
+                            leaderboard = leaderboardData.map(entry => ({
+                                highScore: entry.high_score,
+                                highestLevelReached: entry.highest_level_reached,
+                                totalCloudsDestroyed: entry.total_clouds_destroyed,
+                                starStock: entry.star_stock,
+                                nickname: entry.nickname || 'Anonyme'
+                            }));
+                        } else if (error) {
+                            console.warn('⚠️ Erreur Supabase dove_leaderboard:', error.message);
+                        }
+                    } catch (err) {
+                        console.warn('⚠️ Erreur connexion Supabase Dove:', err);
+                    }
+                }
+
+                // 2️⃣ Fallback sur localStorage si Supabase échoue ou pas de données
+                if (leaderboard.length === 0) {
+                    const doveData = localStorage.getItem('doveGameData');
+                    if (doveData) {
+                        const localData = JSON.parse(doveData);
+                        console.log('📦 Données Dove chargées depuis localStorage:', localData);
+                        leaderboard = [{
+                            highScore: localData.highScore || 0,
+                            highestLevelReached: localData.highestLevelReached || 0,
+                            totalCloudsDestroyed: localData.totalCloudsDestroyed || 0,
+                            starStock: localData.starStock || 0,
+                            nickname: localData.nickname || 'Joueur Local'
+                        }];
+                    }
+                }
+
+                // 3️⃣ Afficher le classement
+                if (leaderboard.length > 0) {
+                    const leaderboardHTML = leaderboard.map((entry, index) => {
+                        const rank = index + 1;
+                        const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
+                        return `
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 15px;background:rgba(255,255,255,0.05);border-radius:8px;margin-bottom:5px;">
+                                <div style="display:flex;align-items:center;gap:10px;flex:1;">
+                                    <span style="min-width:35px;font-weight:bold;">${medal}</span>
+                                    <span style="opacity:0.9;">👤 ${entry.nickname}</span>
+                                </div>
+                                <div style="display:flex;gap:20px;align-items:center;">
+                                    <span style="font-weight:bold;">🏆 ${entry.highScore?.toLocaleString() || 0}</span>
+                                    <span style="opacity:0.7;font-size:0.9em;">📖 ${entry.highestLevelReached || 0}</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    doveContent.innerHTML = `
+                        <div style="max-height:500px;overflow-y:auto;padding:10px;">
+                            ${leaderboardHTML}
+                        </div>
+                    `;
+                } else {
+                    doveContent.innerHTML = `<p style="margin:0;opacity:0.8;">${t.doveNoGame} • <a href="../dove-of-hope-sky-blessing.html" style="color:white;text-decoration:underline;">${t.dovePlayNow}</a></p>`;
+                }
+            } catch (error) {
+                console.error('❌ Erreur chargement score Dove:', error);
+                document.getElementById('doveScoreContent').innerHTML = `<p style="margin:0;opacity:0.8;">Erreur de chargement</p>`;
+            }
+        }
+        
+        // Charger le score Dove uniquement au démarrage
+        loadDoveScore();
+    </script>
+
+    <!-- Supabase Client UMD Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+
+    <script>
+        // Traductions multilingues
+        const translations = {
+            fr: {
+                pageTitle: "Emmanuel Payet - Artiste Chrétien",
+                subtitle: "Artiste Chrétien • Créateur • Inspirateur",
+                gamesTitle: "Jeux & Déco",
+                gamesDesc: "Découvre mes créations visuelles, jeux interactifs et décorations artistiques qui célèbrent la foi et la beauté.",
+                booksTitle: "Livres & Art",
+                booksDesc: "Plonge dans mes œuvres littéraires et artistiques, créées avec ma fille Béthanie, pour nourrir l'âme et l'esprit.",
+                musicTitle: "Gospel Gratuit",
+                musicDesc: "Écoute mes compositions gospel sur AudioMack, des mélodies qui louent Dieu et inspirent l'unité dans la diversité.",
+                shopTitle: "La Bonne Heure",
+                shopDesc: "C'est maintenant ! Découvre ma boutique Redbubble avec des designs uniques et des créations inspirantes à porter.",
+                quote: "L'art chrétien unit les cœurs au-delà des différences, célébrant la beauté de la création divine dans toute sa diversité.",
+                credits: "Codé par Claude • Idée originale Emmanuel Payet",
+                leaderboardTitle: "🏆 Classement Mots En Croix Chrétiens",
+                leaderboardSubtitle: "Les meilleurs joueurs du jeu de mots croisés chrétiens",
+                searchPlaceholder: "🔍 Rechercher un joueur...",
+                statPlayers: "Joueurs",
+                statTopScore: "Meilleur Score",
+                loading: "⏳ Chargement des scores...",
+                rankHeader: "Rang",
+                avatarHeader: "Avatar",
+                playerHeader: "Joueur",
+                levelHeader: "Niveau",
+                scoreHeader: "Score",
+                noResults: "Aucun résultat",
+                scoresLoaded: "scores chargés",
+                allScoresLoaded: "✅ Tous les scores chargés",
+                loadMoreScores: "📥 Charger",
+                moreScores: "scores supplémentaires",
+                confirmLoadMore: "Vous devez charger plus de scores pour accéder à cette page.\nCharger",
+                moreScoresQuestion: "scores supplémentaires ?",
+                errorLoading: "Erreur lors du chargement",
+                errorCorrupted: "Erreur: données corrompues",
+                loadMore: "Charger plus...",
+                anonymous: "Anonyme",
+                doveGameTitle: "🕊️ Colombe d'Espoir : Bénédiction Céleste",
+                doveNoGame: "Aucune partie jouée",
+                dovePlayNow: "Jouer maintenant",
+                wisdomLevels: {
+                    beginner: "Débutant",
+                    apprentice: "Apprenti",
+                    adept: "Adepte",
+                    sage: "Sage",
+                    master: "Maître",
+                    enlightened: "Éveillé",
+                    illuminated: "Illuminé"
+                }
+            },
+            en: {
+                pageTitle: "Emmanuel Payet - Christian Artist",
+                subtitle: "Christian Artist • Creator • Inspirator",
+                gamesTitle: "Games & Deco",
+                gamesDesc: "Discover my visual creations, interactive games and artistic decorations that celebrate faith and beauty.",
+                booksTitle: "Books & Art",
+                booksDesc: "Dive into my literary and artistic works, created with my daughter Béthanie, to nourish the soul and spirit.",
+                musicTitle: "Free Gospel",
+                musicDesc: "Listen to my gospel compositions on AudioMack, melodies that praise God and inspire unity in diversity.",
+                shopTitle: "The Good Time",
+                shopDesc: "It's now! Discover my Redbubble shop with unique designs and inspiring creations to wear.",
+                quote: "Christian art unites hearts beyond differences, celebrating the beauty of divine creation in all its diversity.",
+                credits: "Coded by Claude • Original idea Emmanuel Payet",
+                leaderboardTitle: "🏆 Christian Crossword Ranking",
+                leaderboardSubtitle: "Best players of the Christian crossword game",
+                searchPlaceholder: "🔍 Search for a player...",
+                statPlayers: "Players",
+                statTopScore: "Top Score",
+                loading: "⏳ Loading scores...",
+                rankHeader: "Rank",
+                avatarHeader: "Avatar",
+                playerHeader: "Player",
+                levelHeader: "Level",
+                scoreHeader: "Score",
+                noResults: "No results",
+                scoresLoaded: "scores loaded",
+                allScoresLoaded: "✅ All scores loaded",
+                loadMoreScores: "📥 Load",
+                moreScores: "more scores",
+                confirmLoadMore: "You need to load more scores to access this page.\nLoad",
+                moreScoresQuestion: "more scores?",
+                errorLoading: "Error loading",
+                errorCorrupted: "Error: corrupted data",
+                loadMore: "Load more...",
+                anonymous: "Anonymous",
+                doveGameTitle: "🕊️ Dove of Hope : Sky Blessing",
+                doveNoGame: "No game played",
+                dovePlayNow: "Play now",
+                wisdomLevels: {
+                    beginner: "Beginner",
+                    apprentice: "Apprentice",
+                    adept: "Adept",
+                    sage: "Sage",
+                    master: "Master",
+                    enlightened: "Enlightened",
+                    illuminated: "Illuminated"
+                }
+            },
+            es: {
+                pageTitle: "Emmanuel Payet - Artista Cristiano",
+                subtitle: "Artista Cristiano • Creador • Inspirador",
+                gamesTitle: "Juegos y Decoración",
+                gamesDesc: "Descubre mis creaciones visuales, juegos interactivos y decoraciones artísticas que celebran la fe y la belleza.",
+                booksTitle: "Libros y Arte",
+                booksDesc: "Sumérgete en mis obras literarias y artísticas, creadas con mi hija Béthanie, para nutrir el alma y el espíritu.",
+                musicTitle: "Gospel Gratuito",
+                musicDesc: "Escucha mis composiciones gospel en AudioMack, melodías que alaban a Dios e inspiran unidad en la diversidad.",
+                shopTitle: "El Buen Momento",
+                shopDesc: "¡Es ahora! Descubre mi tienda Redbubble con diseños únicos y creaciones inspiradoras para llevar.",
+                quote: "El arte cristiano une corazones más allá de las diferencias, celebrando la belleza de la creación divina en toda su diversidad.",
+                credits: "Programado por Claude • Idea original Emmanuel Payet",
+                leaderboardTitle: "🏆 Clasificación Crucigramas Cristianos",
+                leaderboardSubtitle: "Mejores jugadores del juego de crucigramas cristianos",
+                searchPlaceholder: "🔍 Buscar un jugador...",
+                statPlayers: "Jugadores",
+                statTopScore: "Mejor Puntuación",
+                loading: "⏳ Cargando puntuaciones...",
+                rankHeader: "Rango",
+                avatarHeader: "Avatar",
+                playerHeader: "Jugador",
+                levelHeader: "Nivel",
+                scoreHeader: "Puntuación",
+                noResults: "Sin resultados",
+                scoresLoaded: "puntuaciones cargadas",
+                allScoresLoaded: "✅ Todas las puntuaciones cargadas",
+                loadMoreScores: "📥 Cargar",
+                moreScores: "puntuaciones adicionales",
+                confirmLoadMore: "Necesita cargar más puntuaciones para acceder a esta página.\nCargar",
+                moreScoresQuestion: "puntuaciones adicionales?",
+                errorLoading: "Error al cargar",
+                errorCorrupted: "Error: datos corruptos",
+                loadMore: "Cargar más...",
+                anonymous: "Anónimo",
+                doveGameTitle: "🕊️ Paloma de Esperanza : Bendición Celestial",
+                doveNoGame: "Ninguna partida jugada",
+                dovePlayNow: "Jugar ahora",
+                wisdomLevels: {
+                    beginner: "Principiante",
+                    apprentice: "Aprendiz",
+                    adept: "Adepto",
+                    sage: "Sabio",
+                    master: "Maestro",
+                    enlightened: "Iluminado",
+                    illuminated: "Resplandeciente"
+                }
+            },
+            de: {
+                pageTitle: "Emmanuel Payet - Christlicher Künstler",
+                subtitle: "Christlicher Künstler • Schöpfer • Inspirator",
+                gamesTitle: "Spiele & Deko",
+                gamesDesc: "Entdecke meine visuellen Kreationen, interaktiven Spiele und künstlerischen Dekorationen, die Glaube und Schönheit feiern.",
+                booksTitle: "Bücher & Kunst",
+                booksDesc: "Tauche ein in meine literarischen und künstlerischen Werke, geschaffen mit meiner Tochter Béthanie, um Seele und Geist zu nähren.",
+                musicTitle: "Kostenloses Gospel",
+                musicDesc: "Höre meine Gospel-Kompositionen auf AudioMack, Melodien, die Gott preisen und Einheit in Vielfalt inspirieren.",
+                shopTitle: "Die Gute Zeit",
+                shopDesc: "Es ist jetzt! Entdecke meinen Redbubble-Shop mit einzigartigen Designs und inspirierenden Kreationen zum Tragen.",
+                quote: "Christliche Kunst vereint Herzen jenseits von Unterschieden und feiert die Schönheit der göttlichen Schöpfung in all ihrer Vielfalt.",
+                credits: "Programmiert von Claude • Originalidee Emmanuel Payet",
+                leaderboardTitle: "🏆 Christliches Kreuzworträtsel Rangliste",
+                leaderboardSubtitle: "Beste Spieler des christlichen Kreuzworträtselspiels",
+                searchPlaceholder: "🔍 Spieler suchen...",
+                statPlayers: "Spieler",
+                statTopScore: "Höchste Punktzahl",
+                loading: "⏳ Laden der Punktzahlen...",
+                rankHeader: "Rang",
+                avatarHeader: "Avatar",
+                playerHeader: "Spieler",
+                levelHeader: "Level",
+                scoreHeader: "Punktzahl",
+                noResults: "Keine Ergebnisse",
+                scoresLoaded: "Punktzahlen geladen",
+                allScoresLoaded: "✅ Alle Punktzahlen geladen",
+                loadMoreScores: "📥 Laden",
+                moreScores: "weitere Punktzahlen",
+                confirmLoadMore: "Sie müssen mehr Punktzahlen laden, um auf diese Seite zuzugreifen.\nLaden",
+                moreScoresQuestion: "weitere Punktzahlen?",
+                errorLoading: "Fehler beim Laden",
+                errorCorrupted: "Fehler: beschädigte Daten",
+                loadMore: "Mehr laden...",
+                anonymous: "Anonym",
+                doveGameTitle: "🕊️ Taube der Hoffnung : Himmelssegen",
+                doveNoGame: "Kein Spiel gespielt",
+                dovePlayNow: "Jetzt spielen",
+                wisdomLevels: {
+                    beginner: "Anfänger",
+                    apprentice: "Lehrling",
+                    adept: "Adept",
+                    sage: "Weiser",
+                    master: "Meister",
+                    enlightened: "Erleuchtet",
+                    illuminated: "Illuminiert"
+                }
+            },
+            it: {
+                pageTitle: "Emmanuel Payet - Artista Cristiano",
+                subtitle: "Artista Cristiano • Creatore • Ispiratore",
+                gamesTitle: "Giochi e Decorazioni",
+                gamesDesc: "Scopri le mie creazioni visive, giochi interattivi e decorazioni artistiche che celebrano la fede e la bellezza.",
+                booksTitle: "Libri e Arte",
+                booksDesc: "Immergiti nelle mie opere letterarie e artistiche, create con mia figlia Béthanie, per nutrire anima e spirito.",
+                musicTitle: "Gospel Gratuito",
+                musicDesc: "Ascolta le mie composizioni gospel su AudioMack, melodie che lodano Dio e ispirano unità nella diversità.",
+                shopTitle: "Il Momento Giusto",
+                shopDesc: "È ora! Scopri il mio negozio Redbubble con design unici e creazioni ispiratrici da indossare.",
+                quote: "L'arte cristiana unisce i cuori oltre le differenze, celebrando la bellezza della creazione divina in tutta la sua diversità.",
+                credits: "Programmato da Claude • Idea originale Emmanuel Payet",
+                leaderboardTitle: "🏆 Classifica Cruciverba Cristiani",
+                leaderboardSubtitle: "Migliori giocatori del gioco di cruciverba cristiani",
+                searchPlaceholder: "🔍 Cerca un giocatore...",
+                statPlayers: "Giocatori",
+                statTopScore: "Miglior Punteggio",
+                loading: "⏳ Caricamento punteggi...",
+                rankHeader: "Classifica",
+                avatarHeader: "Avatar",
+                playerHeader: "Giocatore",
+                levelHeader: "Livello",
+                scoreHeader: "Punteggio",
+                noResults: "Nessun risultato",
+                scoresLoaded: "punteggi caricati",
+                allScoresLoaded: "✅ Tutti i punteggi caricati",
+                loadMoreScores: "📥 Carica",
+                moreScores: "punteggi aggiuntivi",
+                confirmLoadMore: "È necessario caricare più punteggi per accedere a questa pagina.\nCaricare",
+                moreScoresQuestion: "punteggi aggiuntivi?",
+                errorLoading: "Errore di caricamento",
+                errorCorrupted: "Errore: dati corrotti",
+                loadMore: "Carica di più...",
+                anonymous: "Anonimo",
+                doveGameTitle: "🕊️ Colomba della Speranza : Benedizione Celeste",
+                doveNoGame: "Nessuna partita giocata",
+                dovePlayNow: "Gioca ora",
+                wisdomLevels: {
+                    beginner: "Principiante",
+                    apprentice: "Apprendista",
+                    adept: "Adepto",
+                    sage: "Saggio",
+                    master: "Maestro",
+                    enlightened: "Illuminato",
+                    illuminated: "Risplendente"
+                }
+            },
+            pt: {
+                pageTitle: "Emmanuel Payet - Artista Cristão",
+                subtitle: "Artista Cristão • Criador • Inspirador",
+                gamesTitle: "Jogos e Decoração",
+                gamesDesc: "Descubra minhas criações visuais, jogos interativos e decorações artísticas que celebram a fé e a beleza.",
+                booksTitle: "Livros e Arte",
+                booksDesc: "Mergulhe em minhas obras literárias e artísticas, criadas com minha filha Béthanie, para nutrir alma e espírito.",
+                musicTitle: "Gospel Gratuito",
+                musicDesc: "Ouça minhas composições gospel no AudioMack, melodias que louvam a Deus e inspiram unidade na diversidade.",
+                shopTitle: "A Boa Hora",
+                shopDesc: "É agora! Descubra minha loja Redbubble com designs únicos e criações inspiradoras para vestir.",
+                quote: "A arte cristã une corações além das diferenças, celebrando a beleza da criação divina em toda sua diversidade.",
+                credits: "Programado por Claude • Ideia original Emmanuel Payet",
+                leaderboardTitle: "🏆 Classificação Palavras Cruzadas Cristãs",
+                leaderboardSubtitle: "Melhores jogadores do jogo de palavras cruzadas cristãs",
+                searchPlaceholder: "🔍 Procurar um jogador...",
+                statPlayers: "Jogadores",
+                statTopScore: "Melhor Pontuação",
+                loading: "⏳ Carregando pontuações...",
+                rankHeader: "Posição",
+                avatarHeader: "Avatar",
+                playerHeader: "Jogador",
+                levelHeader: "Nível",
+                scoreHeader: "Pontuação",
+                noResults: "Sem resultados",
+                scoresLoaded: "pontuações carregadas",
+                allScoresLoaded: "✅ Todas as pontuações carregadas",
+                loadMoreScores: "📥 Carregar",
+                moreScores: "pontuações adicionais",
+                confirmLoadMore: "Você precisa carregar mais pontuações para acessar esta página.\nCarregar",
+                moreScoresQuestion: "pontuações adicionais?",
+                errorLoading: "Erro ao carregar",
+                errorCorrupted: "Erro: dados corrompidos",
+                loadMore: "Carregar mais...",
+                anonymous: "Anônimo",
+                doveGameTitle: "🕊️ Pomba da Esperança : Bênção Celestial",
+                doveNoGame: "Nenhum jogo jogado",
+                dovePlayNow: "Jogar agora",
+                wisdomLevels: {
+                    beginner: "Iniciante",
+                    apprentice: "Aprendiz",
+                    adept: "Adepto",
+                    sage: "Sábio",
+                    master: "Mestre",
+                    enlightened: "Iluminado",
+                    illuminated: "Resplandecente"
+                }
+            },
+            ru: {
+                pageTitle: "Эммануэль Пайе - Христианский Художник",
+                subtitle: "Христианский Художник • Творец • Вдохновитель",
+                gamesTitle: "Игры и Декор",
+                gamesDesc: "Откройте мои визуальные творения, интерактивные игры и художественные украшения, которые прославляют веру и красоту.",
+                booksTitle: "Книги и Искусство",
+                booksDesc: "Погрузитесь в мои литературные и художественные произведения, созданные с моей дочерью Бетани, чтобы питать душу и дух.",
+                musicTitle: "Бесплатный Госпел",
+                musicDesc: "Слушайте мои госпел-композиции на AudioMack, мелодии, которые славят Бога и вдохновляют единство в разнообразии.",
+                shopTitle: "Хорошее Время",
+                shopDesc: "Сейчас! Откройте мой магазин Redbubble с уникальными дизайнами и вдохновляющими творениями для ношения.",
+                quote: "Христианское искусство объединяет сердца за пределами различий, прославляя красоту божественного творения во всем его разнообразии.",
+                credits: "Запрограммировано Claude • Оригинальная идея Эммануэль Пайе",
+                leaderboardTitle: "🏆 Рейтинг Христианских Кроссвордов",
+                leaderboardSubtitle: "Лучшие игроки христианской игры кроссвордов",
+                searchPlaceholder: "🔍 Поиск игрока...",
+                statPlayers: "Игроки",
+                statTopScore: "Лучший Счет",
+                loading: "⏳ Загрузка счетов...",
+                rankHeader: "Ранг",
+                avatarHeader: "Аватар",
+                playerHeader: "Игрок",
+                levelHeader: "Уровень",
+                scoreHeader: "Счет",
+                noResults: "Нет результатов",
+                scoresLoaded: "счетов загружено",
+                allScoresLoaded: "✅ Все счета загружены",
+                loadMoreScores: "📥 Загрузить",
+                moreScores: "дополнительных счетов",
+                confirmLoadMore: "Вам нужно загрузить больше счетов для доступа к этой странице.\nЗагрузить",
+                moreScoresQuestion: "дополнительных счетов?",
+                errorLoading: "Ошибка загрузки",
+                errorCorrupted: "Ошибка: поврежденные данные",
+                loadMore: "Загрузить еще...",
+                anonymous: "Аноним",
+                doveGameTitle: "🕊️ Голубь Надежды : Небесное Благословение",
+                doveNoGame: "Не сыграно ни одной игры",
+                dovePlayNow: "Играть сейчас",
+                wisdomLevels: {
+                    beginner: "Новичок",
+                    apprentice: "Ученик",
+                    adept: "Адепт",
+                    sage: "Мудрец",
+                    master: "Мастер",
+                    enlightened: "Просветленный",
+                    illuminated: "Озаренный"
+                }
+            },
+            zh: {
+                pageTitle: "艾曼纽·佩耶 - 基督教艺术家",
+                subtitle: "基督教艺术家 • 创作者 • 启发者",
+                gamesTitle: "游戏与装饰",
+                gamesDesc: "发现我的视觉创作、互动游戏和艺术装饰，它们颂扬信仰和美丽。",
+                booksTitle: "书籍与艺术",
+                booksDesc: "沉浸在我与女儿贝塔妮创作的文学和艺术作品中，滋养灵魂和精神。",
+                musicTitle: "免费福音音乐",
+                musicDesc: "在AudioMack上聆听我的福音作品，这些旋律赞美上帝并激励多样性中的团结。",
+                shopTitle: "好时光",
+                shopDesc: "就是现在！发现我的Redbubble商店，拥有独特的设计和鼓舞人心的创作。",
+                quote: "基督教艺术超越差异联合心灵，在其多样性中庆祝神圣创造的美丽。",
+                credits: "由Claude编程 • 原创想法艾曼纽·佩耶",
+                leaderboardTitle: "🏆 基督教填字游戏排名",
+                leaderboardSubtitle: "基督教填字游戏最佳玩家",
+                searchPlaceholder: "🔍 搜索玩家...",
+                statPlayers: "玩家",
+                statTopScore: "最高分",
+                loading: "⏳ 加载分数中...",
+                rankHeader: "排名",
+                avatarHeader: "头像",
+                playerHeader: "玩家",
+                levelHeader: "等级",
+                scoreHeader: "分数",
+                noResults: "无结果",
+                scoresLoaded: "分数已加载",
+                allScoresLoaded: "✅ 所有分数已加载",
+                loadMoreScores: "📥 加载",
+                moreScores: "更多分数",
+                confirmLoadMore: "您需要加载更多分数才能访问此页面。\n加载",
+                moreScoresQuestion: "更多分数？",
+                errorLoading: "加载错误",
+                errorCorrupted: "错误：数据损坏",
+                loadMore: "加载更多...",
+                anonymous: "匿名",
+                doveGameTitle: "🕊️ 希望之鸽 : 天赐祝福",
+                doveNoGame: "未玩游戏",
+                dovePlayNow: "立即开始",
+                wisdomLevels: {
+                    beginner: "初学者",
+                    apprentice: "学徒",
+                    adept: "熟练者",
+                    sage: "智者",
+                    master: "大师",
+                    enlightened: "觉悟者",
+                    illuminated: "圣者"
+                }
+            },
+            ko: {
+                pageTitle: "엠마누엘 파예 - 기독교 예술가",
+                subtitle: "기독교 예술가 • 창작자 • 영감자",
+                gamesTitle: "게임과 장식",
+                gamesDesc: "신앙과 아름다움을 찬양하는 나의 시각적 창작물, 인터랙티브 게임, 예술적 장식을 발견하세요.",
+                booksTitle: "책과 예술",
+                booksDesc: "딸 베타니와 함께 만든 나의 문학적, 예술적 작품에 빠져들어 영혼과 정신을 기르세요.",
+                musicTitle: "무료 가스펠",
+                musicDesc: "AudioMack에서 하나님을 찬양하고 다양성 속의 일치를 영감하는 나의 가스펠 작품을 들어보세요.",
+                shopTitle: "좋은 시간",
+                shopDesc: "지금이에요! 독특한 디자인과 영감을 주는 창작물을 가진 나의 Redbubble 상점을 발견하세요.",
+                quote: "기독교 예술은 차이를 넘어 마음을 하나로 만들며, 모든 다양성 속에서 신성한 창조의 아름다움을 찬양합니다.",
+                credits: "Claude가 프로그래밍 • 원작 아이디어 엠마누엘 파예",
+                leaderboardTitle: "🏆 기독교 십자말풀이 순위",
+                leaderboardSubtitle: "기독교 십자말풀이 게임 최고 플레이어",
+                searchPlaceholder: "🔍 플레이어 검색...",
+                statPlayers: "플레이어",
+                statTopScore: "최고 점수",
+                loading: "⏳ 점수 로딩 중...",
+                rankHeader: "순위",
+                avatarHeader: "아바타",
+                playerHeader: "플레이어",
+                levelHeader: "레벨",
+                scoreHeader: "점수",
+                noResults: "결과 없음",
+                scoresLoaded: "점수 로드됨",
+                allScoresLoaded: "✅ 모든 점수 로드됨",
+                loadMoreScores: "📥 로드",
+                moreScores: "추가 점수",
+                confirmLoadMore: "이 페이지에 액세스하려면 더 많은 점수를 로드해야 합니다.\n로드",
+                moreScoresQuestion: "추가 점수?",
+                errorLoading: "로딩 오류",
+                errorCorrupted: "오류: 손상된 데이터",
+                loadMore: "더 로드...",
+                anonymous: "익명",
+                doveGameTitle: "🕊️ 희망의 비둘기 : 하늘의 축복",
+                doveNoGame: "플레이한 게임 없음",
+                dovePlayNow: "지금 플레이",
+                wisdomLevels: {
+                    beginner: "초보자",
+                    apprentice: "견습생",
+                    adept: "숙련자",
+                    sage: "현자",
+                    master: "달인",
+                    enlightened: "깨달은 자",
+                    illuminated: "성자"
+                }
+            },
+            ja: {
+                pageTitle: "エマニュエル・パイエ - キリスト教アーティスト",
+                subtitle: "キリスト教アーティスト • クリエイター • インスピレーター",
+                gamesTitle: "ゲーム＆デコレーション",
+                gamesDesc: "信仰と美しさを讃える私のビジュアル創作、インタラクティブゲーム、芸術的装飾を発見してください。",
+                booksTitle: "書籍＆アート",
+                booksDesc: "娘ベタニーと共に創作した私の文学的・芸術的作品に浸り、魂と精神を養ってください。",
+                musicTitle: "フリーゴスペル",
+                musicDesc: "AudioMackで神を讃え、多様性の中の一致を鼓舞する私のゴスペル作品を聴いてください。",
+                shopTitle: "良い時間",
+                shopDesc: "今です！ユニークなデザインと感動的な創作物を持つ私のRedbubbleショップを発見してください。",
+                quote: "キリスト教芸術は違いを超えて心を結び、その多様性のすべてにおいて神聖な創造の美しさを讃えます。",
+                credits: "Claudeによってプログラム • オリジナルアイデア エマニュエル・パイエ",
+                leaderboardTitle: "🏆 キリスト教クロスワードランキング",
+                leaderboardSubtitle: "キリスト教クロスワードゲームの最高プレイヤー",
+                searchPlaceholder: "🔍 プレイヤーを検索...",
+                statPlayers: "プレイヤー",
+                statTopScore: "最高スコア",
+                loading: "⏳ スコア読み込み中...",
+                rankHeader: "ランク",
+                avatarHeader: "アバター",
+                playerHeader: "プレイヤー",
+                levelHeader: "レベル",
+                scoreHeader: "スコア",
+                noResults: "結果なし",
+                scoresLoaded: "スコア読み込み済み",
+                allScoresLoaded: "✅ 全スコア読み込み済み",
+                loadMoreScores: "📥 ロード",
+                moreScores: "追加スコア",
+                confirmLoadMore: "このページにアクセスするには、さらにスコアをロードする必要があります。\nロード",
+                moreScoresQuestion: "追加スコア？",
+                errorLoading: "読み込みエラー",
+                errorCorrupted: "エラー：データ破損",
+                loadMore: "もっと読み込む...",
+                anonymous: "匿名",
+                doveGameTitle: "🕊️ 希望の鳩 : 天の祝福",
+                doveNoGame: "ゲーム未プレイ",
+                dovePlayNow: "今すぐプレイ",
+                wisdomLevels: {
+                    beginner: "初心者",
+                    apprentice: "見習い",
+                    adept: "熟練者",
+                    sage: "賢者",
+                    master: "達人",
+                    enlightened: "悟り者",
+                    illuminated: "聖者"
+                }
+            },
+            ar: {
+                pageTitle: "إيمانويل باييت - فنان مسيحي",
+                subtitle: "فنان مسيحي • مبدع • ملهم",
+                gamesTitle: "الألعاب والديكور",
+                gamesDesc: "اكتشف إبداعاتي البصرية والألعاب التفاعلية والزخارف الفنية التي تحتفل بالإيمان والجمال.",
+                booksTitle: "الكتب والفن",
+                booksDesc: "انغمس في أعمالي الأدبية والفنية المصنوعة مع ابنتي بيتاني لتغذية الروح والروح.",
+                musicTitle: "إنجيل مجاني",
+                musicDesc: "استمع إلى مؤلفاتي الإنجيلية على AudioMack، ألحان تحمد الله وتلهم الوحدة في التنوع.",
+                shopTitle: "الوقت الجيد",
+                shopDesc: "الآن! اكتشف متجر Redbubble الخاص بي مع تصاميم فريدة وإبداعات ملهمة للارتداء.",
+                quote: "الفن المسيحي يوحد القلوب ما وراء الاختلافات، محتفلاً بجمال الخلق الإلهي في كل تنوعه.",
+                credits: "مبرمج بواسطة Claude • الفكرة الأصلية إيمانويل باييت",
+                leaderboardTitle: "🏆 ترتيب الكلمات المتقاطعة المسيحية",
+                leaderboardSubtitle: "أفضل لاعبي لعبة الكلمات المتقاطعة المسيحية",
+                searchPlaceholder: "🔍 البحث عن لاعب...",
+                statPlayers: "اللاعبون",
+                statTopScore: "أعلى نتيجة",
+                loading: "⏳ تحميل النتائج...",
+                rankHeader: "الترتيب",
+                avatarHeader: "الصورة",
+                playerHeader: "اللاعب",
+                levelHeader: "المستوى",
+                scoreHeader: "النتيجة",
+                noResults: "لا توجد نتائج",
+                scoresLoaded: "النتائج المحملة",
+                allScoresLoaded: "✅ جميع النتائج محملة",
+                loadMoreScores: "📥 تحميل",
+                moreScores: "نتائج إضافية",
+                confirmLoadMore: "تحتاج إلى تحميل المزيد من النتائج للوصول إلى هذه الصفحة.\nتحميل",
+                moreScoresQuestion: "نتائج إضافية؟",
+                errorLoading: "خطأ في التحميل",
+                errorCorrupted: "خطأ: بيانات تالفة",
+                loadMore: "تحميل المزيد...",
+                anonymous: "مجهول",
+                doveGameTitle: "🕊️ حمامة الأمل : نعمة السماء",
+                doveNoGame: "لم يتم لعب أي لعبة",
+                dovePlayNow: "العب الآن",
+                wisdomLevels: {
+                    beginner: "مبتدئ",
+                    apprentice: "متدرب",
+                    adept: "ماهر",
+                    sage: "حكيم",
+                    master: "أستاذ",
+                    enlightened: "مستنير",
+                    illuminated: "منير"
+                }
+            },
+            hi: {
+                pageTitle: "इमैनुएल पायेट - ईसाई कलाकार",
+                subtitle: "ईसाई कलाकार • रचनाकार • प्रेरणादाता",
+                gamesTitle: "खेल और सजावट",
+                gamesDesc: "मेरी दृश्य रचनाओं, इंटरैक्टिव गेम्स और कलात्मक सजावट को खोजें जो विश्वास और सुंदरता का जश्न मनाते हैं।",
+                booksTitle: "किताबें और कला",
+                booksDesc: "मेरी बेटी बेथानी के साथ बनाई गई मेरी साहित्यिक और कलात्मक कृतियों में डूबें, आत्मा और भावना को पोषण देने के लिए।",
+                musicTitle: "मुफ्त गॉस्पेल",
+                musicDesc: "AudioMack पर मेरी गॉस्पेल रचनाएँ सुनें, ऐसी धुनें जो भगवान की स्तुति करती हैं और विविधता में एकता को प्रेरित करती हैं।",
+                shopTitle: "अच्छा समय",
+                shopDesc: "अभी है! अनोखे डिज़ाइन और प्रेरणादायक रचनाओं के साथ मेरी Redbubble दुकान खोजें।",
+                quote: "ईसाई कला मतभेदों से परे दिलों को एकजुट करती है, अपनी सभी विविधता में दैवीय सृष्टि की सुंदरता का जश्न मनाती है।",
+                credits: "Claude द्वारा कोडित • मूल विचार इमैनुएल पायेट",
+                leaderboardTitle: "🏆 ईसाई क्रॉसवर्ड रैंकिंग",
+                leaderboardSubtitle: "ईसाई क्रॉसवर्ड गेम के सर्वश्रेष्ठ खिलाड़ी",
+                searchPlaceholder: "🔍 खिलाड़ी खोजें...",
+                statPlayers: "खिलाड़ी",
+                statTopScore: "सर्वश्रेष्ठ स्कोर",
+                loading: "⏳ स्कोर लोड हो रहे हैं...",
+                rankHeader: "रैंक",
+                avatarHeader: "अवतार",
+                playerHeader: "खिलाड़ी",
+                levelHeader: "स्तर",
+                scoreHeader: "स्कोर",
+                noResults: "कोई परिणाम नहीं",
+                scoresLoaded: "स्कोर लोड किए गए",
+                allScoresLoaded: "✅ सभी स्कोर लोड किए गए",
+                loadMoreScores: "📥 लोड करें",
+                moreScores: "अतिरिक्त स्कोर",
+                confirmLoadMore: "इस पृष्ठ तक पहुँचने के लिए आपको और स्कोर लोड करने होंगे।\nलोड करें",
+                moreScoresQuestion: "अतिरिक्त स्कोर?",
+                errorLoading: "लोडिंग त्रुटि",
+                errorCorrupted: "त्रुटि: क्षतिग्रस्त डेटा",
+                loadMore: "और लोड करें...",
+                anonymous: "गुमनाम",
+                doveGameTitle: "🕊️ आशा की कबूतर : स्वर्गीय आशीर्वाद",
+                doveNoGame: "कोई खेल नहीं खेला गया",
+                dovePlayNow: "अभी खेलें",
+                wisdomLevels: {
+                    beginner: "शुरुआती",
+                    apprentice: "शिक्षु",
+                    adept: "निपुण",
+                    sage: "बुद्धिमान",
+                    master: "गुरु",
+                    enlightened: "प्रबुद्ध",
+                    illuminated: "प्रकाशित"
+                }
+            },
+            pl: {
+                pageTitle: "Emmanuel Payet - Artysta Chrześcijański",
+                subtitle: "Artysta Chrześcijański • Twórca • Inspirator",
+                gamesTitle: "Gry i Dekoracje",
+                gamesDesc: "Odkryj moje wizualne kreacje, interaktywne gry i artystyczne dekoracje celebrujące wiarę i piękno.",
+                booksTitle: "Książki i Sztuka",
+                booksDesc: "Zanurz się w moich dziełach literackich i artystycznych stworzonych z moją córką Betanią, by karmić duszę i ducha.",
+                musicTitle: "Darmowy Gospel",
+                musicDesc: "Posłuchaj moich kompozycji gospel na AudioMack, melodii wychwalających Boga i inspirujących jedność w różnorodności.",
+                shopTitle: "Dobry Czas",
+                shopDesc: "To teraz! Odkryj mój sklep Redbubble z unikalnymi projektami i inspirującymi kreacjami do noszenia.",
+                quote: "Sztuka chrześcijańska jednoczy serca poza różnicami, celebrując piękno boskiego stworzenia we wszystkich jego różnorodnościach.",
+                credits: "Zakodowane przez Claude • Oryginalny pomysł Emmanuel Payet",
+                leaderboardTitle: "🏆 Ranking Chrześcijańskich Krzyżówek",
+                leaderboardSubtitle: "Najlepsi gracze gry w chrześcijańskie krzyżówki",
+                searchPlaceholder: "🔍 Szukaj gracza...",
+                statPlayers: "Gracze",
+                statTopScore: "Najlepszy Wynik",
+                loading: "⏳ Ładowanie wyników...",
+                rankHeader: "Ranga",
+                avatarHeader: "Awatar",
+                playerHeader: "Gracz",
+                levelHeader: "Poziom",
+                scoreHeader: "Wynik",
+                noResults: "Brak wyników",
+                scoresLoaded: "wyników załadowanych",
+                allScoresLoaded: "✅ Wszystkie wyniki załadowane",
+                loadMoreScores: "📥 Załaduj",
+                moreScores: "dodatkowych wyników",
+                confirmLoadMore: "Musisz załadować więcej wyników, aby uzyskać dostęp do tej strony.\nZaładuj",
+                moreScoresQuestion: "dodatkowych wyników?",
+                errorLoading: "Błąd ładowania",
+                errorCorrupted: "Błąd: uszkodzone dane",
+                loadMore: "Załaduj więcej...",
+                anonymous: "Anonimowy",
+                doveGameTitle: "🕊️ Gołąb Nadziei : Niebiańskie Błogosławieństwo",
+                doveNoGame: "Brak rozegranych gier",
+                dovePlayNow: "Zagraj teraz",
+                wisdomLevels: {
+                    beginner: "Początkujący",
+                    apprentice: "Uczeń",
+                    adept: "Adept",
+                    sage: "Mędrzec",
+                    master: "Mistrz",
+                    enlightened: "Oświecony",
+                    illuminated: "Iluminowany"
+                }
+            },
+            sw: {
+                pageTitle: "Emmanuel Payet - Msanii wa Kikristo",
+                subtitle: "Msanii wa Kikristo • Muundaji • Mhamasisha",
+                gamesTitle: "Michezo na Mapambo",
+                gamesDesc: "Gundua miundombinu yangu ya kuona, michezo ya maingiliano na mapambo ya kisanii yanayosherehekea imani na uzuri.",
+                booksTitle: "Vitabu na Sanaa",
+                booksDesc: "Zama katika kazi zangu za kisayansi na kisanii zilizoundwa na binti yangu Bethanie, kulisha roho na akili.",
+                musicTitle: "Injili Bure",
+                musicDesc: "Sikiliza mchanganyiko wangu wa injili kwenye AudioMack, nyimbo zinazomsifu Mungu na kuhamasisha umoja katika utofauti.",
+                shopTitle: "Wakati Mzuri",
+                shopDesc: "Ni sasa! Gundua duka langu la Redbubble na miundo ya kipekee na miundombinu ya kuhamasisha kuvaa.",
+                quote: "Sanaa ya Kikristo inaunganisha mioyo zaidi ya tofauti, ikisherehekea uzuri wa uumbaji wa kimungu katika utofauti wake wote.",
+                credits: "Imeandikwa na Claude • Wazo la asili Emmanuel Payet",
+                leaderboardTitle: "🏆 Orodha ya Crossword ya Kikristo",
+                leaderboardSubtitle: "Wachezaji bora wa mchezo wa crossword ya Kikristo",
+                searchPlaceholder: "🔍 Tafuta mchezaji...",
+                statPlayers: "Wachezaji",
+                statTopScore: "Alama Bora",
+                loading: "⏳ Inapakia alama...",
+                rankHeader: "Nafasi",
+                avatarHeader: "Picha",
+                playerHeader: "Mchezaji",
+                levelHeader: "Kiwango",
+                scoreHeader: "Alama",
+                noResults: "Hakuna matokeo",
+                scoresLoaded: "alama zimepakiwa",
+                allScoresLoaded: "✅ Alama zote zimepakiwa",
+                loadMoreScores: "📥 Pakia",
+                moreScores: "alama zaidi",
+                confirmLoadMore: "Unahitaji kupakia alama zaidi ili kufikia ukurasa huu.\nPakia",
+                moreScoresQuestion: "alama zaidi?",
+                errorLoading: "Kosa la kupakia",
+                errorCorrupted: "Kosa: data iliyoharibiwa",
+                loadMore: "Pakia zaidi...",
+                anonymous: "Asiye na jina",
+                doveGameTitle: "🕊️ Njiwa wa Matumaini : Baraka ya Mbinguni",
+                doveNoGame: "Hakuna mchezo uliochezwa",
+                dovePlayNow: "Cheza sasa",
+                wisdomLevels: {
+                    beginner: "Mwanzo",
+                    apprentice: "Mwanafunzi",
+                    adept: "Stadi",
+                    sage: "Mwenye Hekima",
+                    master: "Bwana",
+                    enlightened: "Aliyeangaziwa",
+                    illuminated: "Aliyemulikiwa"
+                }
+            }
+        };
+
+        // ✨ Fonction pour traduire un niveau de sagesse (APRÈS translations)
+        function translateWisdomLevel(key) {
+            return translations[currentLang]?.wisdomLevels?.[key] || key;
+        }
+
+        // ⚡ Fonction de détection de langue (APRÈS translations pour pouvoir l'utiliser)
+        function detectInitialLanguage() {
+            // 1. PRIORITÉ 1: localStorage (choix manuel de l'utilisateur)
+            let lang = localStorage.getItem('selectedLanguage');
+            if (lang && translations[lang]) {
+                console.log('🌍 Langue récupérée depuis localStorage (choix utilisateur):', lang);
+                return lang;
+            }
+            
+            // 2. URL en paramètre
+            const urlParams = new URLSearchParams(window.location.search);
+            lang = urlParams.get('lang');
+            if (lang && translations[lang]) {
+                console.log('🌍 Langue détectée depuis URL:', lang);
+                return lang;
+            }
+            
+            // 3. Essayer le parent (window.opener = jeu)
+            try {
+                if (window.opener && window.opener.window && window.opener.window.i18n) {
+                    lang = window.opener.window.i18n.getCurrentLanguage();
+                    if (lang && translations[lang]) {
+                        console.log('🌍 Langue récupérée depuis le jeu parent:', lang);
+                        return lang;
+                    }
+                }
+            } catch (e) {
+                console.log('⚠️ Impossible de récupérer la langue depuis le parent');
+            }
+            
+            // 4. Détecter langue navigateur
+            const browserLang = navigator.language || navigator.userLanguage;
+            const shortLang = browserLang.split('-')[0].toLowerCase();
+            const langMap = {
+                'fr': 'fr', 'en': 'en', 'es': 'es', 'de': 'de', 'it': 'it',
+                'pt': 'pt', 'ru': 'ru', 'zh': 'zh', 'ko': 'ko', 'ja': 'ja',
+                'ar': 'ar', 'hi': 'hi', 'pl': 'pl', 'sw': 'sw'
+            };
+            lang = langMap[shortLang];
+            if (lang && translations[lang]) {
+                console.log('🌍 Langue détectée depuis navigateur:', browserLang, '→', lang);
+                return lang;
+            }
+            
+            // 5. Par défaut français
+            console.log('🌍 Langue par défaut: fr');
+            return 'fr';
+        }
+
+        // Fonction pour appliquer la traduction
+        function applyTranslation(lang) {
+            const t = translations[lang];
+            if (!t) return;
+
+            // Sauvegarder la langue courante
+            currentLang = lang;
+            localStorage.setItem('selectedLanguage', lang);
+
+            // Traduire les textes statiques
+            document.getElementById('page-title').textContent = t.pageTitle;
+            document.title = t.pageTitle;
+            document.getElementById('subtitle').textContent = t.subtitle;
+            document.getElementById('games-title').textContent = t.gamesTitle;
+            document.getElementById('games-desc').textContent = t.gamesDesc;
+            document.getElementById('books-title').textContent = t.booksTitle;
+            document.getElementById('books-desc').textContent = t.booksDesc;
+            document.getElementById('music-title').textContent = t.musicTitle;
+            document.getElementById('music-desc').textContent = t.musicDesc;
+            document.getElementById('shop-title').textContent = t.shopTitle;
+            document.getElementById('shop-desc').textContent = t.shopDesc;
+            document.getElementById('inspiring-quote').textContent = t.quote;
+            document.getElementById('credits').textContent = t.credits;
+            
+            // Traductions du leaderboard
+            const leaderboardTitle = document.querySelector('.leaderboard-title');
+            const leaderboardSubtitle = document.querySelector('.leaderboard-subtitle');
+            const searchInput = document.getElementById('searchInput');
+            const loadingMessage = document.getElementById('loadingMessage');
+            const statLabels = document.querySelectorAll('.stat-label');
+            const doveGameTitle = document.getElementById('dove-game-title');
+
+            if (leaderboardTitle) leaderboardTitle.textContent = t.leaderboardTitle;
+            if (leaderboardSubtitle) leaderboardSubtitle.textContent = t.leaderboardSubtitle;
+            if (searchInput) searchInput.placeholder = t.searchPlaceholder;
+            if (loadingMessage) loadingMessage.textContent = t.loading;
+            if (doveGameTitle) doveGameTitle.textContent = t.doveGameTitle;
+            
+            // Tooltips des statistiques
+            if (statLabels.length >= 2) {
+                statLabels[0].title = t.statPlayers;
+                statLabels[1].title = t.statTopScore;
+            }
+            
+            // Headers du tableau
+            const headers = document.querySelectorAll('.table-header > div');
+            if (headers.length >= 4) {
+                headers[0].textContent = t.rankHeader;
+                headers[1].textContent = t.avatarHeader;
+                headers[2].textContent = t.playerHeader;
+                headers[3].textContent = t.scoreHeader;
+            }
+            
+            // Mettre à jour l'attribut lang
+            document.documentElement.lang = lang;
+            
+            // Mettre à jour l'option active dans le menu
+            document.querySelectorAll('.lang-option').forEach(opt => {
+                opt.classList.toggle('active', opt.dataset.lang === lang);
+            });
+            
+            // Mettre à jour le bouton principal
+            const selectedOption = document.querySelector(`.lang-option[data-lang="${lang}"]`);
+            if (selectedOption) {
+                const flag = selectedOption.dataset.flag;
+                const code = lang.toUpperCase();
+                document.querySelector('.lang-flag').textContent = flag;
+                document.querySelector('.lang-code').textContent = code;
+            }
+            
+            // ✨ REDESSINER LE LEADERBOARD si des données sont chargées
+            const leaderboardContent = document.getElementById('leaderboardContent');
+            if (leaderboardContent && leaderboardContent.children.length > 0) {
+                console.log('🔄 Redessiner leaderboard avec langue:', lang);
+                if (typeof renderPage === 'function') renderPage();
+                if (typeof renderLoadMoreButton === 'function') renderLoadMoreButton();
+            }
+        }
+
+        // ⚡ APPLIQUER LA TRADUCTION IMMÉDIATEMENT (avant affichage)
+        // Utiliser DOMContentLoaded au lieu de 'load' pour être plus rapide
+        // ⚡ INITIALISATION UNIQUE AU CHARGEMENT DU DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Détecter et appliquer la langue
+            currentLang = detectInitialLanguage();
+            applyTranslation(currentLang);
+            console.log('🌍 Module Emmanuel chargé en:', currentLang);
+            
+            // 2. Rafraîchir le leaderboard avec la langue détectée
+            if (typeof allScores !== 'undefined' && allScores && allScores.length > 0) {
+                if (typeof renderPage === 'function') renderPage();
+                if (typeof renderLoadMoreButton === 'function') renderLoadMoreButton();
+            }
+            
+            // 3. Initialiser le sélecteur de langue
+            const dropdown = document.querySelector('.lang-dropdown');
+            const currentBtn = document.querySelector('.lang-current');
+            
+            console.log('🔍 Sélecteur langue:', {
+                dropdown: dropdown ? 'trouvé' : 'NON TROUVÉ',
+                currentBtn: currentBtn ? 'trouvé' : 'NON TROUVÉ'
+            });
+            
+            if (currentBtn && dropdown) {
+                currentBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    dropdown.classList.toggle('open');
+                    const isOpen = dropdown.classList.contains('open');
+                    console.log('🎯 Dropdown cliqué, état:', isOpen ? 'OUVERT' : 'FERMÉ');
+                });
+                
+                // Fermer le dropdown si on clique ailleurs
+                document.addEventListener('click', (e) => {
+                    if (!dropdown.contains(e.target)) {
+                        dropdown.classList.remove('open');
+                    }
+                });
+                
+                // Ajouter les événements aux options de langue
+                document.querySelectorAll('.lang-option').forEach(opt => {
+                    opt.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const selectedLang = opt.dataset.lang;
+                        
+                        // Appliquer la traduction (sauvegarde automatiquement dans localStorage)
+                        applyTranslation(selectedLang);
+                        dropdown.classList.remove('open');
+                    });
+                });
+            } else {
+                console.error('❌ ERREUR: Sélecteur langue non trouvé dans le DOM!');
+            }
+
+            // 4. Animation au scroll pour les cartes
+            const cards = document.querySelectorAll('.platform-card');
+            
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -100px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = `opacity 0.6s ease ${index * 0.2}s, transform 0.6s ease ${index * 0.2}s`;
+                observer.observe(card);
+            });
+
+            // 5. Animation des icônes au survol
+            cards.forEach(card => {
+                const icon = card.querySelector('.platform-icon');
+                
+                card.addEventListener('mouseenter', () => {
+                    icon.style.transform = 'rotateY(180deg)';
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    icon.style.transform = 'rotateY(0deg)';
+                });
+                
+                icon.style.transition = 'transform 0.6s ease';
+            });
+        }); // ⚡ FIN DU DOMCONTENTLOADED
+    </script>
+</body>
+</html>
