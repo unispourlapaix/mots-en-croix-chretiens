@@ -730,7 +730,7 @@ class ChristianCrosswordGame {
         
         // Charger le mode sauvegardé
         const savedMode = localStorage.getItem('gameMode');
-        if (savedMode && (savedMode === 'normal' || savedMode === 'couple' || savedMode === 'race')) {
+        if (savedMode && (savedMode === 'normal' || savedMode === 'couple' || savedMode === 'race' || savedMode === 'sagesse')) {
             this.gameMode = savedMode;
             this.updateModeButtons();
         }
@@ -1539,6 +1539,10 @@ class ChristianCrosswordGame {
                 if (icon) icon.textContent = '💕';
                 if (name) name.textContent = 'Mode Couple';
                 if (count) count.textContent = '(122)';
+            } else if (this.gameMode === 'sagesse') {
+                if (icon) icon.textContent = '🕊️';
+                if (name) name.textContent = 'Mode Sagesse';
+                if (count) count.textContent = '(88)';
             } else if (this.gameMode === 'race') {
                 if (icon) icon.textContent = '🏁';
                 if (name) name.textContent = 'Mode Course';

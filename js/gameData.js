@@ -4720,6 +4720,14 @@ class GameDataManager {
         // Déterminer la source de données selon le mode de jeu
         const gameMode = window.game?.gameMode || 'normal';
         
+        // Mode Sagesse: utiliser les données spécifiques
+        if (gameMode === 'sagesse' && typeof levelsSagesse !== 'undefined') {
+            if (levelNumber < 1 || levelNumber > levelsSagesse.length) {
+                return null;
+            }
+            return levelsSagesse[levelNumber - 1];
+        }
+        
         // Mode Couple: utiliser les données spécifiques
         if (gameMode === 'couple' && typeof coupleChretienData !== 'undefined') {
             if (levelNumber < 1 || levelNumber > coupleChretienData.levels.length) {
@@ -4756,7 +4764,12 @@ class GameDataManager {
     getTotalLevels() {
         const gameMode = window.game?.gameMode || 'normal';
         
-        // Mode Couple: 88 niveaux
+        // Mode Sagesse: 88 niveaux
+        if (gameMode === 'sagesse' && typeof levelsSagesse !== 'undefined') {
+            return levelsSagesse.length;
+        }
+        
+        // Mode Couple: 122 niveaux
         if (gameMode === 'couple' && typeof coupleChretienData !== 'undefined') {
             return coupleChretienData.levels.length;
         }
