@@ -543,14 +543,39 @@ class ChristianCrosswordGame {
                 <div class="resume-modal-body">
                     <div class="mode-cards">
                         <div class="mode-card" data-mode="normal">
-                            <div class="mode-card-icon">🎯</div>
+                            <div class="mode-card-icon">🙏</div>
                             <div class="mode-card-title">Normal</div>
-                            <div class="mode-card-desc">Mode classique pour découvrir</div>
+                            <div class="mode-card-desc">77 niveaux classiques</div>
                         </div>
                         <div class="mode-card" data-mode="couple">
-                            <div class="mode-card-icon">👫</div>
+                            <div class="mode-card-icon">💕</div>
                             <div class="mode-card-title">Couple</div>
-                            <div class="mode-card-desc">Mots d'amour et d'unité</div>
+                            <div class="mode-card-desc">122 mots d'amour et d'unité</div>
+                        </div>
+                        <div class="mode-card" data-mode="sagesse">
+                            <div class="mode-card-icon">🕊️</div>
+                            <div class="mode-card-title">Sagesse</div>
+                            <div class="mode-card-desc">88 sagesses divines</div>
+                        </div>
+                        <div class="mode-card" data-mode="proverbes">
+                            <div class="mode-card-icon">📖</div>
+                            <div class="mode-card-title">Proverbes</div>
+                            <div class="mode-card-desc">88 proverbes bibliques</div>
+                        </div>
+                        <div class="mode-card" data-mode="disciple">
+                            <div class="mode-card-icon">✝️</div>
+                            <div class="mode-card-title">Disciple</div>
+                            <div class="mode-card-desc">88 vers l'amour vrai</div>
+                        </div>
+                        <div class="mode-card" data-mode="veiller">
+                            <div class="mode-card-icon">👁️</div>
+                            <div class="mode-card-title">Veiller</div>
+                            <div class="mode-card-desc">88 vertus vs maux</div>
+                        </div>
+                        <div class="mode-card" data-mode="aimee">
+                            <div class="mode-card-icon">❤️</div>
+                            <div class="mode-card-title">Aimée</div>
+                            <div class="mode-card-desc">88 aimer Dieu & autrui</div>
                         </div>
                     </div>
                 </div>
@@ -589,7 +614,17 @@ class ChristianCrosswordGame {
                 modal.remove();
                 
                 if (window.simpleChatSystem) {
-                    const modeEmoji = mode === 'couple' ? '👫' : mode === 'race' ? '🏁' : '🎯';
+                    const modeIcons = {
+                        'normal': '🙏',
+                        'couple': '💕',
+                        'sagesse': '🕊️',
+                        'proverbes': '📖',
+                        'disciple': '✝️',
+                        'veiller': '👁️',
+                        'aimee': '❤️',
+                        'race': '🏁'
+                    };
+                    const modeEmoji = modeIcons[mode] || '🎯';
                     window.simpleChatSystem.showMessage(
                         `${modeEmoji} Nouvelle partie en mode ${mode.toUpperCase()} !`,
                         'system'
