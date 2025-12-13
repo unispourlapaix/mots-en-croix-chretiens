@@ -4,7 +4,12 @@
  */
 
 // 🔑 CONFIGURATION GLOBALE : Mets ta clé API OpenAI ici pour activer l'IA pour tous les joueurs
-const DEFAULT_OPENAI_KEY = ''; // Désactivé pour l'instant
+// ⚠️ NE JAMAIS POUSSER LA CLÉ SUR GITHUB !
+// Option 1: Importe config.local.js dans index.html
+// Option 2: Utilise /config dans le chat
+const DEFAULT_OPENAI_KEY = (typeof window !== 'undefined' && window.LOCAL_CONFIG) 
+    ? window.LOCAL_CONFIG.OPENAI_API_KEY 
+    : ''; // Désactivé pour l'instant
 
 class UnisonaAI {
     constructor() {
