@@ -1443,11 +1443,12 @@ class ChristianCrosswordGame {
     }
 
     /**
-     * Change le mode de jeu (normal ou couple)
-     * @param {string} mode - 'normal' ou 'couple'
+     * Change le mode de jeu (normal, couple, sagesse, proverbes, disciple, veiller, aimee, race)
+     * @param {string} mode - Le mode de jeu
      */
     switchGameMode(mode) {
-        if (mode !== 'normal' && mode !== 'couple' && mode !== 'race') {
+        const validModes = ['normal', 'couple', 'race', 'sagesse', 'proverbes', 'disciple', 'veiller', 'aimee'];
+        if (!validModes.includes(mode)) {
             console.error('Mode invalide:', mode);
             return;
         }
