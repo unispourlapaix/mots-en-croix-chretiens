@@ -7,12 +7,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Afficher les boutons quand une room est rejointe
     function updateRaceButtonsVisibility() {
         if (window.simpleChatSystem && window.simpleChatSystem.isInRoom()) {
+            // Vérifier le mode actuel
+            const currentMode = window.game ? window.game.gameMode : 'normal';
+            
+            // Le bouton course n'apparaît que si le mode course est sélectionné
+            if (currentMode !== 'race') {
+                if (startRaceBtn) startRaceBtn.style.display = 'none';
+                if (stopRaceBtn) stopRaceBtn.style.display = 'none';
+                return;
+            }
+            
             // Si une course est en cours, afficher le bouton stop
             if (window.multiplayerRace && window.multiplayerRace.isRaceMode) {
                 if (startRaceBtn) startRaceBtn.style.display = 'none';
                 if (stopRaceBtn) stopRaceBtn.style.display = 'block';
             } else {
-                // Sinon, afficher le bouton start
+                // Sinon, afficher le bouton start (seulement en mode course)
                 if (startRaceBtn) startRaceBtn.style.display = 'block';
                 if (stopRaceBtn) stopRaceBtn.style.display = 'none';
             }
