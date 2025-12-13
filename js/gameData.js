@@ -4720,6 +4720,14 @@ class GameDataManager {
         // Déterminer la source de données selon le mode de jeu
         const gameMode = window.game?.gameMode || 'normal';
         
+        // Mode Aimée: utiliser les données spécifiques
+        if (gameMode === 'aimee' && typeof levelsAimee !== 'undefined') {
+            if (levelNumber < 1 || levelNumber > levelsAimee.length) {
+                return null;
+            }
+            return levelsAimee[levelNumber - 1];
+        }
+        
         // Mode Veiller: utiliser les données spécifiques
         if (gameMode === 'veiller' && typeof levelsVeiller !== 'undefined') {
             if (levelNumber < 1 || levelNumber > levelsVeiller.length) {
@@ -4787,6 +4795,11 @@ class GameDataManager {
      */
     getTotalLevels() {
         const gameMode = window.game?.gameMode || 'normal';
+        
+        // Mode Aimée: 88 niveaux
+        if (gameMode === 'aimee' && typeof levelsAimee !== 'undefined') {
+            return levelsAimee.length;
+        }
         
         // Mode Veiller: 88 niveaux
         if (gameMode === 'veiller' && typeof levelsVeiller !== 'undefined') {
