@@ -47,9 +47,10 @@ class AudioSystem {
             gainNode.connect(this.audioContext.destination);
             
             oscillator.type = type;
-            oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
             
-            const now = this.audioContext.currentTime;
+            const now = Math.max(0, this.audioContext.currentTime);
+            oscillator.frequency.setValueAtTime(frequency, now);
+            
             const attack = 0.01;
             const decay = 0.1;
             const sustain = volume * this.masterVolume * 0.7;
