@@ -4712,6 +4712,244 @@ class GameDataManager {
     }
 
     /**
+     * Génère des indices selon le mode de jeu
+     */
+    generateClueForMode(word, gameMode) {
+        // Utilise le module de traduction si disponible
+        if (typeof CLUES_FR !== 'undefined') {
+            if (CLUES_FR[gameMode] && CLUES_FR[gameMode][word]) {
+                return CLUES_FR[gameMode][word];
+            }
+            return CLUES_FR.defaults[gameMode] || CLUES_FR.defaults['normal'];
+        }
+
+        // Fallback si le module n'est pas chargé
+        return 'Vertu chrétienne à découvrir';
+    }
+
+    /**
+     * Vérifie si deux paths ont une collision
+     */
+    hasCollision(path1, path2) {
+        if (!path1 || !path2) return false;
+        
+        for (const [row1, col1] of path1) {
+            for (const [row2, col2] of path2) {
+                if (row1 === row2 && col1 === col2) {
+                    return true; // Collision détectée
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Valide que le path correspond bien au sens du mot (debug)
+     */
+    validateWordPath(word, path, wordName) {
+        if (!path || path.length !== word.length) {
+            console.error(`❌ ${wordName}: path.length (${path?.length}) ≠ word.length (${word.length})`);
+            return false;
+        }
+        
+        // Afficher le mapping pour debug
+        const mapping = path.map((pos, i) => `${word[i]}[${pos[0]},${pos[1]}]`).join(' → ');
+        console.log(`✅ ${wordName}: ${mapping}`);
+        return true;
+    }
+
+    /**
+     * Génère une grille croisée automatique à partir de deux mots
+     * @param {Array} words - Tableau de mots (strings)
+     * @returns {Object} - Format avec words array contenant word, clue, path
+     */
+    generateCrossedWordsFromArray(words) {
+        if (!words || words.length !== 2) {
+            console.error('generateCrossedWordsFromArray: besoin de 2 mots exactement');
+            return null;
+        }
+
+        const [word1, word2] = words;
+        const gameMode = window.game?.gameMode || 'normal';
+        const maxStraightLength = 8; // Longueur max avant de plier
+        
+        const word1IsLong = word1.length > maxStraightLength;
+        const word2IsLong = word2.length > maxStraightLength;
+        
+        // Cas spécial : les deux mots sont longs - on les isole complètement
+        if (word1IsLong && word2IsLong) {
+            return this.generateIsolatedLongWords(word1, word2, gameMode);
+        }
+        
+        // Générer path pour word1
+        let word1Path = [];
+        let word1Direction = 'horizontal';
+        
+        if (word1IsLong) {
+            // Mot coudé dans le coin haut-gauche
+            word1Direction = 'bent';
+            const midPoint = Math.ceil(word1.length / 2);
+            const startCol = 0;
+            const bendRow = 0;
+            
+            // Partie horizontale (ligne 0)
+            for (let i = 0; i < midPoint; i++) {
+                word1Path.push([bendRow, startCol + i]);
+            }
+            // Partie verticale (descend)
+            const remainingLetters = word1.length - midPoint;
+            for (let i = 0; i < remainingLetters; i++) {
+                word1Path.push([bendRow + i + 1, startCol + midPoint - 1]);
+            }
+        } else {
+            // Mot horizontal centré
+            const horizontalRow = 4;
+            const startCol = Math.floor((10 - word1.length) / 2);
+            for (let i = 0; i < word1.length; i++) {
+                word1Path.push([horizontalRow, startCol + i]);
+            }
+        }
+
+        // Générer path pour word2
+        let word2Path = [];
+        let word2Direction = 'vertical';
+        
+        if (word2IsLong) {
+            // Mot coudé dans le coin bas-droit (pour éviter chevauchement avec mot court au centre)
+            word2Direction = 'bent';
+            const midPoint = Math.ceil(word2.length / 2);
+            const startRow = 9;
+            const bendCol = 9;
+            
+            // Partie verticale (monte depuis le bas)
+            for (let i = 0; i < midPoint; i++) {
+                word2Path.push([startRow - i, bendCol]);
+            }
+            // Partie horizontale (vers la gauche)
+            const remainingLetters = word2.length - midPoint;
+            const bendRow = startRow - midPoint + 1;
+            for (let i = 0; i < remainingLetters; i++) {
+                word2Path.push([bendRow, bendCol - (i + 1)]);
+            }
+            
+            // Vérifier collision avec word1
+            if (this.hasCollision(word1Path, word2Path)) {
+                console.warn('⚠️ Collision détectée - Ajustement word2 long');
+                word2Path = [];
+                // Déplacer vers colonne 8 au lieu de 9
+                for (let i = 0; i < midPoint; i++) {
+                    word2Path.push([startRow - i, bendCol - 1]);
+                }
+                for (let i = 0; i < remainingLetters; i++) {
+                    word2Path.push([bendRow, bendCol - 1 - (i + 1)]);
+                }
+            }
+        } else if (!word1IsLong) {
+            // Si word1 est court, on croise
+            const intersectionCol = word1Path[Math.floor(word1Path.length / 2)][1];
+            const startRow = Math.floor((10 - word2.length) / 2);
+            for (let i = 0; i < word2.length; i++) {
+                word2Path.push([startRow + i, intersectionCol]);
+            }
+        } else {
+            // word1 est long mais pas word2, placer word2 bas-droit
+            const col = 9;
+            const startRow = Math.max(0, 10 - word2.length); // Éviter débordement
+            for (let i = 0; i < word2.length; i++) {
+                word2Path.push([startRow + i, col]);
+            }
+            
+            // Vérifier collision avec word1
+            if (this.hasCollision(word1Path, word2Path)) {
+                console.warn('⚠️ Collision détectée - Ajustement word2 court');
+                word2Path = [];
+                // Déplacer vers la gauche
+                for (let i = 0; i < word2.length; i++) {
+                    word2Path.push([startRow + i, col - 2]);
+                }
+            }
+        }
+
+        // Valider les paths (debug)
+        this.validateWordPath(word1, word1Path, word1);
+        this.validateWordPath(word2, word2Path, word2);
+
+        return {
+            words: [
+                {
+                    word: word1,
+                    clue: this.generateClueForMode(word1, gameMode),
+                    path: word1Path,
+                    direction: word1Direction
+                },
+                {
+                    word: word2,
+                    clue: this.generateClueForMode(word2, gameMode),
+                    path: word2Path,
+                    direction: word2Direction
+                }
+            ]
+        };
+    }
+
+    /**
+     * Génère une grille pour deux mots longs isolés
+     */
+    generateIsolatedLongWords(word1, word2, gameMode) {
+        // Word1 : coin haut-gauche, L vers le bas
+        const midPoint1 = Math.ceil(word1.length / 2);
+        const word1Path = [];
+        
+        // Partie horizontale (ligne 0)
+        for (let i = 0; i < midPoint1; i++) {
+            word1Path.push([0, i]);
+        }
+        // Partie verticale (descend depuis la dernière position)
+        const remainingWord1 = word1.length - midPoint1;
+        for (let i = 0; i < remainingWord1; i++) {
+            word1Path.push([i + 1, midPoint1 - 1]);
+        }
+        
+        // Word2 : coin bas-droit, L inversé
+        const midPoint2 = Math.ceil(word2.length / 2);
+        const word2Path = [];
+        const startRow2 = 9;
+        const startCol2 = 9;
+        
+        // Partie verticale (monte depuis le bas)
+        for (let i = 0; i < midPoint2; i++) {
+            word2Path.push([startRow2 - i, startCol2]);
+        }
+        // Partie horizontale (va vers la gauche)
+        const remainingWord2 = word2.length - midPoint2;
+        const bendRow2 = startRow2 - midPoint2 + 1;
+        for (let i = 0; i < remainingWord2; i++) {
+            word2Path.push([bendRow2, startCol2 - (i + 1)]);
+        }
+        
+        // Valider les paths (debug)
+        this.validateWordPath(word1, word1Path, word1);
+        this.validateWordPath(word2, word2Path, word2);
+        
+        return {
+            words: [
+                {
+                    word: word1,
+                    clue: this.generateClueForMode(word1, gameMode),
+                    path: word1Path,
+                    direction: 'bent'
+                },
+                {
+                    word: word2,
+                    clue: this.generateClueForMode(word2, gameMode),
+                    path: word2Path,
+                    direction: 'bent'
+                }
+            ]
+        };
+    }
+
+    /**
      * Récupère un niveau avec fallback automatique vers le français
      * @param {number} levelNumber - Numéro du niveau (1-based)
      * @returns {Object|null} - Données du niveau ou null
@@ -4725,7 +4963,8 @@ class GameDataManager {
             if (levelNumber < 1 || levelNumber > levelsAimee.length) {
                 return null;
             }
-            return levelsAimee[levelNumber - 1];
+            const levelData = levelsAimee[levelNumber - 1];
+            return this.generateCrossedWordsFromArray(levelData.words);
         }
         
         // Mode Veiller: utiliser les données spécifiques
@@ -4733,7 +4972,8 @@ class GameDataManager {
             if (levelNumber < 1 || levelNumber > levelsVeiller.length) {
                 return null;
             }
-            return levelsVeiller[levelNumber - 1];
+            const levelData = levelsVeiller[levelNumber - 1];
+            return this.generateCrossedWordsFromArray(levelData.words);
         }
         
         // Mode Disciple: utiliser les données spécifiques
@@ -4741,7 +4981,8 @@ class GameDataManager {
             if (levelNumber < 1 || levelNumber > levelsDisciple.length) {
                 return null;
             }
-            return levelsDisciple[levelNumber - 1];
+            const levelData = levelsDisciple[levelNumber - 1];
+            return this.generateCrossedWordsFromArray(levelData.words);
         }
         
         // Mode Proverbes: utiliser les données spécifiques
@@ -4749,7 +4990,8 @@ class GameDataManager {
             if (levelNumber < 1 || levelNumber > levelsProverbes.length) {
                 return null;
             }
-            return levelsProverbes[levelNumber - 1];
+            const levelData = levelsProverbes[levelNumber - 1];
+            return this.generateCrossedWordsFromArray(levelData.words);
         }
         
         // Mode Sagesse: utiliser les données spécifiques
@@ -4757,7 +4999,8 @@ class GameDataManager {
             if (levelNumber < 1 || levelNumber > levelsSagesse.length) {
                 return null;
             }
-            return levelsSagesse[levelNumber - 1];
+            const levelData = levelsSagesse[levelNumber - 1];
+            return this.generateCrossedWordsFromArray(levelData.words);
         }
         
         // Mode Couple: utiliser les données spécifiques

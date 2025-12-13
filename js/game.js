@@ -81,6 +81,29 @@ class ChristianCrosswordGame {
         }, 3 * 60 * 1000); // 3 minutes en millisecondes
     }
 
+    /**
+     * Normalise une lettre en supprimant les accents
+     * É → E, À → A, Ç → C, etc.
+     */
+    normalizeAccents(letter) {
+        const map = {
+            'À': 'A', 'Á': 'A', 'Â': 'A', 'Ã': 'A', 'Ä': 'A', 'Å': 'A',
+            'È': 'E', 'É': 'E', 'Ê': 'E', 'Ë': 'E',
+            'Ì': 'I', 'Í': 'I', 'Î': 'I', 'Ï': 'I',
+            'Ò': 'O', 'Ó': 'O', 'Ô': 'O', 'Õ': 'O', 'Ö': 'O',
+            'Ù': 'U', 'Ú': 'U', 'Û': 'U', 'Ü': 'U',
+            'Ç': 'C', 'Ñ': 'N'
+        };
+        return map[letter] || letter;
+    }
+
+    /**
+     * Compare deux lettres en ignorant les accents
+     */
+    lettersMatch(input, expected) {
+        return this.normalizeAccents(input) === this.normalizeAccents(expected);
+    }
+
     saveGame() {
         // CRITICAL: Ne JAMAIS sauvegarder pendant un clearSave
         if (this.isClearingData) {
@@ -337,8 +360,8 @@ class ChristianCrosswordGame {
     }
 
     checkAndAskForResumeOrRestart() {
-        // Récupérer toutes les sauvegardes disponibles (Normal et Couple uniquement)
-        const modes = ['normal', 'couple'];
+        // Récupérer toutes les sauvegardes disponibles (tous les modes)
+        const modes = ['normal', 'couple', 'sagesse', 'proverbes', 'disciple', 'veiller', 'aimee'];
         const availableSaves = [];
         
         modes.forEach(mode => {
@@ -382,7 +405,8 @@ class ChristianCrosswordGame {
         }
         
         if (availableSaves.length === 0) {
-            console.log('📂 Aucune sauvegarde - Première visite');
+            console.log('📂 Aucune sauvegarde - Affichage sélecteur de mode');
+            this.showNewGameModeSelection();
             return;
         }
         
@@ -444,7 +468,7 @@ class ChristianCrosswordGame {
             <div class="resume-modal-content">
                 <div class="resume-modal-header">
                     <h2>🎮 Parties sauvegardées</h2>
-                    <p class="resume-subtitle">Choisissez une partie à reprendre ou commencez une nouvelle</p>
+                    <p class="resume-subtitle">Reprenez où vous en étiez ou choisissez un nouveau mode</p>
                 </div>
                 <div class="resume-modal-body">
                     <div class="resume-saves-list">
@@ -453,7 +477,10 @@ class ChristianCrosswordGame {
                 </div>
                 <div class="resume-modal-footer">
                     <button class="resume-btn resume-btn-new" id="resumeNewGame">
-                        ✨ Nouvelle partie
+                        ✨ Choisir un mode de jeu
+                    </button>
+                    <button class="resume-btn resume-btn-close" id="resumeClose">
+                        ❌ Annuler
                     </button>
                 </div>
             </div>
@@ -520,11 +547,15 @@ class ChristianCrosswordGame {
             });
         });
         
-        // Gérer le bouton "Nouvelle partie"
+        // Gérer le bouton "Choisir un mode"
         document.getElementById('resumeNewGame').addEventListener('click', () => {
             modal.remove();
-            // Afficher une sous-modal pour choisir le mode
             this.showNewGameModeSelection();
+        });
+        
+        // Gérer le bouton "Annuler"
+        document.getElementById('resumeClose').addEventListener('click', () => {
+            modal.remove();
         });
         
         // Animation d'entrée
@@ -2084,13 +2115,13 @@ class ChristianCrosswordGame {
                                 const expected2 = letter2Span.dataset.expected;
                                 const [inputLetter1, inputLetter2] = this.grid[i][j].split('/');
                                 
-                                if ((inputLetter1 || '') === expected1 && (inputLetter2 || '') === expected2) {
+                                if (this.lettersMatch(inputLetter1 || '', expected1) && this.lettersMatch(inputLetter2 || '', expected2)) {
                                     cell.classList.add('correct');
                                     this.checkCompletedWords();
-                                } else if (currentWord.direction === 'horizontal' && inputLetter1 === expected1) {
+                                } else if (currentWord.direction === 'horizontal' && this.lettersMatch(inputLetter1, expected1)) {
                                     // Partiellement correct pour ce mot
                                     this.checkCompletedWords();
-                                } else if (currentWord.direction === 'vertical' && inputLetter2 === expected2) {
+                                } else if (currentWord.direction === 'vertical' && this.lettersMatch(inputLetter2, expected2)) {
                                     // Partiellement correct pour ce mot
                                     this.checkCompletedWords();
                                 }
@@ -2125,7 +2156,7 @@ class ChristianCrosswordGame {
                                 const expected1 = letter1Span.dataset.expected;
                                 const expected2 = letter2Span.dataset.expected;
                                 
-                                if (letter1 === expected1 && letter2 === expected2) {
+                                if (this.lettersMatch(letter1, expected1) && this.lettersMatch(letter2, expected2)) {
                                     cell.classList.add('correct');
                                     this.checkCompletedWords();
                                 } else {
@@ -2162,7 +2193,7 @@ class ChristianCrosswordGame {
                                 // La progression sera partagée seulement lors des mots complets
 
                                 // Vérifier si correct
-                                if (letter === this.solution[i][j]) {
+                                if (this.lettersMatch(letter, this.solution[i][j])) {
                                     cell.classList.add('correct');
                                     // Vérifier les mots complétés en temps réel
                                     this.checkCompletedWords();
@@ -2678,13 +2709,13 @@ class ChristianCrosswordGame {
                         const [letter1, letter2] = cellValue.split('/');
                         // Déterminer quelle lettre utiliser selon la direction du mot
                         if (wordData.direction === 'horizontal') {
-                            isCorrect = letter1 === expectedLetter;
+                            isCorrect = this.lettersMatch(letter1, expectedLetter);
                         } else {
-                            isCorrect = letter2 === expectedLetter;
+                            isCorrect = this.lettersMatch(letter2, expectedLetter);
                         }
                     } else {
                         // Case normale
-                        isCorrect = cellValue === expectedLetter;
+                        isCorrect = this.lettersMatch(cellValue, expectedLetter);
                     }
                     
                     if (!isCorrect) {
