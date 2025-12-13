@@ -4720,6 +4720,14 @@ class GameDataManager {
         // Déterminer la source de données selon le mode de jeu
         const gameMode = window.game?.gameMode || 'normal';
         
+        // Mode Proverbes: utiliser les données spécifiques
+        if (gameMode === 'proverbes' && typeof levelsProverbes !== 'undefined') {
+            if (levelNumber < 1 || levelNumber > levelsProverbes.length) {
+                return null;
+            }
+            return levelsProverbes[levelNumber - 1];
+        }
+        
         // Mode Sagesse: utiliser les données spécifiques
         if (gameMode === 'sagesse' && typeof levelsSagesse !== 'undefined') {
             if (levelNumber < 1 || levelNumber > levelsSagesse.length) {
@@ -4763,6 +4771,11 @@ class GameDataManager {
      */
     getTotalLevels() {
         const gameMode = window.game?.gameMode || 'normal';
+        
+        // Mode Proverbes: 88 niveaux
+        if (gameMode === 'proverbes' && typeof levelsProverbes !== 'undefined') {
+            return levelsProverbes.length;
+        }
         
         // Mode Sagesse: 88 niveaux
         if (gameMode === 'sagesse' && typeof levelsSagesse !== 'undefined') {
