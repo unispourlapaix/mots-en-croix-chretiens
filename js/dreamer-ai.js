@@ -4,7 +4,8 @@
  */
 
 // 🔑 CONFIGURATION GLOBALE : Mets ta clé API Gemini ici (gratuit sur aistudio.google.com)
-const DEFAULT_GEMINI_KEY = 'AIzaSyBXhs7y0-xQvlSX8ZpUUZP7UcdvJtwm56k'; // Obtiens-la sur https://aistudio.google.com/app/apikey
+// ⚠️ NE JAMAIS POUSSER LA CLÉ SUR GITHUB ! Utilise /dreamer-config dans le chat
+const DEFAULT_GEMINI_KEY = ''; // Obtiens-la sur https://aistudio.google.com/app/apikey
 
 class DreamerAI {
     constructor() {
