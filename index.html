@@ -826,15 +826,36 @@
     </script>
     <script src="js/ai-simulator.js"></script>
     <script src="js/welcome-ai.js"></script>
+    <script src="js/unisona-ai.js"></script>
+    <script src="js/dreamer-ai.js"></script>
     <script src="js/tutorial-system.js"></script>
     <script>
-        // Démarrer le tutorial au premier chargement (optionnel, non-bloquant)
+        // Le tutorial sera démarré après l'intro, quand le jeu commence
+        // Message de bienvenue initial d'Unisona (espacé)
         window.addEventListener('load', () => {
+            // Premier message : Bienvenue d'Unisona uniquement
             setTimeout(() => {
-                if (window.tutorialSystem) {
-                    tutorialSystem.start();
+                if (window.simpleChatSystem && !localStorage.getItem('tutorialCompleted')) {
+                    window.simpleChatSystem.showMessage(
+                        "Coucou ! 👋 Je suis Unisona, ton assistante virtuelle ! Clique 7 fois sur ▶️ JOUER pour commencer l'aventure ! 🎬✨",
+                        'ai',
+                        'Unisona'
+                    );
                 }
-            }, 1000); // 1 seconde seulement
+            }, 3000);
+        });
+        
+        // Message d'info IA APRÈS que le jeu soit démarré (intro terminée)
+        document.addEventListener('gameStarted', () => {
+            setTimeout(() => {
+                if (window.simpleChatSystem && window.unisonaAI && window.unisonaAI.checkIfEnabled()) {
+                    window.simpleChatSystem.showMessage(
+                        "✨ Je suis connectée à l'IA ! Tu peux me parler librement dans le chat ! 💬",
+                        'ai',
+                        'Unisona'
+                    );
+                }
+            }, 2000);
         });
     </script>
 </body>

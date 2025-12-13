@@ -1561,6 +1561,9 @@ class ChristianCrosswordGame {
         document.getElementById('startScreen').classList.add('hidden');
         document.getElementById('gameScreen').classList.remove('hidden');
         
+        // Émettre événement pour notifier que le jeu a démarré (après l'intro)
+        document.dispatchEvent(new CustomEvent('gameStarted'));
+        
         // Créer automatiquement une room P2P quand on démarre une partie
         if (typeof simpleChatSystem !== 'undefined' && !simpleChatSystem.isInRoom()) {
             try {
@@ -1575,6 +1578,17 @@ class ChristianCrosswordGame {
         
         this.setupLevel();
         this.saveGame();
+        
+        // Démarrer le tutorial APRÈS l'intro, quand la grille est visible
+        // Vérifier si c'est la première fois
+        const tutorialCompleted = localStorage.getItem('tutorialCompleted');
+        if (!tutorialCompleted) {
+            setTimeout(() => {
+                if (window.tutorialSystem) {
+                    tutorialSystem.start();
+                }
+            }, 1000);
+        }
     }
 
     setupLevel() {

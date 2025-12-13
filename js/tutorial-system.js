@@ -1,6 +1,6 @@
 /**
- * Système de Tutorial Interactif avec Unisona
- * Guide le joueur lors du premier démarrage
+ * Système de Tutorial Unisona - via Chat
+ * Se déclenche après l'intro (7 clics), guide via le chat
  */
 
 class TutorialSystem {
@@ -10,27 +10,29 @@ class TutorialSystem {
         this.tutorialCompleted = false;
         this.highlightedElements = [];
         
-        // Étapes du tutorial
+        // Étapes du tutorial (via chat Unisona)
         this.steps = [
             {
                 id: 'welcome',
-                message: "Bienvenue ! Je suis Unisona 🤖✨ Cliquez sur une case de la grille pour commencer à jouer ! 📝",
-                delay: 5000
+                message: "Super ! 🎮 Maintenant clique sur une case de la grille pour commencer à écrire 📝",
+                highlight: '#crosswordGrid',
+                delay: 4000
             },
             {
-                id: 'navigation',
-                message: "Tapez au clavier pour remplir les cases. Utilisez Backspace pour effacer, les flèches ← → ↑ ↓ pour naviguer 🎯",
-                delay: 5000
+                id: 'clues',
+                message: "Les indices sont affichés ici 👇 Horizontal → et Vertical ↓. Lis-les pour savoir quoi écrire !",
+                highlight: '.clues-container',
+                delay: 4000
             },
             {
                 id: 'hints',
-                message: "Besoin d'aide ? Cliquez sur 💡 Indice pour révéler une lettre. Les indices sont sur la droite 👉",
+                message: "Besoin d'aide ? Clique sur 💡 Indice pour révéler une lettre (mais ça réduit ton score !) 😉",
                 highlight: '#hintButton',
-                delay: 5000
+                delay: 4000
             },
             {
                 id: 'complete',
-                message: "Bon jeu ! N'hésitez pas à me demander de l'aide dans le chat 💬",
+                message: "Voilà ! Tu sais tout maintenant ! 🎉 Amuse-toi bien et n'hésite pas à me parler dans le chat ! 💬",
                 action: () => this.completeTutorial(),
                 delay: 3000
             }
@@ -48,26 +50,10 @@ class TutorialSystem {
         this.isActive = true;
         this.currentStep = 0;
 
-        console.log('🎓 Démarrage du tutorial interactif...');
+        console.log('🎓 Démarrage du tutorial Unisona...');
 
-        // Attendre que le jeu soit chargé
-        await this.waitForGameReady();
-
-        // Démarrer le tutorial
+        // Démarrer directement (la grille est déjà visible)
         await this.executeStep(0);
-    }
-
-    async waitForGameReady() {
-        return new Promise((resolve) => {
-            const checkReady = () => {
-                if (window.game && window.simpleChatSystem && document.getElementById('crosswordGrid')) {
-                    resolve();
-                } else {
-                    setTimeout(checkReady, 100);
-                }
-            };
-            checkReady();
-        });
     }
 
     async executeStep(stepIndex) {
@@ -102,7 +88,7 @@ class TutorialSystem {
             step.action();
         }
 
-        // Passer automatiquement à l'étape suivante
+        // Passer à l'étape suivante après le délai
         if (step.delay) {
             setTimeout(() => {
                 this.nextStep();
@@ -119,7 +105,7 @@ class TutorialSystem {
         const element = document.querySelector(selector);
         if (!element) return;
 
-        // Créer un overlay de highlight avec position fixed (pas de scroll-linked effect)
+        // Créer un overlay de highlight avec position fixed
         const highlight = document.createElement('div');
         highlight.className = 'tutorial-highlight';
         
@@ -191,20 +177,11 @@ class TutorialSystem {
         // Sauvegarder dans localStorage
         localStorage.setItem('tutorialCompleted', 'true');
 
-        // Message final
-        if (window.simpleChatSystem) {
-            window.simpleChatSystem.showMessage(
-                "🎊 Tutorial terminé ! Vous êtes maintenant prêt(e) à jouer. Amusez-vous bien ! 💖",
-                'ai',
-                'Unisona'
-            );
-        }
-
-        console.log('✅ Tutorial complété et sauvegardé');
+        console.log('✅ Tutorial Unisona complété');
     }
 
     reset() {
-        // Réinitialiser le tutorial (utile pour tester)
+        // Réinitialiser le tutorial
         localStorage.removeItem('tutorialCompleted');
         this.isActive = false;
         this.currentStep = 0;
@@ -215,13 +192,6 @@ class TutorialSystem {
     skip() {
         if (this.isActive) {
             this.completeTutorial();
-            if (window.simpleChatSystem) {
-                window.simpleChatSystem.showMessage(
-                    "Tutorial ignoré. Tapez 'aide' dans le chat si vous avez besoin d'aide ! 💬",
-                    'ai',
-                    'Unisona'
-                );
-            }
         }
     }
 }
@@ -244,12 +214,7 @@ style.textContent = `
     }
 
     .tutorial-highlight {
-        animation: pulse 2s ease-in-out infinite !important;
+        transition: all 0.3s ease;
     }
 `;
 document.head.appendChild(style);
-
-console.log('✅ Tutorial System chargé - Commandes disponibles:');
-console.log('   tutorialSystem.start()  - Démarrer le tutorial');
-console.log('   tutorialSystem.reset()  - Réinitialiser le tutorial');
-console.log('   tutorialSystem.skip()   - Ignorer le tutorial');

@@ -17,11 +17,6 @@ class SimpleChatSystem {
 
         // Récupérer le username depuis authSystem si disponible
         this.updateUsername();
-        
-        // Afficher message de bienvenue clair
-        setTimeout(() => {
-            this.showMessage('💬 Chat actif ! Vous pouvez envoyer des messages', 'system');
-        }, 500);
 
         // Écouter les changements d'authentification
         if (typeof authSystem !== 'undefined') {
@@ -433,7 +428,7 @@ class SimpleChatSystem {
     }
 
     // Envoyer un message à tous
-    sendMessage(text) {
+    async sendMessage(text) {
         // Mettre à jour le username depuis authSystem
         this.updateUsername();
 
@@ -460,13 +455,90 @@ class SimpleChatSystem {
                 }
             });
         }
+        
+        // Envoyer à Unisona IA si activé - elle répond à TOUS les messages
+        if (window.unisonaAI && window.unisonaAI.checkIfEnabled()) {
+            console.log('🤖 Envoi du message à Unisona IA...');
+            try {
+                // Envoyer le message à l'IA et attendre la réponse
+                const response = await window.unisonaAI.sendMessage(text);
+                console.log('💬 Réponse de Unisona:', response);
+                // Afficher la réponse dans le chat
+                this.showMessage(response, 'ai', 'Unisona');
+            } catch (error) {
+                console.error('❌ Erreur IA:', error);
+                this.showMessage('Désolée, je n\'ai pas pu répondre 😔 Erreur: ' + error.message, 'ai', 'Unisona');
+            }
+        } else {
+            console.log('⚠️ Unisona IA non disponible ou désactivée');
+        }
+        
+        // Envoyer à Dreamer IA (Gemini) seulement si mentionné
+        if (window.dreamerAI && window.dreamerAI.checkIfEnabled()) {
+            const lowerText = text.toLowerCase();
+            // Détecter si le message est pour Dreamer
+            if (lowerText.includes('@dreamer') || 
+                lowerText.includes('dreamer') || 
+                lowerText.includes('rêve') ||
+                lowerText.includes('dream')) {
+                
+                console.log('💭 Envoi du message à Dreamer AI...');
+                try {
+                    const response = await window.dreamerAI.sendMessage(text);
+                    // Afficher seulement si réponse valide (pas null)
+                    if (response) {
+                        console.log('💬 Réponse de Dreamer:', response);
+                        this.showMessage(response, 'ai', 'Dreamer');
+                    }
+                } catch (error) {
+                    console.error('❌ Erreur Dreamer:', error);
+                    // Pas de message d'erreur visible pour l'utilisateur
+                }
+            }
+        } else {
+            console.log('⚠️ Dreamer IA non disponible ou désactivée');
+        }
     }
 
     // Gérer les commandes du chat
     handleCommand(command) {
         const cmd = command.toLowerCase().trim();
         
-        if (cmd === '/unisona' || cmd === '/bot' || cmd === '/ia') {
+        if (cmd === '/config' || cmd === '/configure' || cmd === '/api') {
+            // Ouvrir la configuration de l'IA Unisona
+            if (!window.unisonaAI) {
+                this.showMessage('❌ Unisona IA n\'est pas disponible', 'system');
+                return;
+            }
+            window.unisonaAI.showConfigModal();
+            
+        } else if (cmd === '/dreamer-config' || cmd === '/dreamer') {
+            // Ouvrir la configuration de Dreamer (Gemini)
+            if (!window.dreamerAI) {
+                this.showMessage('❌ Dreamer IA n\'est pas disponible', 'system');
+                return;
+            }
+            window.dreamerAI.showConfigModal();
+            
+        } else if (cmd === '/clear' || cmd === '/reset') {
+            // Réinitialiser l'historique de conversation avec Unisona
+            if (!window.unisonaAI) {
+                this.showMessage('❌ Unisona IA n\'est pas disponible', 'system');
+                return;
+            }
+            window.unisonaAI.clearHistory();
+            this.showMessage('🔄 Historique Unisona réinitialisé', 'system');
+            
+        } else if (cmd === '/dreamer-clear') {
+            // Réinitialiser l'historique de conversation avec Dreamer
+            if (!window.dreamerAI) {
+                this.showMessage('❌ Dreamer IA n\'est pas disponible', 'system');
+                return;
+            }
+            window.dreamerAI.clearHistory();
+            this.showMessage('🔄 Historique Dreamer réinitialisé', 'system');
+            
+        } else if (cmd === '/unisona' || cmd === '/bot' || cmd === '/ia') {
             // Inviter Unisona à rejoindre une course
             if (!window.game || !window.game.gameStarted) {
                 this.showMessage('⚠️ Lance d\'abord une partie pour jouer avec Unisona !', 'system');
@@ -502,6 +574,10 @@ class SimpleChatSystem {
         } else if (cmd === '/aide' || cmd === '/help') {
             // Afficher l'aide
             this.showMessage('📝 Commandes disponibles :', 'system');
+            this.showMessage('/config - Configurer Unisona (OpenAI)', 'system');
+            this.showMessage('/dreamer-config - Configurer Dreamer (Gemini GRATUIT)', 'system');
+            this.showMessage('/clear - Réinitialiser l\'historique Unisona', 'system');
+            this.showMessage('/dreamer-clear - Réinitialiser l\'historique Dreamer', 'system');
             this.showMessage('/unisona ou /bot - Inviter Unisona à jouer en course', 'system');
             this.showMessage('/stop-unisona - Arrêter Unisona', 'system');
             this.showMessage('/aide ou /help - Afficher cette aide', 'system');
