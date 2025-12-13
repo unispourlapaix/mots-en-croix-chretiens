@@ -4720,6 +4720,14 @@ class GameDataManager {
         // Déterminer la source de données selon le mode de jeu
         const gameMode = window.game?.gameMode || 'normal';
         
+        // Mode Disciple: utiliser les données spécifiques
+        if (gameMode === 'disciple' && typeof levelsDisciple !== 'undefined') {
+            if (levelNumber < 1 || levelNumber > levelsDisciple.length) {
+                return null;
+            }
+            return levelsDisciple[levelNumber - 1];
+        }
+        
         // Mode Proverbes: utiliser les données spécifiques
         if (gameMode === 'proverbes' && typeof levelsProverbes !== 'undefined') {
             if (levelNumber < 1 || levelNumber > levelsProverbes.length) {
@@ -4771,6 +4779,11 @@ class GameDataManager {
      */
     getTotalLevels() {
         const gameMode = window.game?.gameMode || 'normal';
+        
+        // Mode Disciple: 88 niveaux
+        if (gameMode === 'disciple' && typeof levelsDisciple !== 'undefined') {
+            return levelsDisciple.length;
+        }
         
         // Mode Proverbes: 88 niveaux
         if (gameMode === 'proverbes' && typeof levelsProverbes !== 'undefined') {
