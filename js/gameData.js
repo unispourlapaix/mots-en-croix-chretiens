@@ -4720,6 +4720,14 @@ class GameDataManager {
         // Déterminer la source de données selon le mode de jeu
         const gameMode = window.game?.gameMode || 'normal';
         
+        // Mode Veiller: utiliser les données spécifiques
+        if (gameMode === 'veiller' && typeof levelsVeiller !== 'undefined') {
+            if (levelNumber < 1 || levelNumber > levelsVeiller.length) {
+                return null;
+            }
+            return levelsVeiller[levelNumber - 1];
+        }
+        
         // Mode Disciple: utiliser les données spécifiques
         if (gameMode === 'disciple' && typeof levelsDisciple !== 'undefined') {
             if (levelNumber < 1 || levelNumber > levelsDisciple.length) {
@@ -4779,6 +4787,11 @@ class GameDataManager {
      */
     getTotalLevels() {
         const gameMode = window.game?.gameMode || 'normal';
+        
+        // Mode Veiller: 88 niveaux
+        if (gameMode === 'veiller' && typeof levelsVeiller !== 'undefined') {
+            return levelsVeiller.length;
+        }
         
         // Mode Disciple: 88 niveaux
         if (gameMode === 'disciple' && typeof levelsDisciple !== 'undefined') {
