@@ -34,9 +34,17 @@ class AudioSystem {
     }
     
     init() {
-        // Créer le contexte audio lors de la première interaction utilisateur
-        document.addEventListener('click', () => this.ensureAudioContext(), { once: true });
-        document.addEventListener('keydown', () => this.ensureAudioContext(), { once: true });
+        // Créer le contexte audio et démarrer la musique lors de la première interaction utilisateur
+        const startAudio = () => {
+            this.ensureAudioContext();
+            // Démarrer la musique dès le premier clic
+            if (this.musicEnabled && !this.currentAudio) {
+                this.playNextTrack();
+            }
+        };
+        
+        document.addEventListener('click', startAudio, { once: true });
+        document.addEventListener('keydown', startAudio, { once: true });
     }
     
     ensureAudioContext() {

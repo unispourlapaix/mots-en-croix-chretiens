@@ -265,6 +265,11 @@ class ChristianCrosswordGame {
             score: data.score,
             completedWordsCount: data.completedWords?.length || 0
         });
+        
+        // Indiquer au chat de ne pas afficher les messages de bienvenue
+        if (window.simpleChatSystem) {
+            window.simpleChatSystem.skipWelcomeMessages = true;
+        }
             
         // Restaurer l'état du jeu
         this.currentLevel = data.currentLevel || 1;
@@ -3409,6 +3414,12 @@ class ChristianCrosswordGame {
             if (musicSlider) musicSlider.value = this.musicVolume;
             if (soundSlider) soundSlider.value = this.soundVolume;
             this.updateVolumeDisplays();
+            
+            // Appliquer les volumes sauvegardés au système audio
+            if (window.audioSystem) {
+                window.audioSystem.setMusicVolume(this.musicVolume / 100);
+                window.audioSystem.setVolume(this.soundVolume / 100);
+            }
         }, 100);
     }
 
@@ -3424,12 +3435,20 @@ class ChristianCrosswordGame {
         this.musicVolume = parseInt(e.target.value);
         this.updateVolumeDisplays();
         this.saveAudioSettings();
+        // Appliquer le volume au système audio
+        if (window.audioSystem) {
+            window.audioSystem.setMusicVolume(this.musicVolume / 100);
+        }
     }
 
     handleSoundVolumeChange(e) {
         this.soundVolume = parseInt(e.target.value);
         this.updateVolumeDisplays();
         this.saveAudioSettings();
+        // Appliquer le volume au système audio
+        if (window.audioSystem) {
+            window.audioSystem.setVolume(this.soundVolume / 100);
+        }
     }
 
     updateVolumeDisplays() {

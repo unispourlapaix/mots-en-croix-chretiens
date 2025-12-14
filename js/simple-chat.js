@@ -3,6 +3,7 @@ class SimpleChatSystem {
     constructor() {
         this.currentUser = null;
         this.isInitialized = false;
+        this.skipWelcomeMessages = false; // Flag pour éviter les messages lors du chargement
         
         // P2P
         this.peer = null;
@@ -22,7 +23,7 @@ class SimpleChatSystem {
         if (typeof authSystem !== 'undefined') {
             authSystem.onAuthChange((user) => {
                 this.updateUsername();
-                if (user && user.username) {
+                if (user && user.username && !this.skipWelcomeMessages) {
                     this.showMessage(`✅ Connecté en tant que ${user.username}`, 'system');
                     
                     // Mettre à jour le système de présence avec le nouveau username
@@ -33,10 +34,12 @@ class SimpleChatSystem {
                     
                     this.initP2P();
                 }
+                // Réinitialiser le flag après le premier chargement
+                this.skipWelcomeMessages = false;
             });
 
             // Si déjà connecté, afficher le message de bienvenue
-            if (this.currentUser && this.currentUser !== 'Joueur' + Math.floor(Math.random() * 1000)) {
+            if (this.currentUser && this.currentUser !== 'Joueur' + Math.floor(Math.random() * 1000) && !this.skipWelcomeMessages) {
                 setTimeout(() => {
                     this.showMessage(`👋 Bonjour ${this.currentUser} !`, 'system');
                 }, 800);

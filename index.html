@@ -250,9 +250,6 @@
                 <h3>👤 Profil</h3>
                 <div id="profileSection">
                     <p id="profileUsername" style="font-size: 16px; font-weight: bold; color: #ff1493; margin-bottom: 10px;">Non connecté</p>
-                    <button id="changeUsernameBtn" class="menu-cloud-btn" style="display: none;">
-                        ✏️ Modifier le pseudo
-                    </button>
                     <button id="signOutBtn" class="menu-cloud-btn secondary" style="display: none; margin-top: 10px;">
                         🚪 Déconnexion
                     </button>
@@ -293,14 +290,10 @@
                     <h3>ℹ️ À propos</h3>
                     <div class="about-info">
                         <p class="about-item">
-                            <strong>🎨 Artiste:</strong>
-                            <a href="#" id="artistLink" class="info-link">Voir le profil</a>
+                            <strong>✨ Mots croisés chrétiens</strong> par Emmanuel Payet
                         </p>
                         <p class="about-item">
-                            <strong>✨ Création:</strong> Jeu de mots croisés chrétiens avec design kawaii
-                        </p>
-                        <p class="about-item">
-                            <strong>💻 Codage:</strong> Développé avec Claude Code Pro
+                            <a href="#" id="artistLink" class="info-link">🎨 Voir le profil de l'artiste</a>
                         </p>
                     </div>
                 </div>
@@ -348,7 +341,7 @@
                         </div>
                         
                         <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #ffe0f0;">
-                            <p style="font-size: 12px; color: #999;">Vos données sont sécurisées ☁️</p>
+                            <p style="font-size: 12px; color: #999;">✨ Système intuitif et privé ☁️</p>
                         </div>
                     </div>
 
@@ -887,7 +880,7 @@
             setTimeout(() => {
                 if (window.simpleChatSystem && !localStorage.getItem('tutorialCompleted')) {
                     window.simpleChatSystem.showMessage(
-                        "Coucou ! 👋 Je suis Unisona, ton assistante virtuelle ! Clique 7 fois sur ▶️ JOUER pour commencer l'aventure ! 🎬✨",
+                        "👋 Je suis Unisona ! Clique 7 fois sur ▶️ JOUER pour démarrer ! 🎮",
                         'ai',
                         'Unisona'
                     );

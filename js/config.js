@@ -24,8 +24,16 @@ const config = {
     defaultLanguage: 'fr',
     
     // Debug mode
-    debug: false
+    debug: false,
+    enableLogs: false // Activer/désactiver tous les logs console
 };
+
+// Remplacer console.log par une version conditionnelle
+if (!config.enableLogs) {
+    const noop = () => {};
+    window.console.log = noop;
+    window.console.debug = noop;
+}
 
 // Pour les environnements ES6 modules
 if (typeof module !== 'undefined' && module.exports) {

@@ -31,9 +31,16 @@ class MenuTabSystem {
 
         // Écouter les changements d'authentification
         if (typeof authSystem !== 'undefined') {
-            authSystem.onAuthChange(() => {
+            authSystem.onAuthChange((user) => {
                 // Rafraîchir le tab connexion quand l'état d'auth change
                 this.updateConnexionTab();
+                
+                // Basculer vers l'onglet Connexion après connexion réussie
+                if (user && user.username) {
+                    setTimeout(() => {
+                        this.switchTab('connexion');
+                    }, 300);
+                }
             });
         }
 
@@ -147,151 +154,140 @@ class MenuTabSystem {
         
         // Créer un canvas CARRÉ pour l'image
         const canvas = document.createElement('canvas');
-        const size = 1080; // Format Instagram parfait
+        const size = 1080; // Format carré Instagram
         canvas.width = size;
         canvas.height = size;
         const ctx = canvas.getContext('2d');
         
-        // Fond dégradé rose kawaii
+        // Fond dégradé rose kawaii (thème du jeu)
         const gradient = ctx.createLinearGradient(0, 0, size, size);
-        gradient.addColorStop(0, '#FFD3E1');
-        gradient.addColorStop(0.5, '#FFC0DB');
-        gradient.addColorStop(1, '#FFB3D9');
+        gradient.addColorStop(0, '#FF1493');
+        gradient.addColorStop(0.5, '#FF69B4');
+        gradient.addColorStop(1, '#FFB6C1');
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, size, size);
         
-        // Mots "amour" en 14 langues en filigrane
-        const loveWords = [
-            'Love', 'Amour', 'Amor', 'Amore', 'Liebe', 
-            'Любовь', '愛', 'المحبة', 'Αγάπη', 'Cariad',
-            'אהבה', 'Sevgi', 'Kärlek', 'Rakkaus'
+        // Mots bibliques pour le nuage de mots
+        const biblicalWords = [
+            'JESUS', 'AMOUR', 'FOI', 'PAIX', 'GRACE', 'VERITE', 'VIE', 'LUMIERE',
+            'CROIX', 'SALUT', 'ESPOIR', 'JOIE', 'PRIERE', 'PARDON', 'SAGESSE',
+            'BONTE', 'DIEU', 'CHRIST', 'SAINT', 'ETERNEL', 'GLOIRE', 'LOUANGE'
         ];
         
+        // Nuage de mots en arrière-plan
         ctx.save();
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
-        ctx.font = 'bold 36px Arial, sans-serif';
-        ctx.textAlign = 'left';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+        ctx.textAlign = 'center';
         
-        // Disposer les mots en filigrane dans tout le fond
-        const wordPositions = [
-            {word: loveWords[0], x: 80, y: 200, rotation: -0.1},
-            {word: loveWords[1], x: 850, y: 280, rotation: 0.15},
-            {word: loveWords[2], x: 120, y: 450, rotation: 0.08},
-            {word: loveWords[3], x: 880, y: 650, rotation: -0.12},
-            {word: loveWords[4], x: 200, y: 820, rotation: 0.1},
-            {word: loveWords[5], x: 750, y: 920, rotation: -0.08},
-            {word: loveWords[6], x: 920, y: 450, rotation: 0.12},
-            {word: loveWords[7], x: 140, y: 650, rotation: -0.15},
-            {word: loveWords[8], x: 780, y: 180, rotation: 0.08},
-            {word: loveWords[9], x: 320, y: 980, rotation: -0.1},
-            {word: loveWords[10], x: 650, y: 1000, rotation: 0.12},
-            {word: loveWords[11], x: 100, y: 320, rotation: 0.15},
-            {word: loveWords[12], x: 860, y: 800, rotation: -0.1},
-            {word: loveWords[13], x: 380, y: 150, rotation: 0.08}
+        const wordCloud = [
+            {word: biblicalWords[0], x: 200, y: 150, size: 48, rotation: -0.15},
+            {word: biblicalWords[1], x: 850, y: 200, size: 42, rotation: 0.1},
+            {word: biblicalWords[2], x: 300, y: 350, size: 36, rotation: 0.2},
+            {word: biblicalWords[3], x: 750, y: 400, size: 40, rotation: -0.1},
+            {word: biblicalWords[4], x: 150, y: 550, size: 38, rotation: 0.15},
+            {word: biblicalWords[5], x: 900, y: 600, size: 44, rotation: -0.2},
+            {word: biblicalWords[6], x: 400, y: 700, size: 35, rotation: 0.1},
+            {word: biblicalWords[7], x: 650, y: 750, size: 46, rotation: -0.15},
+            {word: biblicalWords[8], x: 200, y: 850, size: 40, rotation: 0.12},
+            {word: biblicalWords[9], x: 850, y: 900, size: 42, rotation: -0.1},
+            {word: biblicalWords[10], x: 500, y: 950, size: 38, rotation: 0.18},
+            {word: biblicalWords[11], x: 120, y: 300, size: 34, rotation: -0.12},
+            {word: biblicalWords[12], x: 920, y: 350, size: 36, rotation: 0.14},
+            {word: biblicalWords[13], x: 350, y: 500, size: 32, rotation: -0.08},
+            {word: biblicalWords[14], x: 700, y: 550, size: 45, rotation: 0.2},
+            {word: biblicalWords[15], x: 180, y: 700, size: 33, rotation: -0.16},
+            {word: biblicalWords[16], x: 880, y: 750, size: 50, rotation: 0.11},
+            {word: biblicalWords[17], x: 450, y: 200, size: 37, rotation: -0.13},
+            {word: biblicalWords[18], x: 600, y: 300, size: 39, rotation: 0.09},
+            {word: biblicalWords[19], x: 250, y: 1000, size: 41, rotation: -0.17},
+            {word: biblicalWords[20], x: 750, y: 1020, size: 43, rotation: 0.15},
+            {word: biblicalWords[21], x: 500, y: 100, size: 38, rotation: -0.1}
         ];
         
-        wordPositions.forEach(pos => {
+        wordCloud.forEach(item => {
             ctx.save();
-            ctx.translate(pos.x, pos.y);
-            ctx.rotate(pos.rotation);
-            ctx.fillText(pos.word, 0, 0);
+            ctx.translate(item.x, item.y);
+            ctx.rotate(item.rotation);
+            ctx.font = `bold ${item.size}px Arial, sans-serif`;
+            ctx.fillText(item.word, 0, 0);
             ctx.restore();
         });
         
         ctx.restore();
         
-        // Fonction pour dessiner des cœurs détaillés avec contour
-        const drawDetailedHeart = (x, y, heartSize, color, rotation = 0) => {
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate(rotation);
-            
-            // Ombre douce du cœur
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
-            ctx.shadowBlur = 8;
-            ctx.shadowOffsetX = 2;
-            ctx.shadowOffsetY = 3;
-            
-            // Remplissage du cœur
-            ctx.fillStyle = color;
-            ctx.beginPath();
-            // Partie supérieure (deux demi-cercles)
-            ctx.arc(-heartSize/4, -heartSize/4, heartSize/4, 0, Math.PI, true);
-            ctx.arc(heartSize/4, -heartSize/4, heartSize/4, 0, Math.PI, true);
-            // Partie inférieure (triangle arrondi)
-            ctx.lineTo(0, heartSize/2);
-            ctx.closePath();
-            ctx.fill();
-            
-            // Contour rose foncé
-            ctx.shadowColor = 'transparent';
-            ctx.strokeStyle = 'rgba(255, 20, 147, 0.3)';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(-heartSize/4, -heartSize/4, heartSize/4, 0, Math.PI, true);
-            ctx.arc(heartSize/4, -heartSize/4, heartSize/4, 0, Math.PI, true);
-            ctx.lineTo(0, heartSize/2);
-            ctx.closePath();
-            ctx.stroke();
-            
-            // Reflet brillant en haut du cœur
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-            ctx.beginPath();
-            ctx.arc(-heartSize/6, -heartSize/3, heartSize/8, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.restore();
-        };
-        
-        // Dessiner des cœurs détaillés en arrière-plan
+        // Pluie de petits cœurs roses kawaii (emojis)
+        const hearts = ['💕', '💖', '💗', '💝', '💓', '💞'];
         const heartPositions = [
-            {x: 100, y: 100, size: 60, color: 'rgba(255, 105, 180, 0.2)', rotation: 0.3},
-            {x: 950, y: 150, size: 80, color: 'rgba(255, 20, 147, 0.18)', rotation: -0.2},
-            {x: 150, y: 900, size: 70, color: 'rgba(255, 182, 193, 0.25)', rotation: 0.5},
-            {x: 900, y: 950, size: 90, color: 'rgba(255, 105, 180, 0.15)', rotation: -0.4},
-            {x: size/2, y: 100, size: 50, color: 'rgba(255, 20, 147, 0.12)', rotation: 0},
-            {x: 200, y: 500, size: 45, color: 'rgba(255, 182, 193, 0.2)', rotation: 0.8},
-            {x: 880, y: 520, size: 55, color: 'rgba(255, 105, 180, 0.18)', rotation: -0.6},
-            {x: 550, y: 250, size: 48, color: 'rgba(255, 105, 180, 0.15)', rotation: 0.4},
-            {x: 300, y: 780, size: 52, color: 'rgba(255, 20, 147, 0.16)', rotation: -0.3}
+            {emoji: hearts[0], x: 120, y: 180, size: 32, rotation: -0.2},
+            {emoji: hearts[1], x: 920, y: 220, size: 28, rotation: 0.15},
+            {emoji: hearts[2], x: 200, y: 400, size: 30, rotation: 0.1},
+            {emoji: hearts[3], x: 850, y: 450, size: 26, rotation: -0.15},
+            {emoji: hearts[4], x: 100, y: 650, size: 28, rotation: 0.2},
+            {emoji: hearts[5], x: 940, y: 700, size: 32, rotation: -0.1},
+            {emoji: hearts[0], x: 180, y: 880, size: 30, rotation: 0.15},
+            {emoji: hearts[1], x: 880, y: 920, size: 28, rotation: -0.2},
+            {emoji: hearts[2], x: 450, y: 120, size: 26, rotation: 0.1},
+            {emoji: hearts[3], x: 650, y: 200, size: 30, rotation: -0.15},
+            {emoji: hearts[4], x: 320, y: 980, size: 28, rotation: 0.12},
+            {emoji: hearts[5], x: 750, y: 1000, size: 32, rotation: -0.18},
+            {emoji: hearts[0], x: 80, y: 300, size: 26, rotation: 0.2},
+            {emoji: hearts[1], x: 960, y: 350, size: 30, rotation: -0.12},
+            {emoji: hearts[2], x: 400, y: 560, size: 28, rotation: 0.15},
+            {emoji: hearts[3], x: 700, y: 820, size: 26, rotation: -0.1}
         ];
         
+        ctx.textAlign = 'center';
         heartPositions.forEach(h => {
-            drawDetailedHeart(h.x, h.y, h.size, h.color, h.rotation);
+            ctx.save();
+            ctx.translate(h.x, h.y);
+            ctx.rotate(h.rotation);
+            ctx.font = `${h.size}px Arial`;
+            ctx.fillText(h.emoji, 0, 0);
+            ctx.restore();
         });
         
-        // Logo étoile kawaii en haut
-        const drawKawaiiLogo = (x, y, logoSize) => {
+        // Fonction pour dessiner l'icône kawaii (étoile avec visage)
+        const drawKawaiiIcon = (x, y, iconSize) => {
+            const scale = iconSize / 512;
+            const centerX = x;
+            const centerY = y;
+            
             ctx.save();
-            ctx.translate(x, y);
             
-            // Cercle rose du logo
+            // Cercle rose de fond
             ctx.fillStyle = '#ff69b4';
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+            ctx.shadowBlur = 15;
+            ctx.shadowOffsetY = 8;
             ctx.beginPath();
-            ctx.arc(0, 0, logoSize/2, 0, Math.PI * 2);
+            ctx.arc(centerX, centerY, iconSize/2, 0, Math.PI * 2);
             ctx.fill();
+            ctx.shadowColor = 'transparent';
             
-            // Croix en X blanche
+            // Croix en X blanche dans le fond
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.lineWidth = logoSize * 0.05;
+            ctx.lineWidth = 24 * scale;
             ctx.lineCap = 'round';
             
             ctx.beginPath();
-            ctx.moveTo(-logoSize * 0.42, -logoSize * 0.42);
-            ctx.lineTo(logoSize * 0.42, logoSize * 0.42);
+            ctx.moveTo(centerX - iconSize * 0.42, centerY - iconSize * 0.42);
+            ctx.lineTo(centerX + iconSize * 0.42, centerY + iconSize * 0.42);
             ctx.stroke();
             
             ctx.beginPath();
-            ctx.moveTo(logoSize * 0.42, -logoSize * 0.42);
-            ctx.lineTo(-logoSize * 0.42, logoSize * 0.42);
+            ctx.moveTo(centerX + iconSize * 0.42, centerY - iconSize * 0.42);
+            ctx.lineTo(centerX - iconSize * 0.42, centerY + iconSize * 0.42);
             ctx.stroke();
             
-            // Étoile blanche
-            const starRadius = logoSize * 0.40;
-            ctx.fillStyle = '#ffffff';
-            ctx.shadowColor = 'rgba(255, 20, 147, 0.4)';
-            ctx.shadowBlur = 8;
+            // Étoile blanche avec ombre
+            const starRadius = iconSize * 0.40;
+            ctx.translate(centerX, centerY);
             
+            ctx.shadowColor = 'rgba(255, 20, 147, 0.4)';
+            ctx.shadowBlur = 10 * scale;
+            ctx.shadowOffsetY = 3 * scale;
+            
+            ctx.fillStyle = '#ffffff';
             ctx.beginPath();
             for (let i = 0; i < 5; i++) {
                 const angle = (Math.PI * 2 * i) / 5 - Math.PI / 2;
@@ -309,122 +305,141 @@ class MenuTabSystem {
             ctx.fill();
             
             ctx.shadowColor = 'transparent';
+            
+            // Visage kawaii
+            const eyeOffset = starRadius * 0.25;
+            const eyeSize = 8 * scale;
+            
+            // Yeux
+            ctx.fillStyle = '#333';
+            ctx.beginPath();
+            ctx.arc(-eyeOffset, -5 * scale, eyeSize, 0, Math.PI * 2);
+            ctx.arc(eyeOffset, -5 * scale, eyeSize, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Sourire
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 4 * scale;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.arc(0, 5 * scale, 25 * scale, 0.2, Math.PI - 0.2);
+            ctx.stroke();
+            
+            // Joues roses
+            ctx.fillStyle = 'rgba(255, 182, 193, 0.6)';
+            ctx.beginPath();
+            ctx.arc(-starRadius * 0.55, 10 * scale, 15 * scale, 0, Math.PI * 2);
+            ctx.arc(starRadius * 0.55, 10 * scale, 15 * scale, 0, Math.PI * 2);
+            ctx.fill();
+            
             ctx.restore();
         };
         
-        // Dessiner le logo en haut
-        drawKawaiiLogo(size/2, 140, 180);
+        // Dessiner l'icône kawaii en haut
+        drawKawaiiIcon(size/2, 180, 240);
         
-        // Titre avec ombre
-        ctx.shadowColor = 'rgba(255, 105, 180, 0.3)';
-        ctx.shadowBlur = 15;
-        ctx.shadowOffsetY = 3;
-        ctx.fillStyle = '#ff1493';
-        ctx.font = 'bold 58px Arial, sans-serif';
+        // Titre en haut avec ombre
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 52px Arial, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('Mots Croisés', size/2, 310);
-        ctx.fillText('Chrétiens', size/2, 380);
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        ctx.shadowBlur = 10;
+        ctx.fillText('MOTS CROISÉS', size/2, size*0.37);
+        ctx.fillText('CHRÉTIENS', size/2, size*0.43);
         ctx.shadowColor = 'transparent';
         
-        // Carte blanche centrale avec ombre pour le contenu principal
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
-        ctx.shadowBlur = 30;
-        ctx.shadowOffsetY = 10;
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        // Carte centrale blanche avec ombre
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        ctx.shadowBlur = 40;
+        ctx.shadowOffsetY = 15;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.98)';
         ctx.beginPath();
-        ctx.roundRect(size*0.12, 440, size*0.76, 420, 40);
+        ctx.roundRect(size*0.1, size*0.48, size*0.8, size*0.36, 30);
         ctx.fill();
         ctx.shadowColor = 'transparent';
         
-        // Avatar (très grand)
-        ctx.font = '140px Arial';
-        ctx.fillText(avatar, size/2, 590);
+        // Motifs de mots en gros traits roses sur fond blanc
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255, 105, 180, 0.08)';
+        ctx.lineWidth = 12;
+        ctx.font = 'bold 120px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        
+        const patternWords = ['AMOUR', 'FOI', 'PAIX', 'JOIE'];
+        const cardTop = size*0.48;
+        const cardBottom = size*0.84;
+        
+        // Disposer les mots en diagonale sur la carte
+        ctx.translate(size/2, (cardTop + cardBottom)/2);
+        ctx.rotate(-0.15);
+        ctx.strokeText(patternWords[0], -150, -80);
+        ctx.strokeText(patternWords[1], 200, 0);
+        ctx.rotate(0.3);
+        ctx.strokeText(patternWords[2], -200, 60);
+        ctx.strokeText(patternWords[3], 150, -20);
+        ctx.restore();
+        
+        // Avatar avec cercle rose
+        ctx.fillStyle = '#FF69B4';
+        ctx.beginPath();
+        ctx.arc(size/2, size*0.56, 75, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.font = '110px Arial';
+        ctx.fillText(avatar, size/2, size*0.595);
         
         // Nom du joueur
         ctx.fillStyle = '#333';
         ctx.font = 'bold 48px Arial, sans-serif';
-        ctx.fillText(username, size/2, 680);
+        ctx.fillText(username, size/2, size*0.68);
         
-        // Ligne décorative
-        ctx.strokeStyle = '#FFB3D9';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(size*0.3, 720);
-        ctx.lineTo(size*0.7, 720);
-        ctx.stroke();
+        // Score avec style kawaii
+        ctx.fillStyle = '#FF1493';
+        ctx.font = 'bold 80px Arial, sans-serif';
+        ctx.fillText(`${score}`, size/2, size*0.77);
         
-        // Score avec fond rose
-        const scoreText = `${score} points`;
-        ctx.font = 'bold 76px Arial, sans-serif';
-        const scoreWidth = ctx.measureText(scoreText).width;
+        ctx.fillStyle = '#FF69B4';
+        ctx.font = 'bold 32px Arial, sans-serif';
+        ctx.fillText('POINTS', size/2, size*0.815);
         
-        ctx.fillStyle = '#ff1493';
-        ctx.beginPath();
-        ctx.roundRect((size - scoreWidth)/2 - 30, 740, scoreWidth + 60, 95, 15);
-        ctx.fill();
+        // Barre du bas avec le lien
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx.fillRect(0, size - 100, size, 100);
         
-        ctx.fillStyle = '#ffffff';
-        ctx.fillText(scoreText, size/2, 810);
+        ctx.fillStyle = '#FF1493';
+        ctx.font = 'bold 32px Arial, sans-serif';
+        ctx.fillText('🎨 emmanuel.gallery', size/2, size - 50);
         
-        // Étoiles décoratives autour du score
-        ctx.font = '32px Arial';
-        ctx.fillText('✨', size/2 - scoreWidth/2 - 60, 795);
-        ctx.fillText('✨', size/2 + scoreWidth/2 + 60, 795);
-        
-        // Message avec emoji
-        ctx.fillStyle = '#666';
-        ctx.font = '30px Arial, sans-serif';
-        ctx.fillText('🎮 Rejoins-moi pour jouer ensemble ! 🙏', size/2, 940);
-        
-        // Section liens en bas avec fond semi-transparent
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-        ctx.fillRect(0, size - 110, size, 110);
-        
-        // Lien principal du jeu
-        ctx.fillStyle = '#ff69b4';
-        ctx.font = 'bold 24px Arial, sans-serif';
-        ctx.fillText('unispourlapaix.github.io/mots-en-croix-chretiens', size/2, size - 68);
-        
-        // Ligne séparatrice
-        ctx.strokeStyle = 'rgba(255, 182, 193, 0.4)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(size*0.25, size - 50);
-        ctx.lineTo(size*0.75, size - 50);
-        ctx.stroke();
-        
-        // Lien emmanuel.gallery avec emoji
-        ctx.fillStyle = '#ff1493';
-        ctx.font = '22px Arial, sans-serif';
-        ctx.fillText('🎨 emmanuel.gallery', size/2, size - 22);
-        
-        // Convertir en blob et partager
+        // Convertir en JPEG et partager
         canvas.toBlob(async (blob) => {
-            const file = new File([blob], 'mon-score-mots-croises.png', { type: 'image/png' });
+            const file = new File([blob], 'mon-score-mots-croises.jpg', { type: 'image/jpeg' });
             
             if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                 try {
                     await navigator.share({
                         title: 'Mon Score - Mots Croisés Chrétiens',
-                        text: `J'ai fait ${score} points aux Mots Croisés Chrétiens ! Rejoignez-moi !`,
+                        text: `J'ai fait ${score} points ! 🎮`,
                         files: [file]
                     });
                 } catch (err) {
                     if (err.name !== 'AbortError') {
-                        this.downloadScoreImage(canvas);
+                        this.downloadScoreImage(canvas, 'jpg');
                     }
                 }
             } else {
-                // Fallback: télécharger l'image
-                this.downloadScoreImage(canvas);
+                this.downloadScoreImage(canvas, 'jpg');
             }
-        });
+        }, 'image/jpeg', 0.95);
     }
     
-    downloadScoreImage(canvas) {
+    downloadScoreImage(canvas, format = 'png') {
         const link = document.createElement('a');
-        link.download = 'mon-score-mots-croises.png';
-        link.href = canvas.toDataURL();
+        const extension = format === 'jpg' ? 'jpg' : 'png';
+        const mimeType = format === 'jpg' ? 'image/jpeg' : 'image/png';
+        const quality = format === 'jpg' ? 0.95 : undefined;
+        
+        link.download = `mon-score-mots-croises.${extension}`;
+        link.href = canvas.toDataURL(mimeType, quality);
         link.click();
     }
 
@@ -544,15 +559,17 @@ class MenuTabSystem {
     // Mettre à jour l'onglet connexion
     updateConnexionTab() {
         const authForm = document.getElementById('authForm');
+        const authFormMenu = document.getElementById('authFormMenu');
         const profileInfo = document.getElementById('profileInfo');
         const chatMultiplayerSection = document.getElementById('chatMultiplayerSection');
 
-        if (!authForm || !profileInfo) return;
+        if (!profileInfo) return;
 
         // Vérifier si l'utilisateur est connecté
         if (typeof authSystem !== 'undefined' && authSystem.isAuthenticated()) {
             const user = authSystem.getCurrentUser();
-            authForm.style.display = 'none';
+            if (authForm) authForm.style.display = 'none';
+            if (authFormMenu) authFormMenu.style.display = 'none';
             profileInfo.style.display = 'block';
             if (chatMultiplayerSection) chatMultiplayerSection.style.display = 'block';
 
@@ -577,7 +594,8 @@ class MenuTabSystem {
             // Mettre à jour les avatars verrouillés/déverrouillés selon le score
             this.updateAvatarLocks();
         } else {
-            authForm.style.display = 'block';
+            if (authForm) authForm.style.display = 'block';
+            if (authFormMenu) authFormMenu.style.display = 'block';
             profileInfo.style.display = 'none';
             if (chatMultiplayerSection) chatMultiplayerSection.style.display = 'none';
         }
