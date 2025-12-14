@@ -59,6 +59,9 @@
             <button id="audioToggleButton" class="audio-toggle-button" title="Activer/Désactiver le son">
                 🔊
             </button>
+            <button id="musicToggleButton" class="music-toggle-button" title="Activer/Désactiver la musique">
+                🎵
+            </button>
         </div>
 
         <!-- Bandeau Info défilant -->
@@ -330,11 +333,11 @@
 
                 <div id="connexionSection">
                     <!-- Formulaire de connexion/inscription -->
-                    <div id="authForm" class="auth-form">
+                    <div id="authFormMenu" class="auth-form">
                         <div class="menu-section">
-                            <input type="text" id="authUsername" placeholder="Nom d'utilisateur" class="kawaii-input" style="width: 100%; margin-bottom: 10px; padding: 12px; border: 2px solid #ff69b4; border-radius: 10px;">
-                            <input type="email" id="authEmail" placeholder="Email" class="kawaii-input" style="width: 100%; margin-bottom: 10px; padding: 12px; border: 2px solid #ff69b4; border-radius: 10px;">
-                            <input type="password" id="authPassword" placeholder="Mot de passe" class="kawaii-input" style="width: 100%; margin-bottom: 15px; padding: 12px; border: 2px solid #ff69b4; border-radius: 10px;">
+                            <p style="color: #666; font-size: 14px; text-align: center; margin-bottom: 15px;">
+                                Créez un compte pour sauvegarder vos scores et discuter avec la communauté
+                            </p>
                             
                             <button id="signInBtn" class="menu-cloud-btn" style="width: 100%; margin-bottom: 10px;">
                                 🔓 Se connecter
@@ -532,6 +535,11 @@
                         <span class="mode-icon">❤️</span>
                         <span class="mode-name">Aimée</span>
                         <span class="mode-desc">(88 aimer Dieu & autrui)</span>
+                    </button>
+                    <button class="mode-option" data-mode="couple-solide">
+                        <span class="mode-icon">💑</span>
+                        <span class="mode-name">Couple Solide</span>
+                        <span class="mode-desc">(88 clés du couple)</span>
                     </button>
                     <button class="mode-option" data-mode="race">
                         <span class="mode-icon">🏁</span>
@@ -756,6 +764,7 @@
     <script src="data/clues-disciple-fr.js"></script>
     <script src="data/clues-veiller-fr.js"></script>
     <script src="data/clues-aimee-fr.js"></script>
+    <script src="data/clues-couple-solide-fr.js"></script>
     <!-- Agrégateur des modules de traduction -->
     <script src="data/clues-fr.js"></script>
     <script src="js/gameData.js"></script>
@@ -765,6 +774,7 @@
     <script src="data/levels-disciple.js"></script>
     <script src="data/levels-veiller.js"></script>
     <script src="data/levels-aimee.js"></script>
+    <script src="data/levels-couple-solide.js"></script>
     <script src="js/achievements.js"></script>
     <script src="js/race-medals.js"></script>
     <script src="js/biblicalQuotes.js"></script>

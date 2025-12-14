@@ -11,6 +11,7 @@ const CLUES_FR = {
     'disciple': typeof CLUES_DISCIPLE_FR !== 'undefined' ? CLUES_DISCIPLE_FR : {},
     'veiller': typeof CLUES_VEILLER_FR !== 'undefined' ? CLUES_VEILLER_FR : {},
     'aimee': typeof CLUES_AIMEE_FR !== 'undefined' ? CLUES_AIMEE_FR : {},
+    'couple-solide': typeof CLUES_COUPLE_SOLIDE_FR !== 'undefined' ? CLUES_COUPLE_SOLIDE_FR : {},
     
     // Messages par défaut si un mot n'est pas trouvé
     'defaults': {
@@ -20,6 +21,7 @@ const CLUES_FR = {
         'disciple': 'Étape du chemin de disciple',
         'veiller': 'Élément du combat spirituel',
         'aimee': 'Reflet de l\'amour qui embrasse l\'infini et le prochain',
+        'couple-solide': 'Clé d\'un couple chrétien réussi',
         'course': 'Vertu à découvrir dans la course'
     }
 };

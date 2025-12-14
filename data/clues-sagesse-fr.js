@@ -192,11 +192,11 @@ const CLUES_SAGESSE_FR = {
     'ROYAUME': 'Règne de Dieu établi sur terre',
     'CIEL': 'Demeure éternelle auprès du Père',
     'BÉATITUDE': 'Bonheur parfait en présence de Dieu',
-    'FÉLICITÉ': 'Joie complète et durable',,
+    'FÉLICITÉ': 'Joie complète et durable',
     'RÈGNE': 'Gouvernement de Dieu sur toute chose',
     'SPLENDEUR': 'Beauté rayonnante de la gloire divine',
     'VICTOIRE': 'Triomphe de la grâce sur le péché',
-    'INFINI': 'Immensité sans limites de Dieu'
+    'INFINI': 'Immensité sans limites de Dieu',
     'TRIOMPHE': 'Victoire finale du bien sur le mal',
     'COURONNE': 'Récompense des fidèles serviteurs'
 };

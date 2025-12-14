@@ -4728,18 +4728,88 @@ class GameDataManager {
     }
 
     /**
-     * Vérifie si deux paths ont une collision
+     * Vérifie si deux paths ont une collision invalide
+     * @param {Array} path1 - Premier chemin [[row, col], ...]
+     * @param {Array} path2 - Deuxième chemin [[row, col], ...]
+     * @param {Object} options - Options de vérification
+     * @param {boolean} options.allowSameLetterIntersection - Autoriser intersection si même lettre
+     * @param {string} options.word1 - Premier mot (pour vérifier les lettres)
+     * @param {string} options.word2 - Deuxième mot (pour vérifier les lettres)
+     * @returns {boolean} - true si collision invalide détectée
      */
-    hasCollision(path1, path2) {
+    hasCollision(path1, path2, options = {}) {
         if (!path1 || !path2) return false;
         
-        for (const [row1, col1] of path1) {
-            for (const [row2, col2] of path2) {
+        const { allowSameLetterIntersection = false, word1 = '', word2 = '' } = options;
+        
+        for (let i = 0; i < path1.length; i++) {
+            const [row1, col1] = path1[i];
+            for (let j = 0; j < path2.length; j++) {
+                const [row2, col2] = path2[j];
+                
                 if (row1 === row2 && col1 === col2) {
-                    return true; // Collision détectée
+                    // Collision détectée à cette position
+                    
+                    // Si on autorise les intersections avec même lettre, vérifier
+                    if (allowSameLetterIntersection && word1 && word2) {
+                        const letter1 = word1[i];
+                        const letter2 = word2[j];
+                        
+                        if (letter1 === letter2) {
+                            console.log(`✅ Intersection valide à [${row1},${col1}]: même lettre "${letter1}"`);
+                            continue; // Pas une collision invalide
+                        }
+                    }
+                    
+                    console.warn(`⚠️ Collision à [${row1},${col1}]`);
+                    return true; // Collision invalide
                 }
             }
         }
+        return false;
+    }
+
+    /**
+     * Vérifie si deux chemins de mots ont des cases adjacentes (débordement)
+     * @param {Array} path1 - Premier chemin [[row, col], ...]
+     * @param {Array} path2 - Deuxième chemin [[row, col], ...]
+     * @param {Object} options - Options
+     * @param {Array} options.allowedIntersections - Liste des positions d'intersection autorisées [[row, col], ...]
+     * @returns {boolean} - true si débordement détecté
+     */
+    hasAdjacentOverflow(path1, path2, options = {}) {
+        if (!path1 || !path2) return false;
+        
+        const { allowedIntersections = [] } = options;
+        
+        // Pour chaque case du premier mot
+        for (const [row1, col1] of path1) {
+            // Vérifier les cases adjacentes (8 directions)
+            const adjacentPositions = [
+                [row1 - 1, col1 - 1], [row1 - 1, col1], [row1 - 1, col1 + 1],
+                [row1, col1 - 1],                       [row1, col1 + 1],
+                [row1 + 1, col1 - 1], [row1 + 1, col1], [row1 + 1, col1 + 1]
+            ];
+            
+            for (const [adjRow, adjCol] of adjacentPositions) {
+                // Vérifier si cette case adjacente appartient au deuxième mot
+                const isInPath2 = path2.some(([row2, col2]) => row2 === adjRow && col2 === adjCol);
+                
+                if (isInPath2) {
+                    // Vérifier si c'est une intersection autorisée
+                    const isAllowedIntersection = allowedIntersections.some(
+                        ([intRow, intCol]) => intRow === adjRow && intCol === adjCol
+                    );
+                    
+                    // Si ce n'est pas une intersection autorisée, c'est un débordement
+                    if (!isAllowedIntersection) {
+                        console.warn(`⚠️ Débordement adjacent détecté: [${row1},${col1}] touche [${adjRow},${adjCol}]`);
+                        return true;
+                    }
+                }
+            }
+        }
+        
         return false;
     }
 
@@ -4759,7 +4829,41 @@ class GameDataManager {
     }
 
     /**
+     * Visualise deux chemins dans une grille (debug)
+     * Utile pour voir les débordements visuellement
+     */
+    visualizePaths(word1, path1, word2, path2) {
+        const grid = Array(10).fill().map(() => Array(10).fill('.'));
+        
+        // Placer word1 avec 'A'
+        path1.forEach(([row, col], i) => {
+            if (row >= 0 && row < 10 && col >= 0 && col < 10) {
+                grid[row][col] = word1[i] || 'A';
+            }
+        });
+        
+        // Placer word2 avec 'B' (ou 'X' si collision)
+        path2.forEach(([row, col], i) => {
+            if (row >= 0 && row < 10 && col >= 0 && col < 10) {
+                if (grid[row][col] !== '.') {
+                    grid[row][col] = 'X'; // Collision
+                } else {
+                    grid[row][col] = word2[i] || 'B';
+                }
+            }
+        });
+        
+        console.log(`\n📊 Visualisation: "${word1}" vs "${word2}"`);
+        console.log('   0 1 2 3 4 5 6 7 8 9');
+        grid.forEach((row, i) => {
+            console.log(`${i}  ${row.join(' ')}`);
+        });
+        console.log('');
+    }
+
+    /**
      * Génère une grille croisée automatique à partir de deux mots
+     * SYSTÈME INTELLIGENT: évite automatiquement les débordements
      * @param {Array} words - Tableau de mots (strings)
      * @returns {Object} - Format avec words array contenant word, clue, path
      */
@@ -4771,6 +4875,351 @@ class GameDataManager {
 
         const [word1, word2] = words;
         const gameMode = window.game?.gameMode || 'normal';
+        
+        console.log(`🎯 Génération grille intelligente: "${word1}" (${word1.length}) x "${word2}" (${word2.length})`);
+        
+        // Essayer différentes stratégies de placement jusqu'à trouver une valide
+        const strategies = [
+            () => this.trySimpleCross(word1, word2),           // Stratégie 1: Croix simple
+            () => this.tryLShapePlacement(word1, word2),       // Stratégie 2: Placement en L
+            () => this.tryIsolatedPlacement(word1, word2),     // Stratégie 3: Mots isolés
+            () => this.tryCompactPlacement(word1, word2),      // Stratégie 4: Placement compact
+        ];
+        
+        for (const strategy of strategies) {
+            const result = strategy();
+            if (result) {
+                console.log(`✅ Placement réussi avec ${result.strategyName}`);
+                return {
+                    words: [
+                        {
+                            word: word1,
+                            clue: this.generateClueForMode(word1, gameMode),
+                            path: result.word1Path,
+                            direction: result.word1Direction
+                        },
+                        {
+                            word: word2,
+                            clue: this.generateClueForMode(word2, gameMode),
+                            path: result.word2Path,
+                            direction: result.word2Direction
+                        }
+                    ]
+                };
+            }
+        }
+        
+        // Fallback: retour à l'ancien système si rien ne fonctionne
+        console.warn('⚠️ Aucune stratégie valide trouvée, utilisation du fallback');
+        return this.generateCrossedWordsFromArrayLegacy(word1, word2, gameMode);
+    }
+
+    /**
+     * Stratégie 1: Croix simple (horizontal x vertical)
+     * Mots courts qui se croisent au milieu
+     */
+    trySimpleCross(word1, word2) {
+        // Vérifier si les deux mots sont assez courts
+        if (word1.length > 8 || word2.length > 8) {
+            return null; // Trop longs pour cette stratégie
+        }
+        
+        // Placer word1 horizontalement au centre
+        const row1 = 4;
+        const startCol1 = Math.floor((10 - word1.length) / 2);
+        const word1Path = [];
+        for (let i = 0; i < word1.length; i++) {
+            word1Path.push([row1, startCol1 + i]);
+        }
+        
+        // Trouver la colonne d'intersection (milieu de word1)
+        const intersectionIndex1 = Math.floor(word1.length / 2);
+        const intersectionCol = word1Path[intersectionIndex1][1];
+        const intersectionLetter1 = word1[intersectionIndex1];
+        
+        // Chercher si word2 contient la même lettre
+        const intersectionIndex2 = word2.indexOf(intersectionLetter1);
+        
+        if (intersectionIndex2 === -1) {
+            // Pas de lettre commune, placer word2 isolé
+            const startRow2 = Math.floor((10 - word2.length) / 2);
+            const col2 = intersectionCol + 3; // 3 colonnes d'écart minimum
+            const word2Path = [];
+            for (let i = 0; i < word2.length; i++) {
+                word2Path.push([startRow2 + i, col2]);
+            }
+            
+            // Vérifier qu'il n'y a pas de débordement
+            if (this.isPlacementValid(word1Path, word2Path, [])) {
+                return {
+                    word1Path,
+                    word1Direction: 'horizontal',
+                    word2Path,
+                    word2Direction: 'vertical',
+                    strategyName: 'Croix simple (isolée)'
+                };
+            }
+            return null;
+        }
+        
+        // Placer word2 verticalement pour croiser word1
+        const startRow2 = row1 - intersectionIndex2;
+        const word2Path = [];
+        for (let i = 0; i < word2.length; i++) {
+            word2Path.push([startRow2 + i, intersectionCol]);
+        }
+        
+        // Vérifier que word2 est dans les limites
+        if (startRow2 < 0 || startRow2 + word2.length > 10) {
+            return null;
+        }
+        
+        // Point d'intersection autorisé
+        const allowedIntersections = [[row1, intersectionCol]];
+        
+        // Vérifier que le placement est valide
+        if (this.isPlacementValid(word1Path, word2Path, allowedIntersections)) {
+            return {
+                word1Path,
+                word1Direction: 'horizontal',
+                word2Path,
+                word2Direction: 'vertical',
+                strategyName: 'Croix simple (intersection)'
+            };
+        }
+        
+        return null;
+    }
+
+    /**
+     * Stratégie 2: Placement en L (mots longs)
+     * Word1 en L dans le coin haut-gauche, word2 en L inversé dans le coin bas-droit
+     */
+    tryLShapePlacement(word1, word2) {
+        // Au moins un mot doit être long
+        if (word1.length <= 8 && word2.length <= 8) {
+            return null;
+        }
+        
+        // Word1 en L (haut-gauche)
+        const midPoint1 = Math.ceil(word1.length / 2);
+        const word1Path = [];
+        
+        // Partie horizontale (ligne 0)
+        for (let i = 0; i < midPoint1; i++) {
+            word1Path.push([0, i]);
+        }
+        // Partie verticale (descend)
+        const remaining1 = word1.length - midPoint1;
+        for (let i = 0; i < remaining1; i++) {
+            word1Path.push([i + 1, midPoint1 - 1]);
+        }
+        
+        // Word2 en L inversé (bas-droit)
+        const midPoint2 = Math.ceil(word2.length / 2);
+        const word2Path = [];
+        
+        // Essayer différentes positions pour word2
+        for (let colOffset = 0; colOffset <= 2; colOffset++) {
+            word2Path.length = 0; // Reset
+            const startRow2 = 9;
+            const startCol2 = 9 - colOffset;
+            
+            // Partie verticale (monte)
+            for (let i = 0; i < midPoint2; i++) {
+                word2Path.push([startRow2 - i, startCol2]);
+            }
+            // Partie horizontale (vers la gauche)
+            const remaining2 = word2.length - midPoint2;
+            const bendRow2 = startRow2 - midPoint2 + 1;
+            for (let i = 0; i < remaining2; i++) {
+                word2Path.push([bendRow2, startCol2 - (i + 1)]);
+            }
+            
+            // Vérifier validité
+            if (this.isPlacementValid(word1Path, word2Path, [])) {
+                return {
+                    word1Path,
+                    word1Direction: 'bent',
+                    word2Path,
+                    word2Direction: 'bent',
+                    strategyName: 'Placement en L'
+                };
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * Stratégie 3: Mots complètement isolés
+     * Utilisée quand les autres stratégies échouent
+     */
+    tryIsolatedPlacement(word1, word2) {
+        // Word1 horizontal en haut
+        const row1 = 1;
+        const startCol1 = Math.floor((10 - Math.min(word1.length, 10)) / 2);
+        const word1Path = [];
+        const maxLen1 = Math.min(word1.length, 10);
+        for (let i = 0; i < maxLen1; i++) {
+            word1Path.push([row1, startCol1 + i]);
+        }
+        
+        // Word2 horizontal en bas
+        const row2 = 8;
+        const startCol2 = Math.floor((10 - Math.min(word2.length, 10)) / 2);
+        const word2Path = [];
+        const maxLen2 = Math.min(word2.length, 10);
+        for (let i = 0; i < maxLen2; i++) {
+            word2Path.push([row2, startCol2 + i]);
+        }
+        
+        // Si mots trop longs, les plier
+        if (word1.length > 10) {
+            word1Path.length = 0;
+            const midPoint = Math.ceil(word1.length / 2);
+            for (let i = 0; i < Math.min(midPoint, 10); i++) {
+                word1Path.push([row1, i]);
+            }
+            const remaining = word1.length - midPoint;
+            for (let i = 0; i < Math.min(remaining, 8); i++) {
+                word1Path.push([row1 + i + 1, midPoint - 1]);
+            }
+        }
+        
+        if (word2.length > 10) {
+            word2Path.length = 0;
+            const midPoint = Math.ceil(word2.length / 2);
+            for (let i = 0; i < Math.min(midPoint, 10); i++) {
+                word2Path.push([row2, i]);
+            }
+            const remaining = word2.length - midPoint;
+            for (let i = 0; i < Math.min(remaining, 8); i++) {
+                word2Path.push([row2 - i - 1, midPoint - 1]);
+            }
+        }
+        
+        // Vérifier validité
+        if (this.isPlacementValid(word1Path, word2Path, [])) {
+            return {
+                word1Path,
+                word1Direction: word1.length > 10 ? 'bent' : 'horizontal',
+                word2Path,
+                word2Direction: word2.length > 10 ? 'bent' : 'horizontal',
+                strategyName: 'Mots isolés'
+            };
+        }
+        
+        return null;
+    }
+
+    /**
+     * Stratégie 4: Placement compact optimisé
+     * Essaie de maximiser l'utilisation de l'espace tout en évitant les débordements
+     */
+    tryCompactPlacement(word1, word2) {
+        // Word1 vertical à gauche
+        const col1 = 2;
+        const startRow1 = Math.floor((10 - word1.length) / 2);
+        const word1Path = [];
+        for (let i = 0; i < word1.length && startRow1 + i < 10; i++) {
+            word1Path.push([startRow1 + i, col1]);
+        }
+        
+        // Word2 vertical à droite (3 colonnes d'écart minimum)
+        const col2 = 7;
+        const startRow2 = Math.floor((10 - word2.length) / 2);
+        const word2Path = [];
+        for (let i = 0; i < word2.length && startRow2 + i < 10; i++) {
+            word2Path.push([startRow2 + i, col2]);
+        }
+        
+        // Vérifier validité
+        if (word1Path.length === word1.length && word2Path.length === word2.length &&
+            this.isPlacementValid(word1Path, word2Path, [])) {
+            return {
+                word1Path,
+                word1Direction: 'vertical',
+                word2Path,
+                word2Direction: 'vertical',
+                strategyName: 'Placement compact'
+            };
+        }
+        
+        return null;
+    }
+
+    /**
+     * Vérifie si un placement est valide (pas de collision, pas de débordement adjacent)
+     * @param {Array} path1 - Chemin du premier mot
+     * @param {Array} path2 - Chemin du deuxième mot
+     * @param {Array} allowedIntersections - Intersections autorisées [[row, col], ...]
+     * @returns {boolean} - true si le placement est valide
+     */
+    isPlacementValid(path1, path2, allowedIntersections = []) {
+        // Vérifier les limites de la grille
+        for (const [row, col] of path1) {
+            if (row < 0 || row >= 10 || col < 0 || col >= 10) {
+                return false;
+            }
+        }
+        for (const [row, col] of path2) {
+            if (row < 0 || row >= 10 || col < 0 || col >= 10) {
+                return false;
+            }
+        }
+        
+        // Vérifier les collisions non autorisées
+        for (const [row1, col1] of path1) {
+            for (const [row2, col2] of path2) {
+                if (row1 === row2 && col1 === col2) {
+                    // Collision détectée
+                    const isAllowed = allowedIntersections.some(
+                        ([r, c]) => r === row1 && c === col1
+                    );
+                    if (!isAllowed) {
+                        console.log(`❌ Collision non autorisée à [${row1},${col1}]`);
+                        return false;
+                    }
+                }
+            }
+        }
+        
+        // Vérifier les débordements adjacents (cases qui se touchent)
+        for (const [row1, col1] of path1) {
+            // 8 directions adjacentes
+            const adjacent = [
+                [row1 - 1, col1 - 1], [row1 - 1, col1], [row1 - 1, col1 + 1],
+                [row1, col1 - 1],                       [row1, col1 + 1],
+                [row1 + 1, col1 - 1], [row1 + 1, col1], [row1 + 1, col1 + 1]
+            ];
+            
+            for (const [adjRow, adjCol] of adjacent) {
+                // Vérifier si cette case adjacente est dans path2
+                const touchesPath2 = path2.some(([r, c]) => r === adjRow && c === adjCol);
+                
+                if (touchesPath2) {
+                    // Vérifier si c'est une intersection autorisée
+                    const isAllowedIntersection = allowedIntersections.some(
+                        ([r, c]) => r === adjRow && c === adjCol
+                    );
+                    
+                    if (!isAllowedIntersection) {
+                        console.log(`❌ Débordement adjacent à [${row1},${col1}] → [${adjRow},${adjCol}]`);
+                        return false;
+                    }
+                }
+            }
+        }
+        
+        console.log(`✅ Placement valide: ${path1.length} + ${path2.length} cases, ${allowedIntersections.length} intersection(s)`);
+        return true;
+    }
+
+    /**
+     * Ancien système (fallback) - conservé pour compatibilité
+     */
+    generateCrossedWordsFromArrayLegacy(word1, word2, gameMode) {
         const maxStraightLength = 8; // Longueur max avant de plier
         
         const word1IsLong = word1.length > maxStraightLength;
@@ -4832,9 +5281,13 @@ class GameDataManager {
                 word2Path.push([bendRow, bendCol - (i + 1)]);
             }
             
-            // Vérifier collision avec word1
-            if (this.hasCollision(word1Path, word2Path)) {
-                console.warn('⚠️ Collision détectée - Ajustement word2 long');
+            // Vérifier collision invalide avec word1
+            if (this.hasCollision(word1Path, word2Path, { 
+                allowSameLetterIntersection: true, 
+                word1: word1, 
+                word2: word2 
+            })) {
+                console.warn('⚠️ Collision invalide détectée - Ajustement word2 long');
                 word2Path = [];
                 // Déplacer vers colonne 8 au lieu de 9
                 for (let i = 0; i < midPoint; i++) {
@@ -4844,28 +5297,74 @@ class GameDataManager {
                     word2Path.push([bendRow, bendCol - 1 - (i + 1)]);
                 }
             }
+            
+            // Vérifier débordement adjacent (mots coudés ne doivent pas se toucher)
+            if (this.hasAdjacentOverflow(word1Path, word2Path, { allowedIntersections: [] })) {
+                console.warn('⚠️ Débordement adjacent entre mots coudés - Ajustement supplémentaire');
+                word2Path = [];
+                // Ajuster encore plus bas et à gauche
+                const newStartRow = Math.max(6, startRow - 1);
+                const newBendCol = Math.max(7, bendCol - 2);
+                for (let i = 0; i < midPoint; i++) {
+                    word2Path.push([newStartRow - i, newBendCol]);
+                }
+                const newBendRow = newStartRow - midPoint + 1;
+                for (let i = 0; i < remainingLetters; i++) {
+                    word2Path.push([newBendRow, newBendCol - (i + 1)]);
+                }
+            }
         } else if (!word1IsLong) {
-            // Si word1 est court, on croise
+            // Si word1 est court, on croise au milieu
             const intersectionCol = word1Path[Math.floor(word1Path.length / 2)][1];
+            const intersectionRow = word1Path[Math.floor(word1Path.length / 2)][0];
             const startRow = Math.floor((10 - word2.length) / 2);
             for (let i = 0; i < word2.length; i++) {
                 word2Path.push([startRow + i, intersectionCol]);
             }
+            
+            // Trouver le point d'intersection
+            const intersectionPoint = word2Path.find(([r, c]) => r === intersectionRow && c === intersectionCol);
+            const allowedIntersections = intersectionPoint ? [[intersectionRow, intersectionCol]] : [];
+            
+            // Vérifier débordement adjacent
+            if (this.hasAdjacentOverflow(word1Path, word2Path, { allowedIntersections })) {
+                console.warn('⚠️ Débordement adjacent détecté - Ajustement word2');
+                // Décaler word2 légèrement
+                word2Path = [];
+                const newCol = intersectionCol + 2; // Décaler de 2 colonnes
+                for (let i = 0; i < word2.length; i++) {
+                    word2Path.push([startRow + i, newCol]);
+                }
+            }
         } else {
-            // word1 est long mais pas word2, placer word2 bas-droit
+            // word1 est long mais pas word2, placer word2 bas-droit isolé
             const col = 9;
             const startRow = Math.max(0, 10 - word2.length); // Éviter débordement
             for (let i = 0; i < word2.length; i++) {
                 word2Path.push([startRow + i, col]);
             }
             
-            // Vérifier collision avec word1
-            if (this.hasCollision(word1Path, word2Path)) {
-                console.warn('⚠️ Collision détectée - Ajustement word2 court');
+            // Vérifier collision invalide avec word1
+            if (this.hasCollision(word1Path, word2Path, { 
+                allowSameLetterIntersection: true, 
+                word1: word1, 
+                word2: word2 
+            })) {
+                console.warn('⚠️ Collision invalide détectée - Ajustement word2 court');
                 word2Path = [];
                 // Déplacer vers la gauche
                 for (let i = 0; i < word2.length; i++) {
                     word2Path.push([startRow + i, col - 2]);
+                }
+            }
+            
+            // Vérifier débordement adjacent (pas d'intersection autorisée dans ce cas)
+            if (this.hasAdjacentOverflow(word1Path, word2Path, { allowedIntersections: [] })) {
+                console.warn('⚠️ Débordement adjacent détecté - Nouvelle position word2');
+                word2Path = [];
+                // Déplacer encore plus loin
+                for (let i = 0; i < word2.length; i++) {
+                    word2Path.push([startRow + i, col - 3]);
                 }
             }
         }
@@ -4873,6 +5372,39 @@ class GameDataManager {
         // Valider les paths (debug)
         this.validateWordPath(word1, word1Path, word1);
         this.validateWordPath(word2, word2Path, word2);
+        
+        // Trouver les intersections réelles (cases communes)
+        const realIntersections = [];
+        for (let i = 0; i < word1Path.length; i++) {
+            for (let j = 0; j < word2Path.length; j++) {
+                const [row1, col1] = word1Path[i];
+                const [row2, col2] = word2Path[j];
+                if (row1 === row2 && col1 === col2) {
+                    realIntersections.push([row1, col1]);
+                }
+            }
+        }
+        
+        // Vérification finale des collisions invalides
+        const finalCollisionCheck = this.hasCollision(word1Path, word2Path, { 
+            allowSameLetterIntersection: true, 
+            word1: word1, 
+            word2: word2 
+        });
+        
+        if (finalCollisionCheck) {
+            console.error(`❌ ALERTE: Collision invalide persistante entre "${word1}" et "${word2}"`);
+        }
+        
+        // Vérification finale des débordements adjacents
+        const finalOverflowCheck = this.hasAdjacentOverflow(word1Path, word2Path, { 
+            allowedIntersections: realIntersections 
+        });
+        
+        if (finalOverflowCheck) {
+            console.error(`❌ ALERTE: Débordement adjacent persistant entre "${word1}" et "${word2}"`);
+            this.visualizePaths(word1, word1Path, word2, word2Path);
+        }
 
         return {
             words: [
@@ -4930,6 +5462,25 @@ class GameDataManager {
         // Valider les paths (debug)
         this.validateWordPath(word1, word1Path, word1);
         this.validateWordPath(word2, word2Path, word2);
+        
+        // Vérification finale des collisions (ne devrait jamais arriver pour mots isolés)
+        const finalCollisionCheck = this.hasCollision(word1Path, word2Path, { 
+            allowSameLetterIntersection: true, 
+            word1: word1, 
+            word2: word2 
+        });
+        
+        if (finalCollisionCheck) {
+            console.error(`❌ ALERTE: Collision invalide entre deux mots isolés "${word1}" et "${word2}"`);
+        }
+        
+        // Vérification des débordements adjacents (mots isolés ne doivent pas se toucher)
+        const adjacentOverflow = this.hasAdjacentOverflow(word1Path, word2Path, { allowedIntersections: [] });
+        
+        if (adjacentOverflow) {
+            console.error(`❌ ALERTE: Débordement adjacent entre mots isolés "${word1}" et "${word2}"`);
+            this.visualizePaths(word1, word1Path, word2, word2Path);
+        }
         
         return {
             words: [
@@ -5003,6 +5554,15 @@ class GameDataManager {
             return this.generateCrossedWordsFromArray(levelData.words);
         }
         
+        // Mode Couple Solide: utiliser les données spécifiques
+        if (gameMode === 'couple-solide' && typeof levelsCoupleSolide !== 'undefined') {
+            if (levelNumber < 1 || levelNumber > levelsCoupleSolide.length) {
+                return null;
+            }
+            const levelData = levelsCoupleSolide[levelNumber - 1];
+            return this.generateCrossedWordsFromArray(levelData.words);
+        }
+        
         // Mode Couple: utiliser les données spécifiques
         if (gameMode === 'couple' && typeof coupleChretienData !== 'undefined') {
             if (levelNumber < 1 || levelNumber > coupleChretienData.levels.length) {
@@ -5042,6 +5602,11 @@ class GameDataManager {
         // Mode Aimée: 88 niveaux
         if (gameMode === 'aimee' && typeof levelsAimee !== 'undefined') {
             return levelsAimee.length;
+        }
+        
+        // Mode Couple Solide: 88 niveaux
+        if (gameMode === 'couple-solide' && typeof levelsCoupleSolide !== 'undefined') {
+            return levelsCoupleSolide.length;
         }
         
         // Mode Veiller: 88 niveaux

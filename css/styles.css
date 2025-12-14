@@ -1270,48 +1270,48 @@ body {
     pointer-events: none;
 }
 
-/* Lettre horizontale (triangle supérieur gauche) */
+/* Lettre horizontale (à gauche, centrée verticalement) */
 .cell-letter-horiz {
     position: absolute;
-    top: 25%;
-    left: 25%;
-    font-size: 11px;
-    font-weight: 600;
+    top: 50%;
+    left: 15%;
+    font-size: 12px;
+    font-weight: 700;
     color: #ff1493;
-    text-shadow: 0 0 2px rgba(255, 255, 255, 0.9);
+    text-shadow: 0 0 3px rgba(255, 255, 255, 0.9);
     transform: translate(-50%, -50%);
 }
 
 .cell-letter-horiz::before {
     content: '→';
     position: absolute;
-    left: -14px;
+    left: -15px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 8px;
+    font-size: 9px;
     color: #ff1493;
     font-weight: bold;
 }
 
-/* Lettre verticale (triangle inférieur droit) */
+/* Lettre verticale (en haut, centrée horizontalement) */
 .cell-letter-vert {
     position: absolute;
-    bottom: 25%;
-    right: 25%;
-    font-size: 11px;
-    font-weight: 600;
+    top: 15%;
+    right: 50%;
+    font-size: 12px;
+    font-weight: 700;
     color: #00BFFF;
-    text-shadow: 0 0 2px rgba(255, 255, 255, 0.9);
-    transform: translate(50%, 50%);
+    text-shadow: 0 0 3px rgba(255, 255, 255, 0.9);
+    transform: translate(50%, -50%);
 }
 
 .cell-letter-vert::before {
     content: '↓';
     position: absolute;
-    right: -14px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 8px;
+    left: 50%;
+    top: -15px;
+    transform: translateX(-50%);
+    font-size: 9px;
     color: #00BFFF;
     font-weight: bold;
 }
@@ -2236,7 +2236,8 @@ body {
 }
 
 /* Audio toggle button */
-.audio-toggle-button {
+.audio-toggle-button,
+.music-toggle-button {
     background: white;
     color: #ff69b4;
     border: none;
@@ -2248,7 +2249,6 @@ body {
     box-shadow: 0 3px 10px rgba(255, 255, 255, 0.4);
     position: absolute;
     top: 15px;
-    right: 15px;
     z-index: 1000;
     width: 45px;
     height: 45px;
@@ -2257,13 +2257,23 @@ body {
     justify-content: center;
 }
 
-.audio-toggle-button:hover {
+.audio-toggle-button {
+    right: 15px;
+}
+
+.music-toggle-button {
+    right: 70px;
+}
+
+.audio-toggle-button:hover,
+.music-toggle-button:hover {
     background: rgba(255, 255, 255, 0.95);
     transform: scale(1.1);
     box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
 }
 
-.audio-toggle-button.disabled {
+.audio-toggle-button.disabled,
+.music-toggle-button.disabled {
     opacity: 0.5;
 }
 
