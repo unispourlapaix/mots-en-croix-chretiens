@@ -1943,9 +1943,10 @@ body {
 
     .clue-section {
         padding: 8px;
-        background: transparent;
+        background: linear-gradient(135deg, #ff69b4 0%, #ff85c1 100%);
         border: none;
-        box-shadow: none;
+        box-shadow: 0 2px 8px rgba(255, 105, 180, 0.2);
+        border-radius: 12px;
     }
 
     .clue-section h3 {
@@ -1954,6 +1955,8 @@ body {
         text-transform: uppercase;
         letter-spacing: 1px;
         font-weight: 800;
+        color: white;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.15);
     }
 
     .clue {
