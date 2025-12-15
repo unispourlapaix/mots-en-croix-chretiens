@@ -806,7 +806,7 @@
                         
                         // Vérifier les mises à jour toutes les 60 secondes
                         setInterval(() => {
-                            registration.update();
+                            registration.update().catch(() => {});
                         }, 60000);
                         
                         // Détecter une nouvelle version
@@ -875,7 +875,7 @@
         });
     </script>
     <!-- Configuration locale (clés API sécurisées) -->
-    <script src="js/config.local.js"></script>
+    <script src="js/config.local.js" onerror="this.remove()"></script>
     <script src="js/ai-simulator.js"></script>
     <script src="js/welcome-ai.js"></script>
     <script src="js/unisona-ai.js"></script>
