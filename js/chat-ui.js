@@ -239,13 +239,67 @@ class ChatUI {
         const count = this.chatSystem.getPlayerCount();
         this.chatParticipantCount.textContent = `${count} 👥`;
     }
+
+    // Rendre le chat repositionnable sur mobile
+    makeDraggable() {
+        const chatContainer = document.querySelector('.chat-container');
+        if (!chatContainer) return;
+
+        const chatHeader = chatContainer.querySelector('.chat-header');
+        if (!chatHeader) return;
+
+        let isDragging = false;
+        let currentX = 0;
+        let currentY = 0;
+        let initialX = 0;
+        let initialY = 0;
+
+        chatHeader.style.cursor = 'move';
+        chatHeader.style.touchAction = 'none';
+
+        const dragStart = (e) => {
+            if (window.innerWidth > 768) return; // Seulement sur mobile
+
+            const touch = e.type.includes('touch') ? e.touches[0] : e;
+            initialX = touch.clientX - currentX;
+            initialY = touch.clientY - currentY;
+            isDragging = true;
+        };
+
+        const drag = (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+
+            const touch = e.type.includes('touch') ? e.touches[0] : e;
+            currentX = touch.clientX - initialX;
+            currentY = touch.clientY - initialY;
+
+            chatContainer.style.transform = `translate(${currentX}px, ${currentY}px)`;
+        };
+
+        const dragEnd = () => {
+            isDragging = false;
+        };
+
+        // Touch events
+        chatHeader.addEventListener('touchstart', dragStart, { passive: false });
+        document.addEventListener('touchmove', drag, { passive: false });
+        document.addEventListener('touchend', dragEnd);
+
+        // Mouse events pour test desktop
+        chatHeader.addEventListener('mousedown', dragStart);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', dragEnd);
+    }
 }
 
 // Initialiser l'UI quand le DOM est prêt
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         window.chatUI = new ChatUI();
+        window.chatUI.makeDraggable();
     });
 } else {
     window.chatUI = new ChatUI();
+    window.chatUI.makeDraggable();
 }
