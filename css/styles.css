@@ -3994,12 +3994,14 @@ body {
 /* Responsive mobile */
 @media (max-width: 768px) {
     .chat-container {
-        top: 10px;
+        top: auto;
+        bottom: 80px;
         right: 10px;
         left: 10px;
         width: auto;
         max-width: none;
-        height: 60vh;
+        height: 50vh;
+        max-height: 400px;
     }
 
     .chat-icon {
