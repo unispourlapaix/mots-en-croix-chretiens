@@ -71,7 +71,8 @@ class AudioSystem {
             
             oscillator.type = type;
             
-            const now = Math.max(0, this.audioContext.currentTime);
+            // S'assurer que now est toujours positif et dans le futur
+            const now = Math.max(this.audioContext.currentTime + 0.001, 0.001);
             oscillator.frequency.setValueAtTime(frequency, now);
             
             const attack = 0.01;
@@ -88,7 +89,7 @@ class AudioSystem {
             oscillator.start(now);
             oscillator.stop(now + duration);
         } catch (e) {
-            console.warn('Erreur audio:', e);
+            // Erreur audio ignorée en silence (logs désactivés)
         }
     }
     
@@ -458,15 +459,28 @@ class AudioSystem {
             this.playNextTrack();
         });
         
-        // Gestion des erreurs
+        // Gestion des erreurs - Éviter la boucle infinie
+        let errorHandled = false;
         audio.addEventListener('error', (e) => {
+            if (errorHandled) return;
+            errorHandled = true;
+            
             console.warn(`⚠️ Erreur de chargement: ${trackName}`, e);
-            this.playNextTrack(); // Passer à la suivante en cas d'erreur
+            // Attendre avant de passer à la suivante pour éviter la boucle
+            setTimeout(() => {
+                this.playNextTrack();
+            }, 1000);
         });
         
         audio.play().catch(err => {
+            if (errorHandled) return;
+            errorHandled = true;
+            
             console.warn(`⚠️ Impossible de jouer: ${trackName}`, err);
-            this.playNextTrack();
+            // Attendre avant de passer à la suivante
+            setTimeout(() => {
+                this.playNextTrack();
+            }, 1000);
         });
         
         this.currentAudio = audio;
