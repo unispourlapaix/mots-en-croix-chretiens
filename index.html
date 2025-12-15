@@ -792,7 +792,7 @@
 
     <!-- Service Worker Registration -->
     <script>
-        // Enregistrer le Service Worker
+        // Service Worker avec logique corrigée anti-boucle
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 // Utiliser le chemin relatif pour GitHub Pages
@@ -804,15 +804,21 @@
                     .then((registration) => {
                         console.log('✅ Service Worker enregistré:', registration.scope);
                         
-                        // Vérifier les mises à jour
+                        // Vérifier les mises à jour toutes les 60 secondes
+                        setInterval(() => {
+                            registration.update();
+                        }, 60000);
+                        
+                        // Détecter une nouvelle version
                         registration.addEventListener('updatefound', () => {
                             const newWorker = registration.installing;
+                            
                             newWorker.addEventListener('statechange', () => {
+                                // Nouvelle version installée et un ancien SW contrôle la page
                                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    // Nouvelle version disponible
-                                    if (confirm('🎉 Nouvelle version disponible ! Voulez-vous mettre à jour ?')) {
+                                    // Demander confirmation avant mise à jour
+                                    if (confirm('🎉 Nouvelle version disponible ! Mettre à jour maintenant ?')) {
                                         newWorker.postMessage({ type: 'SKIP_WAITING' });
-                                        window.location.reload();
                                     }
                                 }
                             });
@@ -823,12 +829,15 @@
                     });
             });
 
-            // Gérer les mises à jour du Service Worker
+            // Recharger UNIQUEMENT quand un nouveau SW prend le contrôle après confirmation
             let refreshing = false;
             navigator.serviceWorker.addEventListener('controllerchange', () => {
                 if (!refreshing) {
                     refreshing = true;
-                    window.location.reload();
+                    // Attendre un peu avant de recharger pour éviter les boucles
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 100);
                 }
             });
         }

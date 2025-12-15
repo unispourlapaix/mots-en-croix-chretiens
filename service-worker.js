@@ -20,7 +20,7 @@ self.addEventListener('install', (event) => {
         return cache.addAll(urlsToCache);
       })
   );
-  self.skipWaiting();
+  // Ne pas skipWaiting automatiquement pour éviter les boucles infinies
 });
 
 // Activation du Service Worker
@@ -35,9 +35,11 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
+    }).then(() => {
+      // Claim seulement après nettoyage du cache
+      return self.clients.claim();
     })
   );
-  self.clients.claim();
 });
 
 // Stratégie de cache: Network First, fallback to Cache
