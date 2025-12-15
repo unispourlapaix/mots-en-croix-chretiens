@@ -471,7 +471,9 @@ class P2PChatSystem {
                 // Afficher le modal d'authentification
                 authSystem.showAuthModal();
             } else {
-                this.open();
+                // Ne pas ouvrir automatiquement le chat après connexion
+                // L'utilisateur doit cliquer manuellement sur le bouton chat
+                // this.open();
             }
         }
     }
