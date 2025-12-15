@@ -451,7 +451,12 @@ class AudioSystem {
         this.currentTrack = trackName;
         this.playedTracks.add(trackName);
         
-        const audio = new Audio(`/public/gospel/${trackName}`);
+        // Chemin adapté pour GitHub Pages
+        const basePath = window.location.hostname === 'unispourlapaix.github.io' 
+            ? '/mots-en-croix-chretiens/public/gospel/'
+            : '/public/gospel/';
+        
+        const audio = new Audio(`${basePath}${trackName}`);
         audio.volume = this.musicVolume;
         
         // Quand la piste se termine, jouer la suivante
