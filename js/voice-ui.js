@@ -285,8 +285,6 @@ class VoiceUI {
             ? '1 participant (vous)' 
             : `${count} participant(s)`;
         this.elements.participantCount.textContent = countText;
-            : `${count} participant(s)`;
-        this.elements.participantCount.textContent = countText;
 
         // Construire la liste des participants
         const participants = [];
