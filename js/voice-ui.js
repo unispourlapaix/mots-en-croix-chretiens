@@ -257,8 +257,13 @@ class VoiceUI {
             isSpeaking: false
         });
 
-        // Ajouter les autres peers
+        // Ajouter les autres peers (exclure les bots)
         this.chatSystem.connections.forEach((conn, peerId) => {
+            // Exclure les bots
+            if (peerId.startsWith('bot-')) {
+                return;
+            }
+            
             if (this.voiceSystem.voiceCalls.has(peerId)) {
                 const voiceState = this.voiceSystem.getPeerVoiceState(peerId);
                 participants.push({

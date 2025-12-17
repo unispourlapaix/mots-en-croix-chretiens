@@ -130,6 +130,12 @@ class VoiceChatSystem {
             return;
         }
 
+        // Exclure les bots
+        if (peerId.startsWith('bot-')) {
+            console.log('⚠️ Appel vocal vers un bot ignoré:', peerId);
+            return;
+        }
+
         if (this.voiceCalls.has(peerId)) {
             console.log('⚠️ Appel déjà établi avec', peerId);
             return;
@@ -161,7 +167,14 @@ class VoiceChatSystem {
     /**
      * Écouter les appels entrants
      */
-    setupIncomingCallListener() {
+    setupIncomiIgnorer les appels des bots
+            if (call.peer.startsWith('bot-')) {
+                console.log('⚠️ Appel vocal d\'un bot ignoré:', call.peer);
+                call.close();
+                return;
+            }
+
+            // ngCallListener() {
         if (!this.chatSystem.peer) return;
 
         this.chatSystem.peer.on('call', (call) => {
