@@ -173,7 +173,12 @@ class VoiceUI {
 
     handleVoiceJoined(event) {
         // Mettre à jour l'UI
-        this.elements.status.innerHTML = '<p class="text-success">🎤 Connecté au salon vocal</p>';
+        const participantCount = this.voiceSystem.getVoiceParticipantCount();
+        const statusMessage = participantCount === 1 
+            ? '🎤 Connecté au salon vocal (en attente d\'autres joueurs)'
+            : `🎤 Connecté au salon vocal (${participantCount} participants)`;
+        
+        this.elements.status.innerHTML = `<p class="text-success">${statusMessage}</p>`;
         this.elements.joinBtn.style.display = 'none';
         this.elements.leaveBtn.style.display = 'block';
         this.elements.controlsRow.style.display = 'flex';
@@ -239,7 +244,10 @@ class VoiceUI {
         this.elements.deafenBtn.textContent = isDeafened ? '🔇 Son' : '🔊 Son';
         this.elements.deafenBtn.classList.toggle('deafened', isDeafened);
     }
-
+const countText = count === 1 
+            ? '1 participant (vous)' 
+            : `${count} participant(s)`;
+        this.elements.participantCount.textContent = countText
     updateParticipants() {
         if (!this.voiceSystem || !this.elements.participants) return;
 

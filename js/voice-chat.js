@@ -46,8 +46,13 @@ class VoiceChatSystem {
             console.log('🎤 Microphone activé');
             this.isInVoiceRoom = true;
 
-            // Notifier les autres utilisateurs
-            this.chatSystem.sendSystemMessage(`🎤 ${this.chatSystem.username} a rejoint le vocal`);
+            // Message adapté selon si seul ou avec d'autres
+            const connectionCount = this.chatSystem.connections.size;
+            const message = connectionCount === 0
+                ? `🎤 ${this.chatSystem.username} est prêt en vocal (en attente d'autres joueurs)`
+                : `🎤 ${this.chatSystem.username} a rejoint le vocal`;
+            
+            this.chatSystem.sendSystemMessage(message);
 
             // Établir les connexions vocales avec tous les peers existants
             this.chatSystem.connections.forEach((dataConn, peerId) => {
