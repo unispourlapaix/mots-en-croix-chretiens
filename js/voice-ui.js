@@ -246,6 +246,16 @@ class VoiceUI {
             this.elements.status.innerHTML = '<p class="text-success">✅ Room active - Vocal disponible</p>';
             this.elements.buttons.style.display = 'block';
         } else if (!inRoom) {
+            this.elements.status.innerHTML = '<p class="text-muted">Créez ou rejoignez une room de chat pour activer le vocal</p>';
+            this.elements.buttons.style.display = 'none';
+        }
+    }
+
+    updateMuteButton(isMuted) {
+        if (!this.elements.muteBtn) return;
+        
+        this.elements.muteBtn.textContent = isMuted ? '🔇 Micro' : '🎤 Micro';
+        this.elements.muteBtn.classList.toggle('muted', isMuted);
         
         // Mettre à jour aussi le bouton SMS
         if (this.elements.smsMuteBtn) {
