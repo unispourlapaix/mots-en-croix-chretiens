@@ -224,15 +224,7 @@ class VoiceUI {
         } else if (!inRoom) {
             this.elements.status.innerHTML = '<p class="text-muted">Créez ou rejoignez une room de chat</p>';
             this.elements.buttons.style.display = 'none';
-            this.hideVoiceSection()
-        const inVoice = this.voiceSystem?.isInVoiceRoom;
-
-        if (inRoom && !inVoice) {
-            this.elements.status.innerHTML = '<p class="text-muted">Prêt à rejoindre le vocal</p>';
-            this.elements.buttons.style.display = 'block';
-        } else if (!inRoom) {
-            this.elements.status.innerHTML = '<p class="text-muted">Rejoignez d\'abord une room de chat</p>';
-            this.elements.buttons.style.display = 'none';
+            this.hideVoiceSection();
         }
     }
 
