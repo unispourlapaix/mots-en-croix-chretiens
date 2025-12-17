@@ -24,7 +24,13 @@ class WelcomeAI {
             "⭐ Plus tu complètes de niveaux, plus tu débloques de médailles !",
             "🎮 Le code de ta partie s'affiche dans le menu Chat pour inviter des amis",
             "💝 Prends ton temps, ce jeu est fait pour te détendre et te bénir",
-            "🏁 Tu veux faire une course ? Je peux jouer avec toi ! Tape /unisona"
+            "🏁 Tu veux faire une course ? Je peux jouer avec toi ! Tape /unisona",
+            "🔒 Sécurité : Ne partage jamais ton code de room publiquement, seulement en privé",
+            "⚠️ Rappel : Ne partage JAMAIS d'informations personnelles avec des inconnus",
+            "🛡️ Prudence : Toute demande d'argent ici est suspecte - signale-la immédiatement",
+            "👨‍👩‍👧‍👦 Protection : Signale tout comportement suspect envers les enfants",
+            "🤝 Sagesse : Pour les rencontres : lieu public, jamais seul(e), préviens quelqu'un",
+            "⏰ Patience : Prends le temps de connaître vraiment les personnes en ligne"
         ];
         this.welcomeMessages = [
             "Bienvenue dans Mots En Croix Chrétiens ! 🙏✨",
