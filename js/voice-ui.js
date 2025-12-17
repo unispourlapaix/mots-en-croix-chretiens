@@ -75,11 +75,11 @@ class VoiceUI {
             <div class="voice-participants-list" id="voiceParticipantsList" style="display: none;">
                 <h4>Participants vocaux</h4>
                 <div class="voice-participants" id="voiceParticipants"></div>
-            </div>à la fin du container chat
-        chatContainer.appendChild(voiceSection);   roomCodeDisplay.after(voiceSection);
-        } else {
-            chatContainer.appendChild(voiceSection);
-        }
+            </div>
+        `;
+
+        // Insérer à la fin du container chat
+        chatContainer.appendChild(voiceSection);
 
         // Stocker les références
         this.elements = {
