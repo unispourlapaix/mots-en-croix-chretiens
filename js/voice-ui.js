@@ -190,6 +190,14 @@ class VoiceUI {
         this.elements.joinBtn.disabled = false;
         this.elements.joinBtn.textContent = '🎤 Rejoindre le vocal';
         this.elements.leaveBtn.style.display = 'none';
+        this.elements.controlsRow.style.display = 'none';
+        this.elements.participantsList.style.display = 'none';
+        
+        this.updateMuteButton(false);
+        this.updateDeafenButton(false);
+        this.updateParticipants();
+    }
+
     showVoiceSection() {
         const section = document.getElementById('voiceControlsSection');
         if (section) {
