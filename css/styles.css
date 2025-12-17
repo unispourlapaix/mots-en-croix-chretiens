@@ -1273,45 +1273,47 @@ body {
 /* Lettre horizontale (à gauche, centrée verticalement) */
 .cell-letter-horiz {
     position: absolute;
-    top: 50%;
-    left: 15%;
-    font-size: 12px;
+    top: 30%;
+    left: 25%;
+    font-size: 14px;
     font-weight: 700;
     color: #ff1493;
     text-shadow: 0 0 3px rgba(255, 255, 255, 0.9);
     transform: translate(-50%, -50%);
+    pointer-events: none;
 }
 
 .cell-letter-horiz::before {
     content: '→';
     position: absolute;
-    left: -15px;
+    left: -18px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 9px;
+    font-size: 10px;
     color: #ff1493;
     font-weight: bold;
 }
 
-/* Lettre verticale (en haut, centrée horizontalement) */
+/* Lettre verticale (en bas à droite) */
 .cell-letter-vert {
     position: absolute;
-    top: 15%;
-    right: 50%;
-    font-size: 12px;
+    bottom: 30%;
+    right: 25%;
+    font-size: 14px;
     font-weight: 700;
     color: #00BFFF;
     text-shadow: 0 0 3px rgba(255, 255, 255, 0.9);
-    transform: translate(50%, -50%);
+    transform: translate(50%, 50%);
+    pointer-events: none;
 }
 
 .cell-letter-vert::before {
     content: '↓';
     position: absolute;
     left: 50%;
-    top: -15px;
+    top: -18px;
     transform: translateX(-50%);
-    font-size: 9px;
+    font-size: 10px;
     color: #00BFFF;
     font-weight: bold;
 }
@@ -1320,6 +1322,7 @@ body {
 .intersection-input {
     font-size: 14px !important;
     color: transparent !important;
+    z-index: 2 !important; /* En dessous des lettres (z-index: 3) */
 }
 
 .cell.focused {
