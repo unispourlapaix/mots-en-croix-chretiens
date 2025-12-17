@@ -96,7 +96,12 @@ class VoiceUI {
             controlsRow: document.getElementById('voiceControlsRow'),
             participantCount: document.getElementById('voiceParticipantCount'),
             participantsList: document.getElementById('voiceParticipantsList'),
-            participants: document.getElementById('voiceParticipants')
+            participants: document.getElementById('voiceParticipants'),
+            // Contrôles dans le chat SMS flottant
+            smsVoiceControls: document.getElementById('chatSmsVoiceControls'),
+            smsMuteBtn: document.getElementById('chatSmsMuteBtn'),
+            smsDeafenBtn: document.getElementById('chatSmsDeafenBtn'),
+            smsLeaveVoiceBtn: document.getElementById('chatSmsLeaveVoiceBtn')
         };
     }
 
@@ -114,6 +119,11 @@ class VoiceUI {
 
         // Bouton deafen
         this.elements.deafenBtn?.addEventListener('click', () => this.handleToggleDeafen());
+
+        // Boutons dans le chat SMS flottant
+        this.elements.smsMuteBtn?.addEventListener('click', () => this.handleToggleMute());
+        this.elements.smsDeafenBtn?.addEventListener('click', () => this.handleToggleDeafen());
+        this.elements.smsLeaveVoiceBtn?.addEventListener('click', () => this.handleLeaveVoice());
 
         // Écouter les événements du chat system
         window.addEventListener('roomCreated', () => {
@@ -179,6 +189,11 @@ class VoiceUI {
             : `🎤 Connecté au salon vocal (${participantCount} participants)`;
         
         this.elements.status.innerHTML = `<p class="text-success">${statusMessage}</p>`;
+        // Afficher les contrôles vocaux dans le chat SMS
+        if (this.elements.smsVoiceControls) {
+            this.elements.smsVoiceControls.style.display = 'flex';
+        }
+        
         this.elements.joinBtn.style.display = 'none';
         this.elements.leaveBtn.style.display = 'block';
         this.elements.controlsRow.style.display = 'flex';
@@ -187,7 +202,12 @@ class VoiceUI {
         this.updateParticipants();
     }
 
-    handleVoiceLeft(event) {
+    hand// Cacher les contrôles vocaux dans le chat SMS
+        if (this.elements.smsVoiceControls) {
+            this.elements.smsVoiceControls.style.display = 'none';
+        }
+        
+        leVoiceLeft(event) {
         // Réinitialiser l'UI
         this.elements.status.innerHTML = '<p class="text-muted">Prêt à rejoindre le vocal</p>';
         this.elements.joinBtn.style.display = 'block';
@@ -226,13 +246,25 @@ class VoiceUI {
             this.elements.status.innerHTML = '<p class="text-success">✅ Room active - Vocal disponible</p>';
             this.elements.buttons.style.display = 'block';
         } else if (!inRoom) {
-            this.elements.status.innerHTML = '<p class="text-muted">Créez ou rejoignez une room de chat pour activer le vocal</p>';
-            this.elements.buttons.style.display = 'none';
+        
+        // Mettre à jour aussi le bouton SMS
+        if (this.elements.smsMuteBtn) {
+            this.elements.smsMuteBtn.textContent = isMuted ? '🔇' : '🎤';
+            this.elements.smsMuteBtn.classList.toggle('muted', isMuted);
         }
     }
 
-    updateMuteButton(isMuted) {
-        if (!this.elements.muteBtn) return;
+    updateDeafenButton(isDeafened) {
+        if (!this.elements.deafenBtn) return;
+        
+        this.elements.deafenBtn.textContent = isDeafened ? '🔇 Son' : '🔊 Son';
+        this.elements.deafenBtn.classList.toggle('deafened', isDeafened);
+        
+        // Mettre à jour aussi le bouton SMS
+        if (this.elements.smsDeafenBtn) {
+            this.elements.smsDeafenBtn.textContent = isDeafened ? '🔇' : '🔊';
+            this.elements.smsDeafenBtn.classList.toggle('deafened', isDeafened);
+        }
         
         this.elements.muteBtn.textContent = isMuted ? '🔇 Micro' : '🎤 Micro';
         this.elements.muteBtn.classList.toggle('muted', isMuted);
@@ -501,6 +533,47 @@ voiceStyles.textContent = `
 
     .text-success {
         color: #10ac84 !important;
+    }
+
+    /* Contrôles vocaux dans le chat SMS flottant */
+    .chat-sms-voice-controls {
+        display: none;
+        gap: 8px;
+        padding: 8px;
+        background: rgba(102, 126, 234, 0.1);
+        border-bottom: 1px solid rgba(255, 105, 180, 0.2);
+        justify-content: center;
+    }
+
+    .chat-sms-voice-btn {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .chat-sms-voice-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .chat-sms-voice-btn.muted,
+    .chat-sms-voice-btn.deafened {
+        background: rgba(255, 69, 69, 0.3);
+        border-color: rgba(255, 69, 69, 0.5);
+    }
+
+    .chat-sms-voice-btn.danger {
+        background: rgba(245, 87, 108, 0.3);
+    }
+
+    .chat-sms-voice-btn.danger:hover {
+        background: rgba(245, 87, 108, 0.5);
     }
 `;
 document.head.appendChild(voiceStyles);
