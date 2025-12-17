@@ -28,11 +28,14 @@ class VoiceUI {
 
     setupUI() {
         // Ajouter les contrôles vocaux dans le menu chat
-        const chatContainer = document.querySelector('.chat-room-controls') || 
-                            document.querySelector('#chatMenu .menu-content');
+        const chatContainer = document.querySelector('#chatRoomInterface') || 
+                            document.querySelector('#chatMultiplayerSection') ||
+                            document.querySelector('.chat-room-interface');
         
         if (!chatContainer) {
             console.error('❌ Container chat non trouvé');
+            // Réessayer dans 1 seconde si le DOM n'est pas encore chargé
+            setTimeout(() => this.setupUI(), 1000);
             return;
         }
 
@@ -72,13 +75,8 @@ class VoiceUI {
             <div class="voice-participants-list" id="voiceParticipantsList" style="display: none;">
                 <h4>Participants vocaux</h4>
                 <div class="voice-participants" id="voiceParticipants"></div>
-            </div>
-        `;
-
-        // Insérer après les contrôles de room existants
-        const roomCodeDisplay = chatContainer.querySelector('#chatRoomCodeDisplay');
-        if (roomCodeDisplay) {
-            roomCodeDisplay.after(voiceSection);
+            </div>à la fin du container chat
+        chatContainer.appendChild(voiceSection);   roomCodeDisplay.after(voiceSection);
         } else {
             chatContainer.appendChild(voiceSection);
         }
