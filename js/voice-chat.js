@@ -172,17 +172,21 @@ class VoiceChatSystem {
     /**
      * Écouter les appels entrants
      */
-    setupIncomiIgnorer les appels des bots
+    setupIncomingCallListener() {
+        if (!this.chatSystem.peer) return;
+
+        this.chatSystem.peer.on('call', (call) => {
+            console.log('📞 Appel entrant de', call.peer);
+
+            // Ignorer les appels des bots
             if (call.peer.startsWith('bot-')) {
                 console.log('⚠️ Appel vocal d\'un bot ignoré:', call.peer);
                 call.close();
                 return;
             }
 
-            // ngCallListener() {
-        if (!this.chatSystem.peer) return;
-
-        this.chatSystem.peer.on('call', (call) => {
+            // Répondre avec notre stream local
+            if (this.localStream && this.isInVoiceRoom) {
             console.log('📞 Appel entrant de', call.peer);
 
             // Répondre avec notre stream local

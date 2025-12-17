@@ -202,12 +202,7 @@ class VoiceUI {
         this.updateParticipants();
     }
 
-    hand// Cacher les contrôles vocaux dans le chat SMS
-        if (this.elements.smsVoiceControls) {
-            this.elements.smsVoiceControls.style.display = 'none';
-        }
-        
-        leVoiceLeft(event) {
+    handleVoiceLeft(event) {
         // Réinitialiser l'UI
         this.elements.status.innerHTML = '<p class="text-muted">Prêt à rejoindre le vocal</p>';
         this.elements.joinBtn.style.display = 'block';
@@ -216,6 +211,11 @@ class VoiceUI {
         this.elements.leaveBtn.style.display = 'none';
         this.elements.controlsRow.style.display = 'none';
         this.elements.participantsList.style.display = 'none';
+        
+        // Cacher les contrôles vocaux dans le chat SMS
+        if (this.elements.smsVoiceControls) {
+            this.elements.smsVoiceControls.style.display = 'none';
+        }
         
         this.updateMuteButton(false);
         this.updateDeafenButton(false);
