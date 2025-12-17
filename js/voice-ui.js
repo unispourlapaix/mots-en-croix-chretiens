@@ -27,13 +27,16 @@ class VoiceUI {
     }
 
     setupUI() {
+        // Vérifier si l'UI est déjà créée
+        if (document.getElementById('voiceControlsSection')) {
+            return; // Déjà créé
+        }
+
         // Ajouter les contrôles vocaux dans le menu chat
-        const chatContainer = document.querySelector('#chatRoomInterface') || 
-                            document.querySelector('#chatMultiplayerSection') ||
-                            document.querySelector('.chat-room-interface');
+        const chatContainer = document.querySelector('#chatMultiplayerSection');
         
         if (!chatContainer) {
-            console.error('❌ Container chat non trouvé');
+            console.log('⏳ En attente du menu chat...');
             // Réessayer dans 1 seconde si le DOM n'est pas encore chargé
             setTimeout(() => this.setupUI(), 1000);
             return;
@@ -41,7 +44,9 @@ class VoiceUI {
 
         // Créer la section vocale
         const voiceSection = document.createElement('div');
+        voiceSection.id = 'voiceControlsSection';
         voiceSection.className = 'voice-controls-section';
+        voiceSection.style.display = 'none'; // Caché par défaut
         voiceSection.innerHTML = `
             <div class="voice-header">
                 <h3>🎤 Salon Vocal</h3>
@@ -110,8 +115,14 @@ class VoiceUI {
 
         // Bouton deafen
         this.elements.deafenBtn?.addEventListener('click', () => this.handleToggleDeafen());
-
-        // Écouter les événements du chat system
+{
+            this.showVoiceSection();
+            this.updateVoiceAvailability();
+        });
+        window.addEventListener('roomJoined', () => {
+            this.showVoiceSection();
+            this.updateVoiceAvailability();
+        }
         window.addEventListener('roomCreated', () => this.updateVoiceAvailability());
         window.addEventListener('roomJoined', () => this.updateVoiceAvailability());
 
@@ -179,18 +190,33 @@ class VoiceUI {
         this.elements.joinBtn.disabled = false;
         this.elements.joinBtn.textContent = '🎤 Rejoindre le vocal';
         this.elements.leaveBtn.style.display = 'none';
-        this.elements.controlsRow.style.display = 'none';
-        this.elements.participantsList.style.display = 'none';
-        
-        this.updateMuteButton(false);
-        this.updateDeafenButton(false);
-        this.updateParticipants();
+    showVoiceSection() {
+        const section = document.getElementById('voiceControlsSection');
+        if (section) {
+            section.style.display = 'block';
+        }
+    }
+
+    hideVoiceSection() {
+        const section = document.getElementById('voiceControlsSection');
+        if (section) {
+            section.style.display = 'none';
+        }
     }
 
     updateVoiceAvailability() {
         if (!this.chatSystem || !this.elements) return;
 
         const inRoom = !!this.chatSystem.roomId;
+        const inVoice = this.voiceSystem?.isInVoiceRoom;
+
+        if (inRoom && !inVoice) {
+            this.elements.status.innerHTML = '<p class="text-success">✅ Room active - Vocal disponible</p>';
+            this.elements.buttons.style.display = 'block';
+        } else if (!inRoom) {
+            this.elements.status.innerHTML = '<p class="text-muted">Créez ou rejoignez une room de chat</p>';
+            this.elements.buttons.style.display = 'none';
+            this.hideVoiceSection()
         const inVoice = this.voiceSystem?.isInVoiceRoom;
 
         if (inRoom && !inVoice) {
