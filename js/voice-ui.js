@@ -115,16 +115,16 @@ class VoiceUI {
 
         // Bouton deafen
         this.elements.deafenBtn?.addEventListener('click', () => this.handleToggleDeafen());
-{
+
+        // Écouter les événements du chat system
+        window.addEventListener('roomCreated', () => {
             this.showVoiceSection();
             this.updateVoiceAvailability();
         });
         window.addEventListener('roomJoined', () => {
             this.showVoiceSection();
             this.updateVoiceAvailability();
-        }
-        window.addEventListener('roomCreated', () => this.updateVoiceAvailability());
-        window.addEventListener('roomJoined', () => this.updateVoiceAvailability());
+        });
 
         // Écouter les événements vocaux
         window.addEventListener('voicejoined', (e) => this.handleVoiceJoined(e));
