@@ -187,10 +187,6 @@ class VoiceChatSystem {
 
             // Répondre avec notre stream local
             if (this.localStream && this.isInVoiceRoom) {
-            console.log('📞 Appel entrant de', call.peer);
-
-            // Répondre avec notre stream local
-            if (this.localStream && this.isInVoiceRoom) {
                 call.answer(this.localStream);
 
                 call.on('stream', (remoteStream) => {

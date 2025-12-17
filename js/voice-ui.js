@@ -265,26 +265,18 @@ class VoiceUI {
             this.elements.smsDeafenBtn.textContent = isDeafened ? '🔇' : '🔊';
             this.elements.smsDeafenBtn.classList.toggle('deafened', isDeafened);
         }
-        
-        this.elements.muteBtn.textContent = isMuted ? '🔇 Micro' : '🎤 Micro';
-        this.elements.muteBtn.classList.toggle('muted', isMuted);
     }
 
-    updateDeafenButton(isDeafened) {
-        if (!this.elements.deafenBtn) return;
-        
-        this.elements.deafenBtn.textContent = isDeafened ? '🔇 Son' : '🔊 Son';
-        this.elements.deafenBtn.classList.toggle('deafened', isDeafened);
-    }
-const countText = count === 1 
-            ? '1 participant (vous)' 
-            : `${count} participant(s)`;
-        this.elements.participantCount.textContent = countText
     updateParticipants() {
         if (!this.voiceSystem || !this.elements.participants) return;
 
         const count = this.voiceSystem.getVoiceParticipantCount();
-        this.elements.participantCount.textContent = `${count} participant(s)`;
+        const countText = count === 1 
+            ? '1 participant (vous)' 
+            : `${count} participant(s)`;
+        this.elements.participantCount.textContent = countText;
+            : `${count} participant(s)`;
+        this.elements.participantCount.textContent = countText;
 
         // Construire la liste des participants
         const participants = [];
