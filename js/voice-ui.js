@@ -46,7 +46,6 @@ class VoiceUI {
         const voiceSection = document.createElement('div');
         voiceSection.id = 'voiceControlsSection';
         voiceSection.className = 'voice-controls-section';
-        voiceSection.style.display = 'none'; // Caché par défaut
         voiceSection.innerHTML = `
             <div class="voice-header">
                 <h3>🎤 Salon Vocal</h3>
@@ -55,7 +54,7 @@ class VoiceUI {
             
             <div class="voice-status" id="voiceStatus">
                 <p class="text-muted">Rejoignez d'abord une room de chat</p>
-            </div>
+            </div>Créez ou rejoignez une room de chat pour activer le vocal
             
             <div class="voice-buttons" id="voiceButtons" style="display: none;">
                 <button class="btn btn-voice-join" id="voiceJoinBtn">
@@ -222,9 +221,8 @@ class VoiceUI {
             this.elements.status.innerHTML = '<p class="text-success">✅ Room active - Vocal disponible</p>';
             this.elements.buttons.style.display = 'block';
         } else if (!inRoom) {
-            this.elements.status.innerHTML = '<p class="text-muted">Créez ou rejoignez une room de chat</p>';
+            this.elements.status.innerHTML = '<p class="text-muted">Créez ou rejoignez une room de chat pour activer le vocal</p>';
             this.elements.buttons.style.display = 'none';
-            this.hideVoiceSection();
         }
     }
 
