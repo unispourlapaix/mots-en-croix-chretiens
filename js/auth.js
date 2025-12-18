@@ -63,12 +63,9 @@ class AuthSystem {
                 // Fermer le modal d'auth
                 this.hideAuthModal();
 
-                // Ouvrir automatiquement le chat après authentification (sauf au démarrage)
-                if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && typeof chatSystem !== 'undefined') {
-                    setTimeout(() => {
-                        chatSystem.open();
-                    }, 500);
-                }
+                // NE PAS ouvrir automatiquement le chat après authentification
+                // L'utilisateur peut l'ouvrir manuellement via la bulle de chat
+                console.log('✅ Connexion réussie - Menu fermé');
             } else {
                 // Utilisateur déconnecté
                 this.currentUser = null;
