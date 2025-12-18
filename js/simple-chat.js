@@ -600,6 +600,36 @@ class SimpleChatSystem {
             window.welcomeAI.leaveRace();
             this.showMessage('👼 Unisona a quitté la partie', 'system');
             
+        } else if (cmd === '/difficulte' || cmd === '/difficulty') {
+            // Changer la difficulté d'Unisona
+            const args = message.split(' ');
+            if (args.length < 2) {
+                const current = window.welcomeAI?.getDifficulty();
+                if (current) {
+                    this.showMessage(`📊 Difficulté actuelle: ${current.emoji} ${current.level} - ${current.description}`, 'system');
+                    this.showMessage('💡 Utilise: /difficulte rapide | moyen | lent', 'system');
+                } else {
+                    this.showMessage('⚠️ Unisona n\'est pas disponible', 'system');
+                }
+                return;
+            }
+            
+            const level = args[1].toLowerCase();
+            if (!window.welcomeAI) {
+                this.showMessage('❌ Unisona n\'est pas disponible', 'system');
+                return;
+            }
+            
+            if (window.welcomeAI.isPlaying) {
+                this.showMessage('⚠️ Impossible de changer la difficulté pendant une course !', 'system');
+                return;
+            }
+            
+            const success = window.welcomeAI.setDifficulty(level);
+            if (!success) {
+                this.showMessage('❌ Difficulté invalide. Utilise: rapide, moyen ou lent', 'system');
+            }
+            
         } else if (cmd === '/aide' || cmd === '/help') {
             // Afficher l'aide
             this.showMessage('📝 Commandes disponibles :', 'system');
@@ -609,6 +639,7 @@ class SimpleChatSystem {
             this.showMessage('/dreamer-clear - Réinitialiser l\'historique Dreamer', 'system');
             this.showMessage('/unisona ou /bot - Inviter Unisona à jouer en course', 'system');
             this.showMessage('/stop-unisona - Arrêter Unisona', 'system');
+            this.showMessage('/difficulte [rapide|moyen|lent] - Changer la difficulté d\'Unisona', 'system');
             this.showMessage('/aide ou /help - Afficher cette aide', 'system');
             
         } else {

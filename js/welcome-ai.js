@@ -13,7 +13,30 @@ class WelcomeAI {
         this.score = 0;
         this.wordsFound = [];
         this.currentGame = null;
-        this.playSpeed = 2000; // 2 secondes entre chaque action
+        
+        // Niveaux de difficulté (vitesse de jeu)
+        this.difficulty = 'moyen'; // 'rapide', 'moyen', 'lent'
+        this.difficultySettings = {
+            'rapide': {
+                baseSpeed: 800,      // 0.8-1.8 secondes entre actions
+                randomRange: 1000,
+                emoji: '⚡',
+                description: 'Très rapide - Expert'
+            },
+            'moyen': {
+                baseSpeed: 2000,     // 2-3 secondes entre actions
+                randomRange: 1000,
+                emoji: '🎯',
+                description: 'Moyen - Normal'
+            },
+            'lent': {
+                baseSpeed: 4000,     // 4-6 secondes entre actions
+                randomRange: 2000,
+                emoji: '🐢',
+                description: 'Lent - Débutant'
+            }
+        };
+        this.playSpeed = this.difficultySettings[this.difficulty].baseSpeed;
         
         this.tips = [
             "💡 Astuce : Commence par les mots les plus courts, ils sont souvent plus faciles !",
@@ -56,6 +79,37 @@ class WelcomeAI {
         
         // Afficher des conseils périodiquement pendant le jeu
         this.startTipScheduler();
+    }
+    
+    // Changer la difficulté
+    setDifficulty(level) {
+        if (!['rapide', 'moyen', 'lent'].includes(level)) {
+            console.error('❌ Difficulté invalide:', level);
+            return false;
+        }
+        
+        this.difficulty = level;
+        const settings = this.difficultySettings[level];
+        this.playSpeed = settings.baseSpeed;
+        
+        console.log(`✅ Difficulté Unisona: ${settings.emoji} ${settings.description}`);
+        
+        if (window.simpleChatSystem) {
+            window.simpleChatSystem.showMessage(
+                `${settings.emoji} Difficulté Unisona changée: ${settings.description}`,
+                'system'
+            );
+        }
+        
+        return true;
+    }
+    
+    // Obtenir la difficulté actuelle
+    getDifficulty() {
+        return {
+            level: this.difficulty,
+            ...this.difficultySettings[this.difficulty]
+        };
     }
 
     showWelcomeMessage() {
@@ -168,7 +222,8 @@ class WelcomeAI {
         this.score = 0;
         this.wordsFound = [];
         
-        // Annoncer mon arrivée dans la course
+        // Annoncer mon arrivée dans la course avec la difficulté
+        const difficultyInfo = this.getDifficulty();
         if (window.multiplayerRace.isRaceMode) {
             window.multiplayerRace.receiveProgress(this.name, 'start', {
                 startTime: Date.now(),
@@ -187,7 +242,8 @@ class WelcomeAI {
             });
         }
         
-        this.sendChatMessage(`${this.avatar} Allons-y ! Je suis prête pour la course ! 🏁`, 'system');
+        const difficultyInfo = this.getDifficulty();
+        this.sendChatMessage(`${this.avatar} Allons-y ! Je suis prête pour la course ! ${difficultyInfo.emoji} (${this.difficulty}) 🏁`, 'system');
         
         // Commencer à simuler le jeu
         this.startPlayingRace();
@@ -212,7 +268,10 @@ class WelcomeAI {
         
         this.currentGame = window.game;
         
-        // Jouer périodiquement
+        // Récupérer les paramètres de vitesse selon la difficulté
+        const settings = this.difficultySettings[this.difficulty];
+        
+        // Jouer périodiquement avec la vitesse de la difficulté
         const playInterval = setInterval(() => {
             if (!this.isPlaying) {
                 clearInterval(playInterval);
@@ -222,7 +281,7 @@ class WelcomeAI {
             // Simuler une progression
             this.makeRaceProgress();
             
-        }, this.playSpeed + Math.random() * 1000); // 2-3 secondes entre actions
+        }, settings.baseSpeed + Math.random() * settings.randomRange);
     }
     
     // Simuler une progression en course
