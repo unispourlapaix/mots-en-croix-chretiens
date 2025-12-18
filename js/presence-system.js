@@ -162,8 +162,9 @@ class PresenceSystem {
         
         roomCode = roomCode.toUpperCase().trim();
         
-        if (roomCode.length !== 6) {
-            throw new Error('Code invalide (doit faire 6 caractères)');
+        // Validation minimale (le code est maintenant un peerID)
+        if (roomCode.length < 3) {
+            throw new Error('Code invalide (trop court)');
         }
         
         // Initialiser myPresence si pas encore fait
