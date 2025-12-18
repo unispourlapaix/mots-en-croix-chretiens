@@ -278,10 +278,38 @@ class WelcomeAI {
                 return;
             }
             
-            // Simuler une progression
+            // Simuler une progression de manière humaine
             this.makeRaceProgress();
             
         }, settings.baseSpeed + Math.random() * settings.randomRange);
+    }
+    
+    // Calculer le temps de réflexion basé sur la difficulté du mot
+    calculateThinkingTime(word) {
+        const baseTime = this.difficultySettings[this.difficulty].baseSpeed;
+        const wordLength = word.length;
+        
+        // Plus le mot est long, plus le temps de réflexion augmente
+        // Mots de 3-4 lettres : temps de base
+        // Mots de 5-7 lettres : +30% de temps
+        // Mots de 8+ lettres : +60% de temps
+        let multiplier = 1.0;
+        if (wordLength >= 8) {
+            multiplier = 1.6;
+        } else if (wordLength >= 5) {
+            multiplier = 1.3;
+        }
+        
+        // Ajouter une variation aléatoire (±20%) pour simuler l'humain
+        const randomFactor = 0.8 + Math.random() * 0.4; // 0.8 à 1.2
+        
+        return baseTime * multiplier * randomFactor;
+    }
+    
+    // Simuler une pause de réflexion
+    shouldTakePause() {
+        // 15% de chance de faire une pause (comme un humain qui réfléchit)
+        return Math.random() < 0.15;
     }
     
     // Simuler une progression en course
@@ -295,6 +323,24 @@ class WelcomeAI {
             return;
         }
         
+        // Parfois, faire une pause de réflexion (comme un humain qui cherche)
+        if (this.shouldTakePause()) {
+            const pauseMessages = [
+                "Hmm, laisse-moi réfléchir... 🤔",
+                "Voyons voir... 💭",
+                "Quel mot pourrait bien aller ici ? 🧐",
+                "Je cherche... ✨"
+            ];
+            
+            if (Math.random() < 0.5) { // 50% de chance d'afficher le message de pause
+                const randomPause = pauseMessages[Math.floor(Math.random() * pauseMessages.length)];
+                this.sendChatMessage(randomPause, 'system');
+            }
+            
+            // Ne pas trouver de mot cette fois, juste réfléchir
+            return;
+        }
+        
         // Trouver un mot au hasard parmi ceux du niveau
         const levelData = window.gameDataManager?.getLevelData(this.currentGame.currentLevel);
         if (!levelData || !levelData.words) return;
@@ -303,12 +349,18 @@ class WelcomeAI {
         const availableWords = levelData.words.filter(w => !this.wordsFound.includes(w.word));
         if (availableWords.length === 0) {
             // Tous les mots trouvés, terminer
+            this.sendChatMessage("🎉 J'ai trouvé tous les mots ! Félicitations à toi aussi ! 💕", 'system');
             this.leaveRace();
             return;
         }
         
-        // Prendre un mot au hasard
-        const randomWord = availableWords[Math.floor(Math.random() * availableWords.length)];
+        // Trier par difficulté (mots courts en premier pour être plus réaliste)
+        availableWords.sort((a, b) => a.word.length - b.word.length);
+        
+        // Choisir parmi les 3 mots les plus faciles (ou tous si moins de 3)
+        const easiestWords = availableWords.slice(0, Math.min(3, availableWords.length));
+        const randomWord = easiestWords[Math.floor(Math.random() * easiestWords.length)];
+        
         this.wordsFound.push(randomWord.word);
         
         // Calculer un score
@@ -335,16 +387,37 @@ class WelcomeAI {
                 percentage: progress
             });
             
-            // Afficher la progression dans le chat
-            if (Math.random() < 0.3) { // 30% de chance de commenter
-                const comments = [
-                    "Ce mot était difficile ! 💪",
-                    "J'adore ce niveau ! ✨",
-                    "Dieu est avec nous ! 🙏",
-                    "Continue, tu progresses bien ! 💝"
-                ];
-                const randomComment = comments[Math.floor(Math.random() * comments.length)];
-                this.sendChatMessage(`${randomComment}`, 'system');
+            // Messages de réussite variés selon la difficulté du mot
+            if (Math.random() < 0.4) { // 40% de chance de commenter
+                let comment;
+                if (randomWord.word.length <= 4) {
+                    // Mots courts - faciles
+                    const easyComments = [
+                        "Facile celui-là ! 😊",
+                        "Trouvé rapidement ! ✨",
+                        "Ah, ce mot était simple ! 💫"
+                    ];
+                    comment = easyComments[Math.floor(Math.random() * easyComments.length)];
+                } else if (randomWord.word.length <= 7) {
+                    // Mots moyens
+                    const mediumComments = [
+                        "Pas mal ! 💪",
+                        "J'adore ce mot ! ✨",
+                        "Continue, tu progresses bien ! 💝",
+                        "On avance ensemble ! 🙏"
+                    ];
+                    comment = mediumComments[Math.floor(Math.random() * mediumComments.length)];
+                } else {
+                    // Mots longs - difficiles
+                    const hardComments = [
+                        "Ouf ! Ce mot était difficile ! 😅",
+                        "J'ai dû réfléchir pour celui-là ! 🤔",
+                        "Quel mot compliqué ! Mais j'ai réussi ! 💪",
+                        "Celui-là m'a donné du fil à retordre ! ✨"
+                    ];
+                    comment = hardComments[Math.floor(Math.random() * hardComments.length)];
+                }
+                this.sendChatMessage(comment, 'system');
             }
         }
     }
