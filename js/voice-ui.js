@@ -242,7 +242,10 @@ class VoiceUI {
         const inRoom = !!this.chatSystem.roomId;
         const inVoice = this.voiceSystem?.isInVoiceRoom;
 
-        if (inRoom && !inVoice) {
+        if (inVoice) {
+            // Déjà connecté au vocal - ne rien changer (géré par handleVoiceJoined)
+            return;
+        } else if (inRoom && !inVoice) {
             this.elements.status.innerHTML = '<p class="text-success">✅ Room active - Vocal disponible</p>';
             this.elements.buttons.style.display = 'block';
         } else if (!inRoom) {
