@@ -77,7 +77,10 @@ class PresenceSystem {
         
         // Utiliser le peer existant (NE PAS recréer)
         const myPeerId = window.simpleChatSystem.peer.id;
-        const roomCode = this.generateRoomCode();
+        
+        // Le code de room EST le peerID de l'hôte
+        // C'est plus simple et ça marche multi-appareils !
+        const roomCode = myPeerId;
         
         // Initialiser myPresence si pas encore fait
         if (!this.myPresence) {
@@ -95,11 +98,11 @@ class PresenceSystem {
         this.currentRoomCode = roomCode;
         this.isRoomHost = true;
         
-        console.log('🏠 Salle créée:', roomCode);
-        console.log('📋 Partagez ce code avec vos amis/famille !');
-        console.log('🆔 Votre Peer ID:', myPeerId);
+        console.log('🏠 Salle créée');
+        console.log('📋 Code à partager:', roomCode);
+        console.log('💡 Les autres doivent entrer ce code pour vous rejoindre');
         
-        // Enregistrer association code → peer ID (pour restauration locale)
+        // Enregistrer en local pour référence
         const roomData = {
             code: roomCode,
             hostPeerId: myPeerId,
@@ -177,16 +180,8 @@ class PresenceSystem {
             };
         }
         
-        // Lire le registre pour trouver le peer ID de l'hôte
-        const roomDataStr = localStorage.getItem(`room_${roomCode}`);
-        if (!roomDataStr) {
-            console.error('❌ Salle non trouvée dans localStorage:', roomCode);
-            console.log('💡 Salles disponibles:', Object.keys(localStorage).filter(k => k.startsWith('room_')));
-            throw new Error(`Salle ${roomCode} introuvable. L'hôte doit d'abord créer la salle.`);
-        }
-        
-        const roomData = JSON.parse(roomDataStr);
-        const hostPeerId = roomData.hostPeerId;
+        // Le roomCode est directement le peerID de l'hôte
+        const hostPeerId = roomCode;
         
         // Vérifier si on est l'hôte
         const myPeerId = window.simpleChatSystem?.peer?.id;
@@ -202,6 +197,14 @@ class PresenceSystem {
             
             return; // Ne pas se connecter à soi-même
         }
+        
+        // Enregistrer en local pour historique
+        const roomData = {
+            code: roomCode,
+            hostPeerId: hostPeerId,
+            joinedAt: Date.now()
+        };
+        localStorage.setItem(`room_${roomCode}`, JSON.stringify(roomData));
         
         this.currentRoomCode = roomCode;
         this.isRoomHost = false;
