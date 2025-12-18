@@ -35,10 +35,14 @@ class MenuTabSystem {
                 // Rafraîchir le tab connexion quand l'état d'auth change
                 this.updateConnexionTab();
                 
-                // Basculer vers l'onglet Connexion après connexion réussie
+                // Fermer le menu après connexion réussie
                 if (user && user.username) {
                     setTimeout(() => {
-                        this.switchTab('connexion');
+                        const menuModal = document.getElementById('menuModal');
+                        if (menuModal) {
+                            menuModal.classList.add('hidden');
+                        }
+                        console.log('✅ Connexion réussie:', user.username);
                     }, 300);
                 }
             });
