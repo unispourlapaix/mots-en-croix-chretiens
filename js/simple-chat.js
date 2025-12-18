@@ -255,6 +255,11 @@ class SimpleChatSystem {
             this.connections.set(conn.peer, conn);
             this.showMessage('✅ Un joueur a rejoint', 'system');
             
+            // Notifier aussi le P2PChatSystem
+            if (window.chatSystem && window.chatSystem.roomId) {
+                window.chatSystem.handleIncomingConnection(conn);
+            }
+            
             // Envoyer un message de bienvenue
             conn.send({
                 type: 'join',
@@ -291,6 +296,14 @@ class SimpleChatSystem {
             this.connections.delete(conn.peer);
             this.showMessage('👋 Un joueur est parti', 'system');
             
+            // Notifier le P2PChatSystem
+            if (window.chatSystem && window.chatSystem.connections) {
+                window.chatSystem.connections.delete(conn.peer);
+                const username = conn.metadata?.username || 'Utilisateur';
+                window.chatSystem.sendSystemMessage(`${username} a quitté le chat 👋`);
+                window.chatSystem.updateParticipantCount();
+            }
+            
             // Notifier le room system
             if (window.roomSystem) {
                 window.roomSystem.handlePlayerLeft({
@@ -309,6 +322,12 @@ class SimpleChatSystem {
 
     // Gérer les messages reçus
     handleMessage(data, conn) {
+        // Router les messages du P2PChatSystem (chat communautaire)
+        if (window.chatSystem && ['message', 'history', 'system'].includes(data.type)) {
+            window.chatSystem.handleIncomingMessage(data, conn.peer);
+            return; // Ne pas traiter dans SimpleChatSystem
+        }
+        
         if (data.type === 'message') {
             this.receiveMessage(data.username, data.text);
         } else if (data.type === 'join') {

@@ -117,10 +117,8 @@ class P2PChatSystem {
                 reject(err);
             });
 
-            // Écouter les connexions entrantes (quelqu'un rejoint notre room)
-            this.peer.on('connection', (conn) => {
-                this.handleIncomingConnection(conn);
-            });
+            // Note: Les connexions entrantes sont gérées par SimpleChatSystem
+            // pour éviter les doublons de messages
         });
     }
 
