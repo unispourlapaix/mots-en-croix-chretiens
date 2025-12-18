@@ -16,6 +16,21 @@ class RoomSystem {
         // Auto-créer ma salle au démarrage
         this.createMyRoom();
         
+        // Écouter les changements d'authentification pour mettre à jour la bulle
+        if (typeof authSystem !== 'undefined') {
+            authSystem.onAuthChange((user) => {
+                console.log('🔐 Auth changed dans RoomSystem:', user?.username);
+                // Mettre à jour le username dans availablePlayers
+                if (user && user.username && this.availablePlayers.has('me')) {
+                    const myInfo = this.availablePlayers.get('me');
+                    myInfo.username = user.username;
+                    this.availablePlayers.set('me', myInfo);
+                    console.log('✅ Username mis à jour dans availablePlayers:', user.username);
+                    this.updateChatBubble();
+                }
+            });
+        }
+        
         // Écouter les événements P2P
         this.setupEventListeners();
     }
