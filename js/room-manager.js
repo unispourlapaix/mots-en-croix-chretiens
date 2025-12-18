@@ -24,6 +24,37 @@ class RoomManager {
             leaveRoomBtn.addEventListener('click', () => this.handleLeaveRoom());
         }
         
+        // Bouton copier code
+        const copyRoomCodeBtn = document.getElementById('copyRoomCodeBtn');
+        if (copyRoomCodeBtn) {
+            copyRoomCodeBtn.addEventListener('click', () => {
+                const roomCode = document.getElementById('currentRoomCode')?.textContent;
+                if (roomCode && roomCode !== '------') {
+                    navigator.clipboard.writeText(roomCode).then(() => {
+                        copyRoomCodeBtn.textContent = '✅';
+                        setTimeout(() => {
+                            copyRoomCodeBtn.textContent = '📋';
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('Erreur copie:', err);
+                        alert('Code: ' + roomCode);
+                    });
+                }
+            });
+        }
+        
+        // Clic sur le code pour voir en entier
+        const currentRoomCode = document.getElementById('currentRoomCode');
+        if (currentRoomCode) {
+            currentRoomCode.addEventListener('click', () => {
+                const code = currentRoomCode.textContent;
+                if (code && code !== '------') {
+                    alert('Code complet:\n\n' + code + '\n\nPartagez ce code avec vos amis pour qu\'ils rejoignent votre salle !');
+                }
+            });
+            currentRoomCode.style.cursor = 'pointer';
+        }
+        
         if (chatConnexionBtn) {
             chatConnexionBtn.addEventListener('click', () => this.openConnexionTab());
         }
@@ -113,8 +144,9 @@ class RoomManager {
             return;
         }
         
-        if (roomCode.length !== 6) {
-            alert('⚠️ Le code doit faire 6 caractères');
+        // Le code est maintenant un peerID complet (pas de limite stricte)
+        if (roomCode.length < 3) {
+            alert('⚠️ Le code semble trop court');
             roomCodeInput.focus();
             return;
         }

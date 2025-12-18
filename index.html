@@ -560,15 +560,16 @@
                     🏠 Créer une salle
                 </button>
                 <div class="join-room-group">
-                    <input type="text" id="roomCodeInput" class="room-code-input" placeholder="CODE" maxlength="6">
+                    <input type="text" id="roomCodeInput" class="room-code-input" placeholder="CODE PEER ID" maxlength="50">
                     <button id="joinRoomBtn" class="room-action-btn join-btn">
                         🚪 Rejoindre
                     </button>
                 </div>
                 <div id="currentRoomInfo" class="current-room-info hidden">
-                    <span class="room-label">Salle:</span>
-                    <span class="room-code" id="currentRoomCode">------</span>
-                    <button id="leaveRoomBtn" class="leave-room-btn">❌</button>
+                    <span class="room-label">Code:</span>
+                    <span class="room-code" id="currentRoomCode" title="Cliquez pour voir le code complet">------</span>
+                    <button id="copyRoomCodeBtn" class="copy-code-btn" title="Copier le code">📋</button>
+                    <button id="leaveRoomBtn" class="leave-room-btn" title="Quitter la salle">❌</button>
                 </div>
             </div>
             <!-- Barre de recherche -->

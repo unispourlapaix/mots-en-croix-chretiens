@@ -4521,11 +4521,15 @@ body {
 }
 
 .current-room-info .room-code {
-    font-size: 18px;
+    font-size: 12px;
     font-weight: 700;
     color: #667eea;
-    letter-spacing: 3px;
+    letter-spacing: 0.5px;
     font-family: monospace;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .leave-room-btn {
@@ -4541,6 +4545,23 @@ body {
 
 .leave-room-btn:hover {
     background: #ff79b3;
+    transform: scale(1.1);
+}
+
+.copy-code-btn {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    margin-right: 5px;
+}
+
+.copy-code-btn:hover {
+    background: #5568d3;
     transform: scale(1.1);
 }
 
