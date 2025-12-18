@@ -63,8 +63,16 @@ class AuthSystem {
                 // Fermer le modal d'auth
                 this.hideAuthModal();
 
-                // NE PAS ouvrir automatiquement le chat après authentification
-                // L'utilisateur peut l'ouvrir manuellement via la bulle de chat
+                // Rouvrir la bulle de chat si elle était minimisée
+                const chatBubbleBody = document.getElementById('chatBubbleBody');
+                const toggleBtn = document.getElementById('toggleChatBubble');
+                if (chatBubbleBody && chatBubbleBody.style.display === 'none') {
+                    chatBubbleBody.style.display = '';
+                    if (toggleBtn) {
+                        toggleBtn.textContent = '−';
+                    }
+                }
+                
                 console.log('✅ Connexion réussie - Menu fermé');
             } else {
                 // Utilisateur déconnecté
