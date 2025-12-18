@@ -3187,9 +3187,9 @@ class ChristianCrosswordGame {
         const modal = document.getElementById('menuModal');
         modal.classList.remove('hidden');
         
-        // Basculer vers l'onglet Connexion
+        // Basculer vers l'onglet Settings par défaut
         if (window.menuTabSystem) {
-            window.menuTabSystem.switchTab('connexion');
+            window.menuTabSystem.switchTab('settings');
         }
         
         // Minimiser la bulle de chat
