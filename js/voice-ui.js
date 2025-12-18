@@ -241,14 +241,22 @@ class VoiceUI {
 
         const inRoom = !!this.chatSystem.roomId;
         const inVoice = this.voiceSystem?.isInVoiceRoom;
+        
+        // Debug
+        console.log('🔍 Voice availability check:', {
+            roomId: this.chatSystem.roomId,
+            inRoom,
+            inVoice,
+            hasConnections: this.chatSystem.connections?.size > 0
+        });
 
         if (inVoice) {
             // Déjà connecté au vocal - ne rien changer (géré par handleVoiceJoined)
             return;
-        } else if (inRoom && !inVoice) {
+        } else if (inRoom) {
             this.elements.status.innerHTML = '<p class="text-success">✅ Room active - Vocal disponible</p>';
             this.elements.buttons.style.display = 'block';
-        } else if (!inRoom) {
+        } else {
             this.elements.status.innerHTML = '<p class="text-muted">Créez ou rejoignez une room de chat pour activer le vocal</p>';
             this.elements.buttons.style.display = 'none';
         }
