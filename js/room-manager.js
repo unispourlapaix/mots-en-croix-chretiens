@@ -259,6 +259,17 @@ class RoomManager {
     }
 
     openConnexionTab() {
+        // Fermer la bulle de chat flottante
+        const chatBubble = document.getElementById('chatBubble');
+        const chatBubbleBody = document.getElementById('chatBubbleBody');
+        if (chatBubble && chatBubbleBody) {
+            chatBubbleBody.style.display = 'none';
+            const toggleBtn = document.getElementById('toggleChatBubble');
+            if (toggleBtn) {
+                toggleBtn.textContent = '+';
+            }
+        }
+        
         // Ouvrir le menu principal
         const menuModal = document.getElementById('menuModal');
         if (menuModal) {

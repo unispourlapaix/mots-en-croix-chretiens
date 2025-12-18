@@ -125,24 +125,18 @@ class ChatUI {
             }
 
             if (success) {
-                this.chatSystem.showMessage('✅ Connecté à la partie!', 'system');
+                this.chatSystem.showMessage('✅ Connecté à la room!', 'system');
                 
-                // Fermer le menu modal
-                const menuModal = document.getElementById('menuModal');
-                if (menuModal) {
-                    menuModal.classList.add('hidden');
+                // NE PAS fermer le menu, rester sur l'onglet Chat
+                // L'utilisateur peut voir les connectés et discuter
+                
+                // Afficher le chat SMS
+                const chatSmsContainer = document.getElementById('chatSmsContainer');
+                if (chatSmsContainer) {
+                    chatSmsContainer.classList.remove('hidden');
                 }
                 
-                // Retourner au jeu si pas encore démarré
-                const startScreen = document.getElementById('startScreen');
-                const gameScreen = document.getElementById('gameScreen');
-                if (startScreen && !startScreen.classList.contains('hidden')) {
-                    // Le jeu n'a pas encore démarré, on peut rester sur l'écran de départ
-                    // L'utilisateur cliquera sur Jouer quand il est prêt
-                } else if (gameScreen && gameScreen.classList.contains('hidden')) {
-                    // Si le jeu est caché, l'afficher
-                    gameScreen.classList.remove('hidden');
-                }
+                console.log('✅ Room rejointe avec succès:', roomCode);
             }
         } catch (error) {
             console.error('Erreur connexion room:', error);
