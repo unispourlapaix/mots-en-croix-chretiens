@@ -128,6 +128,9 @@ class RoomManager {
             document.getElementById('joinRoomBtn').disabled = true;
             document.getElementById('roomCodeInput').disabled = true;
             
+            // Auto-joindre le vocal après création de la salle
+            this.autoJoinVoice();
+            
         } catch (error) {
             console.error('Erreur création salle:', error);
             alert('❌ Erreur: ' + error.message);
@@ -192,6 +195,9 @@ class RoomManager {
             document.getElementById('joinRoomBtn').disabled = true;
             roomCodeInput.disabled = true;
             roomCodeInput.value = '';
+            
+            // Auto-joindre le vocal après jonction de la salle
+            this.autoJoinVoice();
             
         } catch (error) {
             console.error('Erreur rejoindre salle:', error);
@@ -323,6 +329,42 @@ class RoomManager {
         }
         
         console.log('👤 Ouverture onglet connexion');
+    }
+
+    /**
+     * Auto-joindre le chat vocal après création/jonction de salle
+     */
+    async autoJoinVoice() {
+        // Attendre un peu que la salle soit bien établie
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Vérifier que le système vocal existe
+        if (!window.voiceSystem) {
+            console.log('⚠️ Système vocal non disponible');
+            return;
+        }
+
+        // Vérifier que le chat système a une room active
+        if (!window.simpleChatSystem?.roomId) {
+            console.log('⚠️ Pas de room active pour le vocal');
+            return;
+        }
+
+        try {
+            console.log('🎤 Auto-connexion au vocal...');
+            await window.voiceSystem.joinVoiceRoom();
+            console.log('✅ Vocal activé automatiquement');
+        } catch (error) {
+            // Ne pas bloquer si l'utilisateur refuse le micro
+            console.log('ℹ️ Vocal non activé:', error.message);
+            
+            // Afficher un message discret
+            if (window.simpleChatSystem) {
+                window.simpleChatSystem.sendSystemMessage(
+                    '🎤 Vocal disponible ! Activez votre micro depuis le menu si besoin.'
+                );
+            }
+        }
     }
 }
 

@@ -3341,32 +3341,67 @@ body {
     color: white;
     font-size: 11px;
     font-weight: bold;
+    border-radius: 12px 12px 0 0;
 }
 
 .chat-sms-title {
     font-size: 12px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
-.chat-sms-level {
+.voice-status-indicator {
+    display: inline-block;
+    animation: voicePulse 2s ease-in-out infinite;
     font-size: 11px;
-    padding: 2px 8px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
 }
 
-.chat-sms-score {
-    font-size: 11px;
-    padding: 2px 8px;
+@keyframes voicePulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+.chat-sms-participants-list {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    flex: 1;
+    overflow-x: auto;
+    max-width: 60%;
+    padding: 2px 0;
+}
+
+.chat-sms-participant {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 6px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+.chat-sms-participant.me {
     background: rgba(255, 215, 0, 0.3);
-    border-radius: 10px;
+    font-weight: bold;
 }
 
-.chat-sms-participants {
-    font-size: 11px;
-    margin-right: 8px;
+.chat-sms-participant .participant-name {
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.chat-sms-close {
+.chat-sms-close-btn {
     background: none;
     border: none;
     color: white;
@@ -3378,9 +3413,10 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
-.chat-sms-close:hover {
+.chat-sms-close-btn:hover {
     opacity: 0.8;
 }
 
@@ -3488,6 +3524,57 @@ body {
     margin-bottom: 8px;
     position: relative;
     z-index: 150;
+}
+
+/* Contrôles vocaux du chat SMS */
+.chat-sms-voice-controls {
+    display: flex;
+    gap: 6px;
+    padding: 6px 8px;
+    background: linear-gradient(135deg, rgba(255, 105, 180, 0.15), rgba(162, 155, 254, 0.15));
+    border-bottom: 2px solid rgba(255, 105, 180, 0.3);
+    justify-content: center;
+    align-items: center;
+}
+
+.chat-sms-voice-btn {
+    background: linear-gradient(135deg, #ff69b4, #ff85c1);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0;
+    box-shadow: 0 2px 8px rgba(255, 105, 180, 0.3);
+    transition: all 0.2s ease;
+}
+
+.chat-sms-voice-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 3px 12px rgba(255, 105, 180, 0.5);
+}
+
+.chat-sms-voice-btn:active {
+    transform: scale(0.95);
+}
+
+.chat-sms-voice-btn.danger {
+    background: linear-gradient(135deg, #ff6b6b, #ff8787);
+}
+
+.chat-sms-voice-btn.muted {
+    background: linear-gradient(135deg, #95a5a6, #b2bec3);
+    opacity: 0.7;
+}
+
+.chat-sms-voice-btn.deafened {
+    background: linear-gradient(135deg, #95a5a6, #b2bec3);
+    opacity: 0.7;
 }
 
 .chat-sms-input {

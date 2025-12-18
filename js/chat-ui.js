@@ -208,6 +208,23 @@ class ChatUI {
         if (!this.chatSmsParticipants || !this.chatSystem) return;
         const count = this.chatSystem.getPlayerCount();
         this.chatSmsParticipants.textContent = `${count} 👥`;
+        
+        // Mettre à jour la liste des participants
+        this.updateSmsParticipantsList();
+    }
+
+    updateSmsParticipantsList() {
+        const listEl = document.getElementById('chatSmsParticipantsList');
+        if (!listEl || !this.chatSystem) return;
+
+        const participants = this.chatSystem.getParticipants();
+        
+        listEl.innerHTML = participants.map(p => `
+            <div class="chat-sms-participant ${p.isMe ? 'me' : ''}" title="${p.username}">
+                <span style="color: ${p.color};">●</span>
+                <span class="participant-name">${p.username}</span>
+            </div>
+        `).join('');
     }
 
     updateUI() {

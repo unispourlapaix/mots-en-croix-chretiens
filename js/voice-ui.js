@@ -189,9 +189,17 @@ class VoiceUI {
             : `🎤 Connecté au salon vocal (${participantCount} participants)`;
         
         this.elements.status.innerHTML = `<p class="text-success">${statusMessage}</p>`;
+        
         // Afficher les contrôles vocaux dans le chat SMS
         if (this.elements.smsVoiceControls) {
             this.elements.smsVoiceControls.style.display = 'flex';
+        }
+        
+        // Afficher l'indicateur vocal dans l'en-tête du chat
+        const voiceIndicator = document.getElementById('voiceStatusIndicator');
+        if (voiceIndicator) {
+            voiceIndicator.style.display = 'inline';
+            voiceIndicator.title = 'Vocal actif';
         }
         
         this.elements.joinBtn.style.display = 'none';
@@ -215,6 +223,12 @@ class VoiceUI {
         // Cacher les contrôles vocaux dans le chat SMS
         if (this.elements.smsVoiceControls) {
             this.elements.smsVoiceControls.style.display = 'none';
+        }
+        
+        // Masquer l'indicateur vocal dans l'en-tête du chat
+        const voiceIndicator = document.getElementById('voiceStatusIndicator');
+        if (voiceIndicator) {
+            voiceIndicator.style.display = 'none';
         }
         
         this.updateMuteButton(false);

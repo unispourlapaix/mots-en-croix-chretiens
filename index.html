@@ -99,6 +99,18 @@
 
         <!-- Interface Chat simplifiée -->
         <div id="chatSmsContainer" class="chat-sms-container hidden">
+            <!-- En-tête avec participants -->
+            <div class="chat-sms-header">
+                <div class="chat-sms-title">
+                    💬 Chat
+                    <span id="voiceStatusIndicator" class="voice-status-indicator" style="display: none;">🎤</span>
+                </div>
+                <div id="chatSmsParticipantsList" class="chat-sms-participants-list">
+                    <!-- Liste générée dynamiquement -->
+                </div>
+                <button id="chatSmsClose" class="chat-sms-close-btn">✕</button>
+            </div>
+            
             <!-- Contrôles vocaux compacts -->
             <div id="chatSmsVoiceControls" class="chat-sms-voice-controls" style="display: none;">
                 <button id="chatSmsMuteBtn" class="chat-sms-voice-btn" title="Couper/Activer le micro">

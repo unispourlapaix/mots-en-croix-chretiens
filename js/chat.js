@@ -244,8 +244,11 @@ class P2PChatSystem {
 
                 this.renderMessages();
 
-                // Redistribuer aux autres peers (sauf l'émetteur)
-                this.redistributeMessage(data, fromPeerId);
+                // Redistribuer uniquement si on a plus de 2 participants (mesh network)
+                // Avec 2 participants, pas besoin de redistribuer (connexion directe)
+                if (this.connections.size > 1) {
+                    this.redistributeMessage(data, fromPeerId);
+                }
             }
 
         } else if (data.type === 'history') {
@@ -428,6 +431,41 @@ class P2PChatSystem {
             const count = this.connections.size + 1; // +1 pour soi-même
             countEl.textContent = `${count} 👥`;
         }
+        
+        // Mettre à jour aussi l'interface SMS
+        if (window.chatUI) {
+            window.chatUI.updateSmsParticipantCount();
+        }
+    }
+
+    // Obtenir le nombre de joueurs connectés
+    getPlayerCount() {
+        return this.connections.size + 1; // +1 pour soi-même
+    }
+
+    // Obtenir la liste des participants (pour affichage dans le chat volant)
+    getParticipants() {
+        const participants = [
+            {
+                peerId: 'me',
+                username: this.username,
+                color: this.userColor,
+                isMe: true
+            }
+        ];
+
+        this.connections.forEach((conn, peerId) => {
+            if (conn.metadata) {
+                participants.push({
+                    peerId: peerId,
+                    username: conn.metadata.username || 'Utilisateur',
+                    color: conn.metadata.color || '#999',
+                    isMe: false
+                });
+            }
+        });
+
+        return participants;
     }
 
     // Ouvrir le chat (via menu modal et onglet chat)
