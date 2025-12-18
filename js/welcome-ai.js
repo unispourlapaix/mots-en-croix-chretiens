@@ -158,9 +158,23 @@ class WelcomeAI {
             return false;
         }
         
+        // Vérifier qu'une course est active
+        if (!window.multiplayerRace.isRaceMode) {
+            this.sendChatMessage(`${this.name} : Démarre d'abord une course avec le bouton 🏁 ! 😊`, 'system');
+            return false;
+        }
+        
         this.isPlaying = true;
         this.score = 0;
         this.wordsFound = [];
+        
+        // Annoncer mon arrivée dans la course
+        if (window.multiplayerRace.isRaceMode) {
+            window.multiplayerRace.receiveProgress(this.name, 'start', {
+                startTime: Date.now(),
+                duration: window.multiplayerRace.raceDuration
+            });
+        }
         
         // S'ajouter comme joueur disponible dans le système de présence
         if (window.presenceSystem) {
@@ -173,7 +187,7 @@ class WelcomeAI {
             });
         }
         
-        this.sendChatMessage(`${this.avatar} ${this.name} : Allons-y ! Je suis prête pour la course ! 🏁`, 'system');
+        this.sendChatMessage(`${this.avatar} Allons-y ! Je suis prête pour la course ! 🏁`, 'system');
         
         // Commencer à simuler le jeu
         this.startPlayingRace();
@@ -189,7 +203,7 @@ class WelcomeAI {
             window.presenceSystem.onlinePlayers.delete('bot-unisona');
         }
         
-        this.sendChatMessage(`${this.avatar} ${this.name} : Bonne partie ! Dieu te bénisse ! 💕`, 'system');
+        this.sendChatMessage(`${this.avatar} Bonne partie ! Dieu te bénisse ! 💕`, 'system');
     }
     
     // Simuler le jeu en course
@@ -215,11 +229,18 @@ class WelcomeAI {
     makeRaceProgress() {
         if (!this.currentGame || !window.multiplayerRace) return;
         
+        // Vérifier que la course est active
+        if (!window.multiplayerRace.isRaceMode) {
+            console.log('🏁 Course non active, Unisona arrête de jouer');
+            this.leaveRace();
+            return;
+        }
+        
         // Trouver un mot au hasard parmi ceux du niveau
         const levelData = window.gameDataManager?.getLevelData(this.currentGame.currentLevel);
         if (!levelData || !levelData.words) return;
         
-        // Sélectionner un mot que Sophie n'a pas encore trouvé
+        // Sélectionner un mot que Unisona n'a pas encore trouvé
         const availableWords = levelData.words.filter(w => !this.wordsFound.includes(w.word));
         if (availableWords.length === 0) {
             // Tous les mots trouvés, terminer
@@ -235,16 +256,25 @@ class WelcomeAI {
         const wordScore = randomWord.word.length * 10 + 50; // 10pts/lettre + 50pts bonus
         this.score += wordScore;
         
+        // Calculer la progression
+        const progress = (this.wordsFound.length / levelData.words.length) * 100;
+        
+        // Calculer les lettres totales et correctes
+        const totalLetters = levelData.words.reduce((sum, w) => sum + w.word.length, 0);
+        const lettersCorrect = this.wordsFound.reduce((sum, word) => sum + word.length, 0);
+        
         // Envoyer la progression via le système de course
         if (window.multiplayerRace && window.multiplayerRace.isRaceMode) {
-            // Simuler un événement de progression
-            const fakeProgressData = {
-                username: this.name,
-                level: this.currentGame.currentLevel,
-                progress: (this.wordsFound.length / levelData.words.length) * 100,
+            // Simuler la réception d'une progression comme si c'était un joueur distant
+            window.multiplayerRace.receiveProgress(this.name, 'word', {
+                word: randomWord.word,
                 score: this.score,
-                avatar: this.avatar
-            };
+                raceScore: this.score, // Pour un bot, score = raceScore
+                wordsCompleted: this.wordsFound.length,
+                lettersCorrect: lettersCorrect,
+                totalLetters: totalLetters,
+                percentage: progress
+            });
             
             // Afficher la progression dans le chat
             if (Math.random() < 0.3) { // 30% de chance de commenter
@@ -255,7 +285,7 @@ class WelcomeAI {
                     "Continue, tu progresses bien ! 💝"
                 ];
                 const randomComment = comments[Math.floor(Math.random() * comments.length)];
-                this.sendChatMessage(`${this.avatar} ${this.name} : ${randomComment}`, 'system');
+                this.sendChatMessage(`${randomComment}`, 'system');
             }
         }
     }
