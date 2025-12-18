@@ -387,36 +387,92 @@ class WelcomeAI {
                 percentage: progress
             });
             
-            // Messages de réussite variés selon la difficulté du mot
-            if (Math.random() < 0.4) { // 40% de chance de commenter
+            // Décider du type de message à envoyer
+            const messageChance = Math.random();
+            
+            if (messageChance < 0.5) { // 50% de chance de commenter
                 let comment;
-                if (randomWord.word.length <= 4) {
-                    // Mots courts - faciles
-                    const easyComments = [
-                        "Facile celui-là ! 😊",
-                        "Trouvé rapidement ! ✨",
-                        "Ah, ce mot était simple ! 💫"
+                const messageType = Math.random();
+                
+                // 40% messages normaux, 25% rigolos, 20% graves, 15% "tu savais que"
+                if (messageType < 0.4) {
+                    // MESSAGES NORMAUX selon difficulté du mot
+                    if (randomWord.word.length <= 4) {
+                        const easyComments = [
+                            "Facile celui-là ! 😊",
+                            "Trouvé rapidement ! ✨",
+                            "Ah, ce mot était simple ! 💫"
+                        ];
+                        comment = easyComments[Math.floor(Math.random() * easyComments.length)];
+                    } else if (randomWord.word.length <= 7) {
+                        const mediumComments = [
+                            "Pas mal ! 💪",
+                            "J'adore ce mot ! ✨",
+                            "Continue, tu progresses bien ! 💝",
+                            "On avance ensemble ! 🙏"
+                        ];
+                        comment = mediumComments[Math.floor(Math.random() * mediumComments.length)];
+                    } else {
+                        const hardComments = [
+                            "Ouf ! Ce mot était difficile ! 😅",
+                            "J'ai dû réfléchir pour celui-là ! 🤔",
+                            "Quel mot compliqué ! Mais j'ai réussi ! 💪",
+                            "Celui-là m'a donné du fil à retordre ! ✨"
+                        ];
+                        comment = hardComments[Math.floor(Math.random() * hardComments.length)];
+                    }
+                    
+                } else if (messageType < 0.65) {
+                    // MESSAGES RIGOLOS (25%)
+                    const funnyComments = [
+                        "Haha ! Mon cerveau fait 'ding' ! 🔔😄",
+                        "Trop facile, je pourrais le faire les yeux fermés ! 😎 (mais je garde les yeux ouverts 👀)",
+                        "Mon neurone vient de danser la salsa ! 💃✨",
+                        "BINGO ! J'ai trouvé avant que mon café refroidisse ! ☕😂",
+                        "Woohoo ! Je mérite une médaille en chocolat ! 🍫🏅",
+                        "Eurêka ! Archimède serait fier ! 🛁😄",
+                        "Trop stylé ce mot ! Je le mets dans ma collection ! 📚✨",
+                        "LOL, même mon chat aurait trouvé celui-là ! 🐱😹",
+                        "Ça roule ma poule ! 🐔🎉",
+                        "Hop hop hop ! Un mot de plus dans ma besace ! 🎒😊"
                     ];
-                    comment = easyComments[Math.floor(Math.random() * easyComments.length)];
-                } else if (randomWord.word.length <= 7) {
-                    // Mots moyens
-                    const mediumComments = [
-                        "Pas mal ! 💪",
-                        "J'adore ce mot ! ✨",
-                        "Continue, tu progresses bien ! 💝",
-                        "On avance ensemble ! 🙏"
+                    comment = funnyComments[Math.floor(Math.random() * funnyComments.length)];
+                    
+                } else if (messageType < 0.85) {
+                    // MESSAGES GRAVES/PROFONDS (20%)
+                    const seriousComments = [
+                        "Chaque mot trouvé est une victoire sur le découragement. 💪🙏",
+                        "La persévérance est la clé du succès. Continue ! 🗝️✨",
+                        "Dieu nous donne la force de surmonter chaque défi. 🙏💝",
+                        "Dans la difficulté, on découvre notre vraie force. 💪",
+                        "Chaque progrès compte, même le plus petit. 🌱",
+                        "La patience et la foi déplacent les montagnes. ⛰️🙏",
+                        "N'abandonne jamais, Dieu est avec toi. 💕",
+                        "Les victoires les plus douces sont celles qu'on a méritées. 🏆",
+                        "Crois en toi, tu es capable de grandes choses. ✨💪",
+                        "La sagesse vient de la persévérance. 📖🙏"
                     ];
-                    comment = mediumComments[Math.floor(Math.random() * mediumComments.length)];
+                    comment = seriousComments[Math.floor(Math.random() * seriousComments.length)];
+                    
                 } else {
-                    // Mots longs - difficiles
-                    const hardComments = [
-                        "Ouf ! Ce mot était difficile ! 😅",
-                        "J'ai dû réfléchir pour celui-là ! 🤔",
-                        "Quel mot compliqué ! Mais j'ai réussi ! 💪",
-                        "Celui-là m'a donné du fil à retordre ! ✨"
+                    // MESSAGES "TU SAVAIS QUE" (15%)
+                    const didYouKnowComments = [
+                        "💡 Tu savais que ? La Bible contient plus de 3000 promesses de Dieu ! 📖",
+                        "💡 Tu savais que ? Le mot 'amour' apparaît plus de 500 fois dans la Bible ! ❤️",
+                        "💡 Tu savais que ? Jésus parlait 3 langues : hébreu, araméen et grec ! 🗣️",
+                        "💡 Tu savais que ? Le livre le plus court de la Bible est 2 Jean avec 13 versets ! 📚",
+                        "💡 Tu savais que ? La Bible a été traduite en plus de 3000 langues ! 🌍",
+                        "💡 Tu savais que ? Le mot 'joie' apparaît 242 fois dans la Bible ! 😊",
+                        "💡 Tu savais que ? Psaume 117 est le chapitre le plus court de la Bible ! 📖",
+                        "💡 Tu savais que ? La prière peut réduire le stress de 50% ! 🙏✨",
+                        "💡 Tu savais que ? Le nom de Jésus signifie 'Dieu sauve' en hébreu ! ✝️",
+                        "💡 Tu savais que ? La gratitude améliore notre santé mentale ! 💝🧠",
+                        "💡 Tu savais que ? Sourire active 17 muscles et libère des endorphines ! 😊✨",
+                        "💡 Tu savais que ? La foi peut augmenter la résilience face aux épreuves ! 💪🙏"
                     ];
-                    comment = hardComments[Math.floor(Math.random() * hardComments.length)];
+                    comment = didYouKnowComments[Math.floor(Math.random() * didYouKnowComments.length)];
                 }
+                
                 this.sendChatMessage(comment, 'system');
             }
         }
