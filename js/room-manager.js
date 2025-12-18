@@ -67,9 +67,9 @@ class RoomManager {
                 }
             });
             
-            // Format automatique en majuscules
+            // Supprimer espaces automatiquement (peerID sensibles à la casse, ne pas convertir)
             roomCodeInput.addEventListener('input', (e) => {
-                e.target.value = e.target.value.toUpperCase();
+                e.target.value = e.target.value.trim();
             });
         }
         

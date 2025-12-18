@@ -160,7 +160,7 @@ class PresenceSystem {
             }
         }
         
-        roomCode = roomCode.toUpperCase().trim();
+        roomCode = roomCode.trim(); // Ne pas convertir en majuscules (peerID sensibles à la casse)
         
         // Validation minimale (le code est maintenant un peerID)
         if (roomCode.length < 3) {
