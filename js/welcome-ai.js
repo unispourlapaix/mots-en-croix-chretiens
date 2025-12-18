@@ -268,8 +268,7 @@ class WelcomeAI {
         this.score = 0;
         this.wordsFound = [];
         
-        // Annoncer mon arrivée dans la course avec la difficulté
-        const difficultyInfo = this.getDifficulty();
+        // Annoncer mon arrivée dans la course
         if (window.multiplayerRace.isRaceMode) {
             window.multiplayerRace.receiveProgress(this.name, 'start', {
                 startTime: Date.now(),
