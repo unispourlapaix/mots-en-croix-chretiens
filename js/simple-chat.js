@@ -205,8 +205,15 @@ class SimpleChatSystem {
         try {
             this.showMessage('🔗 Tentative de connexion...', 'system');
             
+            // Récupérer la couleur du chatSystem si disponible
+            const userColor = window.chatSystem?.userColor || '#ff69b4';
+            
             const conn = this.peer.connect(roomCode, {
-                reliable: true
+                reliable: true,
+                metadata: {
+                    username: this.currentUser,
+                    color: userColor
+                }
             });
             
             // Timeout de connexion

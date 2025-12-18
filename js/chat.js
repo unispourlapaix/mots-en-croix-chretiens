@@ -71,8 +71,16 @@ class P2PChatSystem {
         return this.userColors[Math.floor(Math.random() * this.userColors.length)];
     }
 
-    // Initialiser PeerJS
+    // Initialiser PeerJS (utilise le peer de SimpleChatSystem)
     async initPeer() {
+        // Utiliser le peer existant de SimpleChatSystem
+        if (window.simpleChatSystem && window.simpleChatSystem.peer) {
+            this.peer = window.simpleChatSystem.peer;
+            console.log('✅ P2PChat utilise le peer SimpleChatSystem:', this.peer.id);
+            return this.peer.id;
+        }
+
+        // Fallback: créer son propre peer si SimpleChatSystem n'est pas disponible
         if (this.peer) return; // Déjà initialisé
 
         return new Promise((resolve, reject) => {
@@ -182,36 +190,22 @@ class P2PChatSystem {
     handleIncomingConnection(conn) {
         const peerId = conn.peer;
 
-        // Stocker la connexion
-        this.connections.set(peerId, conn);
+        // Stocker la connexion (si pas déjà stockée)
+        if (!this.connections.has(peerId)) {
+            this.connections.set(peerId, conn);
+            console.log(`✅ P2PChat: Connexion enregistrée: ${peerId}`);
+        }
 
-        console.log(`✅ Nouvelle connexion: ${peerId}`);
-
-        // Envoyer l'historique des messages au nouveau peer
-        if (this.isHost && this.messages.length > 0) {
-            conn.on('open', () => {
-                conn.send({
-                    type: 'history',
-                    messages: this.messages
-                });
+        // Envoyer l'historique des messages au nouveau peer (si host et connexion ouverte)
+        if (this.isHost && this.messages.length > 0 && conn.open) {
+            conn.send({
+                type: 'history',
+                messages: this.messages
             });
         }
 
-        // Écouter les messages
-        conn.on('data', (data) => {
-            this.handleIncomingMessage(data, peerId);
-        });
-
-        // Gérer la déconnexion
-        conn.on('close', () => {
-            this.connections.delete(peerId);
-            console.log(`❌ Déconnexion: ${peerId}`);
-
-            const username = conn.metadata?.username || 'Utilisateur';
-            this.sendSystemMessage(`${username} a quitté le chat 👋`);
-
-            this.updateParticipantCount();
-        });
+        // Note: Les listeners conn.on('data') et conn.on('close') sont gérés par SimpleChatSystem
+        // pour éviter les doublons de messages
 
         // Mettre à jour le compteur
         this.updateParticipantCount();
@@ -255,7 +249,21 @@ class P2PChatSystem {
             this.renderMessages();
 
         } else if (data.type === 'join') {
-            // Quelqu'un a rejoint
+            // Quelqu'un a rejoint - mettre à jour les métadonnées de la connexion
+            const conn = this.connections.get(fromPeerId);
+            if (conn) {
+                if (!conn.metadata) {
+                    conn.metadata = {};
+                }
+                conn.metadata.username = data.username || 'Utilisateur';
+                conn.metadata.color = data.color || '#999';
+                console.log(`👥 ${data.username} a rejoint le chat`);
+                
+                // Mettre à jour la liste des participants
+                if (window.chatUI) {
+                    window.chatUI.updateSmsParticipantCount();
+                }
+            }
             this.sendSystemMessage(`${data.username} a rejoint le chat 🙏`);
 
         } else if (data.type === 'system') {
