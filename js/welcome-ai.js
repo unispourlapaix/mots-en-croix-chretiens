@@ -448,31 +448,31 @@ class WelcomeAI {
             if (messageType < 0.4) {
                 // MESSAGES NORMAUX selon difficulté du mot
                 if (randomWord.word.length <= 4) {
-                        const easyComments = [
-                            "Facile celui-là ! 😊",
-                            "Trouvé rapidement ! ✨",
-                            "Ah, ce mot était simple ! 💫"
-                        ];
-                        comment = easyComments[Math.floor(Math.random() * easyComments.length)];
-                    } else if (randomWord.word.length <= 7) {
-                        const mediumComments = [
-                            "Pas mal ! 💪",
-                            "J'adore ce mot ! ✨",
-                            "Continue, tu progresses bien ! 💝",
-                            "On avance ensemble ! 🙏"
-                        ];
-                        comment = mediumComments[Math.floor(Math.random() * mediumComments.length)];
-                    } else {
-                        const hardComments = [
-                            "Ouf ! Ce mot était difficile ! 😅",
-                            "J'ai dû réfléchir pour celui-là ! 🤔",
-                            "Quel mot compliqué ! Mais j'ai réussi ! 💪",
-                            "Celui-là m'a donné du fil à retordre ! ✨"
-                        ];
-                        comment = hardComments[Math.floor(Math.random() * hardComments.length)];
-                    }
-                    
-                } else if (messageType < 0.65) {
+                    const easyComments = [
+                        "Facile celui-là ! 😊",
+                        "Trouvé rapidement ! ✨",
+                        "Ah, ce mot était simple ! 💫"
+                    ];
+                    comment = easyComments[Math.floor(Math.random() * easyComments.length)];
+                } else if (randomWord.word.length <= 7) {
+                    const mediumComments = [
+                        "Pas mal ! 💪",
+                        "J'adore ce mot ! ✨",
+                        "Continue, tu progresses bien ! 💝",
+                        "On avance ensemble ! 🙏"
+                    ];
+                    comment = mediumComments[Math.floor(Math.random() * mediumComments.length)];
+                } else {
+                    const hardComments = [
+                        "Ouf ! Ce mot était difficile ! 😅",
+                        "J'ai dû réfléchir pour celui-là ! 🤔",
+                        "Quel mot compliqué ! Mais j'ai réussi ! 💪",
+                        "Celui-là m'a donné du fil à retordre ! ✨"
+                    ];
+                    comment = hardComments[Math.floor(Math.random() * hardComments.length)];
+                }
+                
+            } else if (messageType < 0.65) {
                     // MESSAGES RIGOLOS (25%)
                     const funnyComments = [
                         "Haha ! Mon cerveau fait 'ding' ! 🔔😄",
@@ -525,7 +525,6 @@ class WelcomeAI {
                 
                 this.sendChatMessage(comment, 'system');
             }
-        }
     }
     
     // Être disponible pour rejoindre des courses
