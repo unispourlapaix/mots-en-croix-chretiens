@@ -79,6 +79,52 @@ class WelcomeAI {
         
         // Afficher des conseils périodiquement pendant le jeu
         this.startTipScheduler();
+        
+        // Écouter le démarrage du jeu pour activation automatique en solo
+        this.setupAutoJoin();
+    }
+    
+    // Configurer l'auto-join en mode solo
+    setupAutoJoin() {
+        // Écouter l'événement de démarrage du jeu
+        document.addEventListener('gameStarted', () => {
+            // Attendre un peu que le jeu soit bien lancé
+            setTimeout(() => {
+                // Vérifier si on est en mode solo (pas de course multijoueur active)
+                const isSoloMode = !window.multiplayerRace || !window.multiplayerRace.isRaceMode;
+                
+                if (isSoloMode && !this.isPlaying) {
+                    console.log('🤖 Mode solo détecté - Activation automatique d\'Unisona en mode lent');
+                    
+                    // Passer en mode lent (facile)
+                    this.setDifficulty('lent');
+                    
+                    // Message d'activation
+                    this.sendChatMessage('Je te rejoins pour t\'accompagner ! 🐢 (Mode facile)', 'system');
+                    
+                    // Rejoindre la partie en mode solo
+                    this.joinSoloMode();
+                }
+            }, 2000); // Attendre 2 secondes après le démarrage
+        });
+    }
+    
+    // Rejoindre en mode solo (sans course multijoueur)
+    joinSoloMode() {
+        if (!window.game || !window.game.gameStarted) {
+            console.log('⚠️ Jeu pas encore démarré');
+            return false;
+        }
+        
+        this.isPlaying = true;
+        this.score = 0;
+        this.wordsFound = [];
+        
+        console.log('✅ Unisona rejoint en mode solo facile 🐢');
+        
+        // Commencer à jouer
+        this.startPlayingRace();
+        return true;
     }
     
     // Changer la difficulté
@@ -314,11 +360,15 @@ class WelcomeAI {
     
     // Simuler une progression en course
     makeRaceProgress() {
-        if (!this.currentGame || !window.multiplayerRace) return;
+        if (!this.currentGame) return;
         
-        // Vérifier que la course est active
-        if (!window.multiplayerRace.isRaceMode) {
-            console.log('🏁 Course non active, Unisona arrête de jouer');
+        // En mode course : vérifier que la course est active
+        if (window.multiplayerRace && window.multiplayerRace.isRaceMode) {
+            // Mode course multijoueur - vérifier course active
+            // (la logique existante continue)
+        } else if (!window.game || !window.game.gameStarted) {
+            // En mode solo : vérifier que le jeu est actif
+            console.log('🏁 Jeu non actif, Unisona arrête de jouer');
             this.leaveRace();
             return;
         }
@@ -374,7 +424,7 @@ class WelcomeAI {
         const totalLetters = levelData.words.reduce((sum, w) => sum + w.word.length, 0);
         const lettersCorrect = this.wordsFound.reduce((sum, word) => sum + word.length, 0);
         
-        // Envoyer la progression via le système de course
+        // Envoyer la progression via le système de course SI en mode multijoueur
         if (window.multiplayerRace && window.multiplayerRace.isRaceMode) {
             // Simuler la réception d'une progression comme si c'était un joueur distant
             window.multiplayerRace.receiveProgress(this.name, 'word', {
@@ -386,18 +436,19 @@ class WelcomeAI {
                 totalLetters: totalLetters,
                 percentage: progress
             });
+        }
+        
+        // Messages variés (en mode course ET en mode solo)
+        const messageChance = Math.random();
+        
+        if (messageChance < 0.5) { // 50% de chance de commenter
+            let comment;
+            const messageType = Math.random();
             
-            // Décider du type de message à envoyer
-            const messageChance = Math.random();
-            
-            if (messageChance < 0.5) { // 50% de chance de commenter
-                let comment;
-                const messageType = Math.random();
-                
-                // 40% messages normaux, 25% rigolos, 20% graves, 15% "tu savais que"
-                if (messageType < 0.4) {
-                    // MESSAGES NORMAUX selon difficulté du mot
-                    if (randomWord.word.length <= 4) {
+            // 40% messages normaux, 25% rigolos, 20% graves, 15% "tu savais que"
+            if (messageType < 0.4) {
+                // MESSAGES NORMAUX selon difficulté du mot
+                if (randomWord.word.length <= 4) {
                         const easyComments = [
                             "Facile celui-là ! 😊",
                             "Trouvé rapidement ! ✨",
