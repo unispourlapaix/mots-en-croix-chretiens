@@ -180,11 +180,28 @@ class PresenceSystem {
         // Lire le registre pour trouver le peer ID de l'hôte
         const roomDataStr = localStorage.getItem(`room_${roomCode}`);
         if (!roomDataStr) {
+            console.error('❌ Salle non trouvée dans localStorage:', roomCode);
+            console.log('💡 Salles disponibles:', Object.keys(localStorage).filter(k => k.startsWith('room_')));
             throw new Error(`Salle ${roomCode} introuvable. L'hôte doit d'abord créer la salle.`);
         }
         
         const roomData = JSON.parse(roomDataStr);
         const hostPeerId = roomData.hostPeerId;
+        
+        // Vérifier si on est l'hôte
+        const myPeerId = window.simpleChatSystem?.peer?.id;
+        if (hostPeerId === myPeerId) {
+            console.warn('⚠️ Vous êtes l\'hôte de cette salle, pas besoin de la rejoindre !');
+            this.currentRoomCode = roomCode;
+            this.isRoomHost = true;
+            
+            // Émettre l'événement roomJoined quand même
+            window.dispatchEvent(new CustomEvent('roomJoined', {
+                detail: { roomCode, isHost: true }
+            }));
+            
+            return; // Ne pas se connecter à soi-même
+        }
         
         this.currentRoomCode = roomCode;
         this.isRoomHost = false;
