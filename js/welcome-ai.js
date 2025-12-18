@@ -30,7 +30,17 @@ class WelcomeAI {
             "🛡️ Prudence : Toute demande d'argent ici est suspecte - signale-la immédiatement",
             "👨‍👩‍👧‍👦 Protection : Signale tout comportement suspect envers les enfants",
             "🤝 Sagesse : Pour les rencontres : lieu public, jamais seul(e), préviens quelqu'un",
-            "⏰ Patience : Prends le temps de connaître vraiment les personnes en ligne"
+            "⏰ Patience : Prends le temps de connaître vraiment les personnes en ligne",
+            "📸 Protection : Ne partage jamais de photos privées en ligne. Un ami s'est confié après avoir été victime de chantage - sa famille et les autorités l'ont aidé. Tu peux être protégé(e) aussi ! 💪",
+            "🚫 Cyberharcèlement : Si quelqu'un te met mal à l'aise, bloque-le immédiatement et parle à un adulte de confiance",
+            "👤 Identité : Ne révèle jamais ton nom complet, adresse, école ou numéro de téléphone en ligne",
+            "🎭 Méfiance : Les gens ne sont pas toujours qui ils prétendent être. Reste prudent(e) avec les nouveaux contacts",
+            "💬 Parler aide : Si quelque chose te dérange en ligne, parle-en à tes parents ou un adulte de confiance. Tu n'es jamais seul(e) !",
+            "🔐 Mots de passe : Ne partage JAMAIS tes mots de passe, même avec des 'amis' en ligne",
+            "📱 Captures d'écran : Si quelqu'un te menace ou t'insulte, fais des captures d'écran et signale aux autorités",
+            "👨‍👩‍👧 Parents : Parler à tes parents de tes activités en ligne, c'est normal et ça te protège !",
+            "🗣️ Brise le silence : Ne garde pas pour toi les intimidations ! Les manipulateurs utilisent la peur pour voler ta paix. Parle, tu seras protégé(e) ! 💪✨",
+            "🛡️ Protège les autres : Si tu vois quelqu'un en danger ou harcelé, signale-le ! Protéger les autres est aussi notre devoir 💙"
         ];
         this.welcomeMessages = [
             "Bienvenue dans Mots En Croix Chrétiens ! 🙏✨",
@@ -49,24 +59,9 @@ class WelcomeAI {
     }
 
     showWelcomeMessage() {
-        if (this.hasWelcomed) return;
-        
-        // Attendre 3 secondes avant d'afficher le premier message (laisser le chat s'initialiser)
-        setTimeout(() => {
-            this.welcomeMessages.forEach((message, index) => {
-                setTimeout(() => {
-                    this.sendChatMessage(message, 'system');
-                }, index * 2500); // 2.5 secondes entre chaque message
-            });
-            
-            // Afficher un conseil après les messages de bienvenue
-            setTimeout(() => {
-                const randomTip = this.tips[Math.floor(Math.random() * this.tips.length)];
-                this.sendChatMessage(randomTip, 'system');
-            }, this.welcomeMessages.length * 2500 + 1500);
-            
-            this.hasWelcomed = true;
-        }, 3000);
+        // Messages de bienvenue désactivés - géré dans index.html
+        // pour éviter les doublons
+        this.hasWelcomed = true;
     }
 
     startTipScheduler() {

@@ -102,7 +102,6 @@
             <!-- En-tête avec participants -->
             <div class="chat-sms-header">
                 <div class="chat-sms-title">
-                    💬 Chat
                     <span id="voiceStatusIndicator" class="voice-status-indicator" style="display: none;">🎤</span>
                 </div>
                 <div id="chatSmsParticipantsList" class="chat-sms-participants-list">
@@ -125,7 +124,7 @@
             </div>
             <div class="chat-sms-input-container">
                 <input type="text" id="chatSmsInput" class="chat-sms-input" placeholder="Écrire ici..." maxlength="100">
-                <button id="chatSmsSend" class="chat-sms-send">📤</button>
+                <button id="chatSmsSend" class="chat-sms-send">→</button>
             </div>
             <div id="chatSmsMessages" class="chat-sms-messages">
                 <!-- Messages apparaissent ici -->
@@ -581,6 +580,7 @@
                     <span class="room-label">Code:</span>
                     <span class="room-code" id="currentRoomCode" title="Cliquez pour voir le code complet">------</span>
                     <button id="copyRoomCodeBtn" class="copy-code-btn" title="Copier le code">📋</button>
+                    <button id="shareRoomLinkBtn" class="copy-code-btn" title="Partager le lien">🔗</button>
                     <button id="leaveRoomBtn" class="leave-room-btn" title="Quitter la salle">❌</button>
                 </div>
             </div>
@@ -809,7 +809,6 @@
     <script src="js/race-ui.js"></script>
     <script src="js/leaderboard.js"></script>
     <script src="js/menu-tabs.js"></script>
-    <script src="js/chat.js"></script>
     <script src="js/chat-ui.js"></script>
     <script src="js/voice-chat.js"></script>
     <script src="js/voice-ui.js"></script>

@@ -464,60 +464,99 @@ class PresenceSystem {
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            background: #ffffff;
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
             z-index: 10000;
             text-align: center;
-            min-width: 300px;
+            min-width: 320px;
+            max-width: 90vw;
         `;
         
         modal.innerHTML = `
-            <h2 style="color: #ff69b4; margin-bottom: 20px;">🏠 Salle créée !</h2>
-            <p style="margin-bottom: 15px;">Partagez ce code avec vos amis/famille :</p>
+            <h2 style="color: #333; margin-bottom: 12px; font-size: 20px; font-weight: 600;">🏠 Salle créée !</h2>
+            <p style="margin-bottom: 20px; color: #666; font-size: 14px;">Partagez ce code pour inviter vos amis</p>
             <div style="
-                font-size: 32px;
-                font-weight: bold;
-                color: #667eea;
-                background: #f0f0f0;
-                padding: 15px;
+                background: #f8f9fa;
+                padding: 16px;
                 border-radius: 10px;
                 margin: 20px 0;
-                letter-spacing: 5px;
-                font-family: monospace;
-            ">${roomCode}</div>
+                border: 2px solid #e9ecef;
+            ">
+                <code style="
+                    font-size: 15px;
+                    font-weight: 500;
+                    color: #495057;
+                    font-family: 'Courier New', monospace;
+                    word-break: break-all;
+                    line-height: 1.6;
+                ">${roomCode}</code>
+            </div>
             <button id="copyRoomCode" style="
                 background: #667eea;
                 color: white;
                 border: none;
-                padding: 12px 30px;
+                padding: 12px 24px;
                 border-radius: 8px;
                 cursor: pointer;
-                font-size: 16px;
-                margin: 10px 5px;
+                font-size: 14px;
+                font-weight: 500;
+                margin: 0 5px;
+                transition: all 0.2s;
             ">📋 Copier</button>
             <button id="closeRoomModal" style="
-                background: #ff69b4;
-                color: white;
+                background: #e9ecef;
+                color: #495057;
                 border: none;
-                padding: 12px 30px;
+                padding: 12px 24px;
                 border-radius: 8px;
                 cursor: pointer;
-                font-size: 16px;
-                margin: 10px 5px;
-            ">✅ OK</button>
+                font-size: 14px;
+                font-weight: 500;
+                margin: 0 5px;
+                transition: all 0.2s;
+            ">Fermer</button>
         `;
         
         document.body.appendChild(modal);
         
         // Copier le code
-        document.getElementById('copyRoomCode').onclick = () => {
-            navigator.clipboard.writeText(roomCode);
+        const copyBtn = document.getElementById('copyRoomCode');
+        copyBtn.onclick = async () => {
+            try {
+                await navigator.clipboard.writeText(roomCode);
+                copyBtn.textContent = '✅ Copié !';
+                copyBtn.style.background = '#10ac84';
+                setTimeout(() => {
+                    copyBtn.textContent = '📋 Copier';
+                    copyBtn.style.background = '#667eea';
+                }, 2000);
+            } catch (err) {
+                console.error('Erreur copie:', err);
+            }
         };
         
+        // Effet hover
+        copyBtn.addEventListener('mouseenter', () => {
+            copyBtn.style.transform = 'translateY(-2px)';
+            copyBtn.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.4)';
+        });
+        copyBtn.addEventListener('mouseleave', () => {
+            copyBtn.style.transform = 'translateY(0)';
+            copyBtn.style.boxShadow = 'none';
+        });
+        
+        const closeBtn = document.getElementById('closeRoomModal');
+        closeBtn.addEventListener('mouseenter', () => {
+            closeBtn.style.background = '#dee2e6';
+        });
+        closeBtn.addEventListener('mouseleave', () => {
+            closeBtn.style.background = '#e9ecef';
+        });
+        
         // Fermer modal
-        document.getElementById('closeRoomModal').onclick = () => {
+        closeBtn.onclick = () => {
             modal.remove();
         };
     }

@@ -31,8 +31,45 @@ class RoomSystem {
             });
         }
         
+        // Écouter les événements vocaux pour mettre à jour l'indicateur
+        window.addEventListener('voicejoined', () => {
+            console.log('🎤 Vocal rejoint - Mise à jour bulle');
+            this.updateChatBubble();
+        });
+        window.addEventListener('voiceleft', () => {
+            console.log('🔇 Vocal quitté - Mise à jour bulle');
+            this.updateChatBubble();
+        });
+        
         // Écouter les événements P2P
         this.setupEventListeners();
+        
+        // Vérifier si un roomId est dans l'URL pour rejoindre automatiquement
+        this.checkURLForRoomInvite();
+    }
+    
+    // Vérifier si un lien d'invitation est dans l'URL
+    checkURLForRoomInvite() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomId = urlParams.get('room');
+        
+        if (roomId && roomId.trim()) {
+            console.log('🔗 Invitation trouvée dans l\'URL:', roomId);
+            
+            // Attendre que l'utilisateur soit prêt et le système initialisé
+            setTimeout(() => {
+                if (this.chatSystem.currentUser) {
+                    console.log('📥 Tentative de rejoindre automatiquement la salle:', roomId);
+                    this.requestJoinRoom('Salle partagée', roomId.trim());
+                    
+                    // Nettoyer l'URL après
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                } else {
+                    // Réessayer si le user n'est pas encore prêt
+                    setTimeout(() => this.checkURLForRoomInvite(), 500);
+                }
+            }, 2000); // Attendre 2 secondes après le chargement
+        }
     }
 
     // Créer automatiquement ma salle
@@ -154,6 +191,41 @@ class RoomSystem {
         console.log('✅ Username mis à jour partout');
     }
 
+    // Générer un lien de partage pour la salle
+    generateShareLink() {
+        if (!this.myRoomInfo || !this.myRoomInfo.roomId) {
+            console.warn('⚠️ Pas de salle active');
+            return null;
+        }
+        
+        const baseUrl = window.location.origin + window.location.pathname;
+        const shareUrl = `${baseUrl}?room=${encodeURIComponent(this.myRoomInfo.roomId)}`;
+        
+        console.log('🔗 Lien de partage généré:', shareUrl);
+        return shareUrl;
+    }
+    
+    // Copier le lien de partage dans le presse-papiers
+    async copyShareLink() {
+        const shareLink = this.generateShareLink();
+        
+        if (!shareLink) {
+            this.chatSystem.showMessage('❌ Impossible de générer le lien', 'system');
+            return false;
+        }
+        
+        try {
+            await navigator.clipboard.writeText(shareLink);
+            this.chatSystem.showMessage('✅ Lien de partage copié !', 'system');
+            console.log('📋 Lien copié:', shareLink);
+            return true;
+        } catch (err) {
+            console.error('❌ Erreur copie:', err);
+            this.chatSystem.showMessage('❌ Impossible de copier le lien', 'system');
+            return false;
+        }
+    }
+    
     // Démarrer la diffusion périodique de présence
     startPresenceBroadcast() {
         // Annoncer immédiatement
@@ -1075,12 +1147,16 @@ class RoomSystem {
             // Afficher un badge "Vous" pour le joueur local
             const isMe = player.isMe || peerId === 'me';
             const nameDisplay = isMe ? `${player.username} <span style="color: #667eea; font-weight: bold;">(Vous)</span>` : player.username;
+            
+            // Vérifier si le joueur est en vocal
+            const isInVoice = isMe && window.voiceUI?.voiceSystem?.isInVoiceRoom;
+            const voiceBadge = isInVoice ? '<span class="voice-active-badge" title="En vocal">🎤</span>' : '';
 
             bubbleHTML += `
                 <div class="connected-player-item" data-peer-id="${peerId}">
                     <div class="player-avatar-mini">${player.avatar || '👤'}</div>
                     <div class="player-details">
-                        <div class="player-name-mini">${nameDisplay}</div>
+                        <div class="player-name-mini">${nameDisplay} ${voiceBadge}</div>
                         <div class="player-status-mini">
                             <span class="status-indicator"></span>
                             <span>${player.playerCount || 1}/${player.maxPlayers || 8}</span>

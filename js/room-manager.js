@@ -43,13 +43,29 @@ class RoomManager {
             });
         }
         
+        // Bouton partager lien
+        const shareRoomLinkBtn = document.getElementById('shareRoomLinkBtn');
+        if (shareRoomLinkBtn) {
+            shareRoomLinkBtn.addEventListener('click', async () => {
+                if (window.roomSystem) {
+                    const success = await window.roomSystem.copyShareLink();
+                    if (success) {
+                        shareRoomLinkBtn.textContent = '✅';
+                        setTimeout(() => {
+                            shareRoomLinkBtn.textContent = '🔗';
+                        }, 2000);
+                    }
+                }
+            });
+        }
+        
         // Clic sur le code pour voir en entier
         const currentRoomCode = document.getElementById('currentRoomCode');
         if (currentRoomCode) {
             currentRoomCode.addEventListener('click', () => {
                 const code = currentRoomCode.textContent;
                 if (code && code !== '------') {
-                    alert('Code complet:\n\n' + code + '\n\nPartagez ce code avec vos amis pour qu\'ils rejoignent votre salle !');
+                    this.showCodeModal(code);
                 }
             });
             currentRoomCode.style.cursor = 'pointer';
@@ -84,6 +100,134 @@ class RoomManager {
         }
         
         console.log('✅ Room Manager initialisé');
+    }
+    
+    // Afficher le code de salle dans une modal élégante
+    showCodeModal(code) {
+        // Supprimer les anciennes modals
+        document.querySelectorAll('.code-display-modal').forEach(m => m.remove());
+        
+        const modal = document.createElement('div');
+        modal.className = 'code-display-modal';
+        modal.innerHTML = `
+            <div class="modal-overlay" style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 9998;
+                backdrop-filter: blur(4px);
+            "></div>
+            <div class="modal-content" style="
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: #ffffff;
+                padding: 35px;
+                border-radius: 16px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+                z-index: 9999;
+                text-align: center;
+                min-width: 320px;
+                max-width: 90vw;
+            ">
+                <h3 style="
+                    color: #333;
+                    margin: 0 0 12px 0;
+                    font-size: 20px;
+                    font-weight: 600;
+                ">🔑 Code de la salle</h3>
+                <p style="
+                    color: #666;
+                    margin: 0 0 20px 0;
+                    font-size: 14px;
+                ">Partagez ce code pour inviter vos amis</p>
+                <div style="
+                    background: #f8f9fa;
+                    padding: 16px;
+                    border-radius: 10px;
+                    margin: 20px 0;
+                    border: 2px solid #e9ecef;
+                ">
+                    <code style="
+                        font-size: 15px;
+                        font-weight: 500;
+                        color: #495057;
+                        font-family: 'Courier New', monospace;
+                        word-break: break-all;
+                        line-height: 1.6;
+                    ">${code}</code>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button class="copy-code-btn" style="
+                        background: #667eea;
+                        color: white;
+                        border: none;
+                        padding: 12px 24px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-size: 14px;
+                        font-weight: 500;
+                        transition: all 0.2s;
+                    ">📋 Copier</button>
+                    <button class="close-modal-btn" style="
+                        background: #e9ecef;
+                        color: #495057;
+                        border: none;
+                        padding: 12px 24px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-size: 14px;
+                        font-weight: 500;
+                        transition: all 0.2s;
+                    ">Fermer</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Bouton copier
+        const copyBtn = modal.querySelector('.copy-code-btn');
+        copyBtn.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(code);
+                copyBtn.textContent = '✅ Copié !';
+                copyBtn.style.background = '#10ac84';
+                setTimeout(() => {
+                    copyBtn.textContent = '📋 Copier';
+                    copyBtn.style.background = '#667eea';
+                }, 2000);
+            } catch (err) {
+                console.error('Erreur copie:', err);
+            }
+        });
+        
+        // Bouton hover
+        copyBtn.addEventListener('mouseenter', () => {
+            copyBtn.style.transform = 'translateY(-2px)';
+            copyBtn.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.4)';
+        });
+        copyBtn.addEventListener('mouseleave', () => {
+            copyBtn.style.transform = 'translateY(0)';
+            copyBtn.style.boxShadow = 'none';
+        });
+        
+        const closeBtn = modal.querySelector('.close-modal-btn');
+        closeBtn.addEventListener('mouseenter', () => {
+            closeBtn.style.background = '#dee2e6';
+        });
+        closeBtn.addEventListener('mouseleave', () => {
+            closeBtn.style.background = '#e9ecef';
+        });
+        
+        // Fermer
+        const closeModal = () => modal.remove();
+        closeBtn.addEventListener('click', closeModal);
+        modal.querySelector('.modal-overlay').addEventListener('click', closeModal);
     }
     
     async handleCreateRoom() {
