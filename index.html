@@ -571,15 +571,15 @@
                 </div>
             </div>
             
-            <!-- Actions salle -->
-            <div class="room-actions">
-                <button id="createRoomBtn" class="room-action-btn create-btn">
-                    ✨ Créer Partie
+            <!-- Actions salle privée (cachées dans tab Lobby Public) -->
+            <div class="room-actions" id="privateRoomActions">
+                <button id="createRoomBtn" class="room-action-btn create-btn" title="Créer une salle privée avec code à 6 caractères pour inviter des amis spécifiques">
+                    🔐 Salle Privée
                 </button>
                 <div class="join-room-group">
-                    <input type="text" id="roomCodeInput" class="room-code-input" placeholder="Ex: ABC123" maxlength="6" style="text-transform: uppercase;">
-                    <button id="joinRoomBtn" class="room-action-btn join-btn">
-                        🎮 Rejoindre
+                    <input type="text" id="roomCodeInput" class="room-code-input" placeholder="CODE: ABC123" maxlength="6" style="text-transform: uppercase;">
+                    <button id="joinRoomBtn" class="room-action-btn join-btn" title="Rejoindre une salle privée avec un code à 6 caractères">
+                        🔑 Rejoindre CODE
                     </button>
                 </div>
                 <div id="currentRoomInfo" class="current-room-info hidden">
@@ -605,17 +605,14 @@
                 </button>
             </div>
             
-            <!-- Liste des joueurs connectés (Lobby Public) -->
+            <!-- Bouton connexion lobby (visible si non connecté) -->
+            <button id="connectLobbyBtn" class="connect-lobby-btn hidden" style="width: 100%; padding: 10px; margin-bottom: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                🔌 Se connecter au Lobby
+            </button>
+            
+            <!-- Liste des joueurs connectés - Gérée dynamiquement par lobby-tabs.js -->
             <div class="connected-players-list" id="connectedPlayersList">
-                <div class="lobby-header" style="padding: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; margin-bottom: 10px; text-align: center;">
-                    <div style="font-size: 20px; margin-bottom: 5px;">👥</div>
-                    <div style="font-size: 13px; font-weight: 600;">Joueurs en ligne</div>
-                    <div style="font-size: 11px; opacity: 0.9;">Cliquez pour inviter</div>
-                </div>
-                <div class="empty-room-message">
-                    <p>🌟 Lobby vide pour le moment</p>
-                    <p style="font-size: 0.9rem; color: #999;">Connectez-vous pour être visible !</p>
-                </div>
+                <!-- Contenu généré par JavaScript -->
             </div>
         </div>
     </div>

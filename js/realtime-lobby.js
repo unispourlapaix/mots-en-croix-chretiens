@@ -66,6 +66,9 @@ class RealtimeLobbySystem {
     async registerMyPresence() {
         if (!window.simpleChatSystem?.peer?.id) {
             console.warn('⚠️ Peer non initialisé, impossible d\'enregistrer la présence');
+            console.log('📊 Debug - simpleChatSystem:', !!window.simpleChatSystem);
+            console.log('📊 Debug - peer:', !!window.simpleChatSystem?.peer);
+            console.log('📊 Debug - peer.id:', window.simpleChatSystem?.peer?.id);
             return;
         }
 
@@ -293,6 +296,8 @@ window.addEventListener('beforeunload', async () => {
 
 // Auto-initialiser si Supabase est disponible
 if (typeof supabase !== 'undefined' && supabase) {
+    console.log('🔵 Supabase détecté, préparation auto-init lobby...');
+    
     // Écouter l'événement roomCreated émis par simple-chat.js
     window.addEventListener('roomCreated', async (e) => {
         if (!window.realtimeLobbySystem.isInitialized) {
@@ -301,17 +306,24 @@ if (typeof supabase !== 'undefined' && supabase) {
         }
     });
     
-    // Fallback: vérifier périodiquement si le peer existe déjà
-    const checkPeerReady = setInterval(async () => {
-        if (window.simpleChatSystem?.peer?.id && !window.realtimeLobbySystem.isInitialized) {
-            clearInterval(checkPeerReady);
-            console.log('🎯 Peer déjà prêt, initialisation du lobby...');
-            await window.realtimeLobbySystem.init();
-        }
-    }, 1000);
-    
-    // Arrêter le fallback après 5s
-    setTimeout(() => clearInterval(checkPeerReady), 5000);
+    // Initialiser immédiatement après chargement de la page
+    window.addEventListener('DOMContentLoaded', async () => {
+        // Attendre que simpleChatSystem soit prêt
+        let attempts = 0;
+        const waitForPeer = setInterval(async () => {
+            attempts++;
+            console.log(`🔍 Tentative ${attempts}/10 - Recherche peer...`);
+            
+            if (window.simpleChatSystem?.peer?.id && !window.realtimeLobbySystem.isInitialized) {
+                clearInterval(waitForPeer);
+                console.log('✅ Peer trouvé:', window.simpleChatSystem.peer.id);
+                await window.realtimeLobbySystem.init();
+            } else if (attempts >= 10) {
+                clearInterval(waitForPeer);
+                console.warn('⚠️ Timeout: Peer non trouvé après 10 tentatives');
+            }
+        }, 500);
+    });
 }
 
 console.log('✅ Realtime Lobby System chargé');
