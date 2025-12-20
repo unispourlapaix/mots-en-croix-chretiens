@@ -232,10 +232,26 @@ class PresenceSystem {
             console.log('✅ Mode acceptation auto activé');
         }
         
+        // 🔥 S'ajouter soi-même à roomSystem avant de se connecter
+        if (window.roomSystem) {
+            window.roomSystem.playersInRoom.set('me', {
+                username: this.myPresence.username,
+                avatar: this.myPresence.avatar,
+                isHost: false
+            });
+            window.roomSystem.updateUI();
+            console.log('✅ Ajouté moi-même à roomSystem.playersInRoom');
+        }
+        
         // Connexion P2P directe
         await this.connectToRoomHost(hostPeerId, roomCode);
         
         console.log('✅ Connecté à la salle:', roomCode);
+        
+        // Émettre l'événement de salle rejointe
+        window.dispatchEvent(new CustomEvent('roomJoined', {
+            detail: { roomCode, isHost: false }
+        }));
         
         return roomCode;
     }
@@ -716,6 +732,17 @@ class PresenceSystem {
                 this.connectedPeers.set(data.peerId, conn);
                 window.simpleChatSystem.connections.set(data.peerId, conn);
                 
+                // 🔥 IMPORTANT: Ajouter aussi à roomSystem pour qu'il soit visible dans l'interface
+                if (window.roomSystem) {
+                    window.roomSystem.playersInRoom.set(data.peerId, {
+                        username: data.username,
+                        avatar: data.avatar || '😊',
+                        isHost: false
+                    });
+                    window.roomSystem.updateUI();
+                    console.log('✅ Joueur ajouté à roomSystem.playersInRoom');
+                }
+                
                 // Répondre avec notre info
                 conn.send({
                     type: 'welcome',
@@ -746,6 +773,17 @@ class PresenceSystem {
                     timestamp: Date.now()
                 });
                 
+                // 🔥 Ajouter l'hôte à roomSystem aussi
+                if (window.roomSystem) {
+                    window.roomSystem.playersInRoom.set(data.peerId, {
+                        username: data.username,
+                        avatar: data.avatar || '😊',
+                        isHost: true // C'est l'hôte
+                    });
+                    window.roomSystem.updateUI();
+                    console.log('✅ Hôte ajouté à roomSystem.playersInRoom');
+                }
+                
                 this.notifyPresenceUpdate();
                 break;
                 
@@ -760,6 +798,20 @@ class PresenceSystem {
                     timestamp: Date.now()
                 });
                 
+                // 🔥 Ajouter à roomSystem
+                if (window.roomSystem && !window.roomSystem.playersInRoom.has(data.peerId)) {
+                    window.roomSystem.playersInRoom.set(data.peerId, {
+                        username: data.username,
+                        avatar: data.avatar || '😊',
+                        isHost: false
+                    });
+                    window.roomSystem.updateUI();
+                    console.log('✅ Membre ajouté à roomSystem.playersInRoom');
+                }
+                
+                this.notifyPresenceUpdate();
+                break;
+                
                 this.notifyPresenceUpdate();
                 break;
                 
@@ -767,6 +819,13 @@ class PresenceSystem {
                 // Mise à jour heartbeat
                 if (data.peerId && this.onlinePlayers.has(data.peerId)) {
                     const player = this.onlinePlayers.get(data.peerId);
+                    
+                    // 🔥 Retirer aussi de roomSystem
+                    if (window.roomSystem) {
+                        window.roomSystem.playersInRoom.delete(data.peerId);
+                        window.roomSystem.updateUI();
+                    }
+                    
                     player.timestamp = data.timestamp || Date.now();
                     this.onlinePlayers.set(data.peerId, player);
                 }
