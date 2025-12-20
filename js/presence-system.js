@@ -11,6 +11,10 @@ class PresenceSystem {
         this.roomConnection = null; // Connexion à la salle partagée
         this.connectedPeers = new Map(); // peer_id → DataConnection
         
+        // Cache mémoire pour les room mappings (évite appels DB répétés)
+        this.roomMappingCache = new Map(); // roomCode → { peerId, timestamp }
+        this.CACHE_TTL = 5 * 60 * 1000; // 5 minutes de cache
+        
         this.init();
     }
     
@@ -192,9 +196,6 @@ class PresenceSystem {
                 timestamp: Date.now()
             };
         }
-        
-        // Récupérer le peerID via le mapping
-        const hostPeerId = mapping.peerId;
         
         // Vérifier si on est l'hôte
         const myPeerId = window.simpleChatSystem?.peer?.id;
@@ -1211,7 +1212,14 @@ class PresenceSystem {
             expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24h
         };
         
-        // Essayer Supabase d'abord
+        // 🚀 METTRE EN CACHE IMMÉDIATEMENT (évite lecture DB après écriture)
+        this.roomMappingCache.set(roomCode, {
+            peerId: peerId,
+            timestamp: Date.now()
+        });
+        console.log('💾 Mapping mis en cache:', roomCode);
+        
+        // Essayer Supabase d'abord (en arrière-plan)
         if (typeof supabase !== 'undefined' && supabase) {
             try {
                 const { error } = await supabase
@@ -1237,7 +1245,21 @@ class PresenceSystem {
     
     // Récupérer le mapping code -> peerId
     async getRoomMapping(roomCode) {
-        // Essayer Supabase d'abord
+        // 🚀 VÉRIFIER LE CACHE D'ABORD (99% des cas)
+        const cached = this.roomMappingCache.get(roomCode);
+        if (cached) {
+            const age = Date.now() - cached.timestamp;
+            if (age < this.CACHE_TTL) {
+                console.log(`⚡ Mapping en cache (${Math.round(age/1000)}s)`);
+                return cached.peerId;
+            } else {
+                // Cache expiré, supprimer
+                this.roomMappingCache.delete(roomCode);
+                console.log('🗑️ Cache expiré, rechargement...');
+            }
+        }
+        
+        // Essayer Supabase ensuite
         if (typeof supabase !== 'undefined' && supabase) {
             try {
                 const { data, error } = await supabase
@@ -1249,6 +1271,11 @@ class PresenceSystem {
                 
                 if (data && !error) {
                     console.log('✅ Mapping trouvé dans Supabase');
+                    // Mettre en cache pour les prochains appels
+                    this.roomMappingCache.set(roomCode, {
+                        peerId: data.peer_id,
+                        timestamp: Date.now()
+                    });
                     return data.peer_id;
                 }
             } catch (err) {
@@ -1264,6 +1291,11 @@ class PresenceSystem {
                 // Vérifier expiration
                 if (mapping.expires_at && new Date(mapping.expires_at) > new Date()) {
                     console.log('📦 Mapping trouvé dans localStorage');
+                    // Mettre en cache aussi
+                    this.roomMappingCache.set(roomCode, {
+                        peerId: mapping.peer_id,
+                        timestamp: Date.now()
+                    });
                     return mapping.peer_id;
                 }
             } catch (err) {

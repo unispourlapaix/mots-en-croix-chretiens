@@ -88,13 +88,19 @@ class SimpleChatSystem {
             const savedPeerId = this.getSavedPeerId();
             
             // Configuration PeerJS avec serveurs STUN pour meilleure connectivité
+            // + serveur PeerJS alternatif plus fiable que le Cloud par défaut
             const peerConfig = {
+                host: 'peerjs.92k.de',  // Serveur PeerJS public alternatif (plus stable)
+                port: 443,
+                secure: true,
+                path: '/',
                 config: {
                     iceServers: [
                         { urls: 'stun:stun.l.google.com:19302' },
                         { urls: 'stun:global.stun.twilio.com:3478' }
                     ]
-                }
+                },
+                debug: 0 // 0 = erreurs seulement, 3 = verbose
             };
             
             // Utiliser le peer ID sauvegardé si disponible
@@ -106,65 +112,108 @@ class SimpleChatSystem {
                 this.peer = new Peer(peerConfig);
             }
             
-            this.peer.on('open', (id) => {
-                console.log('🔗 PeerJS connecté, ID:', id);
-                this.roomCode = id;
-                
-                // Sauvegarder le peer ID pour les prochaines sessions
-                this.savePeerId(id);
-                
-                // Notifier l'UI que le peer est prêt
-                window.dispatchEvent(new CustomEvent('roomCreated', { detail: { roomCode: id } }));
-            });
-
-            this.peer.on('connection', (conn) => {
-                this.handleConnection(conn);
-                
-                // Gérer les invitations de jeu depuis le lobby
-                conn.on('data', (data) => {
-                    if (data.type === 'game_invite') {
-                        this.handleGameInvite(conn, data);
+            // Timeout pour détecter si le serveur ne répond pas
+            const connectionTimeout = setTimeout(() => {
+                if (this.peer && !this.peer.id) {
+                    console.warn('⚠️ Serveur PeerJS primaire lent, essai serveur alternatif...');
+                    this.peer.destroy();
+                    
+                    // Essayer avec le serveur Cloud par défaut en fallback
+                    const fallbackConfig = {
+                        config: {
+                            iceServers: [
+                                { urls: 'stun:stun.l.google.com:19302' },
+                                { urls: 'stun:global.stun.twilio.com:3478' }
+                            ]
+                        },
+                        debug: 0
+                    };
+                    
+                    if (savedPeerId) {
+                        this.peer = new Peer(savedPeerId, fallbackConfig);
+                    } else {
+                        this.peer = new Peer(fallbackConfig);
                     }
                     
-                    // Transférer les messages de salle au RoomSystem
-                    if (window.roomSystem && data.type && ['join-request', 'join-accepted', 'join-refused', 
-                        'player-kicked', 'room-mode-changed', 'player-joined', 
-                        'player-left', 'host-transferred'].includes(data.type)) {
-                        window.roomSystem.handleRoomMessage(conn, data);
-                    }
-                });
-            });
-
-            this.peer.on('error', (err) => {
-                // Ignorer les erreurs de connexion réseau (normales pour localhost)
-                if (err.type === 'network' || err.message?.includes('Lost connection')) {
-                    console.log('ℹ️ PeerJS: Connexion serveur perdue (normal en localhost)');
-                    return;
+                    this.setupPeerHandlers();
                 }
-                
-                // Ignorer les erreurs de connexion à un peer (joueur déconnecté/inexistant)
-                if (err.type === 'peer-unavailable' || err.message?.includes('Could not connect to peer')) {
-                    console.log('ℹ️ PeerJS: Joueur non disponible ou déconnecté');
-                    this.showMessage('⚠️ Ce joueur est déconnecté ou n\'existe plus', 'system');
-                    return;
-                }
-                
-                // Erreurs critiques seulement
-                console.error('❌ Erreur PeerJS critique:', err);
-                this.showMessage('⚠️ Erreur de connexion P2P', 'system');
-                
-                // Ne détruire le peer que pour des erreurs vraiment critiques
-                if (err.type === 'server-error' || err.type === 'socket-error') {
-                    if (this.peer) {
-                        this.peer.destroy();
-                        this.peer = null;
-                    }
-                }
-            });
+            }, 5000); // 5 secondes timeout
+            
+            this.setupPeerHandlers(connectionTimeout);
+            
         } catch (error) {
             console.error('❌ Erreur initialisation P2P:', error);
             this.showMessage('⚠️ Chat en mode local uniquement', 'system');
         }
+    }
+
+    // Configurer les gestionnaires d'événements PeerJS
+    setupPeerHandlers(connectionTimeout) {
+        if (!this.peer) return;
+        
+        // Nettoyer les anciens listeners si réutilisation
+        this.peer.removeAllListeners();
+        
+        this.peer.on('open', (id) => {
+            console.log('🔗 PeerJS connecté, ID:', id);
+            this.roomCode = id;
+            
+            // Annuler le timeout fallback si la connexion réussit
+            if (connectionTimeout) {
+                clearTimeout(connectionTimeout);
+            }
+            
+            // Sauvegarder le peer ID pour les prochaines sessions
+            this.savePeerId(id);
+            
+            // Notifier l'UI que le peer est prêt
+            window.dispatchEvent(new CustomEvent('roomCreated', { detail: { roomCode: id } }));
+        });
+
+        this.peer.on('connection', (conn) => {
+            this.handleConnection(conn);
+            
+            // Gérer les invitations de jeu depuis le lobby
+            conn.on('data', (data) => {
+                if (data.type === 'game_invite') {
+                    this.handleGameInvite(conn, data);
+                }
+                
+                // Transférer les messages de salle au RoomSystem
+                if (window.roomSystem && data.type && ['join-request', 'join-accepted', 'join-refused', 
+                    'player-kicked', 'room-mode-changed', 'player-joined', 
+                    'player-left', 'host-transferred'].includes(data.type)) {
+                    window.roomSystem.handleRoomMessage(conn, data);
+                }
+            });
+        });
+
+        this.peer.on('error', (err) => {
+            // Ignorer les erreurs de connexion réseau (normales pour localhost)
+            if (err.type === 'network' || err.message?.includes('Lost connection')) {
+                console.log('ℹ️ PeerJS: Connexion serveur perdue (normal en localhost)');
+                return;
+            }
+            
+            // Ignorer les erreurs de connexion à un peer (joueur déconnecté/inexistant)
+            if (err.type === 'peer-unavailable' || err.message?.includes('Could not connect to peer')) {
+                console.log('ℹ️ PeerJS: Joueur non disponible ou déconnecté');
+                this.showMessage('⚠️ Ce joueur est déconnecté ou n\'existe plus', 'system');
+                return;
+            }
+            
+            // Erreurs critiques seulement
+            console.error('❌ Erreur PeerJS critique:', err);
+            this.showMessage('⚠️ Erreur de connexion P2P', 'system');
+            
+            // Ne détruire le peer que pour des erreurs vraiment critiques
+            if (err.type === 'server-error' || err.type === 'socket-error') {
+                if (this.peer) {
+                    this.peer.destroy();
+                    this.peer = null;
+                }
+            }
+        });
     }
 
     // Créer une room P2P

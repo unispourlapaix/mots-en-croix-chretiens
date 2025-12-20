@@ -34,6 +34,12 @@ class AuthSystem {
             
             if (error) {
                 console.error('❌ Erreur récupération session:', error);
+                
+                // Si l'erreur concerne un refresh token invalide, nettoyer le localStorage
+                if (error.message && error.message.includes('Refresh Token')) {
+                    console.log('🧹 Nettoyage du refresh token invalide...');
+                    await this.clearInvalidSession();
+                }
             } else if (session && session.user) {
                 console.log('✅ Session restaurée depuis localStorage');
                 // IMPORTANT: Attendre que le profil soit chargé AVANT de marquer comme prêt
@@ -48,6 +54,13 @@ class AuthSystem {
             console.log('✅ Auth init terminée, username:', this.currentUser?.username || 'anonyme');
         } catch (err) {
             console.error('❌ Erreur vérification session:', err);
+            
+            // Si l'erreur est liée au refresh token, nettoyer
+            if (err.message && err.message.includes('Refresh Token')) {
+                console.log('🧹 Nettoyage du refresh token invalide...');
+                await this.clearInvalidSession();
+            }
+            
             this.isInitialized = true;
             this.isCheckingAuth = false;
         }
@@ -55,6 +68,13 @@ class AuthSystem {
         // PUIS écouter les changements d'auth
         supabase.auth.onAuthStateChange(async (event, session) => {
             console.log('🔐 Auth event:', event, session ? 'Session active' : 'Pas de session');
+
+            // Gérer les erreurs de token
+            if (event === 'TOKEN_REFRESHED') {
+                console.log('🔄 Token rafraîchi avec succès');
+            } else if (event === 'SIGNED_OUT') {
+                console.log('👋 Utilisateur déconnecté');
+            }
 
             if (session && session.user) {
                 // Utilisateur connecté
@@ -381,6 +401,26 @@ class AuthSystem {
         } catch (err) {
             console.error('❌ Erreur déconnexion:', err);
             return { success: false, error: err.message };
+        }
+    }
+
+    // Nettoyer une session invalide (refresh token expiré)
+    async clearInvalidSession() {
+        try {
+            // Nettoyer le localStorage de Supabase
+            const storageKey = 'mots-croix-auth';
+            localStorage.removeItem(`sb-${storageKey.replace(/-/g, '')}-auth-token`);
+            localStorage.removeItem(`sb-dmszyxowetilvsanqsxm-auth-token`); // Fallback avec l'URL exacte
+            
+            // Forcer une déconnexion silencieuse
+            if (supabase && supabase.auth) {
+                await supabase.auth.signOut({ scope: 'local' });
+            }
+            
+            this.currentUser = null;
+            console.log('✅ Session invalide nettoyée');
+        } catch (err) {
+            console.error('⚠️ Erreur lors du nettoyage:', err);
         }
     }
 

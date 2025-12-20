@@ -12,6 +12,33 @@ const SUPABASE_CONFIG = {
 // Créer le client Supabase seulement si configuré
 let supabase = null;
 
+// Fonction pour gérer les erreurs de refresh token
+function setupGlobalErrorHandler() {
+    // Intercepter les erreurs non gérées liées au refresh token
+    const originalConsoleError = console.error;
+    console.error = function(...args) {
+        const errorMessage = args.join(' ');
+        if (errorMessage.includes('Refresh Token') || errorMessage.includes('Invalid Refresh Token')) {
+            console.log('🧹 Détection d\'erreur de refresh token, nettoyage...');
+            // Nettoyer le localStorage
+            try {
+                const storageKey = 'mots-croix-auth';
+                localStorage.removeItem(`sb-${storageKey.replace(/-/g, '')}-auth-token`);
+                localStorage.removeItem(`sb-dmszyxowetilvsanqsxm-auth-token`);
+                
+                // Si AuthSystem est disponible, nettoyer la session
+                if (window.authSystem && typeof window.authSystem.clearInvalidSession === 'function') {
+                    window.authSystem.clearInvalidSession();
+                }
+            } catch (e) {
+                console.warn('⚠️ Erreur lors du nettoyage automatique:', e);
+            }
+        }
+        // Appeler la fonction console.error originale
+        originalConsoleError.apply(console, args);
+    };
+}
+
 if (SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
     // Attendre que la librairie Supabase soit chargée
     const initSupabase = () => {
@@ -30,6 +57,9 @@ if (SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
                 }
             );
             console.log('✅ Client Supabase Auth initialisé avec persistSession');
+            
+            // Ajouter un gestionnaire global pour les erreurs de refresh token
+            setupGlobalErrorHandler();
         } else {
             console.warn('⚠️ Librairie Supabase non chargée. Nouvelle tentative...');
             setTimeout(initSupabase, 100); // Réessayer après 100ms

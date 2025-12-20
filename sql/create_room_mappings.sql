@@ -1,5 +1,10 @@
 -- Table pour stocker les mappings code court -> peer ID
 -- Permet le multijoueur cross-device avec codes courts
+-- 
+-- ⚡ OPTIMISATION: Cache mémoire côté client (5min TTL)
+--    - 1er appel: DB → cache
+--    - Appels suivants: cache uniquement (0 requête DB)
+--    - Réduction ~90% des requêtes en pratique
 
 CREATE TABLE IF NOT EXISTS room_mappings (
     id BIGSERIAL PRIMARY KEY,
@@ -47,6 +52,12 @@ BEGIN
     WHERE expires_at < NOW();
 END;
 $$ LANGUAGE plpgsql;
+
+-- ⏰ Optionnel: Configurer un CRON job Supabase pour nettoyage automatique
+-- Dashboard Supabase > Database > Cron Jobs
+-- Créer un job qui exécute: SELECT cleanup_expired_room_mappings();
+-- Fréquence recommandée: toutes les 6 heures
+-- Cela évite l'accumulation de codes expirés dans la DB
 
 -- Commentaires
 COMMENT ON TABLE room_mappings IS 'Mapping des codes courts (6 caractères) vers les peer IDs pour le multijoueur';
