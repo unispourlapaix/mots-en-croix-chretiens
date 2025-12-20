@@ -64,7 +64,9 @@ $$ LANGUAGE plpgsql;
 -- SELECT cleanup_inactive_presence();
 
 -- Vue pour les joueurs disponibles dans le lobby
-CREATE OR REPLACE VIEW lobby_available_players AS
+-- SECURITY INVOKER : Utilise les permissions de l'utilisateur qui requête (respect RLS)
+CREATE OR REPLACE VIEW lobby_available_players 
+WITH (security_invoker = true) AS
 SELECT 
     peer_id,
     username,
