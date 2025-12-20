@@ -82,24 +82,14 @@ class RealtimeLobbySystem {
             room_mode: window.roomSystem?.acceptMode || 'manual',
             player_count: 1,
             max_players: 8,
-            status: 'lobby',
+            status: window.roomSystem?.roomInfo?.roomId ? 'in_room' : 'available',
             last_seen: new Date().toISOString()
         };
 
         try {
-            // Track presence dans le channel
+            // Track presence dans le channel (source unique de vérité)
             await this.channel.track(this.myPresence);
-            
-            // Insérer/update dans la table
-            const { error } = await supabase
-                .from('lobby_presence')
-                .upsert(this.myPresence, { onConflict: 'peer_id' });
-
-            if (error) {
-                console.warn('⚠️ Erreur sauvegarde présence DB:', error.message);
-            } else {
-                console.log('✅ Présence enregistrée:', username, peerId);
-            }
+            console.log('✅ Présence enregistrée:', username, peerId);
 
             // Notifier les callbacks
             this.notifyPresenceUpdate();
@@ -162,18 +152,8 @@ class RealtimeLobbySystem {
                 // Mettre à jour last_seen
                 this.myPresence.last_seen = new Date().toISOString();
                 
-                // Update dans le channel
+                // Update dans le channel uniquement
                 await this.channel.track(this.myPresence);
-                
-                // Update dans la DB
-                try {
-                    await supabase
-                        .from('lobby_presence')
-                        .update({ last_seen: this.myPresence.last_seen })
-                        .eq('peer_id', this.myPresence.peer_id);
-                } catch (err) {
-                    console.warn('⚠️ Erreur heartbeat DB:', err.message);
-                }
             }
         }, 30000); // 30 secondes
 
@@ -192,14 +172,8 @@ class RealtimeLobbySystem {
         };
 
         try {
-            // Update channel
+            // Update channel uniquement
             await this.channel.track(this.myPresence);
-            
-            // Update DB
-            await supabase
-                .from('lobby_presence')
-                .update(this.myPresence)
-                .eq('peer_id', this.myPresence.peer_id);
 
             console.log('🔄 Présence mise à jour:', updates);
             this.notifyPresenceUpdate();
@@ -213,7 +187,7 @@ class RealtimeLobbySystem {
         await this.updateMyPresence({
             room_code: roomCode,
             player_count: 1,
-            status: roomCode ? 'lobby' : 'lobby'
+            status: roomCode ? 'in_room' : 'available'
         });
     }
 
@@ -241,9 +215,13 @@ class RealtimeLobbySystem {
             });
     }
 
-    // Récupérer tous les joueurs (y compris soi-même)
+    // Récupérer tous les joueurs (y compris soi-même, mais sans bots)
     getAllPlayers() {
-        return Array.from(this.onlinePlayers.values());
+        return Array.from(this.onlinePlayers.values())
+            .filter(player => {
+                // Exclure les bots locaux (peer_id commence par 'bot-')
+                return !player.peer_id.startsWith('bot-');
+            });
     }
 
     // Récupérer un joueur spécifique
@@ -259,6 +237,12 @@ class RealtimeLobbySystem {
     // Notifier les callbacks
     notifyPresenceUpdate() {
         const players = this.getAvailablePlayers();
+        
+        // Dispatcher un événement global pour mise à jour réactive
+        window.dispatchEvent(new CustomEvent('presence_updated', {
+            detail: { players, count: this.onlinePlayers.size }
+        }));
+        
         this.presenceCallbacks.forEach(cb => {
             try {
                 cb(players);
@@ -280,18 +264,6 @@ class RealtimeLobbySystem {
         // Untrack presence
         if (this.channel && this.myPresence) {
             await this.channel.untrack();
-        }
-
-        // Supprimer de la DB
-        if (this.myPresence) {
-            try {
-                await supabase
-                    .from('lobby_presence')
-                    .delete()
-                    .eq('peer_id', this.myPresence.peer_id);
-            } catch (err) {
-                console.warn('⚠️ Erreur suppression présence:', err.message);
-            }
         }
 
         // Unsubscribe channel
@@ -321,21 +293,25 @@ window.addEventListener('beforeunload', async () => {
 
 // Auto-initialiser si Supabase est disponible
 if (typeof supabase !== 'undefined' && supabase) {
-    // Attendre que le peer soit prêt
-    const waitForPeer = setInterval(async () => {
-        if (window.simpleChatSystem?.peer?.id) {
-            clearInterval(waitForPeer);
+    // Écouter l'événement roomCreated émis par simple-chat.js
+    window.addEventListener('roomCreated', async (e) => {
+        if (!window.realtimeLobbySystem.isInitialized) {
+            console.log('🎯 roomCreated event détecté, initialisation du lobby...');
             await window.realtimeLobbySystem.init();
         }
-    }, 500);
-
-    // Timeout après 10 secondes
-    setTimeout(() => {
-        clearInterval(waitForPeer);
-        if (!window.realtimeLobbySystem.isInitialized) {
-            console.warn('⚠️ Timeout initialisation Lobby Realtime (peer non prêt)');
+    });
+    
+    // Fallback: vérifier périodiquement si le peer existe déjà
+    const checkPeerReady = setInterval(async () => {
+        if (window.simpleChatSystem?.peer?.id && !window.realtimeLobbySystem.isInitialized) {
+            clearInterval(checkPeerReady);
+            console.log('🎯 Peer déjà prêt, initialisation du lobby...');
+            await window.realtimeLobbySystem.init();
         }
-    }, 10000);
+    }, 1000);
+    
+    // Arrêter le fallback après 5s
+    setTimeout(() => clearInterval(checkPeerReady), 5000);
 }
 
 console.log('✅ Realtime Lobby System chargé');

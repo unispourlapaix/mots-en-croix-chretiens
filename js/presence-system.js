@@ -6,7 +6,7 @@ class PresenceSystem {
         this.onlinePlayers = new Map();
         this.heartbeatInterval = null;
         this.storageKey = 'crossword_players_online';
-        this.channel = null;
+        this.supabaseChannel = null; // Supabase Realtime channel
         this.currentRoomCode = null; // Code de la salle actuelle
         this.roomConnection = null; // Connexion à la salle partagée
         this.connectedPeers = new Map(); // peer_id → DataConnection
@@ -19,17 +19,16 @@ class PresenceSystem {
     }
     
     init() {
-        console.log('✅ Système de partage familial/amis P2P');
+        console.log('✅ Système de partage familial/amis P2P + Supabase Realtime');
         
-        // BroadcastChannel pour sync locale entre onglets
-        try {
-            this.channel = new BroadcastChannel('crossword_presence');
-            this.channel.onmessage = (e) => this.handleChannelMessage(e.data);
-        } catch (err) {
-            console.warn('BroadcastChannel non supporté');
+        // Vérifier si Supabase est disponible
+        if (typeof supabase !== 'undefined' && supabase) {
+            console.log('🌐 Supabase Realtime disponible pour les salles CODE');
+        } else {
+            console.warn('⚠️ Supabase non configuré, fallback localStorage uniquement');
         }
         
-        // Écouter localStorage pour sync locale
+        // Écouter localStorage pour sync locale (fallback)
         window.addEventListener('storage', (e) => {
             if (e.key === this.storageKey) {
                 this.syncFromStorage();
@@ -54,6 +53,129 @@ class PresenceSystem {
             code += chars.charAt(Math.floor(Math.random() * chars.length));
         }
         return code;
+    }
+    
+    // Initialiser Supabase Realtime pour une salle CODE
+    async initSupabaseRoomChannel(roomCode) {
+        if (typeof supabase === 'undefined' || !supabase) {
+            console.warn('⚠️ Supabase non disponible, fallback P2P uniquement');
+            return false;
+        }
+        
+        console.log('🌐 Initialisation Supabase Realtime pour salle:', roomCode);
+        
+        try {
+            // Créer un channel dédié pour cette salle
+            this.supabaseChannel = supabase.channel(`room:${roomCode}`, {
+                config: {
+                    broadcast: { self: true },
+                    presence: { key: '' }
+                }
+            });
+            
+            // Écouter les événements de présence
+            this.supabaseChannel
+                .on('presence', { event: 'sync' }, () => {
+                    this.syncSupabasePresence();
+                })
+                .on('presence', { event: 'join' }, ({ newPresences }) => {
+                    console.log('➕ Joueur rejoint (Supabase):', newPresences);
+                    this.handleSupabasePresenceJoin(newPresences);
+                })
+                .on('presence', { event: 'leave' }, ({ leftPresences }) => {
+                    console.log('➖ Joueur parti (Supabase):', leftPresences);
+                    this.handleSupabasePresenceLeave(leftPresences);
+                })
+                .subscribe(async (status) => {
+                    if (status === 'SUBSCRIBED') {
+                        console.log('✅ Salle Supabase Realtime connectée:', roomCode);
+                        
+                        // Enregistrer ma présence
+                        await this.trackSupabasePresence();
+                    }
+                });
+            
+            return true;
+        } catch (err) {
+            console.error('❌ Erreur init Supabase channel:', err);
+            return false;
+        }
+    }
+    
+    // Enregistrer ma présence dans Supabase
+    async trackSupabasePresence() {
+        if (!this.supabaseChannel || !this.myPresence) return;
+        
+        const presenceData = {
+            peer_id: this.myPresence.peerId,
+            username: this.myPresence.username,
+            avatar: this.myPresence.avatar,
+            room_code: this.currentRoomCode,
+            is_host: this.isRoomHost,
+            timestamp: Date.now()
+        };
+        
+        try {
+            await this.supabaseChannel.track(presenceData);
+            console.log('✅ Présence Supabase enregistrée');
+        } catch (err) {
+            console.error('❌ Erreur track Supabase:', err);
+        }
+    }
+    
+    // Synchroniser présence depuis Supabase
+    syncSupabasePresence() {
+        if (!this.supabaseChannel) return;
+        
+        const state = this.supabaseChannel.presenceState();
+        
+        // Convertir en Map (sans écraser les bots locaux)
+        Object.keys(state).forEach(peerId => {
+            const presences = state[peerId];
+            if (presences && presences.length > 0) {
+                const presence = presences[0];
+                
+                // Ne pas écraser si c'est un bot
+                if (presence.peer_id && !presence.peer_id.startsWith('bot-')) {
+                    this.onlinePlayers.set(presence.peer_id, {
+                        peerId: presence.peer_id,
+                        username: presence.username,
+                        avatar: presence.avatar || '😊',
+                        isHost: presence.is_host || false,
+                        timestamp: presence.timestamp || Date.now()
+                    });
+                }
+            }
+        });
+        
+        console.log(`👥 ${this.onlinePlayers.size} joueur(s) dans la salle (Supabase)`);
+        this.notifyPresenceUpdate();
+    }
+    
+    // Gérer arrivée joueur Supabase
+    handleSupabasePresenceJoin(newPresences) {
+        newPresences.forEach(presence => {
+            if (presence.peer_id && !presence.peer_id.startsWith('bot-')) {
+                this.onlinePlayers.set(presence.peer_id, {
+                    peerId: presence.peer_id,
+                    username: presence.username,
+                    avatar: presence.avatar || '😊',
+                    isHost: presence.is_host || false,
+                    timestamp: Date.now()
+                });
+            }
+        });
+        this.notifyPresenceUpdate();
+    }
+    
+    // Gérer départ joueur Supabase
+    handleSupabasePresenceLeave(leftPresences) {
+        leftPresences.forEach(presence => {
+            if (presence.peer_id) {
+                this.onlinePlayers.delete(presence.peer_id);
+            }
+        });
+        this.notifyPresenceUpdate();
     }
     
     // CRÉER une salle (hôte) - VERSION SIMPLIFIÉE avec Supabase
@@ -117,6 +239,10 @@ class PresenceSystem {
         };
         localStorage.setItem(`room_${roomCode}`, JSON.stringify(roomData));
         
+        // 🆕 Initialiser channel Supabase pour cette salle CODE
+        console.log('🔵 Initialisation channel Supabase pour salle:', roomCode);
+        await this.initSupabaseRoomChannel(roomCode);
+        
         // Passer en mode acceptation automatique pour les salles avec CODE
         if (window.roomSystem && typeof window.roomSystem.setAcceptMode === 'function') {
             window.roomSystem.setAcceptMode('auto');
@@ -131,6 +257,12 @@ class PresenceSystem {
             isHost: true,
             timestamp: Date.now()
         });
+        
+        // 🆕 Enregistrer ma présence dans Supabase
+        if (this.supabaseChannel) {
+            console.log('📡 Enregistrement présence Supabase...');
+            await this.trackSupabasePresence();
+        }
         
         // Notifier UI
         this.notifyPresenceUpdate();
@@ -225,6 +357,16 @@ class PresenceSystem {
         
         console.log('🚪 Rejoindre salle:', roomCode);
         console.log('🎯 Connexion à l\'hôte:', hostPeerId);
+        
+        // 🆕 Initialiser channel Supabase pour cette salle CODE
+        console.log('🔵 Initialisation channel Supabase pour salle:', roomCode);
+        await this.initSupabaseRoomChannel(roomCode);
+        
+        // 🆕 Enregistrer ma présence dans Supabase
+        if (this.supabaseChannel) {
+            console.log('📡 Enregistrement présence Supabase...');
+            await this.trackSupabasePresence();
+        }
         
         // Passer en mode acceptation automatique
         if (window.roomSystem && typeof window.roomSystem.setAcceptMode === 'function') {
@@ -803,6 +945,18 @@ class PresenceSystem {
         
         console.log('🚪 Quitter salle:', this.currentRoomCode);
         
+        // 🆕 Se désinscrire du channel Supabase
+        if (this.supabaseChannel) {
+            console.log('🔵 Désinscription du channel Supabase...');
+            try {
+                this.supabaseChannel.unsubscribe();
+                this.supabaseChannel = null;
+                console.log('✅ Channel Supabase fermé');
+            } catch (err) {
+                console.warn('⚠️ Erreur fermeture channel Supabase:', err.message);
+            }
+        }
+        
         // Arrêter le watcher
         if (this.roomWatchInterval) {
             clearInterval(this.roomWatchInterval);
@@ -928,16 +1082,8 @@ class PresenceSystem {
         
         console.log('📢 Présence enregistrée:', username, '(', peerId, ')');
         
-        // Sauvegarder localement
+        // Sauvegarder localement (fallback)
         this.saveToStorage();
-        
-        // Broadcast aux autres onglets
-        if (this.channel) {
-            this.channel.postMessage({
-                type: 'presence',
-                presence: this.myPresence
-            });
-        }
         
         // Si dans une salle, annoncer à tous
         if (this.currentRoomCode) {
@@ -958,7 +1104,7 @@ class PresenceSystem {
         this.notifyPresenceUpdate();
     }
     
-    // Heartbeat local + broadcast salle
+    // Heartbeat local + broadcast salle + Supabase
     startHeartbeat() {
         if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
         
@@ -967,14 +1113,13 @@ class PresenceSystem {
             
             this.myPresence.timestamp = Date.now();
             
-            // Heartbeat local
+            // Heartbeat local (fallback)
             this.saveToStorage();
             
-            if (this.channel) {
-                this.channel.postMessage({
-                    type: 'heartbeat',
-                    peerId: this.myPresence.peerId,
-                    timestamp: Date.now()
+            // 🆕 Heartbeat Supabase (mettre à jour présence)
+            if (this.supabaseChannel && this.currentRoomCode) {
+                this.trackSupabasePresence().catch(err => {
+                    console.warn('⚠️ Erreur heartbeat Supabase:', err.message);
                 });
             }
             
@@ -987,44 +1132,6 @@ class PresenceSystem {
                 });
             }
         }, 3000); // Heartbeat toutes les 3s
-    }
-    
-    // Gérer messages BroadcastChannel
-    handleChannelMessage(message) {
-        if (!message) return;
-        
-        switch (message.type) {
-            case 'presence':
-                if (message.player && message.player.peerId !== this.myPresence?.peerId) {
-                    this.onlinePlayers.set(message.player.peerId, message.player);
-                    this.notifyPresenceUpdate();
-                    console.log('👋 Joueur détecté:', message.player.username);
-                }
-                break;
-                
-            case 'heartbeat':
-                const player = this.onlinePlayers.get(message.peerId);
-                if (player) {
-                    player.timestamp = message.timestamp;
-                }
-                break;
-                
-            case 'disconnect':
-                this.onlinePlayers.delete(message.peerId);
-                this.notifyPresenceUpdate();
-                console.log('👋 Joueur parti:', message.peerId);
-                break;
-                
-            case 'room_created':
-            case 'room_join':
-                // Quelqu'un a créé ou rejoint une salle
-                if (message.roomCode === this.currentRoomCode && 
-                    message.peerId !== this.myPresence?.peerId) {
-                    console.log('👋 Nouveau membre dans la salle:', message.username);
-                    // On va le découvrir via discoverRoomMembers()
-                }
-                break;
-        }
     }
     
     // Sauvegarder dans localStorage (SEULEMENT pour onglets du même navigateur)
@@ -1121,14 +1228,6 @@ class PresenceSystem {
             this.leaveRoom();
         }
         
-        // Broadcast déconnexion locale
-        if (this.channel && this.myPresence) {
-            this.channel.postMessage({
-                type: 'disconnect',
-                peerId: this.myPresence.peerId
-            });
-        }
-        
         // Retirer du localStorage
         if (this.myPresence) {
             try {
@@ -1187,6 +1286,11 @@ class PresenceSystem {
         // Rafraîchir l'UI
         window.roomSystem.updateAvailablePlayersList();
         window.roomSystem.updateChatBubble();
+        
+        // Dispatcher événement pour mise à jour réactive
+        window.dispatchEvent(new CustomEvent('room_presence_updated', {
+            detail: { players: this.getOnlinePlayers(), count: this.onlinePlayers.size }
+        }));
     }
     
     // Obtenir la liste des joueurs en ligne
@@ -1197,10 +1301,6 @@ class PresenceSystem {
     // Nettoyer avant fermeture
     async cleanup() {
         await this.stop();
-        
-        if (this.channel) {
-            this.channel.close();
-        }
     }
     
     // Sauvegarder le mapping code -> peerId (Supabase + fallback localStorage)
