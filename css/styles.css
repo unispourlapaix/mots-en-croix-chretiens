@@ -4248,23 +4248,32 @@ body {
 .room-code-input {
     flex: 1;
     min-width: 0;
-    padding: 10px 12px;
+    padding: 12px 16px;
     border: 2px solid rgba(102, 126, 234, 0.3);
     border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 16px;
+    font-weight: 700;
     text-align: center;
     text-transform: uppercase;
-    letter-spacing: 2px;
-    font-family: monospace;
-    background: rgba(255, 255, 255, 0.9);
+    letter-spacing: 3px;
+    font-family: 'Courier New', monospace;
+    background: rgba(255, 255, 255, 0.95);
     transition: all 0.3s ease;
+    color: #667eea;
+}
+
+.room-code-input::placeholder {
+    color: rgba(102, 126, 234, 0.4);
+    letter-spacing: 2px;
+    font-weight: 600;
 }
 
 .room-code-input:focus {
     outline: none;
     border-color: #667eea;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+    box-shadow: 0 2px 12px rgba(102, 126, 234, 0.25);
+    background: white;
+    transform: scale(1.02);
 }
 
 .join-btn {

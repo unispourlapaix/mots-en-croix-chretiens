@@ -106,17 +106,19 @@ class SimpleChatSystem {
             this.peer.on('connection', (conn) => {
                 this.handleConnection(conn);
                 
-                // Notifier le système de salles
-                if (window.roomSystem) {
-                    conn.on('data', (data) => {
-                        // Transférer les messages de salle au RoomSystem
-                        if (data.type && ['join-request', 'join-accepted', 'join-refused', 
-                            'player-kicked', 'room-mode-changed', 'player-joined', 
-                            'player-left', 'host-transferred'].includes(data.type)) {
-                            window.roomSystem.handleRoomMessage(conn, data);
-                        }
-                    });
-                }
+                // Gérer les invitations de jeu depuis le lobby
+                conn.on('data', (data) => {
+                    if (data.type === 'game_invite') {
+                        this.handleGameInvite(conn, data);
+                    }
+                    
+                    // Transférer les messages de salle au RoomSystem
+                    if (window.roomSystem && data.type && ['join-request', 'join-accepted', 'join-refused', 
+                        'player-kicked', 'room-mode-changed', 'player-joined', 
+                        'player-left', 'host-transferred'].includes(data.type)) {
+                        window.roomSystem.handleRoomMessage(conn, data);
+                    }
+                });
             });
 
             this.peer.on('error', (err) => {
@@ -755,6 +757,55 @@ class SimpleChatSystem {
         if (!window.game) return;
         
         this.showMessage(`📊 ${data.username} est au niveau ${data.level} avec ${data.score} points`, 'system');
+    }
+
+    // Gérer une invitation de jeu depuis le lobby
+    handleGameInvite(conn, data) {
+        console.log('📨 Invitation reçue de:', data.from);
+        
+        // Afficher une notification/modal
+        if (typeof CustomModals !== 'undefined') {
+            CustomModals.showConfirm(
+                '🎮 Invitation de jeu',
+                `${data.from} vous invite à jouer ! Accepter ?`,
+                async () => {
+                    // Accepter l'invitation
+                    conn.send({
+                        type: 'invite_accepted',
+                        from: this.currentUser
+                    });
+                    
+                    // Rejoindre la salle de l'hôte
+                    if (window.presenceSystem) {
+                        // Connecter au peer de l'hôte
+                        await window.presenceSystem.connectToRoomHost(conn.peer, 'invite');
+                        this.showMessage(`✅ Vous avez rejoint ${data.from}`, 'system');
+                    }
+                },
+                () => {
+                    // Refuser l'invitation
+                    conn.send({
+                        type: 'invite_refused',
+                        from: this.currentUser
+                    });
+                    this.showMessage('Invitation refusée', 'system');
+                }
+            );
+        } else {
+            // Fallback simple si CustomModals n'est pas disponible
+            const accept = confirm(`${data.from} vous invite à jouer ! Accepter ?`);
+            if (accept) {
+                conn.send({
+                    type: 'invite_accepted',
+                    from: this.currentUser
+                });
+            } else {
+                conn.send({
+                    type: 'invite_refused',
+                    from: this.currentUser
+                });
+            }
+        }
     }
 
     // Déconnecter P2P

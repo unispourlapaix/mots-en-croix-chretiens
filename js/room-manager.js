@@ -83,9 +83,22 @@ class RoomManager {
                 }
             });
             
-            // Supprimer espaces automatiquement (peerID sensibles à la casse, ne pas convertir)
+            // Normaliser le code automatiquement (majuscules, 6 caractères max)
             roomCodeInput.addEventListener('input', (e) => {
-                e.target.value = e.target.value.trim();
+                let value = e.target.value.trim().toUpperCase();
+                // Limiter à 6 caractères alphanumériques
+                value = value.replace(/[^A-Z0-9]/g, '').substring(0, 6);
+                e.target.value = value;
+                
+                // Auto-rejoindre quand 6 caractères sont entrés
+                if (value.length === 6) {
+                    // Petit délai pour que l'utilisateur voit le code complet
+                    setTimeout(() => {
+                        if (e.target.value === value) { // Vérifier qu'il n'a pas continué à taper
+                            this.handleJoinRoom();
+                        }
+                    }, 300);
+                }
             });
         }
         

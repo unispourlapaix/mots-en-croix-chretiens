@@ -1299,7 +1299,7 @@ class RoomSystem {
                     ` : `
                         <div class="player-actions-mini">
                             ${isInVoice ? `
-                                <button class="action-btn-mini btn-toggle-mic" title="${window.voiceUI?.voiceSystem?.isMuted ? 'Activer' : 'Couper'} le micro">
+                                <button class="action-btn-mini btn-toggle-mic ${window.voiceUI?.voiceSystem?.isMuted ? 'muted' : ''}" title="${window.voiceUI?.voiceSystem?.isMuted ? 'Activer' : 'Couper'} le micro">
                                     ${window.voiceUI?.voiceSystem?.isMuted ? '🔇' : '🎤'}
                                 </button>
                             ` : ''}
@@ -1362,17 +1362,29 @@ class RoomSystem {
             // Toggle micro (joueur local)
             else if (target.classList.contains('btn-toggle-mic')) {
                 console.log('🎤 Toggle micro');
-                if (window.voiceUI?.voiceSystem) {
-                    window.voiceUI.voiceSystem.toggleMute();
-                    setTimeout(() => this.updateChatBubble(), 100);
+                try {
+                    if (window.voiceUI?.voiceSystem) {
+                        window.voiceUI.voiceSystem.toggleMute();
+                        setTimeout(() => this.updateChatBubble(), 100);
+                    } else {
+                        console.warn('⚠️ Système vocal non disponible');
+                    }
+                } catch (error) {
+                    console.error('❌ Erreur toggle micro:', error);
                 }
             }
             
             // Contrôles vocaux
             else if (target.classList.contains('btn-voice-control')) {
                 console.log('🔊 Contrôles vocaux pour:', peerId);
-                if (peerId) {
-                    this.showVoiceControlMenu(peerId);
+                try {
+                    if (peerId) {
+                        this.showVoiceControlMenu(peerId);
+                    } else {
+                        console.warn('⚠️ peerId manquant pour contrôles vocaux');
+                    }
+                } catch (error) {
+                    console.error('❌ Erreur contrôles vocaux:', error);
                 }
             }
             

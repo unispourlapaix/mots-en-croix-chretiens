@@ -52,7 +52,7 @@ class PresenceSystem {
         return code;
     }
     
-    // CRÉER une salle (hôte)
+    // CRÉER une salle (hôte) - VERSION SIMPLIFIÉE avec Supabase
     async createRoom() {
         // Attendre que PeerJS soit prêt (avec retry)
         if (!window.simpleChatSystem?.peer?.id) {
@@ -78,9 +78,11 @@ class PresenceSystem {
         // Utiliser le peer existant (NE PAS recréer)
         const myPeerId = window.simpleChatSystem.peer.id;
         
-        // Le code de room EST le peerID de l'hôte
-        // C'est plus simple et ça marche multi-appareils !
-        const roomCode = myPeerId;
+        // Générer un code court à 6 caractères
+        const roomCode = this.generateRoomCode();
+        
+        // Stocker le mapping dans Supabase (ou fallback localStorage)
+        await this.saveRoomMapping(roomCode, myPeerId);
         
         // Initialiser myPresence si pas encore fait
         if (!this.myPresence) {
@@ -137,7 +139,7 @@ class PresenceSystem {
         return roomCode;
     }
     
-    // REJOINDRE une salle avec code
+    // REJOINDRE une salle avec code court
     async joinRoom(roomCode) {
         // Attendre que PeerJS soit prêt (avec retry)
         if (!window.simpleChatSystem?.peer?.id) {
@@ -160,12 +162,22 @@ class PresenceSystem {
             }
         }
         
-        roomCode = roomCode.trim(); // Ne pas convertir en majuscules (peerID sensibles à la casse)
+        roomCode = roomCode.trim().toUpperCase(); // Normaliser le code
         
-        // Validation minimale (le code est maintenant un peerID)
-        if (roomCode.length < 3) {
-            throw new Error('Code invalide (trop court)');
+        // Validation du code court
+        if (roomCode.length !== 6) {
+            throw new Error('Code invalide. Le code doit faire exactement 6 caractères (ex: ABC123)');
         }
+        
+        // Récupérer le mapping du code court vers le peerID (Supabase ou localStorage)
+        const hostPeerId = await this.getRoomMapping(roomCode);
+        
+        if (!hostPeerId) {
+            throw new Error(`Salle "${roomCode}" introuvable. Vérifiez le code ou créez une nouvelle partie.`);
+        }
+        
+        console.log('🎯 Code court:', roomCode);
+        console.log('🔗 Connexion au PeerID:', hostPeerId);
         
         // Initialiser myPresence si pas encore fait
         if (!this.myPresence) {
@@ -181,8 +193,8 @@ class PresenceSystem {
             };
         }
         
-        // Le roomCode est directement le peerID de l'hôte
-        const hostPeerId = roomCode;
+        // Récupérer le peerID via le mapping
+        const hostPeerId = mapping.peerId;
         
         // Vérifier si on est l'hôte
         const myPeerId = window.simpleChatSystem?.peer?.id;
@@ -457,66 +469,87 @@ class PresenceSystem {
     
     // Afficher modal avec code de salle
     showRoomCodeModal(roomCode) {
-        // Créer modal simple
+        // Créer modal avec design amélioré et instructions claires
         const modal = document.createElement('div');
         modal.style.cssText = `
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: #ffffff;
-            padding: 35px;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             z-index: 10000;
             text-align: center;
-            min-width: 320px;
+            min-width: 380px;
             max-width: 90vw;
         `;
         
         modal.innerHTML = `
-            <h2 style="color: #333; margin-bottom: 12px; font-size: 20px; font-weight: 600;">🏠 Salle créée !</h2>
-            <p style="margin-bottom: 20px; color: #666; font-size: 14px;">Partagez ce code pour inviter vos amis</p>
-            <div style="
-                background: #f8f9fa;
-                padding: 16px;
-                border-radius: 10px;
-                margin: 20px 0;
-                border: 2px solid #e9ecef;
-            ">
-                <code style="
+            <div style="background: white; padding: 30px; border-radius: 16px;">
+                <div style="font-size: 48px; margin-bottom: 15px;">🎉</div>
+                <h2 style="color: #667eea; margin-bottom: 10px; font-size: 24px; font-weight: 700;">Partie créée !</h2>
+                <p style="margin-bottom: 25px; color: #666; font-size: 15px; line-height: 1.5;">
+                    Partagez ce code avec vos amis<br>
+                    <small style="color: #999; font-size: 13px;">Par SMS, email, WhatsApp...</small>
+                </p>
+                <div style="
+                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                    padding: 24px;
+                    border-radius: 12px;
+                    margin: 25px 0;
+                    border: 3px dashed #667eea;
+                ">
+                    <div style="color: #999; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">
+                        Code de partie
+                    </div>
+                    <code style="
+                        font-size: 32px;
+                        font-weight: 800;
+                        color: #667eea;
+                        font-family: 'Courier New', monospace;
+                        letter-spacing: 4px;
+                        text-shadow: 0 2px 4px rgba(102, 126, 234, 0.1);
+                    ">${roomCode}</code>
+                </div>
+                <div style="
+                    background: #fffbeb;
+                    padding: 15px;
+                    border-radius: 10px;
+                    margin: 20px 0;
+                    border-left: 4px solid #fbbf24;
+                ">
+                    <p style="color: #92400e; font-size: 13px; margin: 0; text-align: left;">
+                        💡 <strong>Conseil :</strong> Vos amis doivent cliquer sur "🎮 Rejoindre" et entrer ce code
+                    </p>
+                </div>
+                <button id="copyRoomCode" style="
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border: none;
+                    padding: 14px 28px;
+                    border-radius: 10px;
+                    cursor: pointer;
                     font-size: 15px;
-                    font-weight: 500;
+                    font-weight: 600;
+                    margin: 8px 5px;
+                    transition: all 0.3s;
+                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                ">📋 Copier le code</button>
+                <button id="closeRoomModal" style="
+                    background: #e9ecef;
                     color: #495057;
-                    font-family: 'Courier New', monospace;
-                    word-break: break-all;
-                    line-height: 1.6;
-                ">${roomCode}</code>
+                    border: none;
+                    padding: 14px 28px;
+                    border-radius: 10px;
+                    cursor: pointer;
+                    font-size: 15px;
+                    font-weight: 600;
+                    margin: 8px 5px;
+                    transition: all 0.3s;
+                ">✓ Compris</button>
             </div>
-            <button id="copyRoomCode" style="
-                background: #667eea;
-                color: white;
-                border: none;
-                padding: 12px 24px;
-                border-radius: 8px;
-                cursor: pointer;
-                font-size: 14px;
-                font-weight: 500;
-                margin: 0 5px;
-                transition: all 0.2s;
-            ">📋 Copier</button>
-            <button id="closeRoomModal" style="
-                background: #e9ecef;
-                color: #495057;
-                border: none;
-                padding: 12px 24px;
-                border-radius: 8px;
-                cursor: pointer;
-                font-size: 14px;
-                font-weight: 500;
-                margin: 0 5px;
-                transition: all 0.2s;
-            ">Fermer</button>
         `;
         
         document.body.appendChild(modal);
@@ -527,24 +560,28 @@ class PresenceSystem {
             try {
                 await navigator.clipboard.writeText(roomCode);
                 copyBtn.textContent = '✅ Copié !';
-                copyBtn.style.background = '#10ac84';
+                copyBtn.style.background = 'linear-gradient(135deg, #10ac84 0%, #0ecc74 100%)';
                 setTimeout(() => {
-                    copyBtn.textContent = '📋 Copier';
-                    copyBtn.style.background = '#667eea';
+                    copyBtn.textContent = '📋 Copier le code';
+                    copyBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
                 }, 2000);
             } catch (err) {
                 console.error('Erreur copie:', err);
+                copyBtn.textContent = '❌ Erreur';
+                setTimeout(() => {
+                    copyBtn.textContent = '📋 Copier le code';
+                }, 2000);
             }
         };
         
-        // Effet hover
+        // Effets hover
         copyBtn.addEventListener('mouseenter', () => {
-            copyBtn.style.transform = 'translateY(-2px)';
-            copyBtn.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.4)';
+            copyBtn.style.transform = 'translateY(-3px) scale(1.05)';
+            copyBtn.style.boxShadow = '0 8px 20px rgba(102, 126, 234, 0.5)';
         });
         copyBtn.addEventListener('mouseleave', () => {
-            copyBtn.style.transform = 'translateY(0)';
-            copyBtn.style.boxShadow = 'none';
+            copyBtn.style.transform = 'translateY(0) scale(1)';
+            copyBtn.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.4)';
         });
         
         const closeBtn = document.getElementById('closeRoomModal');
@@ -1163,6 +1200,78 @@ class PresenceSystem {
         if (this.channel) {
             this.channel.close();
         }
+    }
+    
+    // Sauvegarder le mapping code -> peerId (Supabase + fallback localStorage)
+    async saveRoomMapping(roomCode, peerId) {
+        const mapping = {
+            room_code: roomCode,
+            peer_id: peerId,
+            created_at: new Date().toISOString(),
+            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24h
+        };
+        
+        // Essayer Supabase d'abord
+        if (typeof supabase !== 'undefined' && supabase) {
+            try {
+                const { error } = await supabase
+                    .from('room_mappings')
+                    .upsert(mapping, { onConflict: 'room_code' });
+                
+                if (!error) {
+                    console.log('✅ Mapping sauvegardé dans Supabase:', roomCode);
+                    return true;
+                } else {
+                    console.warn('⚠️ Erreur Supabase:', error.message);
+                }
+            } catch (err) {
+                console.warn('⚠️ Supabase indisponible:', err.message);
+            }
+        }
+        
+        // Fallback localStorage (local seulement)
+        console.log('📦 Fallback localStorage pour:', roomCode);
+        localStorage.setItem(`room_mapping_${roomCode}`, JSON.stringify(mapping));
+        return true;
+    }
+    
+    // Récupérer le mapping code -> peerId
+    async getRoomMapping(roomCode) {
+        // Essayer Supabase d'abord
+        if (typeof supabase !== 'undefined' && supabase) {
+            try {
+                const { data, error } = await supabase
+                    .from('room_mappings')
+                    .select('peer_id')
+                    .eq('room_code', roomCode)
+                    .gt('expires_at', new Date().toISOString())
+                    .single();
+                
+                if (data && !error) {
+                    console.log('✅ Mapping trouvé dans Supabase');
+                    return data.peer_id;
+                }
+            } catch (err) {
+                console.warn('⚠️ Supabase indisponible:', err.message);
+            }
+        }
+        
+        // Fallback localStorage
+        const localData = localStorage.getItem(`room_mapping_${roomCode}`);
+        if (localData) {
+            try {
+                const mapping = JSON.parse(localData);
+                // Vérifier expiration
+                if (mapping.expires_at && new Date(mapping.expires_at) > new Date()) {
+                    console.log('📦 Mapping trouvé dans localStorage');
+                    return mapping.peer_id;
+                }
+            } catch (err) {
+                console.error('Erreur parsing mapping:', err);
+            }
+        }
+        
+        return null;
     }
 }
 
