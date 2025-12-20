@@ -30,12 +30,25 @@ class YjsPresenceSystem {
         try {
             console.log('🔄 Initialisation Y.js Presence...');
             
+            // Attendre que Y et y-webrtc soient chargés (max 10s)
+            let attempts = 0;
+            while (attempts < 20) {
+                if (typeof Y !== 'undefined' && typeof WebrtcProvider !== 'undefined') {
+                    break;
+                }
+                console.log(`⏳ Attente chargement Y.js... (${attempts + 1}/20)`);
+                await new Promise(resolve => setTimeout(resolve, 500));
+                attempts++;
+            }
+            
             // Vérifier que Y et y-webrtc sont chargés
             if (typeof Y === 'undefined') {
-                throw new Error('Y.js non chargé - ajoutez le CDN dans index.html');
+                console.warn('⚠️ Y.js non chargé après 10s - fonctionnalité désactivée');
+                return false;
             }
             if (typeof WebrtcProvider === 'undefined') {
-                throw new Error('y-webrtc non chargé - ajoutez le CDN dans index.html');
+                console.warn('⚠️ y-webrtc non chargé après 10s - fonctionnalité désactivée');
+                return false;
             }
             
             // Créer le document partagé
