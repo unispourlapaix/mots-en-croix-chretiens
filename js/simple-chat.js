@@ -377,8 +377,16 @@ class SimpleChatSystem {
             if (window.chatSystem && window.chatSystem.connections) {
                 window.chatSystem.connections.delete(conn.peer);
                 const username = conn.metadata?.username || 'Utilisateur';
-                window.chatSystem.sendSystemMessage(`${username} a quitté le chat 👋`);
-                window.chatSystem.updateParticipantCount();
+                
+                // Vérifier que sendSystemMessage existe
+                if (typeof window.chatSystem.sendSystemMessage === 'function') {
+                    window.chatSystem.sendSystemMessage(`${username} a quitté le chat 👋`);
+                }
+                
+                // Vérifier que updateParticipantCount existe
+                if (typeof window.chatSystem.updateParticipantCount === 'function') {
+                    window.chatSystem.updateParticipantCount();
+                }
             }
             
             // Notifier le room system
