@@ -10,17 +10,11 @@ class RoomSystem {
         this.availablePlayers = new Map(); // Liste des joueurs en ligne
         this.presenceInterval = null; // Interval pour annoncer sa présence
         
-        // 🔥 Y.js Presence System pour lobby global
-        this.yjsPresence = null;
-        
         // Charger la liste des joueurs bloqués
         this.loadBlockedPlayers();
         
         // Auto-créer ma salle au démarrage
         this.createMyRoom();
-        
-        // Initialiser Y.js après P2P
-        setTimeout(() => this.initYjsPresence(), 3000);
         
         // Écouter les changements d'authentification pour mettre à jour la bulle
         if (typeof authSystem !== 'undefined') {
@@ -183,7 +177,8 @@ class RoomSystem {
                 // Démarrer l'annonce de présence périodique
                 this.startPresenceBroadcast();
                 
-                // 🌐 Annoncer ma présence via Supabase pour découverte cross-browser
+                // 🌐 Annoncer ma présence via Supabase Realtime pour découverte cross-device
+                this.joinLobbyPresence();
                 this.announcePresenceToSupabase();
                 
             } else {
@@ -1884,95 +1879,61 @@ class RoomSystem {
         }, 100);
     }
 
-    // 🌐 Annoncer ma présence via Supabase Realtime (découverte cross-browser)
-    async announcePresenceToSupabase() {
-        if (!this.chatSystem?.peer?.id || !window.presenceSystem) {
-            console.log('⏭️ Supabase presence skip: pas de peer ou presence system');
+    // 🌐 Rejoindre le lobby de présence Supabase Realtime
+    async joinLobbyPresence() {
+        if (!this.chatSystem?.peer?.id || !window.lobbyPresence) {
+            console.log('⏭️ Lobby presence skip: pas de peer ou lobbyPresence');
             return;
         }
 
         try {
-            // Enregistrer dans le système de présence P2P local
-            await window.presenceSystem.registerInRoom('global_lobby');
-            console.log('✅ Présence annoncée dans le lobby global');
+            const peerId = this.chatSystem.peer.id;
+            const username = this.chatSystem.currentUser || 'Joueur';
+            const avatar = this.chatSystem.getUserAvatar(username) || '😊';
+
+            // Rejoindre le lobby Supabase Realtime
+            const success = await window.lobbyPresence.joinLobby(peerId, username, avatar);
             
-            // La découverte se fera via localStorage cross-tab et
-            // les connexions P2P directes quand deux joueurs sont sur la même page
-        } catch (err) {
-            console.warn('⚠️ Erreur annonce présence:', err);
-        }
-    }
-    
-    // 🔥 Initialiser Y.js Presence System
-    async initYjsPresence() {
-        if (typeof YjsPresenceSystem === 'undefined') {
-            console.warn('⚠️ YjsPresenceSystem non chargé');
-            return;
-        }
-        
-        if (!this.chatSystem?.peer?.id) {
-            console.log('⏳ Peer pas encore prêt, réessai dans 2s...');
-            setTimeout(() => this.initYjsPresence(), 2000);
-            return;
-        }
-        
-        try {
-            console.log('🚀 Initialisation Y.js Presence...');
-            
-            this.yjsPresence = new YjsPresenceSystem();
-            const success = await this.yjsPresence.init();
-            
-            if (!success) {
-                console.error('❌ Échec init Y.js');
-                return;
+            if (success) {
+                console.log('✅ Rejoint le lobby Supabase Realtime');
+                
+                // Définir le callback de mise à jour
+                window.lobbyPresence.setOnPlayersUpdated((players) => {
+                    console.log(`📡 ${players.length} joueurs dans le lobby Realtime`);
+                    
+                    // Mettre à jour availablePlayers avec les joueurs du lobby
+                    players.forEach(player => {
+                        if (player.peer_id !== peerId) { // Ne pas me rajouter
+                            this.availablePlayers.set(player.peer_id, {
+                                username: player.username,
+                                avatar: player.avatar,
+                                acceptMode: 'manual', // Par défaut
+                                roomMode: 'manual',
+                                playerCount: 1,
+                                maxPlayers: 8,
+                                lastSeen: Date.now(),
+                                isMe: false,
+                                isBot: false,
+                                fromRealtime: true // Marqueur pour indiquer source Realtime
+                            });
+                        }
+                    });
+                    
+                    // Mettre à jour l'UI
+                    this.updateAvailablePlayersList();
+                    this.updateChatBubble();
+                });
             }
-            
-            // Démarrer le heartbeat
-            this.yjsPresence.startHeartbeat(
-                this.chatSystem.peer.id,
-                this.chatSystem.currentUser || 'Anonyme',
-                this.getMyAvatar(),
-                null // Pas encore dans une salle privée
-            );
-            
-            // Écouter les changements de joueurs
-            this.yjsPresence.onPlayersChange((players) => {
-                console.log(`👥 ${players.length} joueur(s) en ligne (Y.js)`, players);
-                this.updateAvailablePlayersFromYjs(players);
-            });
-            
-            console.log('✅ Y.js Presence actif');
         } catch (err) {
-            console.error('❌ Erreur init Y.js Presence:', err);
+            console.warn('⚠️ Erreur joinLobbyPresence:', err);
         }
     }
-    
-    // Mettre à jour la liste des joueurs disponibles depuis Y.js
-    updateAvailablePlayersFromYjs(players) {
-        // Vider la liste actuelle (sauf moi)
-        const myPeerId = this.chatSystem?.peer?.id;
-        const me = this.availablePlayers.get('me');
-        this.availablePlayers.clear();
-        
-        if (me) {
-            this.availablePlayers.set('me', me);
-        }
-        
-        // Ajouter tous les joueurs Y.js
-        players.forEach(player => {
-            // Ne pas m'ajouter deux fois
-            if (player.peerId === myPeerId) return;
-            
-            this.availablePlayers.set(player.peerId, {
-                peerId: player.peerId,
-                username: player.username,
-                avatar: player.avatar,
-                roomCode: player.roomCode
-            });
-        });
-        
-        // Mettre à jour l'UI
-        this.updateAvailablePlayersList();
+
+    // 🌐 Annoncer ma présence via Supabase Realtime (découverte cross-browser)
+    async announcePresenceToSupabase() {
+        // Cette méthode est maintenant remplacée par joinLobbyPresence()
+        // Gardée pour compatibilité avec ancien code
+        await this.joinLobbyPresence();
     }
 }
 
