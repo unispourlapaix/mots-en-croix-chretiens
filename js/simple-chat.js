@@ -84,6 +84,9 @@ class SimpleChatSystem {
         this.updateUsername();
 
         try {
+            // Récupérer le peer ID sauvegardé (persisté entre sessions)
+            const savedPeerId = this.getSavedPeerId();
+            
             // Configuration PeerJS avec serveurs STUN pour meilleure connectivité
             const peerConfig = {
                 config: {
@@ -94,11 +97,22 @@ class SimpleChatSystem {
                 }
             };
             
-            this.peer = new Peer(peerConfig);
+            // Utiliser le peer ID sauvegardé si disponible
+            if (savedPeerId) {
+                console.log('🔄 Réutilisation du peer ID sauvegardé:', savedPeerId);
+                this.peer = new Peer(savedPeerId, peerConfig);
+            } else {
+                console.log('🆕 Création d\'un nouveau peer ID');
+                this.peer = new Peer(peerConfig);
+            }
             
             this.peer.on('open', (id) => {
                 console.log('🔗 PeerJS connecté, ID:', id);
                 this.roomCode = id;
+                
+                // Sauvegarder le peer ID pour les prochaines sessions
+                this.savePeerId(id);
+                
                 // Notifier l'UI que le peer est prêt
                 window.dispatchEvent(new CustomEvent('roomCreated', { detail: { roomCode: id } }));
             });
@@ -805,6 +819,49 @@ class SimpleChatSystem {
                     from: this.currentUser
                 });
             }
+        }
+    }
+
+    // Sauvegarder le peer ID pour réutilisation
+    savePeerId(peerId) {
+        try {
+            localStorage.setItem('persistent_peer_id', peerId);
+            console.log('💾 Peer ID sauvegardé pour les prochaines sessions');
+        } catch (err) {
+            console.warn('⚠️ Impossible de sauvegarder le peer ID:', err);
+        }
+    }
+
+    // Récupérer le peer ID sauvegardé
+    getSavedPeerId() {
+        try {
+            const saved = localStorage.getItem('persistent_peer_id');
+            if (saved) {
+                console.log('📦 Peer ID trouvé dans le cache');
+                return saved;
+            }
+        } catch (err) {
+            console.warn('⚠️ Erreur lecture peer ID:', err);
+        }
+        return null;
+    }
+
+    // Réinitialiser le peer ID (si problème de connexion)
+    resetPeerId() {
+        try {
+            localStorage.removeItem('persistent_peer_id');
+            console.log('🔄 Peer ID réinitialisé');
+            
+            // Déconnecter le peer actuel
+            if (this.peer) {
+                this.peer.destroy();
+                this.peer = null;
+            }
+            
+            // Réinitialiser
+            this.initP2P();
+        } catch (err) {
+            console.error('❌ Erreur réinitialisation peer:', err);
         }
     }
 
