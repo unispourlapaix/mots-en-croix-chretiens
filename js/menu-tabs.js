@@ -57,14 +57,14 @@ class MenuTabSystem {
         this.updateAvatarLocks();
         
         // Gérer la sélection d'avatar
-        document.addEventListener('click', (e) => {
+        document.addEventListener('click', async (e) => {
             if (e.target.classList.contains('avatar-option')) {
                 const unlockScore = parseInt(e.target.dataset.unlock) || 0;
                 const userScore = (authSystem && authSystem.isAuthenticated()) ? (authSystem.getCurrentUser().max_score || 0) : 0;
                 
                 // Vérifier si l'avatar est déverrouillé
                 if (unlockScore > userScore) {
-                    alert(`🔒 Cet avatar est verrouillé ! Atteignez ${unlockScore} points pour le débloquer.`);
+                    await CustomModals.showAlert('🔒 Avatar verrouillé', `Cet avatar est verrouillé ! Atteignez ${unlockScore} points pour le débloquer.`);
                     return;
                 }
                 
@@ -147,7 +147,7 @@ class MenuTabSystem {
     
     async shareScore() {
         if (!authSystem || !authSystem.isAuthenticated()) {
-            alert('Connectez-vous pour partager votre score !');
+            await CustomModals.showAlert('🔒 Connexion requise', 'Connectez-vous pour partager votre score !');
             return;
         }
         

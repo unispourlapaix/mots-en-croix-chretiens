@@ -1112,8 +1112,21 @@ class PresenceSystem {
     notifyPresenceUpdate() {
         if (!window.roomSystem) return;
         
+        // Sauvegarder les bots avant le clear
+        const bots = new Map();
+        window.roomSystem.availablePlayers.forEach((player, peerId) => {
+            if (player.isBot) {
+                bots.set(peerId, player);
+            }
+        });
+        
         // Clear et rebuild pour éviter doublons
         window.roomSystem.availablePlayers.clear();
+        
+        // Restaurer les bots
+        bots.forEach((bot, peerId) => {
+            window.roomSystem.availablePlayers.set(peerId, bot);
+        });
         
         // Ajouter moi-même
         if (this.myPresence) {

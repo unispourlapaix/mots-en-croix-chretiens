@@ -100,7 +100,7 @@ class ChatUI {
     async handleJoinRoom() {
         const roomCode = this.chatRoomCodeInput?.value.trim();
         if (!roomCode) {
-            alert('Veuillez entrer un code de room');
+            await CustomModals.showAlert('⚠️ Code manquant', 'Veuillez entrer un code de room');
             return;
         }
 
@@ -112,7 +112,7 @@ class ChatUI {
         }
 
         if (!this.chatSystem || !this.chatSystem.peer) {
-            alert('Impossible d\'initialiser le chat P2P. Réessayez dans quelques secondes.');
+            await CustomModals.showAlert('❌ Chat indisponible', 'Impossible d\'initialiser le chat P2P. Réessayez dans quelques secondes.');
             return;
         }
 
@@ -140,7 +140,7 @@ class ChatUI {
             }
         } catch (error) {
             console.error('Erreur connexion room:', error);
-            alert('Erreur lors de la connexion: ' + error.message);
+            await CustomModals.showAlert('❌ Erreur de connexion', error.message);
         }
     }
 
@@ -156,18 +156,18 @@ class ChatUI {
                     this.chatCopyCodeBtn.textContent = originalText;
                 }, 2000);
             }
-        }).catch(err => {
+        }).catch(async err => {
             console.error('Erreur copie:', err);
-            alert('Erreur lors de la copie du code');
+            await CustomModals.showAlert('❌ Erreur', 'Erreur lors de la copie du code');
         });
     }
 
-    handleSendMessage() {
+    async handleSendMessage() {
         const message = this.chatMessageInput?.value.trim();
         if (!message) return;
 
         if (!this.chatSystem) {
-            alert('Le système de chat n\'est pas disponible');
+            await CustomModals.showAlert('❌ Chat indisponible', 'Le système de chat n\'est pas disponible');
             return;
         }
 
@@ -180,7 +180,7 @@ class ChatUI {
             }
         } catch (error) {
             console.error('Erreur envoi message:', error);
-            alert('Erreur lors de l\'envoi du message');
+            await CustomModals.showAlert('❌ Erreur', 'Erreur lors de l\'envoi du message');
         }
     }
 

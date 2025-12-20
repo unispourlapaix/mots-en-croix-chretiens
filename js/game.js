@@ -324,6 +324,14 @@ class ChristianCrosswordGame {
                         // Compléter automatiquement les mots déjà complétés
                         this.restoreCompletedWords();
                         
+                        // Notifier que le jeu a été chargé (pour Unisona et les bots)
+                        window.dispatchEvent(new CustomEvent('gameLoaded', {
+                            detail: {
+                                level: this.currentLevel,
+                                gameMode: this.gameMode
+                            }
+                        }));
+                        
                     } catch (error) {
                         console.error('❌ Erreur restauration:', error);
                         // En cas d'erreur, réinitialiser l'état et afficher l'écran de démarrage
@@ -528,11 +536,19 @@ class ChristianCrosswordGame {
         
         // Gérer les boutons de suppression
         modal.querySelectorAll('.resume-delete-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', async (e) => {
                 const index = parseInt(e.target.dataset.index);
                 const save = availableSaves[index];
                 
-                if (confirm(`Êtes-vous sûr de vouloir supprimer la partie ${save.mode.toUpperCase()} ?`)) {
+                // Créer une modal de confirmation personnalisée
+                const confirmDelete = await CustomModals.showConfirm(
+                    '🗑️ Supprimer la partie ?',
+                    `Êtes-vous sûr de vouloir supprimer la partie ${save.mode.toUpperCase()} ?\n\nNiveau ${save.data.currentLevel || 1} - ${save.data.score || 0} points\n\nCette action est irréversible.`,
+                    '🗑️ Supprimer',
+                    '❌ Annuler'
+                );
+                
+                if (confirmDelete) {
                     localStorage.removeItem(save.saveKey);
                     availableSaves.splice(index, 1);
                     
@@ -635,7 +651,7 @@ class ChristianCrosswordGame {
         
         // Gérer le clic sur les cartes de mode
         modal.querySelectorAll('.mode-card').forEach(card => {
-            card.addEventListener('click', () => {
+            card.addEventListener('click', async () => {
                 const mode = card.dataset.mode;
                 
                 // Vérifier s'il existe déjà une sauvegarde pour ce mode
@@ -643,7 +659,7 @@ class ChristianCrosswordGame {
                 const existingSave = localStorage.getItem(saveKey);
                 
                 if (existingSave) {
-                    if (confirm(`Une partie ${mode.toUpperCase()} existe déjà. La supprimer pour recommencer ?`)) {
+                    if (await CustomModals.showConfirm('🗑️ Partie existante', `Une partie ${mode.toUpperCase()} existe déjà. La supprimer pour recommencer ?`, '🗑️ Supprimer', '❌ Garder')) {
                         localStorage.removeItem(saveKey);
                     } else {
                         modal.remove();
@@ -1691,6 +1707,12 @@ class ChristianCrosswordGame {
         if (window.audioSystem) {
             window.audioSystem.setGameMode(this.gameMode);
             window.audioSystem.playNextTrack();
+        }
+        
+        // Message de bienvenue d'un bot assistant
+        if (window.assistantBotManager) {
+            const username = window.simpleChatSystem?.currentUser || 'Joueur';
+            window.assistantBotManager.sendMessage('welcome', { username });
         }
         
         // Émettre événement pour notifier que le jeu a démarré (après l'intro)
@@ -2998,6 +3020,30 @@ class ChristianCrosswordGame {
                 welcomeAI.congratulate();
             }
             
+            // Message de félicitation d'un bot assistant
+            if (window.assistantBotManager) {
+                const username = window.simpleChatSystem?.currentUser || 'Joueur';
+                window.assistantBotManager.sendMessage('achievement', { 
+                    username,
+                    level: this.currentLevel,
+                    score: this.score
+                });
+            }
+            
+            // Émettre événement pour les bots
+            window.dispatchEvent(new CustomEvent('levelComplete', {
+                detail: {
+                    username: window.simpleChatSystem?.currentUser || 'Joueur',
+                    level: this.currentLevel,
+                    score: this.score
+                }
+            }));
+            
+            // Arrêter tous les bots AI
+            if (window.aiBotManager) {
+                window.aiBotManager.stopAllBots();
+            }
+            
             // Ajouter les points du niveau
             const bonusPoints = Math.round(100 * this.currentLevel * config.basePointsMultiplier);
             this.score += bonusPoints;
@@ -3545,6 +3591,61 @@ class ChristianCrosswordGame {
             this.saveGame();
         }
     }
+    
+    // Révéler un mot complet (utilisé par les bots IA)
+    revealWord(wordIndex, noPenalty = false) {
+        if (!this.words || wordIndex < 0 || wordIndex >= this.words.length) {
+            console.error('❌ Index de mot invalide:', wordIndex);
+            return false;
+        }
+        
+        const wordData = this.words[wordIndex];
+        const wordKey = `${wordIndex}-${wordData.word}`;
+        
+        // Vérifier si le mot n'est pas déjà complété
+        if (this.completedWords.has(wordKey) || this.completedWords.has(wordData.word)) {
+            console.log('ℹ️ Mot déjà révélé:', wordData.word);
+            return false;
+        }
+        
+        console.log(`🔓 Révélation du mot "${wordData.word}" (index: ${wordIndex})`);
+        
+        // Révéler toutes les lettres du mot
+        if (wordData.path) {
+            wordData.path.forEach(([row, col]) => {
+                const letter = this.solution[row][col];
+                this.grid[row][col] = letter;
+                
+                // Mettre à jour l'affichage
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                if (cell) {
+                    const letterSpan = cell.querySelector('.cell-letter');
+                    if (letterSpan) {
+                        letterSpan.textContent = letter;
+                    }
+                    cell.classList.add('correct');
+                }
+            });
+            
+            // Marquer le mot comme complété
+            this.completedWords.add(wordKey);
+            this.completedWords.add(wordData.word);
+            
+            // Appliquer la pénalité si nécessaire (pas pour les bots)
+            if (!noPenalty) {
+                this.score -= config.hintPenalty * wordData.word.length;
+                const scoreEl = document.getElementById('infoBannerScore');
+                if (scoreEl) scoreEl.textContent = Math.max(0, this.score);
+            }
+            
+            // Vérifier si le niveau est terminé
+            this.checkIfLevelComplete();
+            
+            return true;
+        }
+        
+        return false;
+    }
 
     async nextLevel() {
         const totalLevels = gameDataManager.getTotalLevels();
@@ -3859,7 +3960,7 @@ class ChristianCrosswordGame {
     }
 
     async handleEditProfile() {
-        const newUsername = prompt('Nouveau pseudo:');
+        const newUsername = await CustomModals.showPrompt('✏️ Modifier le pseudo', 'Nouveau pseudo:', '', '', '✓ Valider', '❌ Annuler');
         if (newUsername && newUsername.trim() && typeof authSystem !== 'undefined') {
             const result = await authSystem.updateUsername(newUsername.trim());
             if (result.success) {

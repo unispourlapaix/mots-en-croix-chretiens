@@ -267,6 +267,7 @@ class WelcomeAI {
         this.isPlaying = true;
         this.score = 0;
         this.wordsFound = [];
+        this.lastPauseTime = 0; // Éviter les pauses consécutives
         
         // Annoncer mon arrivée dans la course
         if (window.multiplayerRace.isRaceMode) {
@@ -353,8 +354,18 @@ class WelcomeAI {
     
     // Simuler une pause de réflexion
     shouldTakePause() {
-        // 15% de chance de faire une pause (comme un humain qui réfléchit)
-        return Math.random() < 0.15;
+        // Éviter les pauses trop fréquentes (minimum 10 secondes entre chaque pause)
+        const now = Date.now();
+        if (now - this.lastPauseTime < 10000) {
+            return false;
+        }
+        
+        // 5% de chance de faire une pause (réduit de 10% à 5%)
+        if (Math.random() < 0.05) {
+            this.lastPauseTime = now;
+            return true;
+        }
+        return false;
     }
     
     // Simuler une progression en course
@@ -381,7 +392,8 @@ class WelcomeAI {
                 "Je cherche... ✨"
             ];
             
-            if (Math.random() < 0.5) { // 50% de chance d'afficher le message de pause
+            // 40% de chance d'afficher le message de pause
+            if (Math.random() < 0.4) {
                 const randomPause = pauseMessages[Math.floor(Math.random() * pauseMessages.length)];
                 this.sendChatMessage(randomPause, 'system');
             }
@@ -410,34 +422,30 @@ class WelcomeAI {
         const easiestWords = availableWords.slice(0, Math.min(3, availableWords.length));
         const randomWord = easiestWords[Math.floor(Math.random() * easiestWords.length)];
         
+        // Trouver l'index du mot dans le jeu pour le révéler
+        const wordIndex = this.currentGame.words.findIndex(w => w.word === randomWord.word);
+        
+        if (wordIndex === -1) {
+            console.warn(`⚠️ Unisona: Mot "${randomWord.word}" non trouvé dans la liste`);
+            return;
+        }
+        
         this.wordsFound.push(randomWord.word);
         
         // Calculer un score
         const wordScore = randomWord.word.length * 10 + 50; // 10pts/lettre + 50pts bonus
         this.score += wordScore;
         
-        // Calculer la progression
+        // NE PAS révéler le mot dans la grille du joueur - Unisona joue sa propre partie
+        console.log(`✅ Unisona a trouvé le mot n°${wordIndex + 1} (dans sa propre partie)`);
+        
+        // Calculer la progression (pour usage interne uniquement)
         const progress = (this.wordsFound.length / levelData.words.length) * 100;
         
-        // Calculer les lettres totales et correctes
-        const totalLetters = levelData.words.reduce((sum, w) => sum + w.word.length, 0);
-        const lettersCorrect = this.wordsFound.reduce((sum, word) => sum + word.length, 0);
+        // Unisona joue sa propre partie - pas d'interaction avec multiplayerRace
+        // Elle annonce juste ses découvertes dans le chat
         
-        // Envoyer la progression via le système de course SI en mode multijoueur
-        if (window.multiplayerRace && window.multiplayerRace.isRaceMode) {
-            // Simuler la réception d'une progression comme si c'était un joueur distant
-            window.multiplayerRace.receiveProgress(this.name, 'word', {
-                word: randomWord.word,
-                score: this.score,
-                raceScore: this.score, // Pour un bot, score = raceScore
-                wordsCompleted: this.wordsFound.length,
-                lettersCorrect: lettersCorrect,
-                totalLetters: totalLetters,
-                percentage: progress
-            });
-        }
-        
-        // Messages variés (en mode course ET en mode solo)
+        // Messages variés
         const messageChance = Math.random();
         
         if (messageChance < 0.5) { // 50% de chance de commenter
@@ -569,5 +577,37 @@ if (document.readyState === 'loading') {
         setTimeout(() => welcomeAI.makeAvailableForRace(), 5000);
     }, 1500);
 }
+
+// Écouter la fin du niveau pour réinitialiser Unisona
+window.addEventListener('levelComplete', () => {
+    if (welcomeAI.isPlaying) {
+        // Arrêter Unisona proprement
+        welcomeAI.leaveRace();
+        
+        // Recommencer au nouveau niveau après un délai
+        setTimeout(() => {
+            if (window.game && window.game.gameStarted) {
+                welcomeAI.joinSoloMode();
+            }
+        }, 3000); // Attendre 3 secondes avant de rejoindre
+    }
+});
+
+// Écouter le chargement d'une sauvegarde
+window.addEventListener('gameLoaded', (event) => {
+    const { gameMode } = event.detail;
+    
+    // Ne démarrer Unisona qu'en mode solo (pas en mode race/multijoueur)
+    const isMultiplayerMode = window.multiplayerRace?.isRaceMode || gameMode === 'race';
+    
+    if (!isMultiplayerMode && window.game && window.game.gameStarted) {
+        console.log('🔄 Sauvegarde chargée - Unisona rejoint la partie');
+        
+        // Attendre un peu que tout soit restauré
+        setTimeout(() => {
+            welcomeAI.joinSoloMode();
+        }, 2000);
+    }
+});
 
 console.log('✅ Unisona (Bot IA) initialisée - Prête pour le chat et les courses !');

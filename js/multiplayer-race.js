@@ -401,7 +401,7 @@ les yeux fixés sur Jésus." - Hébreux 12:1-2
     }
     
     // Afficher le popup de victoire
-    showWinnerPopup(winner, allPlayers) {
+    async showWinnerPopup(winner, allPlayers) {
         const isMe = winner.isMe;
         const message = isMe 
             ? `🏆 VICTOIRE ! 🏆\n\nVous avez gagné avec ${winner.score} points !`
@@ -419,7 +419,7 @@ les yeux fixés sur Jésus." - Hébreux 12:1-2
         if (this.game && typeof this.game.showKawaiiModal === 'function') {
             this.game.showKawaiiModal(message + ranking, '🎉');
         } else {
-            alert(message + ranking);
+            await CustomModals.showAlert('🎉 Fin de la course !', message + ranking);
         }
         
         // Message dans le chat

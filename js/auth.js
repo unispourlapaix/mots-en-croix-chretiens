@@ -779,16 +779,16 @@ class AuthSystem {
         // Bouton changer username
         if (changeUsernameBtn) {
             changeUsernameBtn.addEventListener('click', async () => {
-                const newUsername = prompt('Nouveau pseudo (3-20 caractères):');
+                const newUsername = await CustomModals.showPrompt('✏️ Changer de pseudo', 'Nouveau pseudo (3-20 caractères):', '', '', '✓ Valider', '❌ Annuler');
                 if (!newUsername) return;
 
                 if (newUsername.length < 3 || newUsername.length > 20) {
-                    alert('Le pseudo doit contenir entre 3 et 20 caractères');
+                    await CustomModals.showAlert('⚠️ Pseudo invalide', 'Le pseudo doit contenir entre 3 et 20 caractères');
                     return;
                 }
 
                 if (!/^[a-zA-Z0-9_]+$/.test(newUsername)) {
-                    alert('Le pseudo ne peut contenir que des lettres, chiffres et underscores');
+                    await CustomModals.showAlert('⚠️ Pseudo invalide', 'Le pseudo ne peut contenir que des lettres, chiffres et underscores');
                     return;
                 }
 
@@ -798,10 +798,10 @@ class AuthSystem {
                 const result = await this.changeUsername(newUsername);
 
                 if (result.success) {
-                    alert(result.message);
+                    await CustomModals.showAlert('✅ Succès', result.message);
                     updateProfileDisplay();
                 } else {
-                    alert('Erreur: ' + result.error);
+                    await CustomModals.showAlert('❌ Erreur', result.error);
                 }
 
                 changeUsernameBtn.disabled = false;
@@ -812,7 +812,7 @@ class AuthSystem {
         // Bouton déconnexion
         if (signOutBtn) {
             signOutBtn.addEventListener('click', async () => {
-                if (!confirm('Voulez-vous vraiment vous déconnecter ?')) {
+                if (!await CustomModals.showConfirm('🚺 Déconnexion', 'Voulez-vous vraiment vous déconnecter ?', '🚺 Se déconnecter', '❌ Rester')) {
                     return;
                 }
 
@@ -829,7 +829,7 @@ class AuthSystem {
                         menuModal.classList.add('hidden');
                     }
                 } else {
-                    alert('Erreur: ' + result.error);
+                    await CustomModals.showAlert('❌ Erreur', result.error);
                 }
 
                 signOutBtn.disabled = false;

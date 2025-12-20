@@ -2,7 +2,7 @@
 class RoomSystem {
     constructor(chatSystem) {
         this.chatSystem = chatSystem;
-        this.acceptMode = 'manual'; // 'auto' (accepte tout) ou 'manual' (validation hors salle CODE uniquement)
+        this.acceptMode = 'manual'; // 'auto' (en ligne) ou 'manual' (validation manuelle hors salle CODE)
         this.playersInRoom = new Map(); // peerId -> {username, avatar, isHost}
         this.pendingRequests = new Map(); // peerId -> {username, avatar, conn}
         this.blockedPlayers = new Set(); // peerIds bloqués définitivement
@@ -39,6 +39,28 @@ class RoomSystem {
         window.addEventListener('voiceleft', () => {
             console.log('🔇 Vocal quitté - Mise à jour bulle');
             this.updateChatBubble();
+        });
+        window.addEventListener('voicemuteChanged', () => {
+            console.log('🎤 État micro changé - Mise à jour bulle');
+            this.updateChatBubble();
+        });
+        window.addEventListener('voicepeerJoined', () => {
+            console.log('👤 Peer vocal rejoint - Mise à jour bulle');
+            this.updateChatBubble();
+        });
+        window.addEventListener('voicepeerLeft', () => {
+            console.log('👤 Peer vocal quitté - Mise à jour bulle');
+            this.updateChatBubble();
+        });
+        
+        // Mise à jour throttled pour volumeChange (éviter trop de re-render)
+        let volumeUpdateTimeout;
+        window.addEventListener('voicevolumeChange', () => {
+            if (volumeUpdateTimeout) return;
+            volumeUpdateTimeout = setTimeout(() => {
+                this.updateChatBubble();
+                volumeUpdateTimeout = null;
+            }, 500); // Maximum 2 fois par seconde
         });
         
         // Écouter les événements P2P
@@ -130,11 +152,13 @@ class RoomSystem {
                 this.availablePlayers.set('me', {
                     username: this.chatSystem.currentUser,
                     avatar: this.chatSystem.getUserAvatar(this.chatSystem.currentUser) || '👤',
-                    acceptMode: this.acceptMode,
+                    acceptMode: this.acceptMode || 'manual',
+                    roomMode: this.acceptMode || 'manual',
                     playerCount: 1,
                     maxPlayers: 8,
                     lastSeen: Date.now(),
-                    isMe: true
+                    isMe: true,
+                    isBot: false
                 });
                 
                 console.log('🌐 Ajouté à availablePlayers, total:', this.availablePlayers.size);
@@ -238,6 +262,55 @@ class RoomSystem {
         }, 10000);
         
         console.log('📡 Broadcast de présence démarré');
+        
+        // Initialiser le bot actif au démarrage
+        setTimeout(() => {
+            this.initializeActiveBot();
+        }, 1000);
+    }
+    
+    // Initialiser le bot actif au démarrage
+    initializeActiveBot() {
+        const activeBot = localStorage.getItem('activeBot') || 'bot-unisona';
+        console.log('🤖 Initialisation du bot actif:', activeBot);
+        
+        // Ajouter le bot à la liste des joueurs
+        const botNames = {
+            'bot-unisona': { name: 'Unisona', avatar: '🎭', displayName: 'Unisona' },
+            'bot-origine': { name: '🤖 Origine', avatar: '👼', displayName: 'Origine' },
+            'bot-originaire': { name: '🤖 Originaire', avatar: '🌹', displayName: 'Originaire' },
+            'bot-dreamer': { name: '🤖 Dreamer', avatar: '⛪', displayName: 'Dreamer' },
+            'bot-materik': { name: '🤖 Materik', avatar: '📖', displayName: 'Materik' },
+            'bot-mpandawaha': { name: '🤖 M.Pandawaha', avatar: '🎲', displayName: 'M.Pandawaha' }
+        };
+        
+        const botInfo = botNames[activeBot];
+        if (botInfo) {
+            this.availablePlayers.set(activeBot, {
+                username: botInfo.displayName,
+                avatar: botInfo.avatar,
+                isBot: true,
+                playerCount: 1,
+                maxPlayers: 2,
+                mode: 'solo'
+            });
+            
+            // Démarrer le bot après initialisation
+            setTimeout(() => {
+                if (activeBot === 'bot-unisona') {
+                    if (window.welcomeAI && !window.welcomeAI.isPlaying) {
+                        window.welcomeAI.joinSoloMode();
+                    }
+                } else if (window.aiBots) {
+                    const existingBot = window.aiBots.find(b => b.name === botInfo.name);
+                    if (existingBot && !existingBot.isPlaying && window.game) {
+                        existingBot.startPlaying(window.game);
+                    }
+                }
+            }, 500);
+            
+            this.updateChatBubble();
+        }
     }
 
     // Arrêter la diffusion de présence
@@ -272,7 +345,7 @@ class RoomSystem {
             }
         });
         
-        console.log('📡 Présence annoncée:', announcement.username);
+        // Log supprimé (trop fréquent)
     }
 
     // Recevoir une annonce de présence
@@ -288,10 +361,12 @@ class RoomSystem {
         this.availablePlayers.set(peerId, {
             username,
             avatar,
-            roomMode,
+            acceptMode: roomMode || 'manual',
+            roomMode: roomMode || 'manual',
             playerCount,
             maxPlayers,
-            lastSeen: timestamp
+            lastSeen: timestamp,
+            isBot: false
         });
 
         console.log('👤 Joueur détecté:', username, `(${playerCount}/${maxPlayers})`);
@@ -338,7 +413,7 @@ class RoomSystem {
             mode: mode
         });
 
-        this.chatSystem.showMessage(`⚙️ Mode d'acceptation: ${this.getAcceptModeIcon()}`, 'system');
+        this.chatSystem.showMessage(`⚙️ Statut de connexion: ${this.getAcceptModeIcon()}`, 'system');
         this.updateUI();
     }
 
@@ -846,13 +921,13 @@ class RoomSystem {
         return icons[this.roomMode] || '🔓 Entrée Libre';
     }
     
-    // Obtenir l'icône du mode d'acceptation
+    // Obtenir l'icône du statut de connexion
     getAcceptModeIcon() {
         const icons = {
-            'auto': '✅ Toujours accepter',
-            'manual': '✋ Privée'
+            'auto': '🟢 En ligne',
+            'manual': '✋ Manuel'
         };
-        return icons[this.acceptMode] || '✋ Privée';
+        return icons[this.acceptMode] || '✋ Manuel';
     }
 
     // Configurer les écouteurs d'événements
@@ -901,19 +976,6 @@ class RoomSystem {
         setTimeout(() => {
             console.log('🔄 Première mise à jour de la bulle...');
             this.updateChatBubble();
-            
-            // Ajouter quelques bots de démonstration après un délai
-            setTimeout(() => {
-                if (window.aiBotManager) {
-                    console.log('🤖 Ajout des bots à la liste...');
-                    window.aiBotManager.showBotsAsAvailable();
-                    // Forcer la mise à jour après l'ajout des bots
-                    setTimeout(() => {
-                        console.log('🔄 Mise à jour après ajout bots...');
-                        this.updateChatBubble();
-                    }, 100);
-                }
-            }, 2000);
         }, 100);
     }
 
@@ -984,9 +1046,9 @@ class RoomSystem {
         // Ajouter les écouteurs pour les boutons d'exclusion
         if (this.chatSystem.isHost) {
             list.querySelectorAll('.btn-kick').forEach(btn => {
-                btn.addEventListener('click', (e) => {
+                btn.addEventListener('click', async (e) => {
                     const peerId = e.target.dataset.peerId;
-                    if (confirm('Êtes-vous sûr de vouloir exclure ce joueur ?')) {
+                    if (await CustomModals.showConfirm('🚪 Exclure le joueur ?', 'Êtes-vous sûr de vouloir exclure ce joueur ?', '🚪 Exclure', '❌ Annuler')) {
                         this.kickPlayer(peerId);
                     }
                 });
@@ -1120,7 +1182,11 @@ class RoomSystem {
         const count = this.availablePlayers.size;
         onlineCountEl.textContent = count;
         
-        console.log('🔄 Mise à jour bulle chat:', count, 'joueurs');
+        // Log seulement si le nombre change
+        if (this._lastPlayerCount !== count) {
+            console.log('🔄 Mise à jour bulle chat:', count, 'joueurs');
+            this._lastPlayerCount = count;
+        }
 
         if (count === 0) {
             bubbleList.innerHTML = `
@@ -1135,14 +1201,14 @@ class RoomSystem {
         let bubbleHTML = '';
         this.availablePlayers.forEach((player, peerId) => {
             const modeIcon = {
-                'auto': '✅',
+                'auto': '🟢',
                 'manual': '✋'
             }[player.acceptMode] || '✋';
 
             const modeName = {
-                'auto': 'Toujours accepter',
-                'manual': 'Privée'
-            }[player.acceptMode] || 'Privée';
+                'auto': 'En ligne',
+                'manual': 'Manuel'
+            }[player.acceptMode] || 'Manuel';
 
             // Afficher un badge "Vous" pour le joueur local
             const isMe = player.isMe || peerId === 'me';
@@ -1150,7 +1216,20 @@ class RoomSystem {
             
             // Vérifier si le joueur est en vocal
             const isInVoice = isMe && window.voiceUI?.voiceSystem?.isInVoiceRoom;
-            const voiceBadge = isInVoice ? '<span class="voice-active-badge" title="En vocal">🎤</span>' : '';
+            
+            // État du micro pour ce joueur
+            let micStatus = '';
+            if (isInVoice) {
+                const isMuted = window.voiceUI?.voiceSystem?.isMuted || false;
+                micStatus = isMuted ? '🔇' : '🎤';
+            } else if (!isMe && window.voiceUI?.voiceSystem?.voiceCalls?.has(peerId)) {
+                // Autre joueur en vocal
+                const voiceState = window.voiceUI?.voiceSystem?.getPeerVoiceState(peerId);
+                const isSpeaking = voiceState?.isSpeaking || false;
+                micStatus = isSpeaking ? '<span class="voice-speaking">🎤</span>' : '🎤';
+            }
+            
+            const voiceBadge = micStatus ? `<span class="voice-active-badge" title="État vocal">${micStatus}</span>` : '';
 
             bubbleHTML += `
                 <div class="connected-player-item" data-peer-id="${peerId}">
@@ -1165,15 +1244,33 @@ class RoomSystem {
                     </div>
                     ${!isMe ? `
                         <div class="player-actions-mini">
-                            <button class="action-btn-mini btn-join-bubble" data-peer-id="${peerId}" data-username="${player.username}" title="Demander à rejoindre">
-                                🚪
-                            </button>
-                            <button class="action-btn-mini btn-more-options" data-peer-id="${peerId}" data-username="${player.username}" title="Plus d'options">
-                                ⋮
-                            </button>
+                            ${window.voiceUI?.voiceSystem?.isInVoiceRoom && window.voiceUI?.voiceSystem?.voiceCalls?.has(peerId) ? `
+                                <button class="action-btn-mini btn-voice-control" data-peer-id="${peerId}" title="Contrôles vocaux">
+                                    🔊
+                                </button>
+                            ` : ''}
+                            ${player.isBot ? `
+                                <button class="action-btn-mini btn-change-bot" title="Changer de bot">
+                                    🔄
+                                </button>
+                            ` : `
+                                <button class="action-btn-mini btn-join-bubble" data-peer-id="${peerId}" data-username="${player.username}" title="Jouer avec ${player.username}">
+                                    🎮
+                                </button>
+                            `}
+                            ${!player.isBot ? `
+                                <button class="action-btn-mini btn-more-options" data-peer-id="${peerId}" data-username="${player.username}" title="Plus d'options">
+                                    ⋮
+                                </button>
+                            ` : ''}
                         </div>
                     ` : `
                         <div class="player-actions-mini">
+                            ${isInVoice ? `
+                                <button class="action-btn-mini btn-toggle-mic" title="${window.voiceUI?.voiceSystem?.isMuted ? 'Activer' : 'Couper'} le micro">
+                                    ${window.voiceUI?.voiceSystem?.isMuted ? '🔇' : '🎤'}
+                                </button>
+                            ` : ''}
                             <span class="me-indicator" title="C'est vous !">👤</span>
                         </div>
                     `}
@@ -1183,31 +1280,72 @@ class RoomSystem {
 
         bubbleList.innerHTML = bubbleHTML;
 
-        // Ajouter les écouteurs pour les boutons rejoindre dans la bulle
-        bubbleList.querySelectorAll('.btn-join-bubble').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const peerId = e.target.dataset.peerId;
-                const username = e.target.dataset.username;
+        // Utiliser la délégation d'événements pour éviter de perdre les écouteurs lors des mises à jour
+        
+        // Retirer les anciens écouteurs si présents
+        const oldClickHandler = bubbleList._clickHandler;
+        if (oldClickHandler) {
+            bubbleList.removeEventListener('click', oldClickHandler);
+        }
+        
+        // Créer un gestionnaire d'événements unique
+        const clickHandler = (e) => {
+            const target = e.target.closest('button');
+            if (!target) return;
+            
+            e.stopPropagation();
+            
+            // Bouton rejoindre
+            if (target.classList.contains('btn-join-bubble')) {
+                const peerId = target.dataset.peerId;
+                const username = target.dataset.username;
                 
-                // Vérifier si c'est un bot
                 if (peerId.startsWith('bot-')) {
                     this.joinBotGame(username);
                 } else {
                     this.requestJoinRoom(username, peerId);
                 }
-            });
-        });
+            }
+            
+            // Toggle micro (joueur local)
+            else if (target.classList.contains('btn-toggle-mic')) {
+                if (window.voiceUI?.voiceSystem) {
+                    window.voiceUI.voiceSystem.toggleMute();
+                    setTimeout(() => this.updateChatBubble(), 100);
+                }
+            }
+            
+            // Contrôles vocaux
+            else if (target.classList.contains('btn-voice-control')) {
+                const peerId = target.dataset.peerId;
+                this.showVoiceControlMenu(peerId);
+            }
+            
+            // Plus d'options
+            else if (target.classList.contains('btn-more-options')) {
+                const peerId = target.dataset.peerId;
+                const username = target.dataset.username;
+                
+                if (window.CONFIG?.enableLogs) {
+                    console.log('🔍 Menu contextuel:', { peerId, username });
+                }
+                
+                if (peerId && username) {
+                    this.showPlayerContextMenu(e, peerId, username);
+                } else {
+                    console.warn('⚠️ Données manquantes pour le menu contextuel');
+                }
+            }
+            
+            // Changer de bot (sur Unisona)
+            else if (target.classList.contains('btn-change-bot')) {
+                this.showBotSelectionMenu(e);
+            }
+        };
         
-        // Ajouter les écouteurs pour le bouton "plus d'options"
-        bubbleList.querySelectorAll('.btn-more-options').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const peerId = e.target.dataset.peerId;
-                const username = e.target.dataset.username;
-                this.showPlayerContextMenu(e, peerId, username);
-            });
-        });
+        // Sauvegarder la référence et attacher l'écouteur
+        bubbleList._clickHandler = clickHandler;
+        bubbleList.addEventListener('click', clickHandler);
     }
     
     // Afficher le menu contextuel pour un joueur
@@ -1238,11 +1376,13 @@ class RoomSystem {
             ` : ''}
         `;
         
-        // Positionner le menu
-        const rect = event.target.getBoundingClientRect();
+        // Positionner le menu - utiliser le bouton cliqué (closest('button'))
+        const button = event.target.closest('button');
+        const rect = button ? button.getBoundingClientRect() : event.target.getBoundingClientRect();
         menu.style.position = 'fixed';
         menu.style.top = `${rect.bottom + 5}px`;
         menu.style.left = `${rect.left - 100}px`;
+        menu.style.zIndex = '10000';
         
         document.body.appendChild(menu);
         
@@ -1278,10 +1418,138 @@ class RoomSystem {
             document.addEventListener('click', closeMenu);
         }, 100);
     }
+
+    showBotSelectionMenu(event) {
+        // Supprimer les anciens menus
+        document.querySelectorAll('.bot-selection-menu').forEach(m => m.remove());
+        
+        // Liste des bots disponibles
+        const bots = [
+            { id: 'bot-unisona', name: 'Unisona', emoji: '🎭', description: 'Bot principal polyvalent' },
+            { id: 'bot-origine', name: 'Origine', emoji: '🌟', description: 'Ado inclusif fun' },
+            { id: 'bot-originaire', name: 'Originaire', emoji: '🌾', description: 'Agriculteur futur sage' },
+            { id: 'bot-dreamer', name: 'Dreamer', emoji: '🤖', description: 'Robot rigolo apprenti' },
+            { id: 'bot-materik', name: 'Materik', emoji: '⚙️', description: 'Ingénieur russe technique' },
+            { id: 'bot-mpandawaha', name: 'M.Pandawaha', emoji: '🎋', description: 'Maître sage bambou' }
+        ];
+        
+        // Récupérer le bot actif actuel
+        const activeBot = localStorage.getItem('activeBot') || 'bot-unisona';
+        
+        const menu = document.createElement('div');
+        menu.className = 'bot-selection-menu';
+        menu.innerHTML = `
+            <div class="bot-menu-header">🔄 Choisir votre compagnon IA</div>
+            <div class="bot-menu-items">
+                ${bots.map(bot => `
+                    <button class="bot-menu-item ${bot.id === activeBot ? 'active' : ''}" data-bot-id="${bot.id}">
+                        <span class="bot-emoji">${bot.emoji}</span>
+                        <div class="bot-info">
+                            <div class="bot-name">${bot.name} ${bot.id === activeBot ? '✓' : ''}</div>
+                            <div class="bot-desc">${bot.description}</div>
+                        </div>
+                    </button>
+                `).join('')}
+            </div>
+        `;
+        
+        // Positionner le menu au centre de l'écran
+        menu.style.position = 'fixed';
+        menu.style.top = '50%';
+        menu.style.left = '50%';
+        menu.style.transform = 'translate(-50%, -50%)';
+        menu.style.zIndex = '10000';
+        
+        document.body.appendChild(menu);
+        
+        // Event listeners
+        menu.querySelectorAll('.bot-menu-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const botId = item.dataset.botId;
+                this.switchActiveBot(botId);
+                menu.remove();
+            });
+        });
+        
+        // Fermer au clic extérieur
+        setTimeout(() => {
+            const closeMenu = (e) => {
+                if (!menu.contains(e.target)) {
+                    menu.remove();
+                    document.removeEventListener('click', closeMenu);
+                }
+            };
+            document.addEventListener('click', closeMenu);
+        }, 100);
+    }
+    
+    async switchActiveBot(botId) {
+        // Arrêter tous les bots
+        if (window.stopAllBots) {
+            window.stopAllBots();
+        }
+        
+        // Supprimer tous les bots de la liste des joueurs
+        const botPeers = Array.from(this.availablePlayers.keys()).filter(id => id.startsWith('bot-'));
+        botPeers.forEach(id => {
+            this.availablePlayers.delete(id);
+        });
+        
+        // Sauvegarder le bot actif
+        localStorage.setItem('activeBot', botId);
+        
+        // Ajouter le nouveau bot
+        const botNames = {
+            'bot-unisona': { name: 'Unisona', avatar: '🎭', displayName: 'Unisona' },
+            'bot-origine': { name: '🤖 Origine', avatar: '👼', displayName: 'Origine' },
+            'bot-originaire': { name: '🤖 Originaire', avatar: '🌹', displayName: 'Originaire' },
+            'bot-dreamer': { name: '🤖 Dreamer', avatar: '⛪', displayName: 'Dreamer' },
+            'bot-materik': { name: '🤖 Materik', avatar: '📖', displayName: 'Materik' },
+            'bot-mpandawaha': { name: '🤖 M.Pandawaha', avatar: '🎲', displayName: 'M.Pandawaha' }
+        };
+        
+        const botInfo = botNames[botId];
+        if (botInfo) {
+            this.availablePlayers.set(botId, {
+                username: botInfo.displayName,
+                avatar: botInfo.avatar,
+                isBot: true,
+                playerCount: 1,
+                maxPlayers: 2,
+                mode: 'solo'
+            });
+            
+            // Démarrer le bot approprié
+            setTimeout(() => {
+                if (botId === 'bot-unisona') {
+                    if (window.welcomeAI && !window.welcomeAI.isPlaying) {
+                        window.welcomeAI.joinSoloMode();
+                    }
+                } else if (window.aiBots) {
+                    // Trouver le bot par son nom complet
+                    const existingBot = window.aiBots.find(b => b.name === botInfo.name);
+                    if (existingBot && !existingBot.isPlaying && window.game) {
+                        existingBot.startPlaying(window.game);
+                    }
+                }
+            }, 500);
+            
+            // Mettre à jour l'interface
+            this.updateChatBubble();
+            
+            // Notifier l'utilisateur
+            if (window.simpleChatSystem) {
+                window.simpleChatSystem.showMessage(
+                    `${botInfo.avatar} ${botInfo.displayName} est maintenant votre compagnon IA actif !`,
+                    'system'
+                );
+            }
+        }
+    }
     
     // Bloquer un joueur
-    blockPlayer(peerId, username) {
-        if (confirm(`Bloquer ${username} ?\n\nCe joueur ne pourra plus vous envoyer de demandes.`)) {
+    async blockPlayer(peerId, username) {
+        if (await CustomModals.showConfirm('🚫 Bloquer le joueur ?', `Bloquer ${username} ?\n\nCe joueur ne pourra plus vous envoyer de demandes.`, '🚫 Bloquer', '❌ Annuler')) {
             this.blockedPlayers.add(peerId);
             
             // Déconnecter si connecté
@@ -1315,8 +1583,8 @@ class RoomSystem {
     }
     
     // Signaler un joueur
-    reportPlayer(peerId, username) {
-        const reason = prompt(`Signaler ${username}\n\nRaison du signalement :`);
+    async reportPlayer(peerId, username) {
+        const reason = await CustomModals.showPrompt('🚨 Signaler le joueur', `Signaler ${username}\n\nRaison du signalement :`, '', 'Ex: Comportement inapproprié', '🚨 Signaler', '❌ Annuler');
         
         if (reason && reason.trim()) {
             // Ici on pourrait envoyer à un serveur de modération
@@ -1325,7 +1593,7 @@ class RoomSystem {
             this.chatSystem.showMessage(`⚠️ Signalement envoyé pour ${username}`, 'system');
             
             // Pour l'instant, juste bloquer automatiquement
-            if (confirm(`Voulez-vous également bloquer ${username} ?`)) {
+            if (await CustomModals.showConfirm('🚫 Bloquer aussi ?', `Voulez-vous également bloquer ${username} ?`, '🚫 Bloquer', '❌ Non')) {
                 this.blockedPlayers.add(peerId);
                 this.updateChatBubble();
                 this.saveBlockedPlayers();
@@ -1375,9 +1643,18 @@ class RoomSystem {
     joinBotGame(botName) {
         console.log('🤖 Démarrage d\'une partie avec:', botName);
         
+        // Vérifier si le jeu est démarré
+        if (!window.game || !window.game.gameStarted) {
+            if (window.simpleChatSystem) {
+                window.simpleChatSystem.showMessage('⚠️ Démarre d\'abord une partie avant d\'inviter un bot !', 'system');
+            }
+            console.warn('⚠️ Le jeu n\'est pas démarré');
+            return;
+        }
+        
         // Afficher un message
-        if (this.chatSystem) {
-            this.chatSystem.showMessage(`🤖 Démarrage d'une partie avec ${botName}...`, 'system');
+        if (window.simpleChatSystem) {
+            window.simpleChatSystem.showMessage(`🤖 Démarrage d'une partie avec ${botName}...`, 'system');
         }
         
         // Fermer le modal si ouvert
@@ -1386,17 +1663,103 @@ class RoomSystem {
             modal.classList.add('hidden');
         }
         
-        // Démarrer le jeu avec le bot
-        if (window.game && window.aiBotManager) {
+        // Cas spécial : Unisona (elle a son propre système)
+        if (botName === 'Unisona' || botName === '👼 Unisona') {
+            if (window.welcomeAI) {
+                console.log('✅ Unisona trouvée, démarrage en mode solo...');
+                const started = window.welcomeAI.joinSoloMode();
+                if (started && window.simpleChatSystem) {
+                    window.simpleChatSystem.showMessage('🎮 👼 Unisona a rejoint la partie !', 'ai');
+                }
+            } else {
+                console.error('❌ welcomeAI non disponible');
+            }
+            return;
+        }
+        
+        // Démarrer le jeu avec les autres bots (via aiBotManager)
+        if (window.aiBotManager) {
             // Trouver le bot
             const bot = window.aiBotManager.getBot(botName);
             if (bot) {
+                console.log(`✅ Bot trouvé: ${botName}, démarrage...`);
                 // Démarrer le bot (il jouera automatiquement)
                 bot.startPlaying(window.game);
                 
-                this.chatSystem.showMessage(`🎮 ${botName} a rejoint la partie !`, 'ai');
+                if (window.simpleChatSystem) {
+                    window.simpleChatSystem.showMessage(`🎮 ${botName} a rejoint la partie !`, 'ai');
+                }
+            } else {
+                console.error('❌ Bot non trouvé:', botName);
             }
         }
+    }
+    
+    // Afficher les contrôles vocaux pour un joueur
+    showVoiceControlMenu(peerId) {
+        const player = this.availablePlayers.get(peerId);
+        if (!player) return;
+        
+        const currentVolume = window.voiceUI?.voiceSystem?.audioElements?.get(peerId)?.volume || 1;
+        const volumePercent = Math.round(currentVolume * 100);
+        
+        const menu = `
+            <div class="voice-control-popup" id="voiceControlPopup">
+                <div class="popup-header">
+                    <h4>🔊 Contrôles vocaux - ${player.username}</h4>
+                    <button class="close-popup" onclick="document.getElementById('voiceControlPopup').remove()">✕</button>
+                </div>
+                <div class="popup-content">
+                    <label>Volume: <span id="volumeValue">${volumePercent}%</span></label>
+                    <input type="range" id="volumeSlider" min="0" max="100" value="${volumePercent}" step="5">
+                    <button class="btn-mute-peer" data-peer-id="${peerId}">
+                        ${currentVolume === 0 ? '🔊 Réactiver' : '🔇 Couper le son'}
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        // Supprimer l'ancien menu s'il existe
+        const oldMenu = document.getElementById('voiceControlPopup');
+        if (oldMenu) oldMenu.remove();
+        
+        // Ajouter le nouveau menu
+        document.body.insertAdjacentHTML('beforeend', menu);
+        
+        // Gérer le slider de volume
+        const slider = document.getElementById('volumeSlider');
+        const valueDisplay = document.getElementById('volumeValue');
+        
+        slider.addEventListener('input', (e) => {
+            const volume = e.target.value / 100;
+            valueDisplay.textContent = `${e.target.value}%`;
+            if (window.voiceUI?.voiceSystem) {
+                window.voiceUI.voiceSystem.setPeerVolume(peerId, volume);
+            }
+        });
+        
+        // Gérer le bouton mute/unmute
+        document.querySelector('.btn-mute-peer').addEventListener('click', () => {
+            const audio = window.voiceUI?.voiceSystem?.audioElements?.get(peerId);
+            if (audio) {
+                const newVolume = audio.volume === 0 ? 1 : 0;
+                audio.volume = newVolume;
+                slider.value = newVolume * 100;
+                valueDisplay.textContent = `${Math.round(newVolume * 100)}%`;
+                document.querySelector('.btn-mute-peer').textContent = newVolume === 0 ? '🔊 Réactiver' : '🔇 Couper le son';
+            }
+        });
+        
+        // Fermer en cliquant en dehors
+        setTimeout(() => {
+            document.addEventListener('click', function closePopup(e) {
+                const popup = document.getElementById('voiceControlPopup');
+                if (popup && !popup.contains(e.target)) {
+                    popup.remove();
+                    document.removeEventListener('click', closePopup);
+                }
+            });
+        }, 100);
     }
 }
 

@@ -25,7 +25,7 @@ const config = {
     
     // Debug mode
     debug: false,
-    enableLogs: false // Activer/désactiver tous les logs console
+    enableLogs: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' // Activer automatiquement les logs en localhost
 };
 
 // Remplacer console.log par une version conditionnelle
@@ -33,6 +33,9 @@ if (!config.enableLogs) {
     const noop = () => {};
     window.console.log = noop;
     window.console.debug = noop;
+} else {
+    console.log('🔍 Mode DEBUG activé - Logs console actifs');
+    console.log('🌐 Environnement:', window.location.hostname);
 }
 
 // Pour les environnements ES6 modules

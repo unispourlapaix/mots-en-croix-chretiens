@@ -11,7 +11,7 @@ class RoomUI {
     }
 
     setupEventListeners() {
-        // Sélecteur de mode d'acceptation
+        // Sélecteur de statut de connexion
         const modeSelect = document.getElementById('acceptModeSelect');
         if (modeSelect) {
             modeSelect.addEventListener('change', (e) => {
@@ -23,9 +23,9 @@ class RoomUI {
 
         // Bouton quitter la salle
         if (this.leaveBtn) {
-            this.leaveBtn.addEventListener('click', () => {
+            this.leaveBtn.addEventListener('click', async () => {
                 if (window.roomSystem) {
-                    if (confirm('Êtes-vous sûr de vouloir quitter la salle ?')) {
+                    if (await CustomModals.showConfirm('🚺 Quitter la salle ?', 'Êtes-vous sûr de vouloir quitter la salle ?', '🚺 Quitter', '❌ Rester')) {
                         window.roomSystem.leaveRoom();
                     }
                 }
@@ -117,7 +117,7 @@ class RoomUI {
     }
 
     // Afficher l'ID de la salle (pour partage manuel)
-    showRoomId() {
+    async showRoomId() {
         if (!window.chatSystem || !window.chatSystem.peer) return;
 
         const peerId = window.chatSystem.peer.id;
@@ -132,7 +132,7 @@ class RoomUI {
 Partagez cet ID pour que d'autres joueurs rejoignent !
         `.trim();
 
-        alert(message);
+        await CustomModals.showAlert('🆔 Informations de connexion', message);
 
         // Copier dans le presse-papier
         if (navigator.clipboard) {

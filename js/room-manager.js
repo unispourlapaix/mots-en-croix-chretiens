@@ -35,9 +35,9 @@ class RoomManager {
                         setTimeout(() => {
                             copyRoomCodeBtn.textContent = '📋';
                         }, 2000);
-                    }).catch(err => {
+                    }).catch(async err => {
                         console.error('Erreur copie:', err);
-                        alert('Code: ' + roomCode);
+                        await CustomModals.showAlert('ℹ️ Code Room', 'Code: ' + roomCode);
                     });
                 }
             });
@@ -232,7 +232,7 @@ class RoomManager {
     
     async handleCreateRoom() {
         if (!window.presenceSystem) {
-            alert('❌ Système de présence non initialisé');
+            await CustomModals.showAlert('❌ Système indisponible', 'Le système de présence n\'est pas initialisé');
             return;
         }
         
@@ -259,7 +259,7 @@ class RoomManager {
         }
         
         if (!window.simpleChatSystem?.peer) {
-            alert('❌ Impossible d\'initialiser la connexion P2P. Vérifiez votre connexion internet.');
+            await CustomModals.showAlert('❌ Connexion P2P', 'Impossible d\'initialiser la connexion P2P. Vérifiez votre connexion internet.');
             return;
         }
 
@@ -277,7 +277,7 @@ class RoomManager {
             
         } catch (error) {
             console.error('Erreur création salle:', error);
-            alert('❌ Erreur: ' + error.message);
+            await CustomModals.showAlert('❌ Erreur de création', error.message);
         }
     }
     
@@ -286,20 +286,20 @@ class RoomManager {
         const roomCode = roomCodeInput.value.trim();
         
         if (!roomCode) {
-            alert('⚠️ Entrez un code de salle');
+            await CustomModals.showAlert('⚠️ Code manquant', 'Entrez un code de salle');
             roomCodeInput.focus();
             return;
         }
         
         // Le code est maintenant un peerID complet (pas de limite stricte)
         if (roomCode.length < 3) {
-            alert('⚠️ Le code semble trop court');
+            await CustomModals.showAlert('⚠️ Code invalide', 'Le code semble trop court');
             roomCodeInput.focus();
             return;
         }
         
         if (!window.presenceSystem) {
-            alert('❌ Système de présence non initialisé');
+            await CustomModals.showAlert('❌ Système indisponible', 'Le système de présence n\'est pas initialisé');
             return;
         }
         
@@ -326,7 +326,7 @@ class RoomManager {
         }
         
         if (!window.simpleChatSystem?.peer) {
-            alert('❌ Impossible d\'initialiser la connexion P2P. Vérifiez votre connexion internet.');
+            await CustomModals.showAlert('❌ Connexion P2P', 'Impossible d\'initialiser la connexion P2P. Vérifiez votre connexion internet.');
             return;
         }
 
@@ -345,14 +345,14 @@ class RoomManager {
             
         } catch (error) {
             console.error('Erreur rejoindre salle:', error);
-            alert('❌ Erreur: ' + error.message);
+            await CustomModals.showAlert('❌ Erreur', error.message);
         }
     }
     
-    handleLeaveRoom() {
+    async handleLeaveRoom() {
         if (!window.presenceSystem) return;
         
-        if (confirm('🚪 Voulez-vous vraiment quitter la salle ?')) {
+        if (await CustomModals.showConfirm('🚺 Quitter la salle ?', 'Voulez-vous vraiment quitter la salle ?', '🚺 Quitter', '❌ Rester')) {
             window.presenceSystem.leaveRoom();
             this.hideCurrentRoom();
             

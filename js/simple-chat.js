@@ -41,7 +41,7 @@ class SimpleChatSystem {
             // Si déjà connecté, afficher le message de bienvenue
             if (this.currentUser && this.currentUser !== 'Joueur' + Math.floor(Math.random() * 1000) && !this.skipWelcomeMessages) {
                 setTimeout(() => {
-                    this.showMessage(`👋 Bonjour ${this.currentUser} !`, 'system');
+                    this.showMessage(`✨ 👋 Bonjour`, 'system');
                 }, 800);
             }
         }

@@ -159,7 +159,7 @@ class VoiceUI {
 
         } catch (error) {
             console.error('❌ Erreur join vocal:', error);
-            alert(error.message || 'Impossible de rejoindre le salon vocal');
+            await CustomModals.showAlert('❌ Erreur Vocal', error.message || 'Impossible de rejoindre le salon vocal');
             
             this.elements.joinBtn.disabled = false;
             this.elements.joinBtn.textContent = '🎤 Rejoindre le vocal';
@@ -256,13 +256,15 @@ class VoiceUI {
         const inRoom = !!this.chatSystem.roomId;
         const inVoice = this.voiceSystem?.isInVoiceRoom;
         
-        // Debug
-        console.log('🔍 Voice availability check:', {
-            roomId: this.chatSystem.roomId,
-            inRoom,
-            inVoice,
-            hasConnections: this.chatSystem.connections?.size > 0
-        });
+        // Debug (log uniquement si vocal actif ou debug avancé)
+        if (window.CONFIG?.enableLogs && (inVoice || inRoom)) {
+            console.log('🔍 Voice availability check:', {
+                roomId: this.chatSystem.roomId,
+                inRoom,
+                inVoice,
+                hasConnections: this.chatSystem.connections?.size > 0
+            });
+        }
 
         if (inVoice) {
             // Déjà connecté au vocal - ne rien changer (géré par handleVoiceJoined)

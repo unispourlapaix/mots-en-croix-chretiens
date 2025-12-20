@@ -79,7 +79,7 @@ Reste toujours positive, aimante et inclusive. Tu représentes un christianisme 
         if (this.isEnabled) {
             console.log('✅ Unisona AI activée avec clé:', this.apiKey.substring(0, 20) + '...');
         } else {
-            console.log('❌ Unisona AI désactivée - Clé:', this.apiKey ? 'invalide' : 'manquante');
+            console.log('ℹ️ Unisona AI (OpenAI) non configurée - Mode bot simple actif');
         }
         return this.isEnabled;
     }
@@ -261,7 +261,7 @@ Reste toujours positive, aimante et inclusive. Tu représentes un christianisme 
         document.body.appendChild(modal);
 
         // Gestion des boutons
-        document.getElementById('saveApiKey').addEventListener('click', () => {
+        document.getElementById('saveApiKey').addEventListener('click', async () => {
             const key = document.getElementById('apiKeyInput').value.trim();
             
             // Si le champ est vide et qu'il y a une clé par défaut, utiliser la clé par défaut
@@ -289,9 +289,9 @@ Reste toujours positive, aimante et inclusive. Tu représentes un christianisme 
                     );
                 }
             } else if (!key && !DEFAULT_OPENAI_KEY) {
-                alert('❌ Aucune clé fournie ! Entre une clé API OpenAI.');
+                await CustomModals.showAlert('❌ Clé API manquante', 'Aucune clé fournie ! Entre une clé API OpenAI.');
             } else {
-                alert('❌ Clé API invalide ! Elle doit commencer par "sk-"');
+                await CustomModals.showAlert('❌ Clé API invalide', 'Elle doit commencer par "sk-"');
             }
         });
 

@@ -215,7 +215,7 @@ Tu peux :
         document.body.appendChild(modal);
 
         // Gestion des boutons
-        document.getElementById('saveGeminiKey').addEventListener('click', () => {
+        document.getElementById('saveGeminiKey').addEventListener('click', async () => {
             const key = document.getElementById('geminiApiKeyInput').value.trim();
             
             // Si le champ est vide et qu'il y a une clé par défaut, utiliser la clé par défaut
@@ -242,9 +242,9 @@ Tu peux :
                     );
                 }
             } else if (!key && !DEFAULT_GEMINI_KEY) {
-                alert('❌ Aucune clé fournie ! Entre une clé API Gemini.');
+                await CustomModals.showAlert('❌ Clé API manquante', 'Aucune clé fournie ! Entre une clé API Gemini.');
             } else {
-                alert('❌ Clé API invalide ! Elle doit faire au moins 30 caractères.');
+                await CustomModals.showAlert('❌ Clé API invalide', 'Elle doit faire au moins 30 caractères.');
             }
         });
 

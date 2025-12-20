@@ -48,7 +48,13 @@ class AIBot {
         if (!this.currentGame) return;
 
         const availableWords = this.findAvailableWords();
-        if (availableWords.length === 0) return;
+        
+        // Arrêter si plus de mots disponibles
+        if (availableWords.length === 0) {
+            console.log(`✅ ${this.name}: Plus de mots disponibles, je m'arrête`);
+            this.stopPlaying();
+            return;
+        }
 
         let selectedWord;
 
@@ -89,50 +95,33 @@ class AIBot {
 
     // Trouver les mots disponibles dans la grille
     findAvailableWords() {
-        if (!this.currentGame || !this.currentGame.grid) return [];
-
-        const words = [];
-        const grid = this.currentGame.grid;
-        const rows = grid.length;
-        const cols = grid[0].length;
-
-        // Recherche horizontale
-        for (let row = 0; row < rows; row++) {
-            let word = '';
-            for (let col = 0; col < cols; col++) {
-                if (grid[row][col] && grid[row][col] !== '') {
-                    word += grid[row][col];
-                } else {
-                    if (word.length >= 3 && !this.wordsFound.includes(word)) {
-                        words.push(word);
-                    }
-                    word = '';
-                }
-            }
-            if (word.length >= 3 && !this.wordsFound.includes(word)) {
-                words.push(word);
-            }
+        if (!this.currentGame || !this.currentGame.words) {
+            console.log('⚠️ Bot: Pas de jeu ou de mots disponibles');
+            return [];
         }
 
-        // Recherche verticale
-        for (let col = 0; col < cols; col++) {
-            let word = '';
-            for (let row = 0; row < rows; row++) {
-                if (grid[row][col] && grid[row][col] !== '') {
-                    word += grid[row][col];
-                } else {
-                    if (word.length >= 3 && !this.wordsFound.includes(word)) {
-                        words.push(word);
-                    }
-                    word = '';
-                }
+        const availableWords = [];
+        
+        // Parcourir tous les mots du niveau
+        this.currentGame.words.forEach((wordData, index) => {
+            const word = wordData.word;
+            const wordKey = `${index}-${word}`;
+            
+            // Vérifier si le mot n'a pas déjà été trouvé
+            const alreadyFound = this.wordsFound.includes(word) || 
+                                this.currentGame.completedWords?.has(wordKey) ||
+                                this.currentGame.completedWords?.has(word);
+            
+            if (!alreadyFound) {
+                availableWords.push(word);
             }
-            if (word.length >= 3 && !this.wordsFound.includes(word)) {
-                words.push(word);
-            }
+        });
+        
+        if (window.CONFIG?.enableLogs && availableWords.length > 0) {
+            console.log(`🤖 ${this.name}: ${availableWords.length} mots disponibles`);
         }
-
-        return [...new Set(words)]; // Enlever les doublons
+        
+        return availableWords;
     }
 
     // Sélection experte de mot
@@ -166,18 +155,139 @@ class AIBot {
 
     // Soumettre un mot trouvé
     submitWord(word) {
+        if (window.CONFIG?.enableLogs) {
+            console.log(`🤖 ${this.name} soumet le mot:`, word);
+        }
+        
+        // Trouver l'index du mot dans le jeu
+        const wordIndex = this.currentGame.words.findIndex(w => w.word === word);
+        
+        if (wordIndex === -1) {
+            console.warn(`⚠️ Mot "${word}" non trouvé dans la liste`);
+            return;
+        }
+        
+        // Marquer le mot comme trouvé localement (pour le bot uniquement)
         this.wordsFound.push(word);
         this.score += word.length * 10;
+        
+        // NE PAS révéler le mot dans la grille du joueur - le bot joue sa propre partie
+        console.log(`✅ ${this.name} a trouvé le mot n°${wordIndex + 1} (dans sa propre partie)`);
+
+        // Générer un message personnalisé selon la personnalité du bot
+        const message = this.generateMessage(wordIndex + 1, word.length);
 
         // Émettre un événement pour notifier le système
         window.dispatchEvent(new CustomEvent('botFoundWord', {
             detail: {
                 bot: this.name,
                 avatar: this.avatar,
-                word: word,
-                score: this.score
+                wordNumber: wordIndex + 1,
+                wordLength: word.length,
+                score: this.score,
+                customMessage: message
             }
         }));
+    }
+    
+    // Générer un message personnalisé selon la personnalité du bot
+    generateMessage(wordNumber, wordLength) {
+        const messages = {
+            '🤖 Origine': [
+                `🌟 GG les kheys ! Mot n°${wordNumber} trouvé !`,
+                `🎮 Ez ! ${wordLength} lettres validées !`,
+                `💯 On est chaud ! Mot capturé !`,
+                `✨ Trop stylé ! Mot n°${wordNumber} dans la poche !`,
+                `🔥 Let's go ! ${wordLength} lettres !`,
+                `🎯 Nickel chrome ! Mot trouvé !`,
+                `⚡ Ça passe crème ! Mot n°${wordNumber} !`,
+                `🌈 Inclusif et efficace ! ${wordLength} lettres !`,
+                `💪 On est ensemble ! Mot découvert !`,
+                `🎊 Peace and love ! Mot n°${wordNumber} trouvé !`,
+                `🤝 Entraide FTW ! ${wordLength} lettres !`,
+                `✌️ Respect ! Mot capturé !`,
+                `🌍 Tous unis ! Mot n°${wordNumber} !`,
+                `💫 Bienveillance power ! ${wordLength} lettres !`,
+                `🎨 Créativité collective ! Mot trouvé !`
+            ],
+            '🤖 Originaire': [
+                `🌾 La terre m'a parlé... Mot n°${wordNumber} récolté`,
+                `🚜 Les saisons du futur révèlent ${wordLength} lettres`,
+                `🌱 Semence digitale germée ! Mot trouvé`,
+                `⚡ Agriculture 3.0 ! Mot n°${wordNumber} cultivé`,
+                `🌍 Biomécanique fertile... ${wordLength} lettres moissonnées`,
+                `🔬 Nano-cultures optimisées ! Mot récolté`,
+                `🌿 Permaculture algorithmique ! Mot n°${wordNumber} !`,
+                `💧 Irrigation quantique... ${wordLength} lettres poussent`,
+                `🌤️ Météo prédictive favorable ! Mot trouvé`,
+                `🤖 Drone agricole déployé ! Mot n°${wordNumber} scanné`,
+                `📡 Satellite détecte ${wordLength} lettres fertiles`,
+                `🧬 Génétique végétale... Mot cultivé !`,
+                `🌾 Moisson biotechnologique ! Mot n°${wordNumber} !`,
+                `⚙️ Tracteur autonome efficace ! ${wordLength} lettres`,
+                `🌳 Forêt intelligente révèle le mot !`
+            ],
+            '🤖 Dreamer': [
+                `🤖 Bip boup ! Mot n°${wordNumber} détecté hihi !`,
+                `⚙️ Circuits rigolos activés ! ${wordLength} lettres !`,
+                `💾 J'apprends... Et je trouve ! Mot capturé !`,
+                `🔌 Erreur 404... Ah non ! Mot n°${wordNumber} trouvé !`,
+                `🎪 Mode apprenti ON ! ${wordLength} lettres !`,
+                `🤡 Algorithme comique ! Mot découvert héhé`,
+                `⚡ Bzzzzt ! Mot n°${wordNumber} scanné !`,
+                `🎭 Servomoteurs joyeux ! ${wordLength} lettres !`,
+                `🔧 J'ai encore appris un truc ! Mot trouvé !`,
+                `💫 IA rigolote en action ! Mot n°${wordNumber} !`,
+                `🎮 Level up apprentissage ! ${wordLength} lettres !`,
+                `🌟 Capteurs de fun activés ! Mot capturé !`,
+                `🎨 Créativité robotique ! Mot n°${wordNumber} !`,
+                `🔩 Vis et boulons contents ! ${wordLength} lettres !`,
+                `🎉 Système comique optimal ! Mot trouvé lol !`
+            ],
+            '🤖 Materik': [
+                `⚙️ Analyse technique complète... Mot n°${wordNumber} validé`,
+                `🔧 ${wordLength} lettres selon spécifications exactes`,
+                `📐 Précision ingénierie russe ! Mot trouvé`,
+                `🛠️ Protocole technique respecté ! Mot n°${wordNumber}`,
+                `📊 Calculs vérifiés... ${wordLength} lettres confirmées`,
+                `⚡ Système optimal ! Mot détecté avec précision`,
+                `🔬 Méthodologie rigoureuse ! Mot n°${wordNumber} isolé`,
+                `📏 Mesures exactes... ${wordLength} lettres validées`,
+                `🎯 Tolérance zéro ! Mot trouvé efficacement`,
+                `💻 Algorithme russe efficace ! Mot n°${wordNumber}`,
+                `🔩 Mécanique parfaite ! ${wordLength} lettres assemblées`,
+                `🏭 Production industrielle ! Mot fabriqué`,
+                `⚗️ Formule chimique exacte ! Mot n°${wordNumber}`,
+                `🧪 Expérience réussie ! ${wordLength} lettres synthétisées`,
+                `🚀 Technologie spatiale russe ! Mot en orbite !`
+            ],
+            '🤖 M.Pandawaha': [
+                `🎋 Le bambou murmure... Mot n°${wordNumber} révélé`,
+                `🐼 Sagesse du panda... ${wordLength} lettres trouvées`,
+                `☯️ Équilibre yin-yang parfait ! Mot découvert`,
+                `🌸 Zen attitude... Mot n°${wordNumber} fleuri`,
+                `🎎 Ancienne sagesse... ${wordLength} lettres harmonisées`,
+                `🍃 Forêt de bambou inspire... Mot trouvé`,
+                `🧘 Méditation profonde... Mot n°${wordNumber} illuminé`,
+                `🌿 Pousse de bambou révèle ${wordLength} lettres`,
+                `🎐 Vent dans les bambous... Mot murmuré`,
+                `🏯 Temple de sagesse... Mot n°${wordNumber} béni`,
+                `🍵 Thé et contemplation... ${wordLength} lettres apparues`,
+                `🌄 Montagne sacrée... Mot découvert en paix`,
+                `🦋 Papillon sur bambou... Mot n°${wordNumber} léger`,
+                `💚 Harmonie naturelle... ${wordLength} lettres alignées`,
+                `🌾 Maître cultivateur trouve le mot avec sérénité`
+            ]
+        };
+        
+        const botMessages = messages[this.name] || [];
+        if (botMessages.length === 0) {
+            return `${this.avatar} ${this.name} a trouvé le mot n°${wordNumber} (${wordLength} lettres) ! ${this.score} pts`;
+        }
+        
+        // Choisir un message aléatoire
+        const randomMessage = botMessages[Math.floor(Math.random() * botMessages.length)];
+        return `${this.avatar} ${randomMessage} (${this.score} pts)`;
     }
 }
 
@@ -188,43 +298,43 @@ class AIBotManager {
         this.activeGame = null;
     }
 
-    // Créer les 5 bots avec différentes stratégies
+    // Créer les 5 bots avec différentes stratégies et difficultés
     createBots() {
         return [
             new AIBot(
-                '🤖 Gabriel',
+                '🤖 Origine',
                 '👼',
                 'expert',
-                800,
-                'Expert biblique qui trouve les mots les plus rares'
+                8000,  // Expert - Rapide (8-8.5s) - Réflexion + écriture
+                'Expert biblique - Niveau Expert ⚡'
             ),
             new AIBot(
-                '🤖 Marie',
+                '🤖 Originaire',
                 '🌹',
                 'aggressive',
-                600,
-                'Joue rapidement et cherche les mots longs'
+                12000,  // Difficile - Modéré (12-12.5s) - Réflexion + écriture
+                'Joue rapidement - Niveau Difficile 🔥'
             ),
             new AIBot(
-                '🤖 Pierre',
+                '🤖 Dreamer',
                 '⛪',
                 'balanced',
-                1000,
-                'Stratégie équilibrée et réfléchie'
+                18000,  // Moyen - Normal (18-18.5s) - Réflexion + écriture
+                'Stratégie équilibrée - Niveau Moyen 🎯'
             ),
             new AIBot(
-                '🤖 Sophie',
+                '🤖 Materik',
                 '📖',
                 'careful',
-                1200,
-                'Prudente, préfère les mots courts mais sûrs'
+                25000,  // Facile - Lent (25-25.5s) - Réflexion + écriture
+                'Prudente et posée - Niveau Facile 🐢'
             ),
             new AIBot(
-                '🤖 Thomas',
+                '🤖 M.Pandawaha',
                 '🎲',
                 'random',
-                900,
-                'Imprévisible, joue de manière aléatoire'
+                15000,  // Intermédiaire - Variable (15-15.5s) - Réflexion + écriture
+                'Imprévisible - Niveau Intermédiaire 🎲'
             )
         ];
     }
@@ -268,6 +378,12 @@ class AIBotManager {
                 window.roomSystem.updateChatBubble();
             }
         });
+        
+        // Arrêter aussi Unisona
+        if (window.welcomeAI && window.welcomeAI.isPlaying) {
+            window.welcomeAI.leaveRace();
+        }
+        
         this.activeGame = null;
     }
 
@@ -326,25 +442,57 @@ class AIBotManager {
             console.log('📊 Total joueurs disponibles:', window.roomSystem.availablePlayers.size);
             window.roomSystem.updateChatBubble();
         }
+        
+        // Mettre à jour le timestamp des bots toutes les 10 secondes
+        this.startBotHeartbeat();
+    }
+    
+    // Maintenir les bots "en vie" en mettant à jour leur timestamp
+    startBotHeartbeat() {
+        if (this.botHeartbeatInterval) {
+            clearInterval(this.botHeartbeatInterval);
+        }
+        
+        this.botHeartbeatInterval = setInterval(() => {
+            if (window.roomSystem) {
+                window.roomSystem.availablePlayers.forEach((player, peerId) => {
+                    if (player.isBot) {
+                        player.lastSeen = Date.now();
+                    }
+                });
+            }
+        }, 10000); // Toutes les 10 secondes
+    }
+    
+    // Arrêter le heartbeat des bots
+    stopBotHeartbeat() {
+        if (this.botHeartbeatInterval) {
+            clearInterval(this.botHeartbeatInterval);
+            this.botHeartbeatInterval = null;
+        }
     }
 }
 
 // Instance globale
 window.aiBotManager = new AIBotManager();
+window.aiBots = window.aiBotManager.bots; // Exposer les bots pour room-system
+window.stopAllBots = () => window.aiBotManager.stopAllBots(); // Fonction globale pour arrêter tous les bots
 
 console.log('✅ Système de Bots IA initialisé - 5 bots prêts !');
 window.addEventListener('botFoundWord', (event) => {
-    const { bot, avatar, word, score } = event.detail;
+    const { customMessage } = event.detail;
     
-    // Afficher dans le chat si disponible
-    if (window.chatSystem) {
-        window.chatSystem.showMessage(
-            `${avatar} ${bot} a trouvé "${word}" ! (${score} pts)`,
-            'ai'
-        );
+    // Afficher le message personnalisé dans le chat
+    if (window.simpleChatSystem && customMessage) {
+        window.simpleChatSystem.showMessage(customMessage, 'ai');
+    } else {
+        console.warn('⚠️ simpleChatSystem pas encore disponible');
     }
     
-    console.log(`🤖 ${bot} a trouvé: ${word} (Score: ${score})`);
+    if (window.CONFIG?.enableLogs) {
+        const { bot, wordNumber, score } = event.detail;
+        console.log(`🤖 ${bot} a trouvé le mot n°${wordNumber} (Score: ${score})`);
+    }
 });
 
 console.log('✅ Système de Bots IA initialisé - 5 bots prêts !');

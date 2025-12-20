@@ -286,10 +286,10 @@ class P2PChatSystem {
     }
 
     // Envoyer un message
-    sendMessage(text) {
+    async sendMessage(text) {
         if (!text || text.trim() === '') return;
         if (!this.roomId) {
-            alert('Vous devez créer ou rejoindre une room d\'abord !');
+            await CustomModals.showAlert('⚠️ Room requise', 'Vous devez créer ou rejoindre une room d\'abord !');
             return;
         }
 
@@ -607,7 +607,7 @@ class P2PChatSystem {
                     this.updateParticipantCount();
 
                 } catch (error) {
-                    alert('Erreur lors de la création de la room: ' + error.message);
+                    await CustomModals.showAlert('❌ Erreur de création', error.message);
                     createBtn.disabled = false;
                     createBtn.textContent = '🎮 Créer une Room';
                 }
@@ -621,7 +621,7 @@ class P2PChatSystem {
             joinBtn.addEventListener('click', async () => {
                 const roomId = roomCodeInput.value.trim();
                 if (!roomId) {
-                    alert('Veuillez entrer un code de room');
+                    await CustomModals.showAlert('⚠️ Code manquant', 'Veuillez entrer un code de room');
                     return;
                 }
 
@@ -635,7 +635,7 @@ class P2PChatSystem {
                     this.updateParticipantCount();
 
                 } catch (error) {
-                    alert('Erreur lors de la connexion: ' + error.message);
+                    await CustomModals.showAlert('❌ Erreur de connexion', error.message);
                     joinBtn.disabled = false;
                     joinBtn.textContent = '🔗 Rejoindre';
                 }
@@ -699,8 +699,8 @@ class P2PChatSystem {
                 usernameBtn.style.cursor = 'default';
                 usernameBtn.title = 'Username de votre compte';
             } else {
-                usernameBtn.addEventListener('click', () => {
-                    const newUsername = prompt('Nouveau pseudo:', this.username);
+                usernameBtn.addEventListener('click', async () => {
+                    const newUsername = await CustomModals.showPrompt('✏️ Changer de pseudo', 'Nouveau pseudo:', this.username, '', '✓ Valider', '❌ Annuler');
                     if (newUsername) {
                         this.changeUsername(newUsername);
                         usernameBtn.textContent = this.username;
