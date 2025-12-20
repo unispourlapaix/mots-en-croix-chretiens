@@ -170,17 +170,8 @@ class RoomSystem {
                 console.log('🔄 Mise à jour de la bulle de chat...');
                 this.updateChatBubble();
                 
-                // IMPORTANT: Afficher immédiatement la liste des joueurs disponibles
-                this.updateAvailablePlayersList();
-                console.log('📋 Liste des joueurs disponibles mise à jour');
-                
                 // Démarrer l'annonce de présence périodique
                 this.startPresenceBroadcast();
-                
-                // 🌐 Annoncer ma présence via Supabase Realtime pour découverte cross-device
-                this.joinLobbyPresence();
-                this.announcePresenceToSupabase();
-                
             } else {
                 console.log('⏳ En attente du peer...');
                 setTimeout(checkPeer, 200);
@@ -1149,30 +1140,10 @@ class RoomSystem {
 
         // Afficher le nombre de joueurs en ligne
         const count = this.availablePlayers.size;
-        let listHTML = `
-            <h4>🌐 Joueurs en Ligne (${count})</h4>
-            <div class="lobby-info-banner" style="
-                background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-                border: 2px solid #667eea;
-                border-radius: 12px;
-                padding: 12px;
-                margin-bottom: 15px;
-                font-size: 13px;
-                color: #555;
-            ">
-                <div style="font-weight: 600; color: #667eea; margin-bottom: 6px;">
-                    💡 Comment jouer en multijoueur ?
-                </div>
-                <div style="line-height: 1.5;">
-                    🏠 <strong>Créer une salle</strong> : Cliquez sur "🎮 Créer Partie" pour générer un code<br>
-                    📤 <strong>Partager le code</strong> : Envoyez le code à vos amis<br>
-                    🚪 <strong>Rejoindre</strong> : Vos amis cliquent "🎮 Rejoindre" et entrent le code
-                </div>
-            </div>
-        `;
+        let listHTML = `<h4>🌐 Joueurs en Ligne (${count})</h4>`;
 
         if (count === 0) {
-            listHTML += '<p class="no-players">Aucun joueur détecté sur ce navigateur...</p>';
+            listHTML += '<p class="no-players">Aucun joueur en ligne pour le moment...</p>';
         } else {
             listHTML += '<div class="available-players-list">';
             
@@ -1878,65 +1849,7 @@ class RoomSystem {
             });
         }, 100);
     }
-
-    // 🌐 Rejoindre le lobby de présence Supabase Realtime
-    async joinLobbyPresence() {
-        if (!this.chatSystem?.peer?.id || !window.lobbyPresence) {
-            console.log('⏭️ Lobby presence skip: pas de peer ou lobbyPresence');
-            return;
-        }
-
-        try {
-            const peerId = this.chatSystem.peer.id;
-            const username = this.chatSystem.currentUser || 'Joueur';
-            const avatar = this.chatSystem.getUserAvatar(username) || '😊';
-
-            // Rejoindre le lobby Supabase Realtime
-            const success = await window.lobbyPresence.joinLobby(peerId, username, avatar);
-            
-            if (success) {
-                console.log('✅ Rejoint le lobby Supabase Realtime');
-                
-                // Définir le callback de mise à jour
-                window.lobbyPresence.setOnPlayersUpdated((players) => {
-                    console.log(`📡 ${players.length} joueurs dans le lobby Realtime`);
-                    
-                    // Mettre à jour availablePlayers avec les joueurs du lobby
-                    players.forEach(player => {
-                        if (player.peer_id !== peerId) { // Ne pas me rajouter
-                            this.availablePlayers.set(player.peer_id, {
-                                username: player.username,
-                                avatar: player.avatar,
-                                acceptMode: 'manual', // Par défaut
-                                roomMode: 'manual',
-                                playerCount: 1,
-                                maxPlayers: 8,
-                                lastSeen: Date.now(),
-                                isMe: false,
-                                isBot: false,
-                                fromRealtime: true // Marqueur pour indiquer source Realtime
-                            });
-                        }
-                    });
-                    
-                    // Mettre à jour l'UI
-                    this.updateAvailablePlayersList();
-                    this.updateChatBubble();
-                });
-            }
-        } catch (err) {
-            console.warn('⚠️ Erreur joinLobbyPresence:', err);
-        }
-    }
-
-    // 🌐 Annoncer ma présence via Supabase Realtime (découverte cross-browser)
-    async announcePresenceToSupabase() {
-        // Cette méthode est maintenant remplacée par joinLobbyPresence()
-        // Gardée pour compatibilité avec ancien code
-        await this.joinLobbyPresence();
-    }
 }
-
 
 // Exposer la classe globalement
 window.RoomSystem = RoomSystem;

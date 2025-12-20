@@ -334,10 +334,7 @@ class SimpleChatSystem {
             
             // Notifier aussi le P2PChatSystem
             if (window.chatSystem && window.chatSystem.roomId) {
-                // Vérifier que handleIncomingConnection existe
-                if (typeof window.chatSystem.handleIncomingConnection === 'function') {
-                    window.chatSystem.handleIncomingConnection(conn);
-                }
+                window.chatSystem.handleIncomingConnection(conn);
             }
             
             // Envoyer un message de bienvenue
@@ -380,16 +377,8 @@ class SimpleChatSystem {
             if (window.chatSystem && window.chatSystem.connections) {
                 window.chatSystem.connections.delete(conn.peer);
                 const username = conn.metadata?.username || 'Utilisateur';
-                
-                // Vérifier que sendSystemMessage existe
-                if (typeof window.chatSystem.sendSystemMessage === 'function') {
-                    window.chatSystem.sendSystemMessage(`${username} a quitté le chat 👋`);
-                }
-                
-                // Vérifier que updateParticipantCount existe
-                if (typeof window.chatSystem.updateParticipantCount === 'function') {
-                    window.chatSystem.updateParticipantCount();
-                }
+                window.chatSystem.sendSystemMessage(`${username} a quitté le chat 👋`);
+                window.chatSystem.updateParticipantCount();
             }
             
             // Notifier le room system
@@ -412,10 +401,7 @@ class SimpleChatSystem {
     handleMessage(data, conn) {
         // Router les messages du P2PChatSystem (chat communautaire)
         if (window.chatSystem && ['message', 'history', 'system'].includes(data.type)) {
-            // Vérifier que handleIncomingMessage existe
-            if (typeof window.chatSystem.handleIncomingMessage === 'function') {
-                window.chatSystem.handleIncomingMessage(data, conn.peer);
-            }
+            window.chatSystem.handleIncomingMessage(data, conn.peer);
             return; // Ne pas traiter dans SimpleChatSystem
         }
         
