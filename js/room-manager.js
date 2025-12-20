@@ -441,15 +441,15 @@ class RoomManager {
     }
 
     openConnexionTab() {
-        // Fermer la bulle de chat flottante
+        // Minimiser proprement la bulle de chat flottante (sans forcer display:none)
         const chatBubble = document.getElementById('chatBubble');
-        const chatBubbleBody = document.getElementById('chatBubbleBody');
-        if (chatBubble && chatBubbleBody) {
-            chatBubbleBody.style.display = 'none';
+        if (chatBubble && !chatBubble.classList.contains('minimized')) {
+            chatBubble.classList.add('minimized');
             const toggleBtn = document.getElementById('toggleChatBubble');
             if (toggleBtn) {
                 toggleBtn.textContent = '+';
             }
+            console.log('💬 Chat minimisé proprement via openConnexionTab');
         }
         
         // Ouvrir le menu principal

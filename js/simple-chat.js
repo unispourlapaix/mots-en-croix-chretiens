@@ -4,6 +4,7 @@ class SimpleChatSystem {
         this.currentUser = null;
         this.isInitialized = false;
         this.skipWelcomeMessages = false; // Flag pour éviter les messages lors du chargement
+        this.lastConnectedUser = null; // Éviter les messages en double
         
         // P2P
         this.peer = null;
@@ -23,8 +24,11 @@ class SimpleChatSystem {
         if (typeof authSystem !== 'undefined') {
             authSystem.onAuthChange((user) => {
                 this.updateUsername();
-                if (user && user.username && !this.skipWelcomeMessages) {
+                
+                // Afficher le message seulement si c'est un nouveau user différent du dernier
+                if (user && user.username && !this.skipWelcomeMessages && user.username !== this.lastConnectedUser) {
                     this.showMessage(`✅ Connecté en tant que ${user.username}`, 'system');
+                    this.lastConnectedUser = user.username;
                     
                     // Mettre à jour le système de présence avec le nouveau username
                     if (window.presenceSystem && window.presenceSystem.myPresence && this.peer?.id) {
@@ -34,6 +38,7 @@ class SimpleChatSystem {
                     
                     this.initP2P();
                 }
+                
                 // Réinitialiser le flag après le premier chargement
                 this.skipWelcomeMessages = false;
             });

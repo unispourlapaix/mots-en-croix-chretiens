@@ -366,6 +366,16 @@ class AuthSystem {
                 chatUsername.style.color = '#666';
             }
             
+            // S'assurer que la bulle de chat reste ouverte après déconnexion
+            const chatBubble = document.getElementById('chatBubble');
+            const toggleBtn = document.getElementById('toggleChatBubble');
+            if (chatBubble && chatBubble.classList.contains('minimized')) {
+                chatBubble.classList.remove('minimized');
+                if (toggleBtn) {
+                    toggleBtn.textContent = '−';
+                }
+            }
+            
             console.log('✅ Déconnecté');
             return { success: true };
         } catch (err) {

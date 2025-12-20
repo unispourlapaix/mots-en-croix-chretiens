@@ -3238,13 +3238,7 @@ class ChristianCrosswordGame {
             window.menuTabSystem.switchTab('settings');
         }
         
-        // Minimiser la bulle de chat
-        const chatBubble = document.getElementById('chatBubble');
-        const toggleBtn = document.getElementById('toggleChatBubble');
-        if (chatBubble && !chatBubble.classList.contains('minimized')) {
-            chatBubble.classList.add('minimized');
-            if (toggleBtn) toggleBtn.textContent = '+';
-        }
+        // Ne plus minimiser automatiquement le chat - laisser l'utilisateur décider
     }
 
     closeMenu() {

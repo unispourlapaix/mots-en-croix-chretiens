@@ -944,24 +944,41 @@ class RoomSystem {
         const chatBubble = document.getElementById('chatBubble');
         
         if (toggleBtn && chatBubble) {
-            toggleBtn.addEventListener('click', (e) => {
+            // Supprimer les anciens listeners s'ils existent
+            if (toggleBtn._toggleHandler) {
+                toggleBtn.removeEventListener('click', toggleBtn._toggleHandler);
+            }
+            
+            // Créer le handler et le sauvegarder
+            const toggleHandler = (e) => {
                 e.stopPropagation();
-                chatBubble.classList.toggle('minimized');
-                toggleBtn.textContent = chatBubble.classList.contains('minimized') ? '+' : '−';
-            });
+                e.preventDefault();
+                
+                const isCurrentlyMinimized = chatBubble.classList.contains('minimized');
+                
+                if (isCurrentlyMinimized) {
+                    // Maximiser
+                    chatBubble.classList.remove('minimized');
+                    toggleBtn.textContent = '−';
+                    console.log('📖 Chat ouvert');
+                } else {
+                    // Minimiser
+                    chatBubble.classList.add('minimized');
+                    toggleBtn.textContent = '+';
+                    console.log('📕 Chat minimisé');
+                }
+            };
+            
+            toggleBtn._toggleHandler = toggleHandler;
+            toggleBtn.addEventListener('click', toggleHandler);
             
             // Empêcher la fermeture quand on clique dans la bulle
             chatBubble.addEventListener('click', (e) => {
                 e.stopPropagation();
             });
             
-            // Fermer la bulle quand on clique en dehors
-            document.addEventListener('click', (e) => {
-                if (!chatBubble.contains(e.target) && !chatBubble.classList.contains('minimized')) {
-                    chatBubble.classList.add('minimized');
-                    toggleBtn.textContent = '+';
-                }
-            });
+            // NE PLUS fermer automatiquement la bulle quand on clique en dehors
+            // L'utilisateur doit utiliser le bouton - pour la fermer
         }
         
         // Ajouter la recherche de joueurs
@@ -1179,6 +1196,20 @@ class RoomSystem {
             return;
         }
 
+        // S'assurer que 'me' est toujours présent si le chatSystem est initialisé
+        if (this.chatSystem.currentUser && !this.availablePlayers.has('me')) {
+            console.log('🔧 Réajout de "me" dans availablePlayers');
+            this.availablePlayers.set('me', {
+                username: this.chatSystem.currentUser,
+                avatar: this.chatSystem.getUserAvatar(this.chatSystem.currentUser) || '👤',
+                isMe: true,
+                playerCount: 1,
+                maxPlayers: 8,
+                mode: 'solo',
+                acceptMode: this.acceptMode
+            });
+        }
+
         const count = this.availablePlayers.size;
         onlineCountEl.textContent = count;
         
@@ -1240,6 +1271,7 @@ class RoomSystem {
                             <span class="status-indicator"></span>
                             <span>${player.playerCount || 1}/${player.maxPlayers || 8}</span>
                             <span class="room-mode-badge">${modeIcon} ${modeName}</span>
+                            ${player.isBot && player.difficulty ? `<span class="bot-difficulty-badge" style="font-size: 9px; color: #667eea; font-weight: 600; margin-left: 4px;">${player.difficulty}</span>` : ''}
                         </div>
                     </div>
                     ${!isMe ? `
@@ -1290,25 +1322,46 @@ class RoomSystem {
         
         // Créer un gestionnaire d'événements unique
         const clickHandler = (e) => {
-            const target = e.target.closest('button');
+            // Chercher le bouton parent même si on clique sur un élément enfant
+            // Essayer plusieurs méthodes pour capturer le clic
+            let target = e.target;
+            
+            // Si ce n'est pas déjà un bouton, chercher le parent bouton
+            if (!target.matches('button')) {
+                target = target.closest('button');
+            }
+            
+            // Si toujours pas de bouton, vérifier si on a cliqué sur une zone d'action
+            if (!target && e.target.closest('.player-actions-mini')) {
+                target = e.target.closest('.player-actions-mini').querySelector('button');
+            }
+            
             if (!target) return;
             
+            e.preventDefault();
             e.stopPropagation();
+            
+            // Récupérer les données depuis le bouton ou ses parents
+            const peerId = target.dataset.peerId || target.closest('[data-peer-id]')?.dataset.peerId;
+            const username = target.dataset.username || target.closest('[data-username]')?.dataset.username;
+            
+            // Log pour débug
+            console.log('🖱️ Clic détecté sur:', target.className, { peerId, username });
             
             // Bouton rejoindre
             if (target.classList.contains('btn-join-bubble')) {
-                const peerId = target.dataset.peerId;
-                const username = target.dataset.username;
+                console.log('🎮 Rejoindre:', { peerId, username });
                 
-                if (peerId.startsWith('bot-')) {
+                if (peerId && peerId.startsWith('bot-')) {
                     this.joinBotGame(username);
-                } else {
+                } else if (peerId && username) {
                     this.requestJoinRoom(username, peerId);
                 }
             }
             
             // Toggle micro (joueur local)
             else if (target.classList.contains('btn-toggle-mic')) {
+                console.log('🎤 Toggle micro');
                 if (window.voiceUI?.voiceSystem) {
                     window.voiceUI.voiceSystem.toggleMute();
                     setTimeout(() => this.updateChatBubble(), 100);
@@ -1317,18 +1370,15 @@ class RoomSystem {
             
             // Contrôles vocaux
             else if (target.classList.contains('btn-voice-control')) {
-                const peerId = target.dataset.peerId;
-                this.showVoiceControlMenu(peerId);
+                console.log('🔊 Contrôles vocaux pour:', peerId);
+                if (peerId) {
+                    this.showVoiceControlMenu(peerId);
+                }
             }
             
             // Plus d'options
             else if (target.classList.contains('btn-more-options')) {
-                const peerId = target.dataset.peerId;
-                const username = target.dataset.username;
-                
-                if (window.CONFIG?.enableLogs) {
-                    console.log('🔍 Menu contextuel:', { peerId, username });
-                }
+                console.log('⋮ Plus d\'options:', { peerId, username });
                 
                 if (peerId && username) {
                     this.showPlayerContextMenu(e, peerId, username);
@@ -1339,6 +1389,7 @@ class RoomSystem {
             
             // Changer de bot (sur Unisona)
             else if (target.classList.contains('btn-change-bot')) {
+                console.log('🔄 Changer de bot');
                 this.showBotSelectionMenu(e);
             }
         };
@@ -1420,17 +1471,27 @@ class RoomSystem {
     }
 
     showBotSelectionMenu(event) {
-        // Supprimer les anciens menus
-        document.querySelectorAll('.bot-selection-menu').forEach(m => m.remove());
+        // Empêcher la propagation de l'événement
+        if (event) {
+            event.stopPropagation();
+        }
+        
+        // Supprimer les anciens menus et leurs event listeners
+        document.querySelectorAll('.bot-selection-menu').forEach(m => {
+            if (m._closeHandler) {
+                document.removeEventListener('click', m._closeHandler);
+            }
+            m.remove();
+        });
         
         // Liste des bots disponibles
         const bots = [
-            { id: 'bot-unisona', name: 'Unisona', emoji: '🎭', description: 'Bot principal polyvalent' },
-            { id: 'bot-origine', name: 'Origine', emoji: '🌟', description: 'Ado inclusif fun' },
-            { id: 'bot-originaire', name: 'Originaire', emoji: '🌾', description: 'Agriculteur futur sage' },
-            { id: 'bot-dreamer', name: 'Dreamer', emoji: '🤖', description: 'Robot rigolo apprenti' },
-            { id: 'bot-materik', name: 'Materik', emoji: '⚙️', description: 'Ingénieur russe technique' },
-            { id: 'bot-mpandawaha', name: 'M.Pandawaha', emoji: '🎋', description: 'Maître sage bambou' }
+            { id: 'bot-unisona', name: 'Unisona', emoji: '🎭', description: 'Bot principal polyvalent', difficulty: '🎯 Adaptatif' },
+            { id: 'bot-origine', name: 'Origine', emoji: '🌟', description: 'Ado inclusif fun', difficulty: '⚡ Expert' },
+            { id: 'bot-originaire', name: 'Originaire', emoji: '🌾', description: 'Agriculteur futur sage', difficulty: '🔥 Difficile' },
+            { id: 'bot-dreamer', name: 'Dreamer', emoji: '🤖', description: 'Robot rigolo apprenti', difficulty: '🎯 Moyen' },
+            { id: 'bot-materik', name: 'Materik', emoji: '⚙️', description: 'Ingénieur russe technique', difficulty: '🐢 Facile' },
+            { id: 'bot-mpandawaha', name: 'M.Pandawaha', emoji: '🎋', description: 'Maître sage bambou', difficulty: '🎲 Intermédiaire' }
         ];
         
         // Récupérer le bot actif actuel
@@ -1447,6 +1508,7 @@ class RoomSystem {
                         <div class="bot-info">
                             <div class="bot-name">${bot.name} ${bot.id === activeBot ? '✓' : ''}</div>
                             <div class="bot-desc">${bot.description}</div>
+                            <div class="bot-difficulty" style="font-size: 10px; color: #667eea; font-weight: 600; margin-top: 2px;">${bot.difficulty}</div>
                         </div>
                     </button>
                 `).join('')}
@@ -1462,23 +1524,36 @@ class RoomSystem {
         
         document.body.appendChild(menu);
         
-        // Event listeners
+        // Event listeners pour les items
         menu.querySelectorAll('.bot-menu-item').forEach(item => {
-            item.addEventListener('click', () => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const botId = item.dataset.botId;
                 this.switchActiveBot(botId);
+                
+                // Nettoyer proprement
+                if (menu._closeHandler) {
+                    document.removeEventListener('click', menu._closeHandler);
+                }
                 menu.remove();
             });
         });
         
         // Fermer au clic extérieur
-        setTimeout(() => {
-            const closeMenu = (e) => {
-                if (!menu.contains(e.target)) {
-                    menu.remove();
-                    document.removeEventListener('click', closeMenu);
+        const closeMenu = (e) => {
+            if (!menu.contains(e.target) && !e.target.classList.contains('btn-change-bot')) {
+                if (menu._closeHandler) {
+                    document.removeEventListener('click', menu._closeHandler);
                 }
-            };
+                menu.remove();
+            }
+        };
+        
+        // Sauvegarder la référence du handler
+        menu._closeHandler = closeMenu;
+        
+        // Attacher l'écouteur après un court délai
+        setTimeout(() => {
             document.addEventListener('click', closeMenu);
         }, 100);
     }
@@ -1500,12 +1575,12 @@ class RoomSystem {
         
         // Ajouter le nouveau bot
         const botNames = {
-            'bot-unisona': { name: 'Unisona', avatar: '🎭', displayName: 'Unisona' },
-            'bot-origine': { name: '🤖 Origine', avatar: '👼', displayName: 'Origine' },
-            'bot-originaire': { name: '🤖 Originaire', avatar: '🌹', displayName: 'Originaire' },
-            'bot-dreamer': { name: '🤖 Dreamer', avatar: '⛪', displayName: 'Dreamer' },
-            'bot-materik': { name: '🤖 Materik', avatar: '📖', displayName: 'Materik' },
-            'bot-mpandawaha': { name: '🤖 M.Pandawaha', avatar: '🎲', displayName: 'M.Pandawaha' }
+            'bot-unisona': { name: 'Unisona', avatar: '🎭', displayName: 'Unisona', difficulty: '🎯 Adaptatif' },
+            'bot-origine': { name: '🤖 Origine', avatar: '👼', displayName: 'Origine', difficulty: '⚡ Expert' },
+            'bot-originaire': { name: '🤖 Originaire', avatar: '🌹', displayName: 'Originaire', difficulty: '🔥 Difficile' },
+            'bot-dreamer': { name: '🤖 Dreamer', avatar: '⛪', displayName: 'Dreamer', difficulty: '🎯 Moyen' },
+            'bot-materik': { name: '🤖 Materik', avatar: '📖', displayName: 'Materik', difficulty: '🐢 Facile' },
+            'bot-mpandawaha': { name: '🤖 M.Pandawaha', avatar: '🎲', displayName: 'M.Pandawaha', difficulty: '🎲 Intermédiaire' }
         };
         
         const botInfo = botNames[botId];
@@ -1514,6 +1589,7 @@ class RoomSystem {
                 username: botInfo.displayName,
                 avatar: botInfo.avatar,
                 isBot: true,
+                difficulty: botInfo.difficulty,
                 playerCount: 1,
                 maxPlayers: 2,
                 mode: 'solo'

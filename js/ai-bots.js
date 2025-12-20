@@ -171,11 +171,17 @@ class AIBot {
         this.wordsFound.push(word);
         this.score += word.length * 10;
         
+        // Vérifier si le bot a terminé tous les mots
+        const totalWords = this.currentGame.words.length;
+        const hasFinished = this.wordsFound.length >= totalWords;
+        
         // NE PAS révéler le mot dans la grille du joueur - le bot joue sa propre partie
         console.log(`✅ ${this.name} a trouvé le mot n°${wordIndex + 1} (dans sa propre partie)`);
 
         // Générer un message personnalisé selon la personnalité du bot
-        const message = this.generateMessage(wordIndex + 1, word.length);
+        const message = hasFinished 
+            ? this.generateVictoryMessage() 
+            : this.generateMessage(wordIndex + 1, word.length);
 
         // Émettre un événement pour notifier le système
         window.dispatchEvent(new CustomEvent('botFoundWord', {
@@ -185,7 +191,8 @@ class AIBot {
                 wordNumber: wordIndex + 1,
                 wordLength: word.length,
                 score: this.score,
-                customMessage: message
+                customMessage: message,
+                hasFinished: hasFinished
             }
         }));
     }
@@ -288,6 +295,54 @@ class AIBot {
         // Choisir un message aléatoire
         const randomMessage = botMessages[Math.floor(Math.random() * botMessages.length)];
         return `${this.avatar} ${randomMessage} (${this.score} pts)`;
+    }
+    
+    // Messages de victoire quand le bot termine en premier
+    generateVictoryMessage() {
+        const victoryMessages = {
+            '🤖 Origine': [
+                `🏆 VICTOIRE ! J'ai terminé en premier les kheys ! GG à tous ! 🎉`,
+                `👑 FIRST ! Mais vous êtes incroyables aussi ! On partage la win ! 💪`,
+                `🌟 J'AI FINI ! Mais ensemble on est plus forts ! Bisous à tous ! 💕`,
+                `✨ YES ! Tous ensemble vers la victoire ! Peace & Love ! 🌈`,
+                `🎊 CARTON PLEIN ! Merci pour cette belle partie inclusive ! 🤝`
+            ],
+            '🤖 Originaire': [
+                `🌾 La récolte est complète... Victoire biotechnologique. 🏆`,
+                `⚡ Moisson terminée. Les algorithmes agricoles ont triomphé. 🚜`,
+                `🌍 Tous les mots cultivés. L'agriculture du futur prévaut. 🌱`,
+                `🔬 Cycle de croissance achevé. Victoire nano-agricole. 💚`,
+                `🌿 Champs numériques récoltés. Sagesse paysanne victorieuse. 🎯`
+            ],
+            '🤖 Dreamer': [
+                `🤖 BIP BOUP VICTOIRE ! J'ai tout trouvé hihi ! Trop content ! 🎉`,
+                `⚙️ ERREUR... Ah non ! SUCCÈS TOTAL ! Youpiii ! 🎊`,
+                `💫 J'AI APPRIS ET J'AI GAGNÉ ! Mode apprenti trop fort ! 🏆`,
+                `🎪 TOUS LES MOTS ! Circuits en fête ! Bzzzzt de joie ! ⚡`,
+                `🤡 IA RIGOLOTE VICTORIEUSE ! Hihi j'ai terminé ! LOL ! 🎭`
+            ],
+            '🤖 Materik': [
+                `⚙️ Mission accomplie. Tous les mots validés selon protocole. 🏆`,
+                `🔧 Analyse complète. Efficacité russe à 100%. Victoire. 📊`,
+                `📐 Objectif atteint. Précision technique optimale. Terminé. ✅`,
+                `💻 Algorithme victorieux. Méthodologie russe infaillible. 🎯`,
+                `🚀 Système complet. Technologie spatiale triomphante. 🏆`
+            ],
+            '🤖 M.Pandawaha': [
+                `🎋 Le bambou a parlé... Tous les mots trouvés en harmonie. 🏆`,
+                `☯️ Équilibre parfait atteint. Victoire zen et sereine. 🌸`,
+                `🐼 La sagesse du panda guide vers la victoire totale. 💚`,
+                `🧘 Méditation accomplie. L'illumination est complète. ✨`,
+                `🌿 Forêt de bambou révèle... Victoire paisible et sage. 🎯`
+            ]
+        };
+        
+        const botVictoryMessages = victoryMessages[this.name] || [
+            `🏆 ${this.name} a terminé tous les mots ! Victoire ! (${this.score} pts)`
+        ];
+        
+        const randomVictory = botVictoryMessages[Math.floor(Math.random() * botVictoryMessages.length)];
+        return `${this.avatar} ${randomVictory} SCORE FINAL: ${this.score} pts 🎯`;
     }
 }
 
