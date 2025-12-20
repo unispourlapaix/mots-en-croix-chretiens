@@ -241,6 +241,11 @@ class RealtimeLobbySystem {
             });
     }
 
+    // Récupérer tous les joueurs (y compris soi-même)
+    getAllPlayers() {
+        return Array.from(this.onlinePlayers.values());
+    }
+
     // Récupérer un joueur spécifique
     getPlayer(peerId) {
         return this.onlinePlayers.get(peerId);

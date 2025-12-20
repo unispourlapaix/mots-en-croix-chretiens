@@ -19,33 +19,37 @@ CREATE TABLE IF NOT EXISTS lobby_presence (
 );
 
 -- Index pour recherche rapide
-CREATE INDEX idx_lobby_presence_user_id ON lobby_presence(user_id);
-CREATE INDEX idx_lobby_presence_peer_id ON lobby_presence(peer_id);
-CREATE INDEX idx_lobby_presence_last_seen ON lobby_presence(last_seen);
-CREATE INDEX idx_lobby_presence_status ON lobby_presence(status);
+CREATE INDEX IF NOT EXISTS idx_lobby_presence_user_id ON lobby_presence(user_id);
+CREATE INDEX IF NOT EXISTS idx_lobby_presence_peer_id ON lobby_presence(peer_id);
+CREATE INDEX IF NOT EXISTS idx_lobby_presence_last_seen ON lobby_presence(last_seen);
+CREATE INDEX IF NOT EXISTS idx_lobby_presence_status ON lobby_presence(status);
 
 -- Activer Row Level Security
 ALTER TABLE lobby_presence ENABLE ROW LEVEL SECURITY;
 
 -- Politique: Tout le monde peut lire les présences actives
+DROP POLICY IF EXISTS "Lecture publique des présences" ON lobby_presence;
 CREATE POLICY "Lecture publique des présences"
 ON lobby_presence
 FOR SELECT
 USING (last_seen > NOW() - INTERVAL '1 minute');
 
 -- Politique: Les utilisateurs authentifiés peuvent créer leur présence
+DROP POLICY IF EXISTS "Création de sa propre présence" ON lobby_presence;
 CREATE POLICY "Création de sa propre présence"
 ON lobby_presence
 FOR INSERT
 WITH CHECK (true);
 
 -- Politique: Mise à jour seulement de sa propre présence
+DROP POLICY IF EXISTS "Mise à jour de sa propre présence" ON lobby_presence;
 CREATE POLICY "Mise à jour de sa propre présence"
 ON lobby_presence
 FOR UPDATE
 USING (peer_id = current_setting('request.jwt.claims', true)::json->>'peer_id' OR true);
 
 -- Politique: Suppression de sa propre présence
+DROP POLICY IF EXISTS "Suppression de sa propre présence" ON lobby_presence;
 CREATE POLICY "Suppression de sa propre présence"
 ON lobby_presence
 FOR DELETE
@@ -93,4 +97,13 @@ COMMENT ON COLUMN lobby_presence.status IS 'État du joueur : lobby (disponible)
 COMMENT ON COLUMN lobby_presence.last_seen IS 'Dernière activité (heartbeat toutes les 30s)';
 
 -- Activer Realtime pour cette table
-ALTER PUBLICATION supabase_realtime ADD TABLE lobby_presence;
+-- NOTE: Si vous avez déjà activé Realtime via l'interface, commentez ou ignorez cette erreur
+-- Sinon, activez manuellement dans Dashboard > Database > Replication > lobby_presence
+DO $$
+BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE lobby_presence;
+EXCEPTION
+    WHEN duplicate_object THEN
+        RAISE NOTICE 'Table lobby_presence déjà dans la publication supabase_realtime';
+END
+$$;
