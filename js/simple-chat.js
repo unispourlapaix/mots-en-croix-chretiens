@@ -334,7 +334,10 @@ class SimpleChatSystem {
             
             // Notifier aussi le P2PChatSystem
             if (window.chatSystem && window.chatSystem.roomId) {
-                window.chatSystem.handleIncomingConnection(conn);
+                // Vérifier que handleIncomingConnection existe
+                if (typeof window.chatSystem.handleIncomingConnection === 'function') {
+                    window.chatSystem.handleIncomingConnection(conn);
+                }
             }
             
             // Envoyer un message de bienvenue
@@ -409,7 +412,10 @@ class SimpleChatSystem {
     handleMessage(data, conn) {
         // Router les messages du P2PChatSystem (chat communautaire)
         if (window.chatSystem && ['message', 'history', 'system'].includes(data.type)) {
-            window.chatSystem.handleIncomingMessage(data, conn.peer);
+            // Vérifier que handleIncomingMessage existe
+            if (typeof window.chatSystem.handleIncomingMessage === 'function') {
+                window.chatSystem.handleIncomingMessage(data, conn.peer);
+            }
             return; // Ne pas traiter dans SimpleChatSystem
         }
         
