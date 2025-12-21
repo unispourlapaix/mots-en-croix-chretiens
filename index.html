@@ -123,8 +123,11 @@
                 </button>
             </div>
             
-            <!-- Bouton rejoindre le vocal (visible quand pas connecté) -->
+            <!-- Bouton rejoindre le vocal / Statut (visible selon contexte) -->
             <div id="chatSmsVoiceJoin" class="chat-sms-voice-join" style="display: block;">
+                <div id="chatSmsVoiceStatus" class="chat-sms-voice-status" style="display: none;">
+                    🎤 En vocal avec <span id="chatSmsVoiceCount">0</span> joueur(s)
+                </div>
                 <button id="chatSmsJoinVoiceBtn" class="chat-sms-voice-btn primary" title="Rejoindre le salon vocal">
                     🎤 Rejoindre le vocal
                 </button>

@@ -100,6 +100,8 @@ class VoiceUI {
             // Contrôles dans le chat SMS flottant
             smsVoiceControls: document.getElementById('chatSmsVoiceControls'),
             smsVoiceJoin: document.getElementById('chatSmsVoiceJoin'),
+            smsVoiceStatus: document.getElementById('chatSmsVoiceStatus'),
+            smsVoiceCount: document.getElementById('chatSmsVoiceCount'),
             smsJoinVoiceBtn: document.getElementById('chatSmsJoinVoiceBtn'),
             smsMuteBtn: document.getElementById('chatSmsMuteBtn'),
             smsDeafenBtn: document.getElementById('chatSmsDeafenBtn'),
@@ -193,12 +195,20 @@ class VoiceUI {
         
         this.elements.status.innerHTML = `<p class="text-success">${statusMessage}</p>`;
         
-        // Afficher les contrôles vocaux dans le chat SMS et cacher le bouton Join
+        // Afficher les contrôles vocaux dans le chat SMS
         if (this.elements.smsVoiceControls) {
             this.elements.smsVoiceControls.style.display = 'flex';
         }
-        if (this.elements.smsVoiceJoin) {
-            this.elements.smsVoiceJoin.style.display = 'none';
+        
+        // Afficher le statut au lieu du bouton Join
+        if (this.elements.smsJoinVoiceBtn) {
+            this.elements.smsJoinVoiceBtn.style.display = 'none';
+        }
+        if (this.elements.smsVoiceStatus) {
+            this.elements.smsVoiceStatus.style.display = 'block';
+        }
+        if (this.elements.smsVoiceCount) {
+            this.elements.smsVoiceCount.textContent = participantCount;
         }
         
         // Afficher l'indicateur vocal dans l'en-tête du chat
@@ -226,12 +236,15 @@ class VoiceUI {
         this.elements.controlsRow.style.display = 'none';
         this.elements.participantsList.style.display = 'none';
         
-        // Cacher les contrôles vocaux dans le chat SMS et afficher le bouton Join
+        // Cacher les contrôles vocaux et le statut, afficher le bouton Join
         if (this.elements.smsVoiceControls) {
             this.elements.smsVoiceControls.style.display = 'none';
         }
-        if (this.elements.smsVoiceJoin) {
-            this.elements.smsVoiceJoin.style.display = 'block';
+        if (this.elements.smsVoiceStatus) {
+            this.elements.smsVoiceStatus.style.display = 'none';
+        }
+        if (this.elements.smsJoinVoiceBtn) {
+            this.elements.smsJoinVoiceBtn.style.display = 'block';
         }
         
         // Masquer l'indicateur vocal dans l'en-tête du chat
@@ -321,6 +334,11 @@ class VoiceUI {
             ? '1 participant (vous)' 
             : `${count} participant(s)`;
         this.elements.participantCount.textContent = countText;
+        
+        // Mettre à jour aussi le compteur dans le chat SMS
+        if (this.elements.smsVoiceCount) {
+            this.elements.smsVoiceCount.textContent = count;
+        }
 
         // Construire la liste des participants
         const participants = [];
