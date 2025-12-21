@@ -1207,6 +1207,12 @@ class RoomSystem {
             console.warn('⚠️ Éléments de la bulle non trouvés');
             return;
         }
+        
+        // Ne pas écraser le lobby si l'onglet Lobby Public est actif
+        if (window.lobbyTabsManager?.currentView === 'lobby') {
+            console.log('🔒 Lobby actif, pas de mise à jour par room-system');
+            return;
+        }
 
         // S'assurer que 'me' est toujours présent si le chatSystem est initialisé
         if (this.chatSystem.currentUser && !this.availablePlayers.has('me')) {

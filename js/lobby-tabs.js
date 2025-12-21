@@ -65,6 +65,18 @@ class LobbyTabsManager {
             }
         });
         
+        // Forcer le rafraîchissement toutes les 3s si vue lobby active
+        setInterval(() => {
+            if (this.currentView === 'lobby') {
+                const list = document.getElementById('connectedPlayersList');
+                // Vérifier si le lobby a été écrasé par un autre système
+                if (list && (!list.innerHTML || !list.innerHTML.includes('lobby-header'))) {
+                    console.log('🔄 Restauration affichage lobby...');
+                    this.renderLobbyView();
+                }
+            }
+        }, 3000);
+        
         console.log('🔔 Écouteurs de présence activés');
     }
     
