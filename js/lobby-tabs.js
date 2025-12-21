@@ -141,6 +141,18 @@ class LobbyTabsManager {
         // Vérifier si le système est initialisé
         const isConnected = window.realtimeLobbySystem?.isInitialized;
         
+        // Si pas connecté, tenter l'initialisation automatique
+        if (!isConnected && window.realtimeLobbySystem && !this._autoInitAttempted) {
+            console.log('🔄 Tentative auto-init du lobby...');
+            this._autoInitAttempted = true;
+            window.realtimeLobbySystem.init().then(() => {
+                console.log('✅ Auto-init lobby réussi');
+                this.renderLobbyView(); // Re-render après init
+            }).catch(err => {
+                console.error('❌ Auto-init lobby échoué:', err);
+            });
+        }
+        
         // Afficher/cacher le bouton de connexion
         if (connectBtn) {
             if (!isConnected) {
