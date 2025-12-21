@@ -102,6 +102,34 @@ class AuthSystem {
 
             // Appeler les callbacks
             this.onAuthChangeCallbacks.forEach(cb => cb(this.currentUser));
+            
+            // 🆕 Forcer la synchronisation du username dans tous les systèmes
+            if (this.currentUser && this.currentUser.username) {
+                console.log('🔄 Synchronisation globale du username:', this.currentUser.username);
+                
+                // Synchroniser SimpleChatSystem
+                if (window.simpleChatSystem) {
+                    window.simpleChatSystem.currentUser = this.currentUser.username;
+                    console.log('✅ SimpleChatSystem synchronisé:', window.simpleChatSystem.currentUser);
+                }
+                
+                // Synchroniser P2PChatSystem
+                if (window.chatSystem) {
+                    window.chatSystem.username = this.currentUser.username;
+                    console.log('✅ ChatSystem synchronisé:', window.chatSystem.username);
+                }
+                
+                // Synchroniser RoomSystem
+                if (window.roomSystem) {
+                    window.roomSystem.myUsername = this.currentUser.username;
+                    console.log('✅ RoomSystem synchronisé:', window.roomSystem.myUsername);
+                }
+                
+                // Déclencher un événement global pour les autres modules
+                window.dispatchEvent(new CustomEvent('usernameUpdated', { 
+                    detail: { username: this.currentUser.username } 
+                }));
+            }
         });
 
         this.initUI();
@@ -142,6 +170,9 @@ class AuthSystem {
                     max_score: data.max_score || 0
                 };
                 console.log('✅ Profil chargé:', this.currentUser.username);
+                
+                // 🆕 Synchronisation immédiate après chargement du profil
+                this.syncUsernameGlobally(this.currentUser.username);
                 
                 // Mettre à jour l'UI immédiatement
                 this.updateUIWithUser();
@@ -569,6 +600,38 @@ class AuthSystem {
     // S'abonner aux changements d'auth
     onAuthChange(callback) {
         this.onAuthChangeCallbacks.push(callback);
+    }
+    
+    // 🆕 Synchroniser le username dans tous les systèmes
+    syncUsernameGlobally(username) {
+        if (!username) return;
+        
+        console.log('🔄 Synchronisation globale du username:', username);
+        
+        // Synchroniser SimpleChatSystem
+        if (window.simpleChatSystem) {
+            window.simpleChatSystem.currentUser = username;
+            console.log('✅ SimpleChatSystem synchronisé');
+        }
+        
+        // Synchroniser P2PChatSystem
+        if (window.chatSystem) {
+            window.chatSystem.username = username;
+            console.log('✅ ChatSystem synchronisé');
+        }
+        
+        // Synchroniser RoomSystem
+        if (window.roomSystem) {
+            window.roomSystem.myUsername = username;
+            console.log('✅ RoomSystem synchronisé');
+        }
+        
+        // Déclencher un événement global
+        window.dispatchEvent(new CustomEvent('usernameUpdated', { 
+            detail: { username: username } 
+        }));
+        
+        console.log('✅ Username synchronisé partout:', username);
     }
 
     // Afficher le modal d'authentification
