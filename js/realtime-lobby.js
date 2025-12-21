@@ -129,16 +129,23 @@ class RealtimeLobbySystem {
 
         const username = this.getMyUsername();
         const peerId = window.simpleChatSystem.peer.id;
+        
+        // Vérifier si on est vraiment dans une salle active (avec au moins 2 joueurs)
+        const isInActiveRoom = window.roomSystem?.roomInfo?.roomId && 
+                               window.roomSystem?.roomInfo?.players?.length > 1;
+        
+        // Vérifier si on est en jeu
+        const isInGame = window.game?.gameStarted || false;
 
         this.myPresence = {
             peer_id: peerId,
             username: username,
             avatar: '😊',
-            room_code: window.roomSystem?.roomInfo?.roomId || null,
+            room_code: isInActiveRoom ? window.roomSystem.roomInfo.roomId : null,
             room_mode: window.roomSystem?.acceptMode || 'manual',
             player_count: 1,
             max_players: 8,
-            status: window.roomSystem?.roomInfo?.roomId ? 'in_room' : 'available',
+            status: isInGame ? 'in_game' : (isInActiveRoom ? 'in_room' : 'available'),
             last_seen: new Date().toISOString()
         };
 
@@ -205,8 +212,18 @@ class RealtimeLobbySystem {
         // Heartbeat toutes les 30 secondes
         this.heartbeatInterval = setInterval(async () => {
             if (this.myPresence && this.channel) {
-                // Mettre à jour last_seen
+                // Vérifier si on est vraiment dans une salle active
+                const isInActiveRoom = window.roomSystem?.roomInfo?.roomId && 
+                                       window.roomSystem?.roomInfo?.players?.length > 1;
+                
+                // Vérifier si on est en jeu
+                const isInGame = window.game?.gameStarted || false;
+                
+                // Mettre à jour last_seen et status
                 this.myPresence.last_seen = new Date().toISOString();
+                this.myPresence.status = isInGame ? 'in_game' : (isInActiveRoom ? 'in_room' : 'available');
+                this.myPresence.room_code = isInActiveRoom ? window.roomSystem.roomInfo.roomId : null;
+                this.myPresence.username = this.getMyUsername(); // 🆕 Garder le username à jour
                 
                 // Update dans le channel uniquement
                 await this.channel.track(this.myPresence);
