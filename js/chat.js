@@ -257,11 +257,26 @@ class P2PChatSystem {
                 }
                 conn.metadata.username = data.username || 'Utilisateur';
                 conn.metadata.color = data.color || '#999';
-                console.log(`👥 ${data.username} a rejoint le chat`);
+                console.log(`👥 ${data.username} a rejoint le chat avec couleur ${conn.metadata.color}`);
                 
                 // Mettre à jour la liste des participants
                 if (window.chatUI) {
                     window.chatUI.updateSmsParticipantCount();
+                }
+            } else {
+                // Si la connexion n'existe pas encore dans chatSystem, l'ajouter depuis simpleChatSystem
+                if (window.simpleChatSystem && window.simpleChatSystem.connections) {
+                    const simpleConn = window.simpleChatSystem.connections.get(fromPeerId);
+                    if (simpleConn) {
+                        // Synchroniser la connexion
+                        if (!simpleConn.metadata) {
+                            simpleConn.metadata = {};
+                        }
+                        simpleConn.metadata.username = data.username || 'Utilisateur';
+                        simpleConn.metadata.color = data.color || '#999';
+                        this.connections.set(fromPeerId, simpleConn);
+                        console.log(`🔄 Connexion synchronisée pour ${data.username}`);
+                    }
                 }
             }
             this.sendSystemMessage(`${data.username} a rejoint le chat 🙏`);
@@ -291,6 +306,16 @@ class P2PChatSystem {
         if (!this.roomId) {
             await CustomModals.showAlert('⚠️ Room requise', 'Vous devez créer ou rejoindre une room d\'abord !');
             return;
+        }
+        
+        // Synchroniser les connexions avec simpleChatSystem si nécessaire
+        if (window.simpleChatSystem && window.simpleChatSystem.connections) {
+            window.simpleChatSystem.connections.forEach((simpleConn, peerId) => {
+                if (!this.connections.has(peerId) && simpleConn.open) {
+                    console.log(`🔄 Synchronisation connexion manquante: ${peerId}`);
+                    this.connections.set(peerId, simpleConn);
+                }
+            });
         }
 
         const message = {
@@ -460,15 +485,33 @@ class P2PChatSystem {
             }
         ];
 
+        // Récupérer les participants depuis nos connexions
         this.connections.forEach((conn, peerId) => {
+            let username = 'Utilisateur';
+            let color = '#999';
+            
+            // Essayer de récupérer depuis les métadonnées
             if (conn.metadata) {
-                participants.push({
-                    peerId: peerId,
-                    username: conn.metadata.username || 'Utilisateur',
-                    color: conn.metadata.color || '#999',
-                    isMe: false
-                });
+                username = conn.metadata.username || 'Utilisateur';
+                color = conn.metadata.color || '#999';
             }
+            // Sinon, essayer depuis simpleChatSystem
+            else if (window.simpleChatSystem && window.simpleChatSystem.connections) {
+                const simpleConn = window.simpleChatSystem.connections.get(peerId);
+                if (simpleConn && simpleConn.metadata) {
+                    username = simpleConn.metadata.username || 'Utilisateur';
+                    color = simpleConn.metadata.color || '#999';
+                    // Synchroniser les métadonnées
+                    conn.metadata = simpleConn.metadata;
+                }
+            }
+            
+            participants.push({
+                peerId: peerId,
+                username: username,
+                color: color,
+                isMe: false
+            });
         });
 
         return participants;

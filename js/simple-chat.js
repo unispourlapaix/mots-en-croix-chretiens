@@ -286,6 +286,14 @@ class SimpleChatSystem {
                 }
             });
             
+            // S'assurer que metadata est défini
+            if (!conn.metadata) {
+                conn.metadata = {
+                    username: this.currentUser,
+                    color: userColor
+                };
+            }
+            
             // Timeout de connexion
             const timeout = setTimeout(() => {
                 if (!conn.open) {
@@ -329,18 +337,31 @@ class SimpleChatSystem {
         
         conn.on('open', () => {
             console.log('✅ Connecté à:', conn.peer);
+            
+            // S'assurer que les métadonnées sont définies
+            if (!conn.metadata) {
+                conn.metadata = {};
+            }
+            if (!conn.metadata.username) {
+                conn.metadata.username = this.currentUser;
+            }
+            if (!conn.metadata.color) {
+                conn.metadata.color = window.chatSystem?.userColor || '#ff69b4';
+            }
+            
             this.connections.set(conn.peer, conn);
             this.showMessage('✅ Un joueur a rejoint', 'system');
             
-            // Notifier aussi le P2PChatSystem
+            // Notifier aussi le P2PChatSystem avec les métadonnées
             if (window.chatSystem && window.chatSystem.roomId) {
                 window.chatSystem.handleIncomingConnection(conn);
             }
             
-            // Envoyer un message de bienvenue
+            // Envoyer un message de bienvenue avec username et color
             conn.send({
                 type: 'join',
-                username: this.currentUser
+                username: this.currentUser,
+                color: conn.metadata.color
             });
             
             // Si une course est en cours, envoyer l'état de la course au nouveau joueur
