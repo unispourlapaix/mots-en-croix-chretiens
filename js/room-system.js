@@ -1211,23 +1211,6 @@ class RoomSystem {
         // Ne jamais écraser le lobby - il gère son propre affichage
         console.log('🔒 Lobby gère son affichage, pas de mise à jour par room-system');
         return;
-
-        // S'assurer que 'me' est toujours présent si le chatSystem est initialisé
-        if (this.chatSystem.currentUser && !this.availablePlayers.has('me')) {
-            console.log('🔧 Réajout de "me" dans availablePlayers');
-            this.availablePlayers.set('me', {
-                username: this.chatSystem.currentUser,
-                avatar: this.chatSystem.getUserAvatar(this.chatSystem.currentUser) || '👤',
-                isMe: true,
-                playerCount: 1,
-                maxPlayers: 8,
-                mode: 'solo',
-                acceptMode: this.acceptMode
-            });
-        }
-
-        const count = this.availablePlayers.size;
-        onlineCountEl.textContent = count;
         
         // Log seulement si le nombre change
         if (this._lastPlayerCount !== count) {
