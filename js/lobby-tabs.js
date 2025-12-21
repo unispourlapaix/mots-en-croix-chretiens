@@ -7,9 +7,36 @@ class LobbyTabsManager {
     init() {
         console.log('📑 Lobby Manager simplifié initialisé');
         this.setupPresenceListeners();
+        this.setupStatusButton();
         
         // Affichage initial
         this.renderLobbyView();
+    }
+    
+    setupStatusButton() {
+        const btn = document.getElementById('toggleStatusBtn');
+        if (!btn) return;
+        
+        btn.addEventListener('click', async () => {
+            // Basculer entre disponible et occupé
+            const currentStatus = window.realtimeLobbySystem?.myPresence?.status || 'available';
+            const newStatus = currentStatus === 'available' ? 'busy' : 'available';
+            
+            // Mettre à jour le bouton immédiatement
+            if (newStatus === 'busy') {
+                btn.style.background = '#6c757d';
+                btn.innerHTML = '⭕ Occupé';
+            } else {
+                btn.style.background = '#28a745';
+                btn.innerHTML = '🟢 Disponible';
+            }
+            
+            // Mettre à jour dans Supabase
+            if (window.realtimeLobbySystem?.isInitialized) {
+                await window.realtimeLobbySystem.updateMyPresence({ status: newStatus });
+                console.log('✅ Statut mis à jour:', newStatus);
+            }
+        });
     }
     
     setupConnectButton() {
@@ -112,7 +139,9 @@ class LobbyTabsManager {
         // Récupérer les joueurs depuis le système Realtime (sans bots)
         const allPlayers = window.realtimeLobbySystem?.getAllPlayers() || [];
         // Filtrer les bots locaux (double sécurité)
-        const players = allPlayers.filter(p => !p.peer_id?.startsWith('bot-'));
+        const filteredPlayers = allPlayers.filter(p => !p.peer_id?.startsWith('bot-'));
+        // Limiter à 8 joueurs max
+        const players = filteredPlayers.slice(0, 8);
         const myPeerId = window.simpleChatSystem?.peer?.id;
         
         if (players.length === 0) {
@@ -152,6 +181,10 @@ class LobbyTabsManager {
                 statusEmoji = player.room_mode === 'auto' ? '🟢' : '🔵';
                 statusLabel = player.room_mode === 'auto' ? 'Dispo auto' : 'Disponible';
                 statusColor = player.room_mode === 'auto' ? '#28a745' : '#17a2b8';
+            } else if (player.status === 'busy') {
+                statusEmoji = '⭕';
+                statusLabel = 'Occupé';
+                statusColor = '#6c757d';
             }
             
             const badgesHtml = badges.length > 0 ? 
