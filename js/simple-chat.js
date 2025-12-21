@@ -859,7 +859,10 @@ class SimpleChatSystem {
             CustomModals.showConfirm(
                 '🏠 Invitation de jeu',
                 `${data.from} vous invite dans sa salle ! Accepter ?`,
-                async () => {
+                '✅ Accepter',
+                '❌ Refuser'
+            ).then(async (accepted) => {
+                if (accepted) {
                     console.log('✅ Invitation acceptée');
                     
                     // Accepter l'invitation
@@ -901,8 +904,7 @@ class SimpleChatSystem {
                     
                     // NE PAS ajouter d'écouteur ici - handleConnection() s'en occupe déjà
                     // Les messages seront routés via handleMessage() automatiquement
-                },
-                () => {
+                } else {
                     console.log('❌ Invitation refusée');
                     // Refuser l'invitation
                     conn.send({
@@ -911,7 +913,7 @@ class SimpleChatSystem {
                     });
                     this.showMessage('Invitation refusée', 'system');
                 }
-            );
+            });
         } else {
             // Fallback simple si CustomModals n'est pas disponible
             const accept = confirm(`${data.from} vous invite dans sa salle ! Accepter ?`);
