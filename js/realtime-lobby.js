@@ -9,6 +9,44 @@ class RealtimeLobbySystem {
         this.heartbeatInterval = null;
         this.presenceCallbacks = [];
         this.isInitialized = false;
+        
+        // 🆕 Écouter les mises à jour du username
+        window.addEventListener('usernameUpdated', (e) => {
+            if (this.isInitialized && e.detail?.username) {
+                console.log('🔄 Lobby: Mise à jour username détectée:', e.detail.username);
+                this.updateMyPresenceUsername(e.detail.username);
+            }
+        });
+    }
+    
+    // 🆕 Obtenir le username authentifié (priorité authSystem)
+    getMyUsername() {
+        // Priorité 1: authSystem (toujours le plus à jour)
+        if (window.authSystem?.isAuthenticated()) {
+            const user = window.authSystem.getCurrentUser();
+            if (user?.username) {
+                return user.username;
+            }
+        }
+        
+        // Priorité 2: simpleChatSystem (fallback)
+        if (window.simpleChatSystem?.currentUser) {
+            return window.simpleChatSystem.currentUser;
+        }
+        
+        // Fallback: pseudo générique
+        return 'Joueur';
+    }
+    
+    // 🆕 Mettre à jour le username de ma présence
+    async updateMyPresenceUsername(newUsername) {
+        if (!this.myPresence || !this.isInitialized) return;
+        
+        console.log('🔄 Mise à jour du username dans le lobby:', newUsername);
+        this.myPresence.username = newUsername;
+        
+        // Mettre à jour dans Supabase
+        await this.updateMyPresence({ username: newUsername });
     }
 
     // Initialiser le système Realtime
@@ -89,9 +127,7 @@ class RealtimeLobbySystem {
             return;
         }
 
-        const username = window.authSystem?.getCurrentUser()?.username || 
-                        window.simpleChatSystem?.currentUser || 
-                        'Joueur';
+        const username = this.getMyUsername();
         const peerId = window.simpleChatSystem.peer.id;
 
         this.myPresence = {
