@@ -385,7 +385,21 @@ class LobbyTabsManager {
             const {row, col, letter} = data.cellUpdate;
             if (window.game.grid[row] && window.game.grid[row][col] !== undefined) {
                 window.game.grid[row][col] = letter;
-                window.game.renderGrid();
+                
+                // Mettre à jour le DOM directement
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                if (cell) {
+                    const letterSpan = cell.querySelector('.cell-letter');
+                    if (letterSpan) {
+                        letterSpan.textContent = letter;
+                        // Vérifier si correct
+                        if (letter === window.game.solution[row][col]) {
+                            cell.classList.add('correct');
+                        } else {
+                            cell.classList.remove('correct');
+                        }
+                    }
+                }
             }
         } else if (data.scoreUpdate) {
             // Afficher le score de l'autre joueur

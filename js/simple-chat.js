@@ -416,7 +416,12 @@ class SimpleChatSystem {
                 window.game.currentLevel = data.level;
                 window.game.grid = data.grid;
                 window.game.score = data.score;
-                window.game.renderGrid();
+                // Redessiner la grille avec les données synchronisées
+                if (window.game.words && window.game.words.length > 0) {
+                    window.game.createGrid(window.game.words);
+                    // Restaurer les lettres de la grille synchronisée
+                    window.game.restoreGridLetters();
+                }
             }
             return;
         } else if (data.type === 'game_update') {
