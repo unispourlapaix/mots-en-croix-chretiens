@@ -405,6 +405,28 @@ class SimpleChatSystem {
             return; // Ne pas traiter dans SimpleChatSystem
         }
         
+        // Gérer les messages de la salle unifiée
+        if (data.type === 'chat_message') {
+            console.log('📨 Message salle unifiée reçu:', data);
+            this.showMessage(data.message, 'user', data.from);
+            return;
+        } else if (data.type === 'game_sync') {
+            console.log('🔄 Sync jeu reçu:', data);
+            if (window.game) {
+                window.game.currentLevel = data.level;
+                window.game.grid = data.grid;
+                window.game.score = data.score;
+                window.game.renderGrid();
+            }
+            return;
+        } else if (data.type === 'game_update') {
+            console.log('📊 Update jeu reçu:', data);
+            if (window.lobbyTabsManager) {
+                window.lobbyTabsManager.handleGameUpdate(data);
+            }
+            return;
+        }
+        
         if (data.type === 'message') {
             this.receiveMessage(data.username, data.text);
         } else if (data.type === 'join') {
@@ -540,8 +562,14 @@ class SimpleChatSystem {
         // Afficher le message localement
         this.showMessage(text, 'own', this.currentUser);
 
-        // Si P2P actif, envoyer aux autres
-        if (this.connections.size > 0) {
+        // Si dans une salle unifiée, utiliser broadcastChatMessage
+        if (this.isInRoom()) {
+            console.log('📤 Envoi via salle unifiée');
+            this.broadcastChatMessage(text);
+        } 
+        // Sinon, méthode P2P classique
+        else if (this.connections.size > 0) {
+            console.log('📤 Envoi P2P classique');
             const message = {
                 type: 'message',
                 username: this.currentUser,
@@ -871,28 +899,8 @@ class SimpleChatSystem {
                     
                     this.showMessage(`🏠 Vous avez rejoint la salle de ${data.from}`, 'system');
                     
-                    // Écouter les messages de cette connexion
-                    conn.on('data', (msgData) => {
-                        console.log('📨 Message reçu:', msgData);
-                        
-                        if (msgData.type === 'chat_message') {
-                            this.showMessage(msgData.message, 'user', msgData.from || data.from);
-                        } else if (msgData.type === 'game_sync') {
-                            // Synchroniser l'état du jeu
-                            if (window.game) {
-                                console.log('🔄 Synchronisation jeu:', msgData);
-                                window.game.currentLevel = msgData.level;
-                                window.game.grid = msgData.grid;
-                                window.game.score = msgData.score;
-                                window.game.renderGrid();
-                            }
-                        } else if (msgData.type === 'game_update') {
-                            // Mise à jour du jeu
-                            if (window.lobbyTabsManager) {
-                                window.lobbyTabsManager.handleGameUpdate(msgData);
-                            }
-                        }
-                    });
+                    // NE PAS ajouter d'écouteur ici - handleConnection() s'en occupe déjà
+                    // Les messages seront routés via handleMessage() automatiquement
                 },
                 () => {
                     console.log('❌ Invitation refusée');
