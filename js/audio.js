@@ -272,7 +272,7 @@ class AudioSystem {
             'proverbes': [
                 'La-voix-de-la-Sagesse.mp3',
                 'Psaumes-34-Preserve-tes-mots-du-mal-rmx.mp3',
-                'Veille-a-ton-cœur.mp3',
+                'Veille-a-ton-coeur.mp3',
                 'Marche-avec-moi-Exode-33.mp3'
             ],
             'disciple': [
@@ -341,7 +341,7 @@ class AudioSystem {
             'Marche-avec-moi-Exode-33.mp3',
             'Messagers-de-Paix.mp3',
             'Mon-coeur.mp3',
-            'Mon-cœur-bat.mp3',
+            'Mon-coeur-bat.mp3',
             'Mon-ti-Jesus.mp3',
             'Move-with-Joy.mp3',
             'N-abandonne-pas.mp3',
@@ -365,7 +365,7 @@ class AudioSystem {
             'Qu-est-ce-que-l-amour.mp3',
             'Reste-eveille-avec-moi.mp3',
             'Revetez-vous-d-Amour.mp3',
-            'Sans-charite-mon-cœur-s-eteint.mp3',
+            'Sans-charite-mon-coeur-s-eteint.mp3',
             'Ta-paix-guide-mes-pas.mp3',
             'Tiens-bon-tiens-bon.mp3',
             'Tu-es-appele-a-porte-la-paix.mp3',
@@ -376,7 +376,7 @@ class AudioSystem {
             'Unis-pour-la-paix-dans-le-respect.mp3',
             'UnisPourLaPaix.mp3',
             'Unite.mp3',
-            'Veille-a-ton-cœur.mp3',
+            'Veille-a-ton-coeur.mp3',
             'Voici-ma-priere.mp3'
         ];
     }
