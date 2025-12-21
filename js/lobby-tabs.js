@@ -1,19 +1,14 @@
-// Gestion des tabs Lobby Public / Ma Salle dans le sidebar
+// Gestion du lobby simplifié (plus de tabs)
 class LobbyTabsManager {
     constructor() {
-        this.currentView = 'lobby'; // 'lobby' ou 'room'
-        this.updateInterval = null;
         this.init();
     }
     
     init() {
-        console.log('📑 Lobby Tabs Manager initialisé');
-        this.setupEventListeners();
+        console.log('📑 Lobby Manager simplifié initialisé');
         this.setupPresenceListeners();
-        this.setupConnectButton();
         
-        // Affichage initial statique
-        // Mise à jour uniquement au changement de tab ou d'événements
+        // Affichage initial
         this.renderLobbyView();
     }
     
@@ -53,84 +48,20 @@ class LobbyTabsManager {
     setupPresenceListeners() {
         // Écouter les changements de présence du système Realtime
         window.addEventListener('presence_updated', () => {
-            if (this.currentView === 'lobby') {
-                this.renderLobbyView();
-            }
+            this.renderLobbyView();
         });
         
-        // Écouter les changements de présence du système P2P
-        window.addEventListener('room_presence_updated', () => {
-            if (this.currentView === 'room') {
-                this.renderRoomView();
-            }
-        });
-        
-        // Forcer le rafraîchissement toutes les 3s si vue lobby active
+        // Forcer le rafraîchissement toutes les 3s pour garantir visibilité
         setInterval(() => {
-            if (this.currentView === 'lobby') {
-                const list = document.getElementById('connectedPlayersList');
-                // Vérifier si le lobby a été écrasé par un autre système
-                if (list && (!list.innerHTML || !list.innerHTML.includes('lobby-header'))) {
-                    console.log('🔄 Restauration affichage lobby...');
-                    this.renderLobbyView();
-                }
+            const list = document.getElementById('connectedPlayersList');
+            // Vérifier si le lobby a été écrasé
+            if (list && (!list.innerHTML || list.innerHTML.includes('Contenu généré'))) {
+                console.log('🔄 Restauration affichage lobby...');
+                this.renderLobbyView();
             }
         }, 3000);
         
         console.log('🔔 Écouteurs de présence activés');
-    }
-    
-    setupEventListeners() {
-        const lobbyTabBtn = document.getElementById('lobbyTabBtn');
-        const roomTabBtn = document.getElementById('roomTabBtn');
-        
-        if (lobbyTabBtn) {
-            lobbyTabBtn.addEventListener('click', () => this.switchView('lobby'));
-        }
-        
-        if (roomTabBtn) {
-            roomTabBtn.addEventListener('click', () => this.switchView('room'));
-        }
-    }
-    
-    switchView(view) {
-        this.currentView = view;
-        
-        const lobbyTabBtn = document.getElementById('lobbyTabBtn');
-        const roomTabBtn = document.getElementById('roomTabBtn');
-        const privateRoomActions = document.getElementById('privateRoomActions');
-        
-        if (view === 'lobby') {
-            lobbyTabBtn?.classList.add('active');
-            lobbyTabBtn.style.background = 'white';
-            lobbyTabBtn.style.color = '#667eea';
-            
-            roomTabBtn?.classList.remove('active');
-            roomTabBtn.style.background = 'transparent';
-            roomTabBtn.style.color = '#999';
-            
-            // Cacher actions salles privées dans lobby public
-            if (privateRoomActions) {
-                privateRoomActions.style.display = 'none';
-            }
-            
-            this.renderLobbyView();
-        } else {
-            roomTabBtn?.classList.add('active');
-            roomTabBtn.style.background = 'white';
-            roomTabBtn.style.color = '#667eea';
-            
-            lobbyTabBtn?.classList.remove('active');
-            lobbyTabBtn.style.background = 'transparent';
-            lobbyTabBtn.style.color = '#999';
-            
-            // Afficher actions salles privées dans "Ma Salle"
-            if (privateRoomActions) {
-                privateRoomActions.style.display = 'block';
-            }
-            
-            this.renderRoomView();
-        }
     }
     
     renderLobbyView() {
@@ -186,26 +117,16 @@ class LobbyTabsManager {
         
         if (players.length === 0) {
             list.innerHTML = `
-                <div class="lobby-header" style="padding: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; margin-bottom: 10px; text-align: center;">
-                    <div style="font-size: 20px; margin-bottom: 5px;">🌍</div>
-                    <div style="font-size: 13px; font-weight: 600;">Lobby Public</div>
-                    <div style="font-size: 11px; opacity: 0.9;">Joueurs en ligne</div>
-                </div>
-                <div class="empty-room-message">
-                    <p>🌟 Lobby vide</p>
-                    <p style="font-size: 0.9rem; color: #999;">Connectez-vous pour être visible !</p>
+                <div class="empty-room-message" style="text-align: center; padding: 20px; color: #999;">
+                    <p style="font-size: 24px; margin-bottom: 10px;">🌟</p>
+                    <p style="font-weight: 600;">Aucun joueur en ligne</p>
+                    <p style="font-size: 0.9rem;">Soyez le premier connecté !</p>
                 </div>
             `;
             return;
         }
         
-        let html = `
-            <div class="lobby-header" style="padding: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; margin-bottom: 10px; text-align: center;">
-                <div style="font-size: 20px; margin-bottom: 5px;">🌍</div>
-                <div style="font-size: 13px; font-weight: 600;">${players.length} joueur${players.length > 1 ? 's' : ''} en ligne</div>
-                <div style="font-size: 11px; opacity: 0.9;">✨ Cliquez sur un joueur pour le rejoindre</div>
-            </div>
-        `;
+        let html = '';
         
         players.forEach(player => {
             const isSelf = player.peer_id === myPeerId;
@@ -273,64 +194,10 @@ class LobbyTabsManager {
         
         list.innerHTML = html;
     }
-    
-    renderRoomView() {
-        const list = document.getElementById('connectedPlayersList');
-        if (!list) return;
-        
-        // Récupérer les joueurs de la salle privée depuis presence-system (sans bots)
-        const allRoomPlayers = window.presenceSystem ? 
-            Array.from(window.presenceSystem.onlinePlayers.values()) : [];
-        // Filtrer les bots locaux (bot-unisona, etc.)
-        const roomPlayers = allRoomPlayers.filter(p => !p.peerId?.startsWith('bot-'));
-        
-        if (roomPlayers.length === 0) {
-            list.innerHTML = `
-                <div class="lobby-header" style="padding: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; margin-bottom: 10px; text-align: center;">
-                    <div style="font-size: 20px; margin-bottom: 5px;">🔒</div>
-                    <div style="font-size: 13px; font-weight: 600;">Ma Salle Privée</div>
-                    <div style="font-size: 11px; opacity: 0.9;">Vous seul</div>
-                </div>
-                <div class="empty-room-message">
-                    <p>🏠 Salle privée vide</p>
-                    <p style="font-size: 0.9rem; color: #999;">Invitez des joueurs !</p>
-                </div>
-            `;
-            return;
-        }
-        
-        let html = `
-            <div class="lobby-header" style="padding: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; margin-bottom: 10px; text-align: center;">
-                <div style="font-size: 20px; margin-bottom: 5px;">🔒</div>
-                <div style="font-size: 13px; font-weight: 600;">Ma Salle Privée (${roomPlayers.length})</div>
-                <div style="font-size: 11px; opacity: 0.9;">P2P Direct</div>
-            </div>
-        `;
-        
-        roomPlayers.forEach(player => {
-            html += `
-                <div class="player-item" style="padding: 12px; margin-bottom: 8px; background: white; border-radius: 10px; border: 2px solid #e9ecef;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <div style="font-size: 24px;">${player.isHost ? '👑' : '👤'}</div>
-                        <div style="flex: 1;">
-                            <div style="font-weight: 600; color: #333; font-size: 14px;">
-                                ${player.username}${player.isHost ? ' (Hôte)' : ''}
-                            </div>
-                            <div style="font-size: 11px; color: #999;">
-                                ${player.level ? `Niveau ${player.level}` : 'Connecté'}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-        
-        list.innerHTML = html;
-    }
 }
 
 // Initialiser au chargement
 document.addEventListener('DOMContentLoaded', () => {
     window.lobbyTabsManager = new LobbyTabsManager();
-    console.log('✅ Lobby Tabs Manager prêt');
+    console.log('✅ Lobby Manager simplifié prêt');
 });

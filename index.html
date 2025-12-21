@@ -580,17 +580,12 @@
                 <input type="text" id="playerSearchInput" class="player-search-input" placeholder="🔍 Rechercher un joueur...">
             </div>
             
-            <!-- Tabs: Lobby Public / Ma Salle Privée -->
-            <div class="lobby-tabs" style="display: flex; gap: 5px; padding: 8px; background: #f8f9fa; border-radius: 8px; margin-bottom: 10px;">
-                <button id="lobbyTabBtn" class="lobby-tab-btn active" style="flex: 1; padding: 8px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; background: white; color: #667eea; transition: all 0.3s;">
-                    🌍 Lobby Public
-                </button>
-                <button id="roomTabBtn" class="lobby-tab-btn" style="flex: 1; padding: 8px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; background: transparent; color: #999; transition: all 0.3s;">
-                    🔒 Ma Salle
-                </button>
+            <!-- Header Lobby simplifié -->
+            <div style="padding: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; margin-bottom: 10px; text-align: center;">
+                <div style="font-size: 20px; margin-bottom: 5px;">🌍</div>
+                <div style="font-size: 14px; font-weight: 600;">Joueurs en ligne</div>
+                <div style="font-size: 11px; opacity: 0.9;">✨ Cliquez pour rejoindre</div>
             </div>
-            
-            <!-- Connexion automatique au lobby -->
             
             <!-- Liste des joueurs connectés - Gérée dynamiquement par lobby-tabs.js -->
             <div class="connected-players-list" id="connectedPlayersList">
