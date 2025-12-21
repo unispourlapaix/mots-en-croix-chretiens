@@ -22,7 +22,7 @@ class PresenceSystem {
         console.log('✅ Système de partage familial/amis P2P + Supabase Realtime');
         
         // Vérifier si Supabase est disponible
-        if (typeof supabase !== 'undefined' && supabase) {
+        if (typeof window.supabaseClient !== 'undefined' && window.supabaseClient) {
             console.log('🌐 Supabase Realtime disponible pour les salles CODE');
         } else {
             console.warn('⚠️ Supabase non configuré, fallback localStorage uniquement');
@@ -57,7 +57,7 @@ class PresenceSystem {
     
     // Initialiser Supabase Realtime pour une salle CODE
     async initSupabaseRoomChannel(roomCode) {
-        if (typeof supabase === 'undefined' || !supabase) {
+        if (typeof window.supabaseClient === 'undefined' || !window.supabaseClient) {
             console.warn('⚠️ Supabase non disponible, fallback P2P uniquement');
             return false;
         }
@@ -66,7 +66,7 @@ class PresenceSystem {
         
         try {
             // Créer un channel dédié pour cette salle
-            this.supabaseChannel = supabase.channel(`room:${roomCode}`, {
+            this.supabaseChannel = window.supabaseClient.channel(`room:${roomCode}`, {
                 config: {
                     broadcast: { self: true },
                     presence: { key: '' }
@@ -1320,9 +1320,9 @@ class PresenceSystem {
         console.log('💾 Mapping mis en cache:', roomCode);
         
         // Essayer Supabase d'abord (en arrière-plan)
-        if (typeof supabase !== 'undefined' && supabase) {
+        if (typeof window.supabaseClient !== 'undefined' && window.supabaseClient) {
             try {
-                const { error } = await supabase
+                const { error } = await window.supabaseClient
                     .from('room_mappings')
                     .upsert(mapping, { onConflict: 'room_code' });
                 
@@ -1360,9 +1360,9 @@ class PresenceSystem {
         }
         
         // Essayer Supabase ensuite
-        if (typeof supabase !== 'undefined' && supabase) {
+        if (typeof window.supabaseClient !== 'undefined' && window.supabaseClient) {
             try {
-                const { data, error } = await supabase
+                const { data, error } = await window.supabaseClient
                     .from('room_mappings')
                     .select('peer_id')
                     .eq('room_code', roomCode)

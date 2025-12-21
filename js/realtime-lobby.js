@@ -13,8 +13,9 @@ class RealtimeLobbySystem {
 
     // Initialiser le système Realtime
     async init() {
-        if (!supabase) {
-            console.warn('⚠️ Supabase non configuré, utilisation du système P2P local');
+        if (!window.supabaseClient) {
+            console.warn('⚠️ Supabase non configuré, fallback localStorage uniquement');
+            console.log('📊 Debug - window.supabaseClient:', !!window.supabaseClient);
             return false;
         }
 
@@ -22,7 +23,7 @@ class RealtimeLobbySystem {
 
         try {
             // Créer un channel Realtime pour le lobby
-            this.channel = supabase.channel('lobby:public', {
+            this.channel = window.supabaseClient.channel('lobby:public', {
                 config: {
                     broadcast: { self: true },
                     presence: { key: '' }
@@ -295,7 +296,7 @@ window.addEventListener('beforeunload', async () => {
 });
 
 // Auto-initialiser si Supabase est disponible
-if (typeof supabase !== 'undefined' && supabase) {
+if (typeof window.supabaseClient !== 'undefined' && window.supabaseClient) {
     console.log('🔵 Supabase détecté, préparation auto-init lobby...');
     
     // Écouter l'événement roomCreated émis par simple-chat.js

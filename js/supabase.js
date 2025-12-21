@@ -56,7 +56,12 @@ if (SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
                     }
                 }
             );
+            
+            // 🆕 Exposer globalement pour accès depuis autres modules
+            window.supabaseClient = supabase;
+            
             console.log('✅ Client Supabase Auth initialisé avec persistSession');
+            console.log('🔵 Supabase client exposé globalement (window.supabaseClient)');
             
             // Ajouter un gestionnaire global pour les erreurs de refresh token
             setupGlobalErrorHandler();
