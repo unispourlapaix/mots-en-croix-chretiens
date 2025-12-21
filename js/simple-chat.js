@@ -153,15 +153,20 @@ class SimpleChatSystem {
             
             // Gérer les invitations de jeu depuis le lobby
             conn.on('data', (data) => {
-                if (da) {
-        if (!this.peer) return;
-        
-        // Nettoyer les anciens listeners si réutilisation
-        this.peer.removeAllListeners();
-        
-        this.peer.on('open', (id) => {
-            console.log('🔗 PeerJS Cloud connecté, ID:', id);
-            this.roomCode = id;peer.on('error', (err) => {
+                if (data.type === 'game_invite') {
+                    this.handleGameInvite(conn, data);
+                }
+                
+                // Transférer les messages de salle au RoomSystem
+                if (window.roomSystem && data.type && ['join-request', 'join-accepted', 'join-refused', 
+                    'player-kicked', 'room-mode-changed', 'player-joined', 
+                    'player-left', 'host-transferred'].includes(data.type)) {
+                    window.roomSystem.handleRoomMessage(conn, data);
+                }
+            });
+        });
+
+        this.peer.on('error', (err) => {
             // Ignorer les erreurs de connexion réseau (normales pour localhost)
             if (err.type === 'network' || err.message?.includes('Lost connection')) {
                 console.log('ℹ️ PeerJS: Connexion serveur perdue (normal en localhost)');
