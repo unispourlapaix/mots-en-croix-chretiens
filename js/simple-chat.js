@@ -88,12 +88,8 @@ class SimpleChatSystem {
             const savedPeerId = this.getSavedPeerId();
             
             // Configuration PeerJS avec serveurs STUN pour meilleure connectivité
-            // + serveur PeerJS alternatif plus fiable que le Cloud par défaut
+            // Utiliser le serveur Cloud par défaut (pas de cookies Cloudflare)
             const peerConfig = {
-                host: 'peerjs.92k.de',  // Serveur PeerJS public alternatif (plus stable)
-                port: 443,
-                secure: true,
-                path: '/',
                 config: {
                     iceServers: [
                         { urls: 'stun:stun.l.google.com:19302' },
@@ -112,34 +108,7 @@ class SimpleChatSystem {
                 this.peer = new Peer(peerConfig);
             }
             
-            // Timeout pour détecter si le serveur ne répond pas
-            const connectionTimeout = setTimeout(() => {
-                if (this.peer && !this.peer.id) {
-                    console.warn('⚠️ Serveur PeerJS primaire lent, essai serveur alternatif...');
-                    this.peer.destroy();
-                    
-                    // Essayer avec le serveur Cloud par défaut en fallback
-                    const fallbackConfig = {
-                        config: {
-                            iceServers: [
-                                { urls: 'stun:stun.l.google.com:19302' },
-                                { urls: 'stun:global.stun.twilio.com:3478' }
-                            ]
-                        },
-                        debug: 0
-                    };
-                    
-                    if (savedPeerId) {
-                        this.peer = new Peer(savedPeerId, fallbackConfig);
-                    } else {
-                        this.peer = new Peer(fallbackConfig);
-                    }
-                    
-                    this.setupPeerHandlers();
-                }
-            }, 5000); // 5 secondes timeout
-            
-            this.setupPeerHandlers(connectionTimeout);
+            this.setupPeerHandlers();
             
         } catch (error) {
             console.error('❌ Erreur initialisation P2P:', error);
@@ -175,20 +144,15 @@ class SimpleChatSystem {
             
             // Gérer les invitations de jeu depuis le lobby
             conn.on('data', (data) => {
-                if (data.type === 'game_invite') {
-                    this.handleGameInvite(conn, data);
-                }
-                
-                // Transférer les messages de salle au RoomSystem
-                if (window.roomSystem && data.type && ['join-request', 'join-accepted', 'join-refused', 
-                    'player-kicked', 'room-mode-changed', 'player-joined', 
-                    'player-left', 'host-transferred'].includes(data.type)) {
-                    window.roomSystem.handleRoomMessage(conn, data);
-                }
-            });
-        });
-
-        this.peer.on('error', (err) => {
+                if (da) {
+        if (!this.peer) return;
+        
+        // Nettoyer les anciens listeners si réutilisation
+        this.peer.removeAllListeners();
+        
+        this.peer.on('open', (id) => {
+            console.log('🔗 PeerJS Cloud connecté, ID:', id);
+            this.roomCode = id;peer.on('error', (err) => {
             // Ignorer les erreurs de connexion réseau (normales pour localhost)
             if (err.type === 'network' || err.message?.includes('Lost connection')) {
                 console.log('ℹ️ PeerJS: Connexion serveur perdue (normal en localhost)');
