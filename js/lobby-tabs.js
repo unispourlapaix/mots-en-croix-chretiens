@@ -178,8 +178,8 @@ class LobbyTabsManager {
         let html = `
             <div class="lobby-header" style="padding: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; margin-bottom: 10px; text-align: center;">
                 <div style="font-size: 20px; margin-bottom: 5px;">🌍</div>
-                <div style="font-size: 13px; font-weight: 600;">Lobby Public (${players.length})</div>
-                <div style="font-size: 11px; opacity: 0.9;">Cliquez pour inviter</div>
+                <div style="font-size: 13px; font-weight: 600;">${players.length} joueur${players.length > 1 ? 's' : ''} en ligne</div>
+                <div style="font-size: 11px; opacity: 0.9;">✨ Cliquez sur un joueur pour le rejoindre</div>
             </div>
         `;
         
@@ -212,11 +212,18 @@ class LobbyTabsManager {
             const badgesHtml = badges.length > 0 ? 
                 `<span style="font-size: 10px; background: rgba(102, 126, 234, 0.1); color: #667eea; padding: 2px 6px; border-radius: 4px; margin-left: 5px;">${badges.join(' ')}</span>` : '';
             
+            const clickHandler = !isSelf && player.status === 'available' ? `onclick="window.realtimeLobbyUI.invitePlayer('${player.peer_id}')"` : '';
+            const hoverStyle = !isSelf && player.status === 'available' ? 'box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transform: translateY(-2px);' : '';
+            
             html += `
                 <div class="player-item ${isSelf ? 'self' : ''}" data-peer-id="${player.peer_id}" 
+                     ${clickHandler}
                      style="padding: 12px; margin-bottom: 8px; background: ${isSelf ? 'linear-gradient(135deg, #fff5f9 0%, #ffe5f5 100%)' : 'white'}; 
-                            border-radius: 10px; cursor: ${isSelf ? 'default' : 'pointer'}; border: 2px solid ${isSelf ? '#ff69b4' : '#e9ecef'}; 
-                            transition: all 0.3s;">
+                            border-radius: 10px; cursor: ${isSelf ? 'default' : player.status === 'available' ? 'pointer' : 'not-allowed'}; 
+                            border: 2px solid ${isSelf ? '#ff69b4' : player.status === 'available' ? '#667eea' : '#e9ecef'}; 
+                            transition: all 0.3s;"
+                     onmouseover="this.style.cssText = this.style.cssText + '${hoverStyle}'" 
+                     onmouseout="this.style.cssText = this.style.cssText.replace('${hoverStyle}', '')">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <div style="font-size: 24px;">${statusEmoji}</div>
                         <div style="flex: 1;">
@@ -228,11 +235,7 @@ class LobbyTabsManager {
                             </div>
                         </div>
                         ${!isSelf && player.status === 'available' ? `
-                            <button class="invite-btn" onclick="window.realtimeLobbyUI.invitePlayer('${player.peer_id}')" 
-                                    style="padding: 6px 12px; background: #667eea; color: white; border: none; 
-                                           border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">
-                                📨 Inviter
-                            </button>
+                            <div style="font-size: 20px; opacity: 0.7;">👆</div>
                         ` : !isSelf ? `
                             <span style="padding: 6px 12px; background: #e9ecef; color: #999; 
                                          border-radius: 6px; font-size: 12px; font-weight: 600;">
