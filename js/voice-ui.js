@@ -99,6 +99,8 @@ class VoiceUI {
             participants: document.getElementById('voiceParticipants'),
             // Contrôles dans le chat SMS flottant
             smsVoiceControls: document.getElementById('chatSmsVoiceControls'),
+            smsVoiceJoin: document.getElementById('chatSmsVoiceJoin'),
+            smsJoinVoiceBtn: document.getElementById('chatSmsJoinVoiceBtn'),
             smsMuteBtn: document.getElementById('chatSmsMuteBtn'),
             smsDeafenBtn: document.getElementById('chatSmsDeafenBtn'),
             smsLeaveVoiceBtn: document.getElementById('chatSmsLeaveVoiceBtn')
@@ -121,6 +123,7 @@ class VoiceUI {
         this.elements.deafenBtn?.addEventListener('click', () => this.handleToggleDeafen());
 
         // Boutons dans le chat SMS flottant
+        this.elements.smsJoinVoiceBtn?.addEventListener('click', () => this.handleJoinVoice());
         this.elements.smsMuteBtn?.addEventListener('click', () => this.handleToggleMute());
         this.elements.smsDeafenBtn?.addEventListener('click', () => this.handleToggleDeafen());
         this.elements.smsLeaveVoiceBtn?.addEventListener('click', () => this.handleLeaveVoice());
@@ -190,9 +193,12 @@ class VoiceUI {
         
         this.elements.status.innerHTML = `<p class="text-success">${statusMessage}</p>`;
         
-        // Afficher les contrôles vocaux dans le chat SMS
+        // Afficher les contrôles vocaux dans le chat SMS et cacher le bouton Join
         if (this.elements.smsVoiceControls) {
             this.elements.smsVoiceControls.style.display = 'flex';
+        }
+        if (this.elements.smsVoiceJoin) {
+            this.elements.smsVoiceJoin.style.display = 'none';
         }
         
         // Afficher l'indicateur vocal dans l'en-tête du chat
@@ -220,9 +226,12 @@ class VoiceUI {
         this.elements.controlsRow.style.display = 'none';
         this.elements.participantsList.style.display = 'none';
         
-        // Cacher les contrôles vocaux dans le chat SMS
+        // Cacher les contrôles vocaux dans le chat SMS et afficher le bouton Join
         if (this.elements.smsVoiceControls) {
             this.elements.smsVoiceControls.style.display = 'none';
+        }
+        if (this.elements.smsVoiceJoin) {
+            this.elements.smsVoiceJoin.style.display = 'block';
         }
         
         // Masquer l'indicateur vocal dans l'en-tête du chat
