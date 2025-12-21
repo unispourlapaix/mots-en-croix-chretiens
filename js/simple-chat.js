@@ -822,33 +822,83 @@ class SimpleChatSystem {
         this.showMessage(`📊 ${data.username} est au niveau ${data.level} avec ${data.score} points`, 'system');
     }
 
-    // Gérer une invitation de jeu depuis le lobby
+    // Gérer une invitation de jeu depuis le lobby (SALLE UNIFIÉE chat + jeu)
     handleGameInvite(conn, data) {
-        console.log('📨 Invitation reçue de:', data.from);
+        console.log('📨 Invitation reçue de:', data.from, 'roomId:', data.roomId);
         
         // Afficher une notification/modal
         if (typeof CustomModals !== 'undefined') {
             CustomModals.showConfirm(
-                '🎮 Invitation de jeu',
-                `${data.from} vous invite à jouer ! Accepter ?`,
+                '🏠 Invitation de jeu',
+                `${data.from} vous invite dans sa salle ! Accepter ?`,
                 async () => {
+                    console.log('✅ Invitation acceptée');
+                    
                     // Accepter l'invitation
                     conn.send({
                         type: 'invite_accepted',
                         from: this.currentUser
                     });
                     
-                    // Rejoindre la salle de l'hôte
-                    if (window.presenceSystem) {
-                        // Connecter au peer de l'hôte
-                        await window.presenceSystem.connectToRoomHost(conn.peer, 'invite');
-                        this.showMessage(`✅ Vous avez rejoint ${data.from}`, 'system');
+                    // Rejoindre la salle unifiée (chat + jeu)
+                    if (!this.connections) {
+                        this.connections = new Map();
                     }
+                    this.connections.set(conn.peer, conn);
+                    this.roomCode = data.roomId;
+                    this.isHost = false;
+                    
+                    // Initialiser roomPlayers si nécessaire
+                    if (!this.roomPlayers) {
+                        this.roomPlayers = new Map();
+                    }
+                    
+                    // Ajouter l'hôte
+                    this.roomPlayers.set(conn.peer, {
+                        username: data.from,
+                        peer_id: conn.peer,
+                        isHost: true
+                    });
+                    
+                    // M'ajouter
+                    if (this.peer?.id) {
+                        this.roomPlayers.set('me', {
+                            username: this.currentUser,
+                            peer_id: this.peer.id,
+                            isHost: false
+                        });
+                    }
+                    
+                    this.showMessage(`🏠 Vous avez rejoint la salle de ${data.from}`, 'system');
+                    
+                    // Écouter les messages de cette connexion
+                    conn.on('data', (msgData) => {
+                        console.log('📨 Message reçu:', msgData);
+                        
+                        if (msgData.type === 'chat_message') {
+                            this.showMessage(msgData.message, 'user', msgData.from || data.from);
+                        } else if (msgData.type === 'game_sync') {
+                            // Synchroniser l'état du jeu
+                            if (window.game) {
+                                console.log('🔄 Synchronisation jeu:', msgData);
+                                window.game.currentLevel = msgData.level;
+                                window.game.grid = msgData.grid;
+                                window.game.score = msgData.score;
+                                window.game.renderGrid();
+                            }
+                        } else if (msgData.type === 'game_update') {
+                            // Mise à jour du jeu
+                            if (window.lobbyTabsManager) {
+                                window.lobbyTabsManager.handleGameUpdate(msgData);
+                            }
+                        }
+                    });
                 },
                 () => {
+                    console.log('❌ Invitation refusée');
                     // Refuser l'invitation
                     conn.send({
-                        type: 'invite_refused',
+                        type: 'invite_declined',
                         from: this.currentUser
                     });
                     this.showMessage('Invitation refusée', 'system');
@@ -856,15 +906,30 @@ class SimpleChatSystem {
             );
         } else {
             // Fallback simple si CustomModals n'est pas disponible
-            const accept = confirm(`${data.from} vous invite à jouer ! Accepter ?`);
+            const accept = confirm(`${data.from} vous invite dans sa salle ! Accepter ?`);
             if (accept) {
                 conn.send({
                     type: 'invite_accepted',
                     from: this.currentUser
                 });
+                
+                // Même logique que ci-dessus
+                if (!this.connections) this.connections = new Map();
+                this.connections.set(conn.peer, conn);
+                this.roomCode = data.roomId;
+                this.isHost = false;
+                
+                if (!this.roomPlayers) this.roomPlayers = new Map();
+                this.roomPlayers.set(conn.peer, {
+                    username: data.from,
+                    peer_id: conn.peer,
+                    isHost: true
+                });
+                
+                this.showMessage(`🏠 Salle rejointe: ${data.from}`, 'system');
             } else {
                 conn.send({
-                    type: 'invite_refused',
+                    type: 'invite_declined',
                     from: this.currentUser
                 });
             }
@@ -879,6 +944,78 @@ class SimpleChatSystem {
         } catch (err) {
             console.warn('⚠️ Impossible de sauvegarder le peer ID:', err);
         }
+    }
+    
+    // Vérifier si on est dans une salle unifiée
+    isInRoom() {
+        return this.roomCode !== null && this.connections.size > 0;
+    }
+    
+    // Diffuser un message de chat dans la salle unifiée
+    broadcastChatMessage(text) {
+        if (!this.isInRoom()) {
+            console.warn('⚠️ Pas dans une salle, impossible d\'envoyer le message');
+            return;
+        }
+        
+        const message = {
+            type: 'chat_message',
+            from: this.currentUser,
+            message: text,
+            timestamp: Date.now()
+        };
+        
+        // Envoyer à tous les joueurs de la salle
+        this.connections.forEach((conn) => {
+            if (conn.open) {
+                conn.send(message);
+                console.log('📤 Message chat envoyé à:', conn.peer);
+            }
+        });
+    }
+    
+    // Diffuser une mise à jour du jeu dans la salle unifiée
+    broadcastGameUpdate(updateData) {
+        if (!this.isInRoom()) {
+            console.warn('⚠️ Pas dans une salle, impossible d\'envoyer la mise à jour');
+            return;
+        }
+        
+        const message = {
+            type: 'game_update',
+            from: this.currentUser,
+            ...updateData,
+            timestamp: Date.now()
+        };
+        
+        // Envoyer à tous les joueurs de la salle
+        this.connections.forEach((conn) => {
+            if (conn.open) {
+                conn.send(message);
+                console.log('📤 Mise à jour jeu envoyée à:', conn.peer);
+            }
+        });
+    }
+    
+    // Diffuser la synchronisation complète du jeu
+    broadcastGameSync() {
+        if (!this.isInRoom() || !window.game) return;
+        
+        const syncData = {
+            type: 'game_sync',
+            from: this.currentUser,
+            level: window.game.currentLevel,
+            grid: window.game.grid,
+            score: window.game.score,
+            timestamp: Date.now()
+        };
+        
+        this.connections.forEach((conn) => {
+            if (conn.open) {
+                conn.send(syncData);
+                console.log('📤 Sync jeu envoyé à:', conn.peer);
+            }
+        });
     }
 
     // Récupérer le peer ID sauvegardé

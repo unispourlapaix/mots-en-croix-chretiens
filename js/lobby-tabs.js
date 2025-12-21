@@ -227,6 +227,171 @@ class LobbyTabsManager {
         
         list.innerHTML = html;
     }
+    
+    // Inviter un joueur (créer une salle unifiée chat + jeu)
+    async invitePlayer(peerId) {
+        console.log('📨 Invitation joueur:', peerId);
+        
+        const player = window.realtimeLobbySystem?.getPlayer(peerId);
+        if (!player) {
+            console.error('❌ Joueur introuvable');
+            return;
+        }
+        
+        // Vérifier que P2P est prêt
+        if (!window.simpleChatSystem?.peer?.id) {
+            console.log('🎯 Initialisation P2P avant invitation...');
+            window.simpleChatSystem?.initP2P();
+            
+            // Attendre que le peer soit prêt
+            let attempts = 0;
+            while (!window.simpleChatSystem?.peer?.id && attempts < 50) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                attempts++;
+            }
+            
+            if (!window.simpleChatSystem?.peer?.id) {
+                console.error('❌ Timeout: P2P non initialisé');
+                return;
+            }
+        }
+        
+        console.log('✅ P2P prêt, envoi invitation...');
+        
+        try {
+            // Connexion P2P
+            const conn = window.simpleChatSystem.peer.connect(peerId, {
+                reliable: true,
+                metadata: {
+                    type: 'game_invite',
+                    from: window.simpleChatSystem.currentUser,
+                    roomId: window.simpleChatSystem.peer.id // Mon peer ID = ID de ma salle
+                }
+            });
+            
+            conn.on('open', () => {
+                console.log('✅ Connexion P2P établie avec', player.username);
+                
+                // Créer la salle unifiée (chat + jeu)
+                const roomId = window.simpleChatSystem.peer.id;
+                console.log('🏠 Création salle unifiée:', roomId);
+                
+                // Enregistrer la connexion dans simpleChatSystem
+                if (!window.simpleChatSystem.connections) {
+                    window.simpleChatSystem.connections = new Map();
+                }
+                window.simpleChatSystem.connections.set(peerId, conn);
+                window.simpleChatSystem.roomCode = roomId;
+                window.simpleChatSystem.isHost = true;
+                
+                // Ajouter le joueur à la salle
+                if (!window.simpleChatSystem.roomPlayers) {
+                    window.simpleChatSystem.roomPlayers = new Map();
+                }
+                window.simpleChatSystem.roomPlayers.set(peerId, {
+                    username: player.username,
+                    peer_id: peerId,
+                    isHost: false
+                });
+                
+                // Message système
+                window.simpleChatSystem.showMessage(
+                    `🏠 Salle créée avec ${player.username}`,
+                    'system'
+                );
+                
+                // Envoyer invitation avec info de la salle
+                conn.send({
+                    type: 'game_invite',
+                    from: window.simpleChatSystem.currentUser,
+                    roomId: roomId,
+                    message: `${window.simpleChatSystem.currentUser} vous invite dans sa salle !`
+                });
+                
+                console.log('📨 Invitation envoyée');
+                
+                // Écouter les messages du joueur
+                conn.on('data', (data) => {
+                    console.log('📨 Message reçu:', data);
+                    this.handleInviteResponse(peerId, player.username, data);
+                });
+            });
+            
+            conn.on('error', (err) => {
+                console.error('❌ Erreur connexion:', err);
+            });
+            
+            conn.on('close', () => {
+                console.log('🔌 Connexion fermée avec', player.username);
+                // Retirer de la salle
+                window.simpleChatSystem.roomPlayers?.delete(peerId);
+                window.simpleChatSystem.connections?.delete(peerId);
+            });
+            
+        } catch (err) {
+            console.error('❌ Erreur invitation:', err);
+        }
+    }
+    
+    // Gérer la réponse à l'invitation
+    handleInviteResponse(peerId, username, data) {
+        if (data.type === 'invite_accepted') {
+            console.log('✅ Invitation acceptée par', username);
+            window.simpleChatSystem.showMessage(
+                `✅ ${username} a rejoint la salle !`,
+                'system'
+            );
+            
+            // Synchroniser l'état du jeu si une partie est en cours
+            if (window.game?.gameStarted) {
+                const conn = window.simpleChatSystem.connections.get(peerId);
+                if (conn) {
+                    conn.send({
+                        type: 'game_sync',
+                        level: window.game.currentLevel,
+                        grid: window.game.grid,
+                        score: window.game.score
+                    });
+                }
+            }
+        } else if (data.type === 'invite_declined') {
+            console.log('❌ Invitation refusée par', username);
+            window.simpleChatSystem.showMessage(
+                `❌ ${username} a refusé l'invitation`,
+                'system'
+            );
+            // Nettoyer
+            window.simpleChatSystem.roomPlayers?.delete(peerId);
+            window.simpleChatSystem.connections?.delete(peerId);
+        } else if (data.type === 'chat_message') {
+            // Message de chat
+            window.simpleChatSystem.showMessage(
+                data.message,
+                'user',
+                username
+            );
+        } else if (data.type === 'game_update') {
+            // Mise à jour du jeu (lettre placée, etc.)
+            this.handleGameUpdate(data);
+        }
+    }
+    
+    // Gérer les mises à jour du jeu
+    handleGameUpdate(data) {
+        if (!window.game) return;
+        
+        if (data.cellUpdate) {
+            // Mettre à jour une cellule
+            const {row, col, letter} = data.cellUpdate;
+            if (window.game.grid[row] && window.game.grid[row][col] !== undefined) {
+                window.game.grid[row][col] = letter;
+                window.game.renderGrid();
+            }
+        } else if (data.scoreUpdate) {
+            // Afficher le score de l'autre joueur
+            console.log('📊 Score joueur distant:', data.scoreUpdate);
+        }
+    }
 }
 
 // Initialiser au chargement

@@ -436,52 +436,13 @@ class RealtimeLobbyUI {
         }
     }
 
-    // Inviter un joueur (envoyer invitation P2P)
+    // Inviter un joueur (rediriger vers le système unifié)
     async invitePlayer(peerId) {
-        const player = window.realtimeLobbySystem?.getPlayer(peerId);
-        
-        if (!player) {
-            alert('❌ Joueur introuvable');
-            return;
-        }
-
-        console.log('📨 Invitation de:', player.username);
-
-        // Vérifier que P2P est initialisé
-        if (!window.simpleChatSystem?.peer) {
-            alert('❌ Erreur: P2P non initialisé');
-            return;
-        }
-
-        try {
-            const conn = window.simpleChatSystem.peer.connect(peerId, {
-                reliable: true,
-                metadata: {
-                    type: 'game_invite',
-                    from: window.simpleChatSystem.currentUser
-                }
-            });
-
-            conn.on('open', () => {
-                console.log('✅ Connexion établie avec', player.username);
-
-                // Envoyer l'invitation
-                conn.send({
-                    type: 'game_invite',
-                    from: window.simpleChatSystem.currentUser,
-                    message: `${window.simpleChatSystem.currentUser} vous invite à jouer !`
-                });
-
-                alert(`✅ Invitation envoyée à ${player.username} !`);
-            });
-
-            conn.on('error', (err) => {
-                console.error('❌ Erreur invitation:', err);
-                alert('❌ Impossible d\'envoyer l\'invitation');
-            });
-        } catch (err) {
-            console.error('❌ Erreur:', err);
-            alert('❌ Erreur lors de l\'invitation');
+        console.log('🔄 Redirection vers système unifié lobby-tabs');
+        if (window.lobbyTabsManager) {
+            await window.lobbyTabsManager.invitePlayer(peerId);
+        } else {
+            console.error('❌ lobbyTabsManager non disponible');
         }
     }
 
