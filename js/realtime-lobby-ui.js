@@ -497,7 +497,10 @@ class RealtimeLobbyUI {
 // Instance globale
 window.realtimeLobbyUI = new RealtimeLobbyUI();
 
-// Ajouter un bouton pour ouvrir le lobby dans l'interface existante
+// DÉSACTIVÉ : Bouton "🌐 Lobby" en double
+// Le lobby est maintenant accessible via le tab "🌍 Lobby Public" dans le chat bubble
+// Plus besoin de panneau séparé
+/*
 setTimeout(() => {
     const chatBubble = document.getElementById('chatBubble');
     if (chatBubble && !document.getElementById('openLobbyBtn')) {
@@ -527,5 +530,6 @@ setTimeout(() => {
         document.body.appendChild(btn);
     }
 }, 2000);
+*/
 
-console.log('✅ Realtime Lobby UI chargée');
+console.log('✅ Realtime Lobby UI chargée (bouton désactivé - utiliser tab dans chat bubble)');

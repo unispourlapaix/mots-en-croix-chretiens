@@ -148,6 +148,12 @@ class RoomSystem {
                 
                 console.log('👥 Ajouté à playersInRoom');
                 
+                // Notifier le lobby Realtime de mon peer ID (= roomCode)
+                if (window.realtimeLobbySystem?.isInitialized) {
+                    window.realtimeLobbySystem.updateRoomCode(this.myRoomInfo.roomId);
+                    console.log('✅ RoomCode mis à jour dans Realtime Lobby');
+                }
+                
                 // M'ajouter aussi à la liste des joueurs disponibles
                 this.availablePlayers.set('me', {
                     username: this.chatSystem.currentUser,
@@ -405,6 +411,12 @@ class RoomSystem {
         this.acceptMode = mode;
         if (this.myRoomInfo) {
             this.myRoomInfo.acceptMode = mode;
+        }
+        
+        // Notifier le lobby Realtime du changement de mode
+        if (window.realtimeLobbySystem?.isInitialized) {
+            window.realtimeLobbySystem.updateAcceptMode(mode);
+            console.log('✅ AcceptMode mis à jour dans Realtime Lobby:', mode);
         }
 
         // Notifier tous les joueurs du changement
