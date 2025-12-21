@@ -14,6 +14,17 @@ let supabase = null;
 
 // Fonction pour gérer les erreurs de refresh token
 function setupGlobalErrorHandler() {
+    // Filtrer les warnings Cloudflare cookies (inoffensifs)
+    const originalConsoleWarn = console.warn;
+    console.warn = function(...args) {
+        const warnMessage = args.join(' ');
+        // Ignorer les warnings de cookies Cloudflare (normaux pour localhost)
+        if (warnMessage.includes('__cf_bm') || warnMessage.includes('cf_clearance')) {
+            return; // Ne pas afficher
+        }
+        originalConsoleWarn.apply(console, args);
+    };
+    
     // Intercepter les erreurs non gérées liées au refresh token
     const originalConsoleError = console.error;
     console.error = function(...args) {
