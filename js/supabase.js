@@ -40,8 +40,15 @@ function setupGlobalErrorHandler() {
 }
 
 if (SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
+    console.log('🔵 Configuration Supabase détectée, initialisation...');
+    
     // Attendre que la librairie Supabase soit chargée
+    let initAttempts = 0;
+    const maxAttempts = 50; // 5 secondes max
+    
     const initSupabase = () => {
+        initAttempts++;
+        
         if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
             supabase = window.supabase.createClient(
                 SUPABASE_CONFIG.url,
@@ -62,12 +69,18 @@ if (SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
             
             console.log('✅ Client Supabase Auth initialisé avec persistSession');
             console.log('🔵 Supabase client exposé globalement (window.supabaseClient)');
+            console.log('🔵 Test accès client:', typeof window.supabaseClient);
             
             // Ajouter un gestionnaire global pour les erreurs de refresh token
             setupGlobalErrorHandler();
         } else {
-            console.warn('⚠️ Librairie Supabase non chargée. Nouvelle tentative...');
-            setTimeout(initSupabase, 100); // Réessayer après 100ms
+            if (initAttempts < maxAttempts) {
+                console.log(`⏳ Tentative ${initAttempts}/${maxAttempts} - Attente librairie Supabase...`);
+                setTimeout(initSupabase, 100); // Réessayer après 100ms
+            } else {
+                console.error('❌ Timeout: Librairie Supabase non chargée après 5 secondes');
+                console.log('📊 window.supabase:', typeof window.supabase);
+            }
         }
     };
     
