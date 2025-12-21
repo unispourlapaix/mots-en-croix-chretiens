@@ -190,11 +190,15 @@ class LobbyTabsManager {
             const badgesHtml = badges.length > 0 ? 
                 `<span style="font-size: 10px; background: rgba(102, 126, 234, 0.1); color: #667eea; padding: 2px 6px; border-radius: 4px; margin-left: 5px;">${badges.join(' ')}</span>` : '';
             
-            // Tous les joueurs sont rejoignables sauf soi-même
-            const canJoin = !isSelf;
-            const joinLabel = player.status === 'in_game' ? '🎮 Rejoindre' : 
-                             player.status === 'in_room' ? '🚪 Rejoindre' : 
-                             '📨 Inviter';
+            // Vérifier si on est déjà connecté avec ce joueur
+            const isConnected = !isSelf && window.simpleChatSystem?.connections?.has(player.peer_id);
+            
+            // Tous les joueurs sont rejoignables sauf soi-même et ceux déjà connectés
+            const canJoin = !isSelf && !isConnected;
+            const displayLabel = isConnected ? '✅ Connecté' : 
+                                player.status === 'in_game' ? '🎮 Rejoindre' : 
+                                player.status === 'in_room' ? '🚪 Rejoindre' : 
+                                '📨 Inviter';
             const clickHandler = canJoin ? `onclick="window.realtimeLobbyUI.invitePlayer('${player.peer_id}')"` : '';
             const hoverStyle = canJoin ? 'box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transform: translateY(-2px);' : '';
             
@@ -202,8 +206,8 @@ class LobbyTabsManager {
                 <div class="player-item ${isSelf ? 'self' : ''}" data-peer-id="${player.peer_id}" 
                      ${clickHandler}
                      style="padding: 12px; margin-bottom: 8px; background: ${isSelf ? 'linear-gradient(135deg, #fff5f9 0%, #ffe5f5 100%)' : 'white'}; 
-                            border-radius: 10px; cursor: ${isSelf ? 'default' : 'pointer'}; 
-                            border: 2px solid ${isSelf ? '#ff69b4' : '#667eea'}; 
+                            border-radius: 10px; cursor: ${isSelf ? 'default' : canJoin ? 'pointer' : 'default'}; 
+                            border: 2px solid ${isSelf ? '#ff69b4' : isConnected ? '#28a745' : '#667eea'}; 
                             transition: all 0.3s;"
                      onmouseover="this.style.cssText = this.style.cssText + '${hoverStyle}'" 
                      onmouseout="this.style.cssText = this.style.cssText.replace('${hoverStyle}', '')">
@@ -224,8 +228,14 @@ class LobbyTabsManager {
                                            font-weight: 600; cursor: pointer; transition: all 0.2s;"
                                     onmouseover="this.style.transform='scale(1.05)'" 
                                     onmouseout="this.style.transform='scale(1)'">
-                                ${joinLabel}
+                                ${displayLabel}
                             </button>
+                        ` : isConnected ? `
+                            <span style="padding: 6px 12px; background: #28a745; 
+                                         color: white; border-radius: 6px; font-size: 12px; 
+                                         font-weight: 600;">
+                                ${displayLabel}
+                            </span>
                         ` : ''}
                     </div>
                 </div>
