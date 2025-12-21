@@ -21,12 +21,7 @@ class PresenceSystem {
     init() {
         console.log('✅ Système de partage familial/amis P2P + Supabase Realtime');
         
-        // Vérifier si Supabase est disponible
-        if (typeof window.supabaseClient !== 'undefined' && window.supabaseClient) {
-            console.log('🌐 Supabase Realtime disponible pour les salles CODE');
-        } else {
-            console.warn('⚠️ Supabase non configuré, fallback localStorage uniquement');
-        }
+        // Note: Vérification Supabase se fera à la demande dans initSupabaseRoomChannel()
         
         // Écouter localStorage pour sync locale (fallback)
         window.addEventListener('storage', (e) => {
