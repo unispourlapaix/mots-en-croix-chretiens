@@ -17,8 +17,17 @@ class SimpleChatSystem {
         if (this.isInitialized) return;
         this.isInitialized = true;
 
-        // Récupérer le username depuis authSystem si disponible
+        // Récupérer le username depuis authSystem si disponible (TOUJOURS en priorité)
         this.updateUsername();
+        
+        // Forcer une nouvelle mise à jour si authSystem est déjà connecté
+        if (typeof authSystem !== 'undefined' && authSystem.isAuthenticated()) {
+            const user = authSystem.getCurrentUser();
+            if (user && user.username) {
+                this.currentUser = user.username;
+                console.log('✅ Chat initialisé avec le pseudo authentifié:', this.currentUser);
+            }
+        }
 
         // Écouter les changements d'authentification
         if (typeof authSystem !== 'undefined') {

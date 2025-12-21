@@ -18,6 +18,19 @@ class MultiplayerRace {
         this.hasStoppedRace = false; // Pour savoir si j'ai arrêté ma course
     }
 
+    // Récupérer le vrai username authentifié
+    getMyUsername() {
+        // Priorité au username authentifié
+        if (typeof authSystem !== 'undefined' && authSystem.isAuthenticated()) {
+            const user = authSystem.getCurrentUser();
+            if (user && user.username) {
+                return user.username;
+            }
+        }
+        // Fallback sur chatSystem
+        return this.chatSystem?.currentUser || 'Joueur';
+    }
+
     // Démarrer une course
     startRace() {
         if (!this.chatSystem || !this.chatSystem.isInRoom()) {
@@ -292,7 +305,7 @@ class MultiplayerRace {
         // Créer le tableau des scores
         const allPlayers = [
             {
-                username: this.chatSystem.currentUser,
+                username: this.getMyUsername(),
                 score: this.game.score,
                 finishTime: this.raceFinished ? Math.floor((Date.now() - this.raceStartTime) / 1000) : null,
                 stopped: this.hasStoppedRace
@@ -369,7 +382,7 @@ les yeux fixés sur Jésus." - Hébreux 12:1-2
         // Compter combien de joueurs sont encore actifs
         const allPlayers = [
             {
-                username: this.chatSystem.currentUser,
+                username: this.getMyUsername(),
                 score: this.game.score,
                 stopped: this.hasStoppedRace,
                 isMe: true
@@ -433,7 +446,7 @@ les yeux fixés sur Jésus." - Hébreux 12:1-2
         const message = {
             type: 'race',
             action: type,
-            username: this.chatSystem.currentUser,
+            username: this.getMyUsername(),
             data: data,
             timestamp: Date.now()
         };
@@ -628,7 +641,7 @@ les yeux fixés sur Jésus." - Hébreux 12:1-2
         // Créer la liste de tous les joueurs
         const allPlayers = [
             {
-                username: this.chatSystem.currentUser,
+                username: this.getMyUsername(),
                 score: currentGameScore, // Score total du jeu
                 raceScore: currentRaceScore, // Points gagnés pendant la course
                 isMe: true,
@@ -698,7 +711,7 @@ les yeux fixés sur Jésus." - Hébreux 12:1-2
         // Créer la liste de tous les joueurs
         const allPlayers = [
             {
-                username: this.chatSystem.currentUser,
+                username: this.getMyUsername(),
                 score: this.game.score,
                 wordsCompleted: this.myProgress.wordsCompleted,
                 progress: this.myProgress.totalLetters > 0 
