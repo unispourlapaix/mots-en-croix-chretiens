@@ -65,8 +65,24 @@ class RealtimeLobbySystem {
 
     // Enregistrer ma présence
     async registerMyPresence() {
+        // Si peer pas initialisé, l'initialiser maintenant
         if (!window.simpleChatSystem?.peer?.id) {
-            console.warn('⚠️ Peer non initialisé, impossible d\'enregistrer la présence');
+            console.log('🎯 Initialisation automatique du peer pour le lobby...');
+            
+            if (window.simpleChatSystem && typeof window.simpleChatSystem.initP2P === 'function') {
+                window.simpleChatSystem.initP2P();
+                
+                // Attendre que le peer soit prêt (max 5s)
+                let attempts = 0;
+                while (!window.simpleChatSystem?.peer?.id && attempts < 50) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    attempts++;
+                }
+            }
+        }
+        
+        if (!window.simpleChatSystem?.peer?.id) {
+            console.warn('⚠️ Peer non initialisé après 5s, impossible d\'enregistrer la présence');
             console.log('📊 Debug - simpleChatSystem:', !!window.simpleChatSystem);
             console.log('📊 Debug - peer:', !!window.simpleChatSystem?.peer);
             console.log('📊 Debug - peer.id:', window.simpleChatSystem?.peer?.id);
