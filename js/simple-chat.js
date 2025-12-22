@@ -427,14 +427,28 @@ class SimpleChatSystem {
         } else if (data.type === 'game_sync') {
             console.log('🔄 Sync jeu reçu:', data);
             if (window.game) {
-                window.game.currentLevel = data.level;
-                window.game.grid = data.grid;
-                window.game.score = data.score;
-                // Redessiner la grille avec les données synchronisées
-                if (window.game.words && window.game.words.length > 0) {
-                    window.game.createGrid(window.game.words);
-                    // Restaurer les lettres de la grille synchronisée
-                    window.game.restoreGridLetters();
+                // Appliquer le mode de jeu si fourni
+                if (data.gameMode && data.gameMode !== window.game.gameMode) {
+                    console.log(`🎯 Changement mode: ${window.game.gameMode} → ${data.gameMode}`);
+                    window.game.gameMode = data.gameMode;
+                    localStorage.setItem('gameMode', data.gameMode);
+                    window.game.updateModeButtons();
+                }
+                
+                // Si le jeu est déjà démarré chez l'hôte, synchroniser l'état complet
+                if (data.gameStarted && data.grid) {
+                    window.game.currentLevel = data.level;
+                    window.game.grid = data.grid;
+                    window.game.score = data.score;
+                    // Redessiner la grille avec les données synchronisées
+                    if (window.game.words && window.game.words.length > 0) {
+                        window.game.createGrid(window.game.words);
+                        // Restaurer les lettres de la grille synchronisée
+                        window.game.restoreGridLetters();
+                    }
+                } else {
+                    // Jeu pas encore démarré chez l'hôte, juste appliquer le mode et niveau
+                    window.game.currentLevel = data.level || 1;
                 }
             }
             return;
@@ -1157,6 +1171,14 @@ class SimpleChatSystem {
                     // Activer le bouton vocal
                     if (window.voiceUI) {
                         window.voiceUI.updateSmsVoiceButton();
+                    }
+                    
+                    // 🎮 Démarrer automatiquement le jeu si pas encore démarré
+                    if (window.game && !window.game.gameStarted) {
+                        console.log('🎮 Démarrage automatique du jeu en multijoueur...');
+                        setTimeout(() => {
+                            window.game.startGame();
+                        }, 500); // Petit délai pour laisser la connexion s'établir
                     }
                     
                     // NE PAS ajouter d'écouteur ici - handleConnection() s'en occupe déjà

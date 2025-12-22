@@ -427,8 +427,21 @@ class LobbyTabsManager {
                     conn.send({
                         type: 'game_sync',
                         level: window.game.currentLevel,
+                        gameMode: window.game.gameMode,
                         grid: window.game.grid,
-                        score: window.game.score
+                        score: window.game.score,
+                        gameStarted: true
+                    });
+                }
+            } else if (window.game) {
+                // Si le jeu n'est pas encore démarré, envoyer quand même le mode par défaut
+                const conn = window.simpleChatSystem.connections.get(peerId);
+                if (conn) {
+                    conn.send({
+                        type: 'game_sync',
+                        level: 1,
+                        gameMode: window.game.gameMode || 'normal',
+                        gameStarted: false
                     });
                 }
             }
