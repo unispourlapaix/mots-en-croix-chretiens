@@ -859,6 +859,27 @@ class SimpleChatSystem {
                     }, 1000);
                 }
                 break;
+                
+            case 'game_started':
+                // Un joueur a démarré le jeu
+                const startModeIcon = action.gameMode === 'couple' ? '💕' : action.gameMode === 'sagesse' ? '🧘' : action.gameMode === 'proverbes' ? '📖' : action.gameMode === 'disciple' ? '✝️' : action.gameMode === 'veiller' ? '🕯️' : action.gameMode === 'aimee' ? '💝' : action.gameMode === 'couple-solide' ? '💪' : '🏆';
+                const startModeName = action.gameMode === 'couple' ? 'Couple' : action.gameMode === 'sagesse' ? 'Sagesse' : action.gameMode === 'proverbes' ? 'Proverbes' : action.gameMode === 'disciple' ? 'Disciple' : action.gameMode === 'veiller' ? 'Veiller' : action.gameMode === 'aimee' ? 'Aimée' : action.gameMode === 'couple-solide' ? 'Couple Solide' : 'Normal';
+                this.showMessage(`🎮 ${startModeIcon} ${username} a démarré une partie en mode ${startModeName} !`, 'system');
+                
+                // Proposer de rejoindre automatiquement si pas encore en jeu
+                if (window.game && !window.game.gameStarted) {
+                    this.showMessage(`💡 Vous pouvez cliquer sur "Jouer" pour rejoindre la partie`, 'system');
+                }
+                break;
+                
+            case 'mode_changed':
+                // Un joueur a changé de mode
+                const prevModeIcon = action.previousMode === 'couple' ? '💕' : '🏆';
+                const newModeIcon = action.newMode === 'couple' ? '💕' : action.newMode === 'sagesse' ? '🧘' : action.newMode === 'proverbes' ? '📖' : action.newMode === 'disciple' ? '✝️' : action.newMode === 'veiller' ? '🕯️' : action.newMode === 'aimee' ? '💝' : action.newMode === 'couple-solide' ? '💪' : '🏆';
+                const prevModeName = action.previousMode === 'couple' ? 'Couple' : action.previousMode === 'sagesse' ? 'Sagesse' : action.previousMode === 'proverbes' ? 'Proverbes' : action.previousMode === 'disciple' ? 'Disciple' : action.previousMode === 'veiller' ? 'Veiller' : action.previousMode === 'aimee' ? 'Aimée' : action.previousMode === 'couple-solide' ? 'Couple Solide' : 'Normal';
+                const newModeName = action.newMode === 'couple' ? 'Couple' : action.newMode === 'sagesse' ? 'Sagesse' : action.newMode === 'proverbes' ? 'Proverbes' : action.newMode === 'disciple' ? 'Disciple' : action.newMode === 'veiller' ? 'Veiller' : action.newMode === 'aimee' ? 'Aimée' : action.newMode === 'couple-solide' ? 'Couple Solide' : 'Normal';
+                this.showMessage(`🔄 ${username} a changé de mode: ${prevModeIcon} ${prevModeName} → ${newModeIcon} ${newModeName} (${action.totalLevels} niveaux)`, 'system');
+                break;
         }
     }
     
