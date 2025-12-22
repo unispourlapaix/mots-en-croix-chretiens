@@ -535,6 +535,16 @@ class SimpleChatSystem {
         localStorage.setItem(`avatar_${username}`, avatar);
     }
 
+    // Fermer/minimiser le menu du chat
+    closeChat() {
+        const chatBubble = document.getElementById('chatBubble');
+        const toggleBtn = document.getElementById('toggleChatBubble');
+        if (chatBubble && !chatBubble.classList.contains('minimized')) {
+            chatBubble.classList.add('minimized');
+            if (toggleBtn) toggleBtn.textContent = '+';
+        }
+    }
+
     showMessage(text, type = 'message', username = null) {
         const container = document.getElementById('chatSmsContainer');
         const messagesDiv = document.getElementById('chatSmsMessages');
@@ -594,6 +604,9 @@ class SimpleChatSystem {
 
         // Afficher le message localement
         this.showMessage(text, 'own', this.currentUser);
+        
+        // Fermer le menu du chat après l'envoi
+        this.closeChat();
 
         // Si dans une salle unifiée, utiliser broadcastChatMessage
         if (this.isInRoom()) {
