@@ -308,18 +308,12 @@ class LobbyTabsManager {
                 console.log('🏠 Création nouvelle salle:', roomId);
             }
             
-            // Connexion P2P
+            // Connexion P2P (invitation envoyée via conn.send après ouverture)
             const conn = window.simpleChatSystem.peer.connect(peerId, {
                 reliable: true,
                 metadata: {
-                    type: 'game_invite',
                     from: window.simpleChatSystem.currentUser,
-                    roomId: roomId,
-                    existingPlayers: window.simpleChatSystem.roomPlayers ? 
-                        Array.from(window.simpleChatSystem.roomPlayers.values()).map(p => ({
-                            username: p.username,
-                            peer_id: p.peer_id
-                        })) : []
+                    roomId: roomId
                 }
             });
             
@@ -415,6 +409,7 @@ class LobbyTabsManager {
     handleInviteResponse(peerId, username, data) {
         if (data.type === 'invite_accepted') {
             console.log('✅ Invitation acceptée par', username);
+            // Message affiché une seule fois côté hôte
             window.simpleChatSystem.showMessage(
                 `✅ ${username} a rejoint la salle !`,
                 'system'

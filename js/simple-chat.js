@@ -1077,7 +1077,7 @@ class SimpleChatSystem {
             });
         }
         
-        this.showMessage(`👋 ${data.username} a rejoint la salle`, 'system');
+        // Message affiché par lobby-tabs.js côté hôte
     }
 
     // Gérer une invitation de jeu depuis le lobby (SALLE UNIFIÉE chat + jeu)
