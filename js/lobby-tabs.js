@@ -350,11 +350,10 @@ class LobbyTabsManager {
                     isHost: false
                 });
                 
-                // Message système
-                const message = isAlreadyInRoom ? 
-                    `🏠 ${player.username} a rejoint la salle` :
-                    `🏠 Salle créée avec ${player.username}`;
-                window.simpleChatSystem.showMessage(message, 'system');
+                // Message système (seulement si nouvelle salle créée)
+                if (!isAlreadyInRoom) {
+                    window.simpleChatSystem.showMessage(`🏠 Salle créée avec ${player.username}`, 'system');
+                }
                 
                 // Notifier les autres joueurs déjà connectés
                 if (isAlreadyInRoom) {
