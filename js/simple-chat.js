@@ -880,6 +880,130 @@ class SimpleChatSystem {
                 const newModeName = action.newMode === 'couple' ? 'Couple' : action.newMode === 'sagesse' ? 'Sagesse' : action.newMode === 'proverbes' ? 'Proverbes' : action.newMode === 'disciple' ? 'Disciple' : action.newMode === 'veiller' ? 'Veiller' : action.newMode === 'aimee' ? 'Aimée' : action.newMode === 'couple-solide' ? 'Couple Solide' : 'Normal';
                 this.showMessage(`🔄 ${username} a changé de mode: ${prevModeIcon} ${prevModeName} → ${newModeIcon} ${newModeName} (${action.totalLevels} niveaux)`, 'system');
                 break;
+                
+            case 'mode_change_request':
+                // Recevoir une demande de vote pour changer de mode
+                this.handleModeChangeRequest(action, username);
+                break;
+                
+            case 'mode_change_vote':
+                // Recevoir un vote d'un autre joueur
+                this.handleModeChangeVote(action, username);
+                break;
+                
+            case 'mode_change_result':
+                // Recevoir le résultat du vote
+                this.handleModeChangeResult(action);
+                break;
+        }
+    }
+    
+    // Gérer une demande de changement de mode
+    handleModeChangeRequest(action, username) {
+        const { voteId, previousMode, newMode, requester } = action;
+        
+        // Ne pas afficher de modal si c'est notre propre demande
+        const myUsername = this.currentUser;
+        if (requester === myUsername) return;
+        
+        const newModeIcon = window.game?.getModeIcon(newMode) || '🎯';
+        const newModeName = window.game?.getModeName(newMode) || newMode;
+        
+        this.showMessage(`🗳️ ${requester} propose de changer pour le mode ${newModeIcon} ${newModeName}`, 'system');
+        
+        // Afficher une modal de vote
+        if (typeof CustomModals !== 'undefined') {
+            CustomModals.show({
+                title: '🗳️ Vote: Changement de Mode',
+                content: `<div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 48px; margin-bottom: 20px;">${newModeIcon}</div>
+                    <p style="font-size: 16px; margin-bottom: 15px;">
+                        <strong>${requester}</strong> propose de changer pour le mode:
+                    </p>
+                    <p style="font-size: 20px; font-weight: bold; color: #667eea; margin-bottom: 20px;">
+                        ${newModeName}
+                    </p>
+                    <p style="font-size: 14px; color: #666;">
+                        Vote automatique dans 15 secondes
+                    </p>
+                </div>`,
+                buttons: [
+                    {
+                        text: '✅ Accepter',
+                        className: 'btn-primary',
+                        callback: () => {
+                            this.sendModeChangeVote(voteId, true);
+                        }
+                    },
+                    {
+                        text: '❌ Refuser',
+                        className: 'btn-secondary',
+                        callback: () => {
+                            this.sendModeChangeVote(voteId, false);
+                        }
+                    }
+                ]
+            });
+        }
+    }
+    
+    // Envoyer un vote pour le changement de mode
+    sendModeChangeVote(voteId, accepted) {
+        const message = {
+            type: 'game_action',
+            username: this.currentUser,
+            action: {
+                type: 'mode_change_vote',
+                voteId: voteId,
+                vote: accepted,
+                voter: this.currentUser,
+                peerId: this.peer?.id
+            },
+            timestamp: Date.now()
+        };
+        
+        this.connections.forEach((conn) => {
+            if (conn.open) {
+                conn.send(message);
+            }
+        });
+        
+        this.showMessage(`${accepted ? '✅' : '❌'} Vous avez voté ${accepted ? 'POUR' : 'CONTRE'} le changement de mode`, 'system');
+    }
+    
+    // Gérer la réception d'un vote
+    handleModeChangeVote(action, username) {
+        if (!window.game || !window.game.modeChangeVote) return;
+        
+        const { voteId, vote, peerId } = action;
+        
+        // Vérifier que c'est le bon vote
+        if (voteId !== window.game.modeChangeVote.id) return;
+        
+        // Enregistrer le vote
+        window.game.modeChangeVote.votes.set(peerId, vote);
+        
+        console.log(`🗳️ Vote reçu de ${username}: ${vote ? 'OUI' : 'NON'}`);
+        
+        // Vérifier si tous les joueurs ont voté
+        const totalPlayers = this.connections.size + 1;
+        const votesReceived = window.game.modeChangeVote.votes.size;
+        
+        if (votesReceived >= totalPlayers) {
+            // Tous les votes sont reçus, traiter immédiatement
+            clearTimeout(window.game.modeChangeVote.timeout);
+            window.game.processModeChangeVote();
+        }
+    }
+    
+    // Gérer le résultat du vote
+    handleModeChangeResult(action) {
+        const { approved, yesVotes, totalVotes, totalPlayers, newMode } = action;
+        
+        if (approved && window.game) {
+            // Le vote est accepté, appliquer le changement
+            const previousMode = window.game.gameMode;
+            window.game.applyModeChange(previousMode, newMode);
         }
     }
     

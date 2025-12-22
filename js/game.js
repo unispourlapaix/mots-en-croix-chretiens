@@ -1510,6 +1510,42 @@ class ChristianCrosswordGame {
     }
 
     /**
+     * Obtenir l'icône d'un mode
+     */
+    getModeIcon(mode) {
+        const icons = {
+            'normal': '🙏',
+            'couple': '💕',
+            'sagesse': '🕊️',
+            'proverbes': '📖',
+            'disciple': '✝️',
+            'veiller': '👁️',
+            'aimee': '💝',
+            'couple-solide': '💪',
+            'race': '🏁'
+        };
+        return icons[mode] || '🎯';
+    }
+
+    /**
+     * Obtenir le nom d'un mode
+     */
+    getModeName(mode) {
+        const names = {
+            'normal': 'Normal',
+            'couple': 'Couple',
+            'sagesse': 'Sagesse',
+            'proverbes': 'Proverbes',
+            'disciple': 'Disciple',
+            'veiller': 'Veiller',
+            'aimee': 'Aimée',
+            'couple-solide': 'Couple Solide',
+            'race': 'Course'
+        };
+        return names[mode] || mode;
+    }
+
+    /**
      * Met à jour l'affichage du nombre maximum de niveaux
      */
     updateMaxLevelDisplay() {
@@ -1560,6 +1596,109 @@ class ChristianCrosswordGame {
 
         const previousMode = this.gameMode;
         
+        // 🗳️ Si des joueurs sont connectés, demander l'approbation par vote
+        if (window.simpleChatSystem && window.simpleChatSystem.connections.size > 0) {
+            // Lancer un vote pour le changement de mode
+            this.requestModeChangeVote(previousMode, mode);
+            return;
+        }
+        
+        // Pas de joueurs connectés, changement direct
+        this.applyModeChange(previousMode, mode);
+    }
+
+    // Demander un vote pour changer de mode
+    requestModeChangeVote(previousMode, newMode) {
+        const username = window.simpleChatSystem?.currentUser || 'Joueur';
+        const voteId = `vote_${Date.now()}`;
+        
+        // Initialiser le système de vote
+        if (!this.modeChangeVote) {
+            this.modeChangeVote = {
+                id: voteId,
+                previousMode: previousMode,
+                newMode: newMode,
+                requester: username,
+                votes: new Map(), // peerId -> boolean (true = oui, false = non)
+                timeout: null
+            };
+        }
+        
+        // Ajouter le vote du demandeur (automatiquement oui)
+        const myPeerId = window.simpleChatSystem?.peer?.id;
+        if (myPeerId) {
+            this.modeChangeVote.votes.set(myPeerId, true);
+        }
+        
+        // Envoyer la demande de vote à tous les joueurs
+        window.simpleChatSystem.broadcastGameAction({
+            type: 'mode_change_request',
+            voteId: voteId,
+            previousMode: previousMode,
+            newMode: newMode,
+            requester: username,
+            totalPlayers: window.simpleChatSystem.connections.size + 1 // +1 pour soi-même
+        });
+        
+        // Notifier localement
+        const newModeIcon = this.getModeIcon(newMode);
+        const newModeName = this.getModeName(newMode);
+        window.simpleChatSystem.showMessage(`🗳️ Vote lancé: Changer pour le mode ${newModeIcon} ${newModeName}`, 'system');
+        
+        // Timeout de 15 secondes pour le vote
+        this.modeChangeVote.timeout = setTimeout(() => {
+            this.processModeChangeVote();
+        }, 15000);
+    }
+
+    // Traiter les résultats du vote
+    processModeChangeVote() {
+        if (!this.modeChangeVote) return;
+        
+        const { votes, previousMode, newMode, requester } = this.modeChangeVote;
+        const totalPlayers = window.simpleChatSystem.connections.size + 1;
+        const votesReceived = votes.size;
+        const yesVotes = Array.from(votes.values()).filter(v => v === true).length;
+        const noVotes = votesReceived - yesVotes;
+        
+        // Majorité = plus de 50%
+        const majorityNeeded = Math.ceil(totalPlayers / 2);
+        const approved = yesVotes >= majorityNeeded;
+        
+        console.log(`🗳️ Résultats du vote: ${yesVotes} oui, ${noVotes} non (${votesReceived}/${totalPlayers} votes)`);
+        
+        // Envoyer le résultat à tous
+        window.simpleChatSystem.broadcastGameAction({
+            type: 'mode_change_result',
+            voteId: this.modeChangeVote.id,
+            approved: approved,
+            yesVotes: yesVotes,
+            noVotes: noVotes,
+            totalVotes: votesReceived,
+            totalPlayers: totalPlayers,
+            previousMode: previousMode,
+            newMode: newMode
+        });
+        
+        // Afficher le résultat localement
+        const newModeIcon = this.getModeIcon(newMode);
+        const newModeName = this.getModeName(newMode);
+        if (approved) {
+            window.simpleChatSystem.showMessage(`✅ Vote accepté (${yesVotes}/${totalPlayers}) ! Changement vers ${newModeIcon} ${newModeName}`, 'system');
+            // Appliquer le changement
+            setTimeout(() => {
+                this.applyModeChange(previousMode, newMode);
+            }, 1000);
+        } else {
+            window.simpleChatSystem.showMessage(`❌ Vote rejeté (${yesVotes}/${totalPlayers}). Mode ${this.getModeIcon(previousMode)} ${this.getModeName(previousMode)} conservé`, 'system');
+        }
+        
+        // Nettoyer
+        this.modeChangeVote = null;
+    }
+
+    // Appliquer le changement de mode (après approbation ou si seul)
+    applyModeChange(previousMode, mode) {
         // Sauvegarder la partie en cours du mode actuel avant de changer
         if (this.gameStarted) {
             this.saveGame();
