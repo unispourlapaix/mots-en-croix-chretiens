@@ -35,8 +35,12 @@ class VoiceChatSystem {
             return;
         }
 
-        if (!this.chatSystem.roomId) {
-            throw new Error('Vous devez être dans une room de chat pour rejoindre le vocal');
+        // Vérifier si on est dans une room (chatSystem.roomId OU simpleChatSystem.roomCode)
+        const inRoom = this.chatSystem.roomId || 
+                       (window.simpleChatSystem && window.simpleChatSystem.roomCode);
+        
+        if (!inRoom) {
+            throw new Error('Vous devez rejoindre un joueur pour activer le vocal');
         }
 
         try {
@@ -46,20 +50,31 @@ class VoiceChatSystem {
             console.log('🎤 Microphone activé');
             this.isInVoiceRoom = true;
 
-            // Message adapté selon si seul ou avec d'autres
-            const connectionCount = this.chatSystem.connections.size;
-            const message = connectionCount === 0
-                ? `🎤 ${this.chatSystem.username} est prêt en vocal (en attente d'autres joueurs)`
-                : `🎤 ${this.chatSystem.username} a rejoint le vocal`;
+            // Utiliser les connexions appropriées (P2PChatSystem ou SimpleChatSystem)
+            const connections = this.chatSystem.connections || window.simpleChatSystem?.connections;
+            const username = this.chatSystem.username || window.simpleChatSystem?.currentUser;
             
-            this.chatSystem.sendSystemMessage(message);
+            // Message adapté selon si seul ou avec d'autres
+            const connectionCount = connections?.size || 0;
+            const message = connectionCount === 0
+                ? `🎤 ${username} est prêt en vocal (en attente d'autres joueurs)`
+                : `🎤 ${username} a rejoint le vocal`;
+            
+            // Envoyer le message système (si chatSystem disponible)
+            if (this.chatSystem.sendSystemMessage) {
+                this.chatSystem.sendSystemMessage(message);
+            } else if (window.simpleChatSystem) {
+                window.simpleChatSystem.showMessage(message, 'system');
+            }
 
             // Établir les connexions vocales avec tous les peers existants
-            this.chatSystem.connections.forEach((dataConn, peerId) => {
-                if (dataConn.open) {
-                    this.callPeer(peerId);
-                }
-            });
+            if (connections) {
+                connections.forEach((dataConn, peerId) => {
+                    if (dataConn.open) {
+                        this.callPeer(peerId);
+                    }
+                });
+            }
 
             // Écouter les appels entrants (nouveau dans cette session et futurs)
             this.setupIncomingCallListener();
@@ -116,11 +131,18 @@ class VoiceChatSystem {
         this.isMuted = false;
         this.isDeafened = false;
 
-        // Notifier
-        this.chatSystem.sendSystemMessage(`🔇 ${this.chatSystem.username} a quitté le vocal`);
+        // Notifier avec le système approprié
+        const username = this.chatSystem.username || window.simpleChatSystem?.currentUser;
+        const message = `🔇 ${username} a quitté le vocal`;
+        
+        if (this.chatSystem.sendSystemMessage && typeof this.chatSystem.sendSystemMessage === 'function') {
+            this.chatSystem.sendSystemMessage(message);
+        } else if (window.simpleChatSystem) {
+            window.simpleChatSystem.showMessage(message, 'system');
+        }
         
         this.dispatchVoiceEvent('left', {
-            roomId: this.chatSystem.roomId
+            roomId: this.chatSystem.roomId || window.simpleChatSystem?.roomCode
         });
 
         console.log('🔇 Salon vocal quitté');
@@ -147,7 +169,14 @@ class VoiceChatSystem {
         }
 
         try {
-            const call = this.chatSystem.peer.call(peerId, this.localStream);
+            // Utiliser le peer approprié (P2PChatSystem ou SimpleChatSystem)
+            const peer = this.chatSystem.peer || window.simpleChatSystem?.peer;
+            if (!peer) {
+                console.error('❌ Pas de peer disponible');
+                return;
+            }
+            
+            const call = peer.call(peerId, this.localStream);
             
             call.on('stream', (remoteStream) => {
                 this.handleRemoteStream(peerId, remoteStream);
@@ -173,9 +202,11 @@ class VoiceChatSystem {
      * Écouter les appels entrants
      */
     setupIncomingCallListener() {
-        if (!this.chatSystem.peer) return;
+        // Utiliser le peer approprié (P2PChatSystem ou SimpleChatSystem)
+        const peer = this.chatSystem.peer || window.simpleChatSystem?.peer;
+        if (!peer) return;
 
-        this.chatSystem.peer.on('call', (call) => {
+        peer.on('call', (call) => {
             console.log('📞 Appel entrant de', call.peer);
 
             // Ignorer les appels des bots

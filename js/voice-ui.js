@@ -53,8 +53,8 @@ class VoiceUI {
             </div>
             
             <div class="voice-status" id="voiceStatus">
-                <p class="text-muted">Rejoignez d'abord une room de chat</p>
-            </div>Créez ou rejoignez une room de chat pour activer le vocal
+                <p class="text-muted">Créez ou rejoignez une room de chat pour activer le vocal</p>
+            </div>
             
             <div class="voice-buttons" id="voiceButtons" style="display: none;">
                 <button class="btn btn-voice-join" id="voiceJoinBtn">
@@ -98,14 +98,12 @@ class VoiceUI {
             participantsList: document.getElementById('voiceParticipantsList'),
             participants: document.getElementById('voiceParticipants'),
             // Contrôles dans le chat SMS flottant
-            smsVoiceControls: document.getElementById('chatSmsVoiceControls'),
-            smsVoiceJoin: document.getElementById('chatSmsVoiceJoin'),
-            smsVoiceStatus: document.getElementById('chatSmsVoiceStatus'),
-            smsVoiceCount: document.getElementById('chatSmsVoiceCount'),
-            smsJoinVoiceBtn: document.getElementById('chatSmsJoinVoiceBtn'),
+            smsVoiceBtn: document.getElementById('chatSmsVoiceBtn'),
+            smsVoicePopup: document.getElementById('chatSmsVoicePopup'),
             smsMuteBtn: document.getElementById('chatSmsMuteBtn'),
             smsDeafenBtn: document.getElementById('chatSmsDeafenBtn'),
-            smsLeaveVoiceBtn: document.getElementById('chatSmsLeaveVoiceBtn')
+            smsLeaveVoiceBtn: document.getElementById('chatSmsLeaveVoiceBtn'),
+            voicePopupClose: document.getElementById('voicePopupClose')
         };
     }
 
@@ -124,20 +122,46 @@ class VoiceUI {
         // Bouton deafen
         this.elements.deafenBtn?.addEventListener('click', () => this.handleToggleDeafen());
 
-        // Boutons dans le chat SMS flottant
-        this.elements.smsJoinVoiceBtn?.addEventListener('click', () => this.handleJoinVoice());
-        this.elements.smsMuteBtn?.addEventListener('click', () => this.handleToggleMute());
-        this.elements.smsDeafenBtn?.addEventListener('click', () => this.handleToggleDeafen());
-        this.elements.smsLeaveVoiceBtn?.addEventListener('click', () => this.handleLeaveVoice());
+        // Bouton vocal SMS - rejoint ou ouvre popup selon l'état
+        this.elements.smsVoiceBtn?.addEventListener('click', () => this.handleSmsVoiceClick());
+        
+        // Boutons dans le popup
+        this.elements.smsMuteBtn?.addEventListener('click', () => {
+            this.handleToggleMute();
+            this.updateMuteButton(this.voiceSystem.isMuted);
+        });
+        this.elements.smsDeafenBtn?.addEventListener('click', () => {
+            this.handleToggleDeafen();
+            this.updateDeafenButton(this.voiceSystem.isDeafened);
+        });
+        this.elements.smsLeaveVoiceBtn?.addEventListener('click', () => {
+            this.handleLeaveVoice();
+            this.closeVoicePopup();
+        });
+        
+        // Fermer le popup
+        this.elements.voicePopupClose?.addEventListener('click', () => this.closeVoicePopup());
+        
+        // Fermer le popup en cliquant à l'extérieur
+        document.addEventListener('click', (e) => {
+            if (this.elements.smsVoicePopup && 
+                this.elements.smsVoicePopup.style.display === 'block' &&
+                !this.elements.smsVoicePopup.contains(e.target) &&
+                !this.elements.smsVoiceBtn.contains(e.target)) {
+                this.closeVoicePopup();
+            }
+        });
 
         // Écouter les événements du chat system
         window.addEventListener('roomCreated', () => {
             this.showVoiceSection();
             this.updateVoiceAvailability();
+            this.updateSmsVoiceButton();
         });
         window.addEventListener('roomJoined', () => {
             this.showVoiceSection();
             this.updateVoiceAvailability();
+            this.updateSmsVoiceButton();
         });
 
         // Écouter les événements vocaux
@@ -148,6 +172,9 @@ class VoiceUI {
         window.addEventListener('voicemuteChanged', (e) => this.updateMuteButton(e.detail.isMuted));
         window.addEventListener('voicedeafenChanged', (e) => this.updateDeafenButton(e.detail.isDeafened));
         window.addEventListener('voicevolumeChange', (e) => this.updateParticipantVolume(e.detail));
+        
+        // Mettre à jour l'état du bouton SMS dès le départ
+        this.updateSmsVoiceButton();
 
         // Vérifier périodiquement la disponibilité
         setInterval(() => this.updateVoiceAvailability(), 1000);
@@ -168,6 +195,52 @@ class VoiceUI {
             
             this.elements.joinBtn.disabled = false;
             this.elements.joinBtn.textContent = '🎤 Rejoindre le vocal';
+        }
+    }
+
+    handleSmsVoiceClick() {
+        const inVoice = this.voiceSystem?.isInVoiceRoom;
+        
+        if (inVoice) {
+            // Déjà en vocal - ouvrir le popup de contrôles
+            this.openVoicePopup();
+        } else {
+            // Pas encore en vocal - rejoindre
+            this.handleJoinVoice();
+        }
+    }
+
+    openVoicePopup() {
+        if (!this.elements.smsVoicePopup) return;
+        this.elements.smsVoicePopup.style.display = 'block';
+        
+        // Mettre à jour l'état des boutons
+        this.updatePopupButtons();
+    }
+
+    closeVoicePopup() {
+        if (!this.elements.smsVoicePopup) return;
+        this.elements.smsVoicePopup.style.display = 'none';
+    }
+
+    updatePopupButtons() {
+        if (!this.voiceSystem) return;
+        
+        // Mettre à jour le style des boutons selon l'état
+        if (this.elements.smsMuteBtn) {
+            if (this.voiceSystem.isMuted) {
+                this.elements.smsMuteBtn.classList.add('muted');
+            } else {
+                this.elements.smsMuteBtn.classList.remove('muted');
+            }
+        }
+        
+        if (this.elements.smsDeafenBtn) {
+            if (this.voiceSystem.isDeafened) {
+                this.elements.smsDeafenBtn.classList.add('deafened');
+            } else {
+                this.elements.smsDeafenBtn.classList.remove('deafened');
+            }
         }
     }
 
@@ -195,27 +268,10 @@ class VoiceUI {
         
         this.elements.status.innerHTML = `<p class="text-success">${statusMessage}</p>`;
         
-        // Afficher les contrôles vocaux dans le chat SMS
-        if (this.elements.smsVoiceControls) {
-            this.elements.smsVoiceControls.style.display = 'flex';
-        }
-        
-        // Afficher le statut au lieu du bouton Join
-        if (this.elements.smsJoinVoiceBtn) {
-            this.elements.smsJoinVoiceBtn.style.display = 'none';
-        }
-        if (this.elements.smsVoiceStatus) {
-            this.elements.smsVoiceStatus.style.display = 'block';
-        }
-        if (this.elements.smsVoiceCount) {
-            this.elements.smsVoiceCount.textContent = participantCount;
-        }
-        
-        // Afficher l'indicateur vocal dans l'en-tête du chat
-        const voiceIndicator = document.getElementById('voiceStatusIndicator');
-        if (voiceIndicator) {
-            voiceIndicator.style.display = 'inline';
-            voiceIndicator.title = 'Vocal actif';
+        // Changer le style du bouton pour indiquer qu'on est en vocal
+        if (this.elements.smsVoiceBtn) {
+            this.elements.smsVoiceBtn.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
+            this.elements.smsVoiceBtn.title = 'Contrôles vocaux (cliquer pour ouvrir)';
         }
         
         this.elements.joinBtn.style.display = 'none';
@@ -236,22 +292,17 @@ class VoiceUI {
         this.elements.controlsRow.style.display = 'none';
         this.elements.participantsList.style.display = 'none';
         
-        // Cacher les contrôles vocaux et le statut, afficher le bouton Join
-        if (this.elements.smsVoiceControls) {
-            this.elements.smsVoiceControls.style.display = 'none';
-        }
-        if (this.elements.smsVoiceStatus) {
-            this.elements.smsVoiceStatus.style.display = 'none';
-        }
-        if (this.elements.smsJoinVoiceBtn) {
-            this.elements.smsJoinVoiceBtn.style.display = 'block';
+        // Fermer le popup s'il est ouvert
+        this.closeVoicePopup();
+        
+        // Remettre le bouton en mode "rejoindre"
+        if (this.elements.smsVoiceBtn) {
+            this.elements.smsVoiceBtn.style.background = 'linear-gradient(135deg, #ff69b4, #ff85c1)';
+            this.elements.smsVoiceBtn.title = 'Rejoindre le salon vocal';
         }
         
-        // Masquer l'indicateur vocal dans l'en-tête du chat
-        const voiceIndicator = document.getElementById('voiceStatusIndicator');
-        if (voiceIndicator) {
-            voiceIndicator.style.display = 'none';
-        }
+        // Mettre à jour l'état du bouton
+        this.updateSmsVoiceButton();
         
         this.updateMuteButton(false);
         this.updateDeafenButton(false);
@@ -269,6 +320,39 @@ class VoiceUI {
         const section = document.getElementById('voiceControlsSection');
         if (section) {
             section.style.display = 'none';
+        }
+    }
+
+    updateSmsVoiceButton() {
+        const voiceBtn = this.elements?.smsVoiceBtn;
+        if (!voiceBtn) return;
+
+        // Vérifier si on est dans une room (via chatSystem.roomId OU simpleChatSystem.roomCode)
+        const inRoom = (this.chatSystem && !!this.chatSystem.roomId) || 
+                       (window.simpleChatSystem && !!window.simpleChatSystem.roomCode);
+        const inVoice = this.voiceSystem?.isInVoiceRoom;
+
+        // Toujours afficher le bouton
+        voiceBtn.style.display = 'flex';
+
+        if (inVoice) {
+            // En vocal - bouton vert pour ouvrir les contrôles
+            voiceBtn.disabled = false;
+            voiceBtn.style.opacity = '1';
+            voiceBtn.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
+            voiceBtn.title = 'Contrôles vocaux (cliquer pour ouvrir)';
+        } else if (inRoom) {
+            // Dans une room mais pas en vocal - bouton rose pour rejoindre
+            voiceBtn.disabled = false;
+            voiceBtn.style.opacity = '1';
+            voiceBtn.style.background = 'linear-gradient(135deg, #ff69b4, #ff85c1)';
+            voiceBtn.title = 'Rejoindre le salon vocal';
+        } else {
+            // Pas dans une room - bouton grisé
+            voiceBtn.disabled = true;
+            voiceBtn.style.opacity = '0.4';
+            voiceBtn.style.background = 'linear-gradient(135deg, #95a5a6, #b2bec3)';
+            voiceBtn.title = 'Rejoignez un joueur pour activer le vocal';
         }
     }
 
@@ -306,10 +390,22 @@ class VoiceUI {
         this.elements.muteBtn.textContent = isMuted ? '🔇 Micro' : '🎤 Micro';
         this.elements.muteBtn.classList.toggle('muted', isMuted);
         
-        // Mettre à jour aussi le bouton SMS
+        // Mettre à jour aussi le bouton SMS dans le popup
         if (this.elements.smsMuteBtn) {
-            this.elements.smsMuteBtn.textContent = isMuted ? '🔇' : '🎤';
             this.elements.smsMuteBtn.classList.toggle('muted', isMuted);
+        }
+        
+        // Griser l'icône principale quand muté
+        if (this.elements.smsVoiceBtn) {
+            if (isMuted) {
+                this.elements.smsVoiceBtn.style.background = 'linear-gradient(135deg, #95a5a6, #b2bec3)';
+                this.elements.smsVoiceBtn.style.opacity = '0.7';
+                this.elements.smsVoiceBtn.title = 'Micro coupé (cliquer pour les contrôles)';
+            } else {
+                this.elements.smsVoiceBtn.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
+                this.elements.smsVoiceBtn.style.opacity = '1';
+                this.elements.smsVoiceBtn.title = 'Contrôles vocaux (cliquer pour ouvrir)';
+            }
         }
     }
 
@@ -319,9 +415,8 @@ class VoiceUI {
         this.elements.deafenBtn.textContent = isDeafened ? '🔇 Son' : '🔊 Son';
         this.elements.deafenBtn.classList.toggle('deafened', isDeafened);
         
-        // Mettre à jour aussi le bouton SMS
+        // Mettre à jour aussi le bouton SMS dans le popup
         if (this.elements.smsDeafenBtn) {
-            this.elements.smsDeafenBtn.textContent = isDeafened ? '🔇' : '🔊';
             this.elements.smsDeafenBtn.classList.toggle('deafened', isDeafened);
         }
     }
@@ -334,11 +429,6 @@ class VoiceUI {
             ? '1 participant (vous)' 
             : `${count} participant(s)`;
         this.elements.participantCount.textContent = countText;
-        
-        // Mettre à jour aussi le compteur dans le chat SMS
-        if (this.elements.smsVoiceCount) {
-            this.elements.smsVoiceCount.textContent = count;
-        }
 
         // Construire la liste des participants
         const participants = [];
@@ -370,8 +460,10 @@ class VoiceUI {
             }
         });
 
-        // Afficher
-        this.elements.participants.innerHTML = participants.map(p => `
+        // Afficher (filtrer les participants sans username)
+        this.elements.participants.innerHTML = participants
+            .filter(p => p.username && typeof p.username === 'string')
+            .map(p => `
             <div class="voice-participant ${p.isSpeaking ? 'speaking' : ''}" data-peer-id="${p.peerId || 'self'}">
                 <div class="participant-avatar" style="background-color: ${p.color}">
                     ${p.username.charAt(0).toUpperCase()}

@@ -110,29 +110,33 @@
                 <button id="chatSmsClose" class="chat-sms-close-btn">✕</button>
             </div>
             
-            <!-- Contrôles vocaux compacts -->
-            <div id="chatSmsVoiceControls" class="chat-sms-voice-controls" style="display: none;">
-                <button id="chatSmsMuteBtn" class="chat-sms-voice-btn" title="Couper/Activer le micro">
-                    🎤
-                </button>
-                <button id="chatSmsDeafenBtn" class="chat-sms-voice-btn" title="Couper/Activer le son">
-                    🔊
-                </button>
-                <button id="chatSmsLeaveVoiceBtn" class="chat-sms-voice-btn danger" title="Quitter le vocal">
-                    🔇
-                </button>
+            <!-- Contrôles vocaux compacts - popup au clic -->
+            <div id="chatSmsVoicePopup" class="chat-sms-voice-popup" style="display: none;">
+                <div class="voice-popup-header">
+                    <span>🎤 Contrôles Vocaux</span>
+                    <button id="voicePopupClose" class="voice-popup-close">✕</button>
+                </div>
+                <div class="voice-popup-content">
+                    <button id="chatSmsMuteBtn" class="voice-popup-btn">
+                        <span class="voice-btn-icon">🎤</span>
+                        <span class="voice-btn-label">Couper/Activer micro</span>
+                    </button>
+                    <button id="chatSmsDeafenBtn" class="voice-popup-btn">
+                        <span class="voice-btn-icon">🔊</span>
+                        <span class="voice-btn-label">Couper/Activer son</span>
+                    </button>
+                    <button id="chatSmsLeaveVoiceBtn" class="voice-popup-btn danger">
+                        <span class="voice-btn-icon">🔇</span>
+                        <span class="voice-btn-label">Quitter le vocal</span>
+                    </button>
+                </div>
             </div>
             
-            <!-- Bouton rejoindre le vocal / Statut (visible selon contexte) -->
-            <div id="chatSmsVoiceJoin" class="chat-sms-voice-join" style="display: block;">
-                <div id="chatSmsVoiceStatus" class="chat-sms-voice-status" style="display: none;">
-                    🎤 En vocal avec <span id="chatSmsVoiceCount">0</span> joueur(s)
-                </div>
-                <button id="chatSmsJoinVoiceBtn" class="chat-sms-voice-btn primary" title="Rejoindre le salon vocal">
-                    🎤 Rejoindre le vocal
-                </button>
-            </div>
             <div class="chat-sms-input-container">
+                <!-- Bouton vocal unique qui ouvre le popup ou rejoint -->
+                <button id="chatSmsVoiceBtn" class="chat-sms-voice-btn-inline" title="Rejoindre le salon vocal" disabled>
+                    🎤
+                </button>
                 <input type="text" id="chatSmsInput" class="chat-sms-input" placeholder="Écrire ici..." maxlength="100">
                 <button id="chatSmsSend" class="chat-sms-send">→</button>
             </div>

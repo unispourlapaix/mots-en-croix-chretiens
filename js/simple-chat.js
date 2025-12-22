@@ -11,6 +11,10 @@ class SimpleChatSystem {
         this.connections = new Map(); // peerId -> connection
         this.roomCode = null;
         this.isHost = false;
+        
+        // Système de blocage
+        this.blockedPlayers = new Set(); // Set de peer IDs bloqués
+        this.loadBlockedPlayers();
     }
 
     init() {
@@ -149,21 +153,15 @@ class SimpleChatSystem {
         });
 
         this.peer.on('connection', (conn) => {
-            this.handleConnection(conn);
+            // Bloquer les connexions de joueurs bloqués
+            if (this.isPlayerBlocked(conn.peer)) {
+                console.log('🚫 Connexion refusée (joueur bloqué):', conn.peer);
+                conn.close();
+                return;
+            }
             
-            // Gérer les invitations de jeu depuis le lobby
-            conn.on('data', (data) => {
-                if (data.type === 'game_invite') {
-                    this.handleGameInvite(conn, data);
-                }
-                
-                // Transférer les messages de salle au RoomSystem
-                if (window.roomSystem && data.type && ['join-request', 'join-accepted', 'join-refused', 
-                    'player-kicked', 'room-mode-changed', 'player-joined', 
-                    'player-left', 'host-transferred'].includes(data.type)) {
-                    window.roomSystem.handleRoomMessage(conn, data);
-                }
-            });
+            // handleConnection gère déjà tous les événements 'data'
+            this.handleConnection(conn);
         });
 
         this.peer.on('error', (err) => {
@@ -376,8 +374,13 @@ class SimpleChatSystem {
             if (window.chatSystem && window.chatSystem.connections) {
                 window.chatSystem.connections.delete(conn.peer);
                 const username = conn.metadata?.username || 'Utilisateur';
-                window.chatSystem.sendSystemMessage(`${username} a quitté le chat 👋`);
-                window.chatSystem.updateParticipantCount();
+                // Vérifier que la méthode existe avant de l'appeler
+                if (typeof window.chatSystem.sendSystemMessage === 'function') {
+                    window.chatSystem.sendSystemMessage(`${username} a quitté le chat 👋`);
+                }
+                if (typeof window.chatSystem.updateParticipantCount === 'function') {
+                    window.chatSystem.updateParticipantCount();
+                }
             }
             
             // Notifier le room system
@@ -402,6 +405,18 @@ class SimpleChatSystem {
         if (window.chatSystem && ['message', 'history', 'system'].includes(data.type)) {
             window.chatSystem.handleIncomingMessage(data, conn.peer);
             return; // Ne pas traiter dans SimpleChatSystem
+        }
+        
+        // Gérer les invitations de jeu depuis le lobby
+        if (data.type === 'game_invite') {
+            this.handleGameInvite(conn, data);
+            return;
+        }
+        
+        // Gérer l'arrivée d'un nouveau joueur dans la salle
+        if (data.type === 'player_joined_room') {
+            this.handlePlayerJoinedRoom(conn, data);
+            return;
         }
         
         // Gérer les messages de la salle unifiée
@@ -854,6 +869,49 @@ class SimpleChatSystem {
         this.showMessage(`📊 ${data.username} est au niveau ${data.level} avec ${data.score} points`, 'system');
     }
 
+    // Gérer l'arrivée d'un nouveau joueur dans la salle
+    handlePlayerJoinedRoom(conn, data) {
+        console.log('👥 Nouveau joueur dans la salle:', data.username, data.peer_id);
+        
+        // Ajouter le nouveau joueur à la liste
+        if (!this.roomPlayers) {
+            this.roomPlayers = new Map();
+        }
+        
+        this.roomPlayers.set(data.peer_id, {
+            username: data.username,
+            peer_id: data.peer_id,
+            isHost: false
+        });
+        
+        // Se connecter au nouveau joueur
+        if (data.peer_id !== this.peer?.id && !this.connections.has(data.peer_id)) {
+            console.log('🔗 Connexion au nouveau joueur:', data.username);
+            const peerConn = this.peer.connect(data.peer_id, {
+                reliable: true,
+                metadata: {
+                    type: 'peer_join',
+                    username: this.currentUser,
+                    roomId: this.roomCode
+                }
+            });
+            
+            peerConn.on('open', () => {
+                console.log('✅ Connecté au nouveau joueur:', data.username);
+                if (!this.connections) {
+                    this.connections = new Map();
+                }
+                this.connections.set(data.peer_id, peerConn);
+            });
+            
+            peerConn.on('error', (err) => {
+                console.error('❌ Erreur connexion avec nouveau joueur', data.username, err);
+            });
+        }
+        
+        this.showMessage(`👋 ${data.username} a rejoint la salle`, 'system');
+    }
+
     // Gérer une invitation de jeu depuis le lobby (SALLE UNIFIÉE chat + jeu)
     handleGameInvite(conn, data) {
         console.log('📨 Invitation reçue de:', data.from, 'roomId:', data.roomId);
@@ -895,6 +953,42 @@ class SimpleChatSystem {
                         isHost: true
                     });
                     
+                    // Ajouter les autres joueurs déjà présents dans la salle
+                    if (data.existingPlayers && Array.isArray(data.existingPlayers)) {
+                        console.log('👥 Connexion aux autres joueurs:', data.existingPlayers.length);
+                        for (const player of data.existingPlayers) {
+                            // Ajouter à la liste
+                            this.roomPlayers.set(player.peer_id, {
+                                username: player.username,
+                                peer_id: player.peer_id,
+                                isHost: false
+                            });
+                            
+                            // Se connecter à chaque joueur existant
+                            if (player.peer_id !== this.peer?.id) {
+                                console.log('🔗 Connexion à:', player.username, player.peer_id);
+                                const peerConn = this.peer.connect(player.peer_id, {
+                                    reliable: true,
+                                    metadata: {
+                                        type: 'peer_join',
+                                        username: this.currentUser,
+                                        roomId: data.roomId
+                                    }
+                                });
+                                
+                                peerConn.on('open', () => {
+                                    console.log('✅ Connecté à:', player.username);
+                                    this.connections.set(player.peer_id, peerConn);
+                                    this.showMessage(`👋 Connecté à ${player.username}`, 'system');
+                                });
+                                
+                                peerConn.on('error', (err) => {
+                                    console.error('❌ Erreur connexion avec', player.username, err);
+                                });
+                            }
+                        }
+                    }
+                    
                     // M'ajouter
                     if (this.peer?.id) {
                         this.roomPlayers.set('me', {
@@ -905,6 +999,11 @@ class SimpleChatSystem {
                     }
                     
                     this.showMessage(`🏠 Vous avez rejoint la salle de ${data.from}`, 'system');
+                    
+                    // Activer le bouton vocal
+                    if (window.voiceUI) {
+                        window.voiceUI.updateSmsVoiceButton();
+                    }
                     
                     // NE PAS ajouter d'écouteur ici - handleConnection() s'en occupe déjà
                     // Les messages seront routés via handleMessage() automatiquement
@@ -1085,6 +1184,52 @@ class SimpleChatSystem {
     // Vérifier si en mode P2P
     isInRoom() {
         return this.roomCode !== null;
+    }
+
+    // === Système de blocage ===
+    
+    // Bloquer un joueur
+    blockPlayer(peerId) {
+        this.blockedPlayers.add(peerId);
+        this.saveBlockedPlayers();
+        console.log('🚫 Joueur bloqué:', peerId);
+    }
+
+    // Débloquer un joueur
+    unblockPlayer(peerId) {
+        this.blockedPlayers.delete(peerId);
+        this.saveBlockedPlayers();
+        console.log('✅ Joueur débloqué:', peerId);
+    }
+
+    // Vérifier si un joueur est bloqué
+    isPlayerBlocked(peerId) {
+        return this.blockedPlayers.has(peerId);
+    }
+
+    // Sauvegarder la liste des joueurs bloqués
+    saveBlockedPlayers() {
+        try {
+            const blocked = Array.from(this.blockedPlayers);
+            localStorage.setItem('blockedPlayers', JSON.stringify(blocked));
+        } catch (e) {
+            console.error('❌ Erreur sauvegarde joueurs bloqués:', e);
+        }
+    }
+
+    // Charger la liste des joueurs bloqués
+    loadBlockedPlayers() {
+        try {
+            const saved = localStorage.getItem('blockedPlayers');
+            if (saved) {
+                const blocked = JSON.parse(saved);
+                this.blockedPlayers = new Set(blocked);
+                console.log('📋 Joueurs bloqués chargés:', this.blockedPlayers.size);
+            }
+        } catch (e) {
+            console.error('❌ Erreur chargement joueurs bloqués:', e);
+            this.blockedPlayers = new Set();
+        }
     }
 }
 

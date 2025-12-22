@@ -193,24 +193,23 @@ class LobbyTabsManager {
             // Vérifier si on est déjà connecté avec ce joueur
             const isConnected = !isSelf && window.simpleChatSystem?.connections?.has(player.peer_id);
             
-            // Tous les joueurs sont rejoignables sauf soi-même et ceux déjà connectés
-            const canJoin = !isSelf && !isConnected;
-            const displayLabel = isConnected ? '✅ Connecté' : 
+            // Vérifier si le joueur est bloqué
+            const isBlocked = !isSelf && window.simpleChatSystem?.isPlayerBlocked(player.peer_id);
+            
+            // Tous les joueurs sont rejoignables sauf soi-même, ceux déjà connectés et ceux bloqués
+            const canJoin = !isSelf && !isConnected && !isBlocked;
+            const displayLabel = isBlocked ? '🚫 Bloqué' :
+                                isConnected ? '✅ Connecté' : 
                                 player.status === 'in_game' ? '🎮 Rejoindre' : 
                                 player.status === 'in_room' ? '🚪 Rejoindre' : 
                                 '📨 Inviter';
-            const clickHandler = canJoin ? `onclick="window.realtimeLobbyUI.invitePlayer('${player.peer_id}')"` : '';
-            const hoverStyle = canJoin ? 'box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transform: translateY(-2px);' : '';
             
             html += `
                 <div class="player-item ${isSelf ? 'self' : ''}" data-peer-id="${player.peer_id}" 
-                     ${clickHandler}
                      style="padding: 12px; margin-bottom: 8px; background: ${isSelf ? 'linear-gradient(135deg, #fff5f9 0%, #ffe5f5 100%)' : 'white'}; 
-                            border-radius: 10px; cursor: ${isSelf ? 'default' : canJoin ? 'pointer' : 'default'}; 
-                            border: 2px solid ${isSelf ? '#ff69b4' : isConnected ? '#28a745' : '#667eea'}; 
-                            transition: all 0.3s;"
-                     onmouseover="this.style.cssText = this.style.cssText + '${hoverStyle}'" 
-                     onmouseout="this.style.cssText = this.style.cssText.replace('${hoverStyle}', '')">
+                            border-radius: 10px; cursor: default; 
+                            border: 2px solid ${isSelf ? '#ff69b4' : isBlocked ? '#e74c3c' : isConnected ? '#28a745' : '#667eea'}; 
+                            transition: all 0.3s;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <div style="font-size: 24px;">${statusEmoji}</div>
                         <div style="flex: 1;">
@@ -221,21 +220,41 @@ class LobbyTabsManager {
                                 ${statusLabel}${badgesHtml}
                             </div>
                         </div>
-                        ${canJoin ? `
-                            <button onclick="window.realtimeLobbyUI.invitePlayer('${player.peer_id}')" 
-                                    style="padding: 6px 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                                           color: white; border: none; border-radius: 6px; font-size: 12px; 
-                                           font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                                    onmouseover="this.style.transform='scale(1.05)'" 
-                                    onmouseout="this.style.transform='scale(1)'">
-                                ${displayLabel}
-                            </button>
-                        ` : isConnected ? `
-                            <span style="padding: 6px 12px; background: #28a745; 
-                                         color: white; border-radius: 6px; font-size: 12px; 
-                                         font-weight: 600;">
-                                ${displayLabel}
-                            </span>
+                        ${!isSelf ? `
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                ${canJoin ? `
+                                    <button onclick="window.lobbyTabsManager.invitePlayer('${player.peer_id}'); event.stopPropagation();" 
+                                            style="padding: 6px 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                                                   color: white; border: none; border-radius: 6px; font-size: 12px; 
+                                                   font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap;"
+                                            onmouseover="this.style.transform='scale(1.05)'" 
+                                            onmouseout="this.style.transform='scale(1)'">
+                                        ${displayLabel}
+                                    </button>
+                                ` : isConnected ? `
+                                    <span style="padding: 6px 14px; background: #28a745; 
+                                                 color: white; border-radius: 6px; font-size: 12px; 
+                                                 font-weight: 600; white-space: nowrap;">
+                                        ${displayLabel}
+                                    </span>
+                                ` : isBlocked ? `
+                                    <span style="padding: 6px 14px; background: #e74c3c; 
+                                                 color: white; border-radius: 6px; font-size: 12px; 
+                                                 font-weight: 600; white-space: nowrap;">
+                                        ${displayLabel}
+                                    </span>
+                                ` : ''}
+                                <button onclick="window.lobbyTabsManager.toggleBlockPlayer('${player.peer_id}', '${player.username}'); event.stopPropagation();" 
+                                        style="padding: 6px 12px; background: ${isBlocked ? '#95a5a6' : '#e74c3c'}; 
+                                               color: white; border: none; border-radius: 6px; font-size: 11px; 
+                                               font-weight: 600; cursor: pointer; transition: all 0.2s; 
+                                               min-width: 40px; flex-shrink: 0;"
+                                        onmouseover="this.style.transform='scale(1.05)'" 
+                                        onmouseout="this.style.transform='scale(1)'"
+                                        title="${isBlocked ? 'Débloquer ce joueur' : 'Bloquer ce joueur'}">
+                                    ${isBlocked ? '✓' : '🚫'}
+                                </button>
+                            </div>
                         ` : ''}
                     </div>
                 </div>
@@ -276,35 +295,55 @@ class LobbyTabsManager {
         console.log('✅ P2P prêt, envoi invitation...');
         
         try {
+            // Vérifier si je suis déjà dans une salle
+            const existingRoomId = window.simpleChatSystem.roomCode;
+            const isAlreadyInRoom = !!existingRoomId;
+            
+            // Utiliser la salle existante ou créer une nouvelle
+            const roomId = existingRoomId || window.simpleChatSystem.peer.id;
+            
+            if (isAlreadyInRoom) {
+                console.log('🏠 Invitation à rejoindre ma salle existante:', roomId);
+            } else {
+                console.log('🏠 Création nouvelle salle:', roomId);
+            }
+            
             // Connexion P2P
             const conn = window.simpleChatSystem.peer.connect(peerId, {
                 reliable: true,
                 metadata: {
                     type: 'game_invite',
                     from: window.simpleChatSystem.currentUser,
-                    roomId: window.simpleChatSystem.peer.id // Mon peer ID = ID de ma salle
+                    roomId: roomId,
+                    existingPlayers: window.simpleChatSystem.roomPlayers ? 
+                        Array.from(window.simpleChatSystem.roomPlayers.values()).map(p => ({
+                            username: p.username,
+                            peer_id: p.peer_id
+                        })) : []
                 }
             });
             
             conn.on('open', () => {
                 console.log('✅ Connexion P2P établie avec', player.username);
                 
-                // Créer la salle unifiée (chat + jeu)
-                const roomId = window.simpleChatSystem.peer.id;
-                console.log('🏠 Création salle unifiée:', roomId);
-                
-                // Enregistrer la connexion dans simpleChatSystem
+                // Initialiser structures si nécessaire
                 if (!window.simpleChatSystem.connections) {
                     window.simpleChatSystem.connections = new Map();
                 }
-                window.simpleChatSystem.connections.set(peerId, conn);
-                window.simpleChatSystem.roomCode = roomId;
-                window.simpleChatSystem.isHost = true;
-                
-                // Ajouter le joueur à la salle
                 if (!window.simpleChatSystem.roomPlayers) {
                     window.simpleChatSystem.roomPlayers = new Map();
                 }
+                
+                // Enregistrer la connexion
+                window.simpleChatSystem.connections.set(peerId, conn);
+                
+                // Définir la salle (si nouvelle)
+                if (!isAlreadyInRoom) {
+                    window.simpleChatSystem.roomCode = roomId;
+                    window.simpleChatSystem.isHost = true;
+                }
+                
+                // Ajouter le nouveau joueur à la salle
                 window.simpleChatSystem.roomPlayers.set(peerId, {
                     username: player.username,
                     peer_id: peerId,
@@ -312,17 +351,40 @@ class LobbyTabsManager {
                 });
                 
                 // Message système
-                window.simpleChatSystem.showMessage(
-                    `🏠 Salle créée avec ${player.username}`,
-                    'system'
-                );
+                const message = isAlreadyInRoom ? 
+                    `🏠 ${player.username} a rejoint la salle` :
+                    `🏠 Salle créée avec ${player.username}`;
+                window.simpleChatSystem.showMessage(message, 'system');
+                
+                // Notifier les autres joueurs déjà connectés
+                if (isAlreadyInRoom) {
+                    window.simpleChatSystem.connections.forEach((existingConn, existingPeerId) => {
+                        if (existingPeerId !== peerId) {
+                            existingConn.send({
+                                type: 'player_joined_room',
+                                username: player.username,
+                                peer_id: peerId
+                            });
+                        }
+                    });
+                }
+                
+                // Déclencher événement pour activer le vocal
+                if (window.voiceUI) {
+                    window.voiceUI.updateSmsVoiceButton();
+                }
                 
                 // Envoyer invitation avec info de la salle
                 conn.send({
                     type: 'game_invite',
                     from: window.simpleChatSystem.currentUser,
                     roomId: roomId,
-                    message: `${window.simpleChatSystem.currentUser} vous invite dans sa salle !`
+                    existingPlayers: Array.from(window.simpleChatSystem.roomPlayers.values())
+                        .filter(p => p.peer_id !== peerId)
+                        .map(p => ({ username: p.username, peer_id: p.peer_id })),
+                    message: isAlreadyInRoom ?
+                        `${window.simpleChatSystem.currentUser} vous invite à rejoindre sa salle !` :
+                        `${window.simpleChatSystem.currentUser} vous invite dans sa salle !`
                 });
                 
                 console.log('📨 Invitation envoyée');
@@ -422,6 +484,32 @@ class LobbyTabsManager {
             // Afficher le score de l'autre joueur
             console.log('📊 Score joueur distant:', data.scoreUpdate);
         }
+    }
+
+    // Bloquer/débloquer un joueur
+    toggleBlockPlayer(peerId, username) {
+        if (!window.simpleChatSystem) return;
+        
+        const isBlocked = window.simpleChatSystem.isPlayerBlocked(peerId);
+        
+        if (isBlocked) {
+            window.simpleChatSystem.unblockPlayer(peerId);
+            window.simpleChatSystem.showMessage(`✅ ${username} débloqué`, 'system');
+        } else {
+            window.simpleChatSystem.blockPlayer(peerId);
+            window.simpleChatSystem.showMessage(`🚫 ${username} bloqué`, 'system');
+            
+            // Déconnecter si actuellement connecté
+            const conn = window.simpleChatSystem.connections?.get(peerId);
+            if (conn) {
+                conn.close();
+                window.simpleChatSystem.connections.delete(peerId);
+                window.simpleChatSystem.roomPlayers?.delete(peerId);
+            }
+        }
+        
+        // Rafraîchir l'affichage
+        this.renderLobbyView();
     }
 }
 
