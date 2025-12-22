@@ -1737,18 +1737,7 @@ class ChristianCrosswordGame {
                         console.log(`🔄 Changement de mode: ${previousMode} → ${mode} (reprise partie)`);
                         this.loadGameFromData(data);
                         
-                        // 🌐 Partager le changement de mode avec les autres joueurs
-                        if (window.simpleChatSystem && window.simpleChatSystem.connections.size > 0) {
-                            window.simpleChatSystem.broadcastGameAction({
-                                type: 'mode_changed',
-                                previousMode: previousMode,
-                                newMode: mode,
-                                level: data.currentLevel,
-                                totalLevels: gameDataManager.getTotalLevels()
-                            });
-                        }
-                        
-                        // Notifier
+                        // Notifier localement (pas de broadcast, déjà fait via mode_change_result)
                         if (window.simpleChatSystem) {
                             const modeEmoji = mode === 'couple' ? '👫' : mode === 'race' ? '🏁' : '🎯';
                             window.simpleChatSystem.showMessage(
@@ -1775,18 +1764,7 @@ class ChristianCrosswordGame {
             this.setupLevel();
             this.saveGame();
             
-            // 🌐 Partager le changement de mode avec les autres joueurs
-            if (window.simpleChatSystem && window.simpleChatSystem.connections.size > 0) {
-                window.simpleChatSystem.broadcastGameAction({
-                    type: 'mode_changed',
-                    previousMode: previousMode,
-                    newMode: mode,
-                    level: this.currentLevel,
-                    totalLevels: gameDataManager.getTotalLevels()
-                });
-            }
-            
-            // Notifier le changement de mode
+            // Notifier localement le changement de mode (pas de broadcast, déjà fait via mode_change_result)
             if (window.simpleChatSystem) {
                 const modeIcon = mode === 'couple' ? '💕' : '🏆';
                 const modeName = mode === 'couple' ? 'Couple' : 'Normal';

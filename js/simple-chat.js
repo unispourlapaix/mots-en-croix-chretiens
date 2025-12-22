@@ -873,7 +873,13 @@ class SimpleChatSystem {
                 break;
                 
             case 'mode_changed':
-                // Un joueur a changé de mode
+                // Un joueur a changé de mode (UNIQUEMENT si seul, pas de vote)
+                // En multijoueur, le changement se fait via mode_change_result après vote
+                if (this.connections.size > 0) {
+                    console.warn('⚠️ Ignoré: mode_changed reçu en multijoueur (devrait utiliser le vote)');
+                    break;
+                }
+                
                 const prevModeIcon = action.previousMode === 'couple' ? '💕' : '🏆';
                 const newModeIcon = action.newMode === 'couple' ? '💕' : action.newMode === 'sagesse' ? '🧘' : action.newMode === 'proverbes' ? '📖' : action.newMode === 'disciple' ? '✝️' : action.newMode === 'veiller' ? '🕯️' : action.newMode === 'aimee' ? '💝' : action.newMode === 'couple-solide' ? '💪' : '🏆';
                 const prevModeName = action.previousMode === 'couple' ? 'Couple' : action.previousMode === 'sagesse' ? 'Sagesse' : action.previousMode === 'proverbes' ? 'Proverbes' : action.previousMode === 'disciple' ? 'Disciple' : action.previousMode === 'veiller' ? 'Veiller' : action.previousMode === 'aimee' ? 'Aimée' : action.previousMode === 'couple-solide' ? 'Couple Solide' : 'Normal';
