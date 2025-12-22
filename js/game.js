@@ -1658,14 +1658,20 @@ class ChristianCrosswordGame {
         const { votes, previousMode, newMode, requester } = this.modeChangeVote;
         const totalPlayers = window.simpleChatSystem.connections.size + 1;
         const votesReceived = votes.size;
+        
+        // Compter les votes OUI explicites
         const yesVotes = Array.from(votes.values()).filter(v => v === true).length;
-        const noVotes = votesReceived - yesVotes;
+        
+        // Les joueurs qui n'ont pas voté = vote NON automatique
+        const noVotesExplicit = Array.from(votes.values()).filter(v => v === false).length;
+        const noVotesImplicit = totalPlayers - votesReceived; // Pas de vote = NON
+        const noVotes = noVotesExplicit + noVotesImplicit;
         
         // Majorité = plus de 50%
         const majorityNeeded = Math.ceil(totalPlayers / 2);
         const approved = yesVotes >= majorityNeeded;
         
-        console.log(`🗳️ Résultats du vote: ${yesVotes} oui, ${noVotes} non (${votesReceived}/${totalPlayers} votes)`);
+        console.log(`🗳️ Résultats du vote: ${yesVotes} oui, ${noVotes} non (${noVotesExplicit} explicites + ${noVotesImplicit} absents) sur ${totalPlayers} joueurs`);
         
         // Envoyer le résultat à tous
         window.simpleChatSystem.broadcastGameAction({
@@ -1683,14 +1689,16 @@ class ChristianCrosswordGame {
         // Afficher le résultat localement
         const newModeIcon = this.getModeIcon(newMode);
         const newModeName = this.getModeName(newMode);
+        const abstentionMsg = noVotesImplicit > 0 ? ` (${noVotesImplicit} absent${noVotesImplicit > 1 ? 's' : ''} = NON)` : '';
+        
         if (approved) {
-            window.simpleChatSystem.showMessage(`✅ Vote accepté (${yesVotes}/${totalPlayers}) ! Changement vers ${newModeIcon} ${newModeName}`, 'system');
+            window.simpleChatSystem.showMessage(`✅ Vote accepté (${yesVotes} OUI / ${noVotes} NON sur ${totalPlayers}${abstentionMsg}) ! Changement vers ${newModeIcon} ${newModeName}`, 'system');
             // Appliquer le changement
             setTimeout(() => {
                 this.applyModeChange(previousMode, newMode);
             }, 1000);
         } else {
-            window.simpleChatSystem.showMessage(`❌ Vote rejeté (${yesVotes}/${totalPlayers}). Mode ${this.getModeIcon(previousMode)} ${this.getModeName(previousMode)} conservé`, 'system');
+            window.simpleChatSystem.showMessage(`❌ Vote rejeté (${yesVotes} OUI / ${noVotes} NON sur ${totalPlayers}${abstentionMsg}). Mode ${this.getModeIcon(previousMode)} ${this.getModeName(previousMode)} conservé`, 'system');
         }
         
         // Nettoyer

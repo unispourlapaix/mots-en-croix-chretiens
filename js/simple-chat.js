@@ -923,8 +923,11 @@ class SimpleChatSystem {
                     <p style="font-size: 20px; font-weight: bold; color: #667eea; margin-bottom: 20px;">
                         ${newModeName}
                     </p>
-                    <p style="font-size: 14px; color: #666;">
-                        Vote automatique dans 15 secondes
+                    <p style="font-size: 14px; color: #e74c3c; margin-bottom: 10px; font-weight: 600;">
+                        ⚠️ Pas de vote = Refus automatique
+                    </p>
+                    <p style="font-size: 12px; color: #999;">
+                        Compte à rebours: 15 secondes
                     </p>
                 </div>`,
                 buttons: [
