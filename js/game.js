@@ -3091,6 +3091,22 @@ class ChristianCrosswordGame {
             if (wordComplete) {
                 this.completedWords.add(wordKey);
                 
+                // 🌟 Animer les cellules du mot en or
+                if (wordData.path) {
+                    wordData.path.forEach(([row, col]) => {
+                        const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+                        if (cell) {
+                            // Ajouter la classe d'animation
+                            cell.classList.add('word-completed');
+                            
+                            // Retirer la classe après l'animation pour pouvoir la rejouer
+                            setTimeout(() => {
+                                cell.classList.remove('word-completed');
+                            }, 1000);
+                        }
+                    });
+                }
+                
                 // Son de mot valide
                 if (window.audioSystem) {
                     window.audioSystem.playWordValid();
