@@ -798,7 +798,10 @@ class SimpleChatSystem {
     
     // Diffuser une action de jeu à tous les joueurs connectés
     broadcastGameAction(action) {
-        if (this.connections.size === 0) return;
+        if (this.connections.size === 0) {
+            console.log('⚠️ Aucune connexion pour broadcaster:', action.type);
+            return;
+        }
         
         const message = {
             type: 'game_action',
@@ -807,11 +810,26 @@ class SimpleChatSystem {
             timestamp: Date.now()
         };
         
-        this.connections.forEach((conn) => {
+        let sentCount = 0;
+        let failedCount = 0;
+        
+        this.connections.forEach((conn, peerId) => {
             if (conn.open) {
-                conn.send(message);
+                try {
+                    conn.send(message);
+                    sentCount++;
+                    console.log(`✅ Message envoyé à ${peerId}:`, action.type);
+                } catch (error) {
+                    failedCount++;
+                    console.error(`❌ Erreur envoi à ${peerId}:`, error);
+                }
+            } else {
+                failedCount++;
+                console.warn(`⚠️ Connexion fermée avec ${peerId}`);
             }
         });
+        
+        console.log(`📊 Broadcast ${action.type}: ${sentCount} envoyés, ${failedCount} échoués sur ${this.connections.size} connexions`);
     }
     
     // Gérer une action de jeu reçue
@@ -819,6 +837,7 @@ class SimpleChatSystem {
         if (!window.game) return;
         
         const { action, username } = data;
+        console.log(`📥 Action reçue de ${username}:`, action.type, action);
         
         switch(action.type) {
             case 'word_completed':

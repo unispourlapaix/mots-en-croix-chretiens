@@ -3115,7 +3115,16 @@ class ChristianCrosswordGame {
                 // Vérifier si ce mot a été révélé avec un indice
                 const usedHint = this.wordsWithHints.has(wordKey);
                 
-                // 🌐 TOUJOURS partager avec les autres joueurs en multijoueur (même si indice utilisé)
+                // Ajouter les points bonus SEULEMENT si aucun indice n'a été utilisé
+                const wordBonus = usedHint ? 0 : 50;
+                if (wordBonus > 0) {
+                    this.updateScoreWithAnimation(wordBonus);
+                    console.log(`✅ Mot complété: "${wordData.word}" (+${wordBonus} points)`);
+                } else {
+                    console.log(`✅ Mot complété: "${wordData.word}" (0 points - indice utilisé)`);
+                }
+                
+                // 🌐 TOUJOURS partager avec les autres joueurs en multijoueur (APRÈS mise à jour du score)
                 if (window.simpleChatSystem && window.simpleChatSystem.connections && window.simpleChatSystem.connections.size > 0) {
                     const totalWords = this.words.length;
                     const wordsCompleted = this.completedWords.size;
@@ -3123,23 +3132,13 @@ class ChristianCrosswordGame {
                     window.simpleChatSystem.broadcastGameAction({
                         type: 'word_completed',
                         word: wordData.word,
-                        score: this.score,
+                        score: this.score, // Score APRÈS ajout des points
                         gameMode: this.gameMode,
                         wordLength: wordData.word.length,
                         wordsCompleted: wordsCompleted,
                         totalWords: totalWords,
                         usedHint: usedHint
                     });
-                }
-                
-                // Ajouter les points bonus SEULEMENT si aucun indice n'a été utilisé
-                if (!usedHint) {
-                    const wordBonus = 50;
-                    this.updateScoreWithAnimation(wordBonus);
-
-                    console.log(`✅ Mot complété: "${wordData.word}" (+${wordBonus} points)`);
-                } else {
-                    console.log(`✅ Mot complété: "${wordData.word}" (0 points - indice utilisé)`);
                 }
                 
                 // 🎯 NOUVELLE LOGIQUE: Passer au prochain mot non complété
