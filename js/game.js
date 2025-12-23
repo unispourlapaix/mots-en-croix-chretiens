@@ -1556,6 +1556,83 @@ class ChristianCrosswordGame {
     }
 
     /**
+     * Met à jour le score avec animation
+     * @param {number} points - Points à ajouter (peut être positif ou négatif)
+     */
+    updateScoreWithAnimation(points) {
+        // Mettre à jour le score
+        this.score += points;
+        
+        // Mettre à jour l'affichage de la bannière
+        const scoreEl = document.getElementById('infoBannerScore');
+        if (scoreEl) scoreEl.textContent = this.score;
+        
+        // Mettre à jour l'affichage au-dessus de la grille avec animation
+        const gameScoreValue = document.getElementById('gameScoreValue');
+        if (gameScoreValue) {
+            // Retirer l'ancienne animation
+            gameScoreValue.classList.remove('score-increase');
+            
+            // Forcer un reflow pour redémarrer l'animation
+            void gameScoreValue.offsetWidth;
+            
+            // Ajouter l'animation
+            if (points !== 0) {
+                gameScoreValue.classList.add('score-increase');
+                
+                // Créer popup de points
+                const popup = document.createElement('div');
+                popup.className = 'score-popup';
+                popup.textContent = points > 0 ? `+${points}` : points;
+                
+                const scoreDisplay = document.getElementById('gameScoreDisplay');
+                if (scoreDisplay) {
+                    scoreDisplay.style.position = 'relative';
+                    scoreDisplay.appendChild(popup);
+                    
+                    // Retirer le popup après l'animation
+                    setTimeout(() => {
+                        if (popup.parentNode === scoreDisplay) {
+                            scoreDisplay.removeChild(popup);
+                        }
+                    }, 1000);
+                }
+            }
+            
+            // Mettre à jour la valeur avec animation de compteur
+            const startValue = this.score - points;
+            const duration = 300; // ms
+            const startTime = performance.now();
+            
+            const animate = (currentTime) => {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Easing cubic
+                const easeProgress = progress < 0.5 
+                    ? 4 * progress * progress * progress 
+                    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+                
+                const currentValue = Math.round(startValue + (points * easeProgress));
+                gameScoreValue.textContent = currentValue;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    gameScoreValue.textContent = this.score;
+                }
+            };
+            
+            requestAnimationFrame(animate);
+        }
+        
+        // Mettre à jour le système d'achievements
+        if (window.achievementSystem) {
+            window.achievementSystem.updateScore(this.score);
+        }
+    }
+
+    /**
      * Change le mode de jeu (normal, couple, sagesse, proverbes, disciple, veiller, aimee, race)
      * @param {string} mode - Le mode de jeu
      */
@@ -1849,6 +1926,12 @@ class ChristianCrosswordGame {
         this.gameStarted = true;
         document.getElementById('startScreen').classList.add('hidden');
         document.getElementById('gameScreen').classList.remove('hidden');
+        
+        // Initialiser l'affichage du score au-dessus de la grille
+        const gameScoreValue = document.getElementById('gameScoreValue');
+        if (gameScoreValue) {
+            gameScoreValue.textContent = this.score;
+        }
         
         // Démarrer la musique d'ambiance selon le mode
         if (window.audioSystem) {
@@ -2883,14 +2966,7 @@ class ChristianCrosswordGame {
         const wordBonusPoints = completedWords * wordBonus;
         
         const totalPoints = letterPoints + wordBonusPoints;
-        this.score += totalPoints;
-        const scoreEl = document.getElementById('infoBannerScore');
-        if (scoreEl) scoreEl.textContent = this.score;
-
-        // Mettre à jour le score dans le système d'achievements
-        if (window.achievementSystem) {
-            window.achievementSystem.updateScore(this.score);
-        }
+        this.updateScoreWithAnimation(totalPoints);
 
         // Notifier dans le chat
         if (percentage === 100 && typeof window.simpleChatSystem !== 'undefined') {
@@ -3043,14 +3119,7 @@ class ChristianCrosswordGame {
                 // Ajouter les points bonus SEULEMENT si aucun indice n'a été utilisé
                 if (!usedHint) {
                     const wordBonus = 50;
-                    this.score += wordBonus;
-                    const scoreEl = document.getElementById('infoBannerScore');
-                    if (scoreEl) scoreEl.textContent = this.score;
-
-                    // Mettre à jour le score dans le système d'achievements
-                    if (window.achievementSystem) {
-                        window.achievementSystem.updateScore(this.score);
-                    }
+                    this.updateScoreWithAnimation(wordBonus);
 
                     console.log(`✅ Mot complété: "${wordData.word}" (+${wordBonus} points)`);
                 } else {
@@ -3219,14 +3288,7 @@ class ChristianCrosswordGame {
             
             // Ajouter les points du niveau
             const bonusPoints = Math.round(100 * this.currentLevel * config.basePointsMultiplier);
-            this.score += bonusPoints;
-            const scoreEl = document.getElementById('infoBannerScore');
-            if (scoreEl) scoreEl.textContent = this.score;
-
-            // Mettre à jour le score dans le système d'achievements
-            if (window.achievementSystem) {
-                window.achievementSystem.updateScore(this.score);
-            }
+            this.updateScoreWithAnimation(bonusPoints);
 
             // Notifier dans le chat
             if (typeof window.simpleChatSystem !== 'undefined') {
@@ -3280,19 +3342,13 @@ class ChristianCrosswordGame {
                         if (this.gameMode === 'normal') {
                             if (finishPosition === 1) {
                                 positionBonus = 200; // Premier
-                                this.score += positionBonus;
-                                const scoreEl = document.getElementById('infoBannerScore');
-                                if (scoreEl) scoreEl.textContent = this.score;
+                                this.updateScoreWithAnimation(positionBonus);
                             } else if (finishPosition === 2) {
                                 positionBonus = 100; // Deuxième
-                                this.score += positionBonus;
-                                const scoreEl = document.getElementById('infoBannerScore');
-                                if (scoreEl) scoreEl.textContent = this.score;
+                                this.updateScoreWithAnimation(positionBonus);
                             } else if (finishPosition === 3) {
                                 positionBonus = 50; // Troisième
-                                this.score += positionBonus;
-                                const scoreEl = document.getElementById('infoBannerScore');
-                                if (scoreEl) scoreEl.textContent = this.score;
+                                this.updateScoreWithAnimation(positionBonus);
                             }
                         }
                         
