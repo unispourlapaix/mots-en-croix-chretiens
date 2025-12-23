@@ -1108,6 +1108,9 @@ class SimpleChatSystem {
             peerConn.on('error', (err) => {
                 console.error('❌ Erreur connexion avec nouveau joueur', data.username, err);
             });
+            
+            // Ajouter le gestionnaire de messages pour cette connexion
+            this.handleConnection(peerConn);
         }
         
         // Message affiché par lobby-tabs.js côté hôte
@@ -1186,12 +1189,15 @@ class SimpleChatSystem {
                                 peerConn.on('open', () => {
                                     console.log('✅ Connecté à:', player.username);
                                     this.connections.set(player.peer_id, peerConn);
-                                    this.showMessage(`👋 Connecté à ${player.username}`, 'system');
+                                    // Message supprimé - déjà affiché par handleInviteResponse
                                 });
                                 
                                 peerConn.on('error', (err) => {
                                     console.error('❌ Erreur connexion avec', player.username, err);
                                 });
+                                
+                                // Ajouter le gestionnaire de messages pour cette connexion
+                                this.handleConnection(peerConn);
                             }
                         }
                     }
