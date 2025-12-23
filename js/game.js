@@ -3023,6 +3023,23 @@ class ChristianCrosswordGame {
                 // Vérifier si ce mot a été révélé avec un indice
                 const usedHint = this.wordsWithHints.has(wordKey);
                 
+                // 🌐 TOUJOURS partager avec les autres joueurs en multijoueur (même si indice utilisé)
+                if (window.simpleChatSystem && window.simpleChatSystem.connections && window.simpleChatSystem.connections.size > 0) {
+                    const totalWords = this.words.length;
+                    const wordsCompleted = this.completedWords.size;
+                    console.log(`📢 Broadcast mot complété: "${wordData.word}" aux ${window.simpleChatSystem.connections.size} joueurs`);
+                    window.simpleChatSystem.broadcastGameAction({
+                        type: 'word_completed',
+                        word: wordData.word,
+                        score: this.score,
+                        gameMode: this.gameMode,
+                        wordLength: wordData.word.length,
+                        wordsCompleted: wordsCompleted,
+                        totalWords: totalWords,
+                        usedHint: usedHint
+                    });
+                }
+                
                 // Ajouter les points bonus SEULEMENT si aucun indice n'a été utilisé
                 if (!usedHint) {
                     const wordBonus = 50;
@@ -3036,21 +3053,6 @@ class ChristianCrosswordGame {
                     }
 
                     console.log(`✅ Mot complété: "${wordData.word}" (+${wordBonus} points)`);
-                    
-                    // 🌐 Partager avec les autres joueurs en multijoueur
-                    if (window.simpleChatSystem && window.simpleChatSystem.connections.size > 0) {
-                        const totalWords = this.words.length;
-                        const wordsCompleted = this.completedWords.size;
-                        window.simpleChatSystem.broadcastGameAction({
-                            type: 'word_completed',
-                            word: wordData.word,
-                            score: this.score,
-                            gameMode: this.gameMode,
-                            wordLength: wordData.word.length,
-                            wordsCompleted: wordsCompleted,
-                            totalWords: totalWords
-                        });
-                    }
                 } else {
                     console.log(`✅ Mot complété: "${wordData.word}" (0 points - indice utilisé)`);
                 }

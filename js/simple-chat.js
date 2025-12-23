@@ -826,7 +826,8 @@ class SimpleChatSystem {
                 const maskedWord = '*'.repeat(action.word.length);
                 const modeIcon = action.gameMode === 'couple' ? '💕' : '🙏';
                 const progress = action.totalWords ? ` (${action.wordsCompleted}/${action.totalWords})` : '';
-                this.showMessage(`🎉 ${modeIcon} ${username} a trouvé un mot de ${action.word.length} lettres${progress} ! (${action.score} pts)`, 'system');
+                const hintIndicator = action.usedHint ? ' 💡' : '';
+                this.showMessage(`🎉 ${modeIcon} ${username} a trouvé un mot de ${action.word.length} lettres${progress}${hintIndicator} ! (${action.score} pts)`, 'system');
                 break;
                 
             case 'level_completed':
