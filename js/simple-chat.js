@@ -1128,6 +1128,12 @@ class SimpleChatSystem {
                 if (accepted) {
                     console.log('✅ Invitation acceptée');
                     
+                    // 🤖 Arrêter tous les bots quand on rejoint un multijoueur
+                    if (window.stopAllBots) {
+                        console.log('🤖 Arrêt des bots - Mode multijoueur activé');
+                        window.stopAllBots();
+                    }
+                    
                     // Accepter l'invitation
                     conn.send({
                         type: 'invite_accepted',

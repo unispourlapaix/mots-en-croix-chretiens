@@ -409,6 +409,13 @@ class LobbyTabsManager {
     handleInviteResponse(peerId, username, data) {
         if (data.type === 'invite_accepted') {
             console.log('✅ Invitation acceptée par', username);
+            
+            // 🤖 Arrêter tous les bots quand un joueur rejoint
+            if (window.stopAllBots) {
+                console.log('🤖 Arrêt des bots - Joueur connecté');
+                window.stopAllBots();
+            }
+            
             // Message affiché une seule fois côté hôte
             window.simpleChatSystem.showMessage(
                 `✅ ${username} a rejoint la salle !`,

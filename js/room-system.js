@@ -277,6 +277,12 @@ class RoomSystem {
     
     // Initialiser le bot actif au démarrage
     initializeActiveBot() {
+        // Ne pas démarrer de bot si on est en multijoueur
+        if (window.simpleChatSystem && window.simpleChatSystem.connections && window.simpleChatSystem.connections.size > 0) {
+            console.log('👥 Mode multijoueur détecté - Bots désactivés');
+            return;
+        }
+        
         const activeBot = localStorage.getItem('activeBot') || 'bot-unisona';
         console.log('🤖 Initialisation du bot actif:', activeBot);
         
@@ -1570,6 +1576,14 @@ class RoomSystem {
     }
     
     async switchActiveBot(botId) {
+        // Ne pas changer de bot si on est en multijoueur
+        if (window.simpleChatSystem && window.simpleChatSystem.connections && window.simpleChatSystem.connections.size > 0) {
+            if (window.simpleChatSystem) {
+                window.simpleChatSystem.showMessage('⚠️ Les bots sont désactivés en mode multijoueur', 'system');
+            }
+            return;
+        }
+        
         // Arrêter tous les bots
         if (window.stopAllBots) {
             window.stopAllBots();
@@ -1729,6 +1743,14 @@ class RoomSystem {
     // Rejoindre une partie avec un bot
     joinBotGame(botName) {
         console.log('🤖 Démarrage d\'une partie avec:', botName);
+        
+        // Ne pas démarrer de bot si on est en multijoueur
+        if (window.simpleChatSystem && window.simpleChatSystem.connections && window.simpleChatSystem.connections.size > 0) {
+            if (window.simpleChatSystem) {
+                window.simpleChatSystem.showMessage('⚠️ Les bots sont désactivés en mode multijoueur. Jouez avec les autres joueurs connectés !', 'system');
+            }
+            return;
+        }
         
         // Vérifier si le jeu est démarré
         if (!window.game || !window.game.gameStarted) {
