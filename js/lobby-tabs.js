@@ -174,7 +174,7 @@ class LobbyTabsManager {
                     badges.push(`🔑 ${player.room_code}`);
                 }
             } else if (player.status === 'in_game') {
-                statusEmoji = '🎮';
+                statusEmoji = '👥';
                 statusLabel = 'En partie';
                 statusColor = '#dc3545';
             } else if (player.status === 'available') {
@@ -210,53 +210,55 @@ class LobbyTabsManager {
                             border-radius: 10px; cursor: default; 
                             border: 2px solid ${isSelf ? '#ff69b4' : isBlocked ? '#e74c3c' : isConnected ? '#28a745' : '#667eea'}; 
                             transition: all 0.3s;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: ${!isSelf ? '8px' : '0'};">
                         <div style="font-size: 24px;">${statusEmoji}</div>
-                        <div style="flex: 1;">
-                            <div style="font-weight: 600; color: #333; font-size: 14px;">
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="font-weight: 600; color: #333; font-size: 14px; word-break: break-word;">
                                 ${player.username}${isSelf ? ' (Vous)' : ''}
                             </div>
                             <div style="font-size: 11px; color: ${statusColor}; font-weight: 600;">
                                 ${statusLabel}${badgesHtml}
                             </div>
                         </div>
-                        ${!isSelf ? `
-                            <div style="display: flex; gap: 10px; align-items: center;">
-                                ${canJoin ? `
-                                    <button onclick="window.lobbyTabsManager.invitePlayer('${player.peer_id}'); event.stopPropagation();" 
-                                            style="padding: 6px 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                                                   color: white; border: none; border-radius: 6px; font-size: 12px; 
-                                                   font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap;"
-                                            onmouseover="this.style.transform='scale(1.05)'" 
-                                            onmouseout="this.style.transform='scale(1)'">
-                                        ${displayLabel}
-                                    </button>
-                                ` : isConnected ? `
-                                    <span style="padding: 6px 14px; background: #28a745; 
-                                                 color: white; border-radius: 6px; font-size: 12px; 
-                                                 font-weight: 600; white-space: nowrap;">
-                                        ${displayLabel}
-                                    </span>
-                                ` : isBlocked ? `
-                                    <span style="padding: 6px 14px; background: #e74c3c; 
-                                                 color: white; border-radius: 6px; font-size: 12px; 
-                                                 font-weight: 600; white-space: nowrap;">
-                                        ${displayLabel}
-                                    </span>
-                                ` : ''}
-                                <button onclick="window.lobbyTabsManager.toggleBlockPlayer('${player.peer_id}', '${player.username}'); event.stopPropagation();" 
-                                        style="padding: 6px 12px; background: ${isBlocked ? '#95a5a6' : '#e74c3c'}; 
-                                               color: white; border: none; border-radius: 6px; font-size: 11px; 
-                                               font-weight: 600; cursor: pointer; transition: all 0.2s; 
-                                               min-width: 40px; flex-shrink: 0;"
-                                        onmouseover="this.style.transform='scale(1.05)'" 
-                                        onmouseout="this.style.transform='scale(1)'"
-                                        title="${isBlocked ? 'Débloquer ce joueur' : 'Bloquer ce joueur'}">
-                                    ${isBlocked ? '✓' : '🚫'}
-                                </button>
-                            </div>
-                        ` : ''}
                     </div>
+                    ${!isSelf ? `
+                        <div style="display: flex; gap: 8px; padding-left: 34px;">
+                            ${canJoin ? `
+                                <button onclick="window.lobbyTabsManager.invitePlayer('${player.peer_id}'); event.stopPropagation();" 
+                                        style="padding: 6px 12px; background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%); 
+                                               color: white; border: none; border-radius: 6px; font-size: 12px; 
+                                               font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; flex: 1;
+                                               box-shadow: 0 2px 6px rgba(255, 105, 180, 0.3);"
+                                        onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 12px rgba(255, 105, 180, 0.5)'" 
+                                        onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 6px rgba(255, 105, 180, 0.3)'">
+                                    ${displayLabel}
+                                </button>
+                            ` : isConnected ? `
+                                <span style="padding: 6px 12px; background: #28a745; 
+                                             color: white; border-radius: 6px; font-size: 12px; 
+                                             font-weight: 600; white-space: nowrap; flex: 1; text-align: center;">
+                                    ${displayLabel}
+                                </span>
+                            ` : isBlocked ? `
+                                <span style="padding: 6px 12px; background: #e74c3c; 
+                                             color: white; border-radius: 6px; font-size: 12px; 
+                                             font-weight: 600; white-space: nowrap; flex: 1; text-align: center;">
+                                    ${displayLabel}
+                                </span>
+                            ` : ''}
+                            <button onclick="window.lobbyTabsManager.toggleBlockPlayer('${player.peer_id}', '${player.username}'); event.stopPropagation();" 
+                                    style="padding: 6px 12px; background: ${isBlocked ? '#95a5a6' : '#e74c3c'}; 
+                                           color: white; border: none; border-radius: 6px; font-size: 11px; 
+                                           font-weight: 600; cursor: pointer; transition: all 0.2s; 
+                                           min-width: 70px; flex-shrink: 0;
+                                           box-shadow: 0 2px 6px ${isBlocked ? 'rgba(149, 165, 166, 0.3)' : 'rgba(231, 76, 60, 0.3)'};"
+                                    onmouseover="this.style.transform='scale(1.05)'" 
+                                    onmouseout="this.style.transform='scale(1)'"
+                                    title="${isBlocked ? 'Débloquer ce joueur' : 'Bloquer ce joueur'}">
+                                ${isBlocked ? '✓ OK' : '🚫 Bloquer'}
+                            </button>
+                        </div>
+                    ` : ''}
                 </div>
             `;
         });

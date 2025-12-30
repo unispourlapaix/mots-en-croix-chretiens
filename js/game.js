@@ -1351,55 +1351,39 @@ class ChristianCrosswordGame {
         const menuHeader = document.querySelector('.menu-header h2');
         if (menuHeader) menuHeader.textContent = i18n.t('menuSettings');
 
-        // Section Cloud
-        const cloudTitle = document.querySelector('.menu-section h3');
-        if (cloudTitle) cloudTitle.textContent = i18n.t('menuCloudTitle');
-        const cloudBtn = document.getElementById('menuCloudBtn');
-        if (cloudBtn) cloudBtn.textContent = i18n.t('menuCloudButton');
-        const cloudDesc = document.querySelector('.menu-description');
-        if (cloudDesc) cloudDesc.textContent = i18n.t('menuCloudDescription');
+        // Section Profil (sections[0])
+        // Déjà gérée ailleurs
 
-        // Section Langue
+        // Section Langue (sections[1])
         const sections = document.querySelectorAll('.menu-section');
         if (sections[1]) {
             const langTitle = sections[1].querySelector('h3');
             if (langTitle) langTitle.textContent = i18n.t('menuLanguageTitle');
         }
 
-        // Section Audio
-        if (sections[2]) {
-            const audioTitle = sections[2].querySelector('h3');
+        // Section Médailles (sections[2])
+        // Pas de traduction nécessaire
+
+        // Section Audio (sections[3])
+        if (sections[3]) {
+            const audioTitle = sections[3].querySelector('h3');
             if (audioTitle) audioTitle.textContent = i18n.t('menuAudioTitle');
-            const musicLabel = sections[2].querySelector('label[for="musicVolume"]');
+            const musicLabel = sections[3].querySelector('label[for="musicVolume"]');
             if (musicLabel) musicLabel.textContent = i18n.t('menuMusicLabel');
-            const soundLabel = sections[2].querySelector('label[for="soundVolume"]');
+            const soundLabel = sections[3].querySelector('label[for="soundVolume"]');
             if (soundLabel) soundLabel.textContent = i18n.t('menuSoundLabel');
         }
 
-        // Section À propos
-        if (sections[3]) {
-            const aboutTitle = sections[3].querySelector('h3');
+        // Section Crédits (sections[4])
+        if (sections[4]) {
+            const aboutTitle = sections[4].querySelector('h3');
             if (aboutTitle) aboutTitle.textContent = i18n.t('menuAboutTitle');
 
-            const aboutItems = sections[3].querySelectorAll('.about-item strong');
+            const aboutItems = sections[4].querySelectorAll('.about-item strong');
             if (aboutItems[0]) aboutItems[0].textContent = i18n.t('menuArtistLabel');
-            if (aboutItems[1]) aboutItems[1].textContent = i18n.t('menuCreationLabel');
-            if (aboutItems[2]) aboutItems[2].textContent = i18n.t('menuCodingLabel');
 
             const artistLink = document.getElementById('artistLink');
             if (artistLink) artistLink.textContent = i18n.t('menuArtistLink');
-
-            const creationText = sections[3].querySelectorAll('.about-item')[1];
-            if (creationText) {
-                const textNode = Array.from(creationText.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
-                if (textNode) textNode.textContent = ' ' + i18n.t('menuCreationText');
-            }
-
-            const codingText = sections[3].querySelectorAll('.about-item')[2];
-            if (codingText) {
-                const textNode = Array.from(codingText.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
-                if (textNode) textNode.textContent = ' ' + i18n.t('menuCodingText');
-            }
         }
     }
 

@@ -290,47 +290,47 @@
             <!-- Contenu Onglet Menu -->
             <div id="settingsTabContent" class="menu-tab-content active">
                 <div class="menu-section">
-                <h3>👤 Profil</h3>
-                <div id="profileSection">
-                    <p id="profileUsername" style="font-size: 16px; font-weight: bold; color: #ff1493; margin-bottom: 10px;">Non connecté</p>
-                    <button id="signOutBtn" class="menu-cloud-btn secondary" style="display: none; margin-top: 10px;">
-                        🚪 Déconnexion
-                    </button>
-                </div>
-                <p class="menu-description">Gérez votre compte et vos informations</p>
-            </div>
-
-            <div class="menu-section">
-                <h3>🏆 Collection de Médailles</h3>
-                <button id="achievementsBtn" class="menu-cloud-btn">
-                    🏆 Voir mes médailles
-                </button>
-                <p class="menu-description">Consultez vos récompenses et achievements</p>
-            </div>
-
-            <div class="menu-section">
-                <h3>🌍 Langue / Language</h3>
-                <div id="menuLanguageSelector" class="menu-language-selector"></div>
-            </div>
-
-            <div class="menu-section">
-                <h3>🔊 Audio</h3>
-                <div class="audio-controls">
-                    <div class="audio-control-item">
-                        <label for="musicVolume">🎵 Musique</label>
-                        <input type="range" id="musicVolume" min="0" max="100" value="50">
-                        <span id="musicVolumeValue">50%</span>
+                    <h3>👤 Profil</h3>
+                    <div id="profileSection">
+                        <p id="profileUsername" style="font-size: 16px; font-weight: bold; color: #ff1493; margin-bottom: 10px;">Non connecté</p>
+                        <button id="signOutBtn" class="menu-cloud-btn secondary" style="display: none; margin-top: 10px;">
+                            🚪 Déconnexion
+                        </button>
                     </div>
-                    <div class="audio-control-item">
-                        <label for="soundVolume">🔔 Effets sonores</label>
-                        <input type="range" id="soundVolume" min="0" max="100" value="50">
-                        <span id="soundVolumeValue">50%</span>
-                    </div>
+                    <p class="menu-description">Gérez votre compte et vos informations</p>
                 </div>
-            </div>
 
                 <div class="menu-section">
-                    <h3>ℹ️ À propos</h3>
+                    <h3>🌍 Choisir la langue</h3>
+                    <div id="menuLanguageSelector" class="menu-language-selector"></div>
+                </div>
+
+                <div class="menu-section">
+                    <h3>🏆 Collection de Médailles</h3>
+                    <button id="achievementsBtn" class="menu-cloud-btn">
+                        🏆 Voir mes médailles
+                    </button>
+                    <p class="menu-description">Consultez vos récompenses et achievements</p>
+                </div>
+
+                <div class="menu-section">
+                    <h3>🔊 Audio</h3>
+                    <div class="audio-controls">
+                        <div class="audio-control-item">
+                            <label for="musicVolume">🎵 Musique</label>
+                            <input type="range" id="musicVolume" min="0" max="100" value="50">
+                            <span id="musicVolumeValue">50%</span>
+                        </div>
+                        <div class="audio-control-item">
+                            <label for="soundVolume">🔔 Effets sonores</label>
+                            <input type="range" id="soundVolume" min="0" max="100" value="50">
+                            <span id="soundVolumeValue">50%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="menu-section">
+                    <h3>🎨 Crédits</h3>
                     <div class="about-info">
                         <p class="about-item">
                             <strong>✨ Mots croisés chrétiens</strong> par Emmanuel Payet
@@ -488,19 +488,19 @@
 
                             <div style="text-align: center; padding: 20px; background: #fff5f9; border-radius: 12px;">
                                 <p style="font-size: 15px; margin-bottom: 12px; color: #666;">
-                                    ✨ <strong>Connexion simplifiée</strong>
+                                    ✨ <strong>Bienvenue dans l'aventure !</strong>
                                 </p>
                                 <p style="font-size: 13px; color: #888; margin-bottom: 8px;">
-                                    1️⃣ Cliquez sur "Créer Partie" → recevez un code court (6 lettres)
+                                    1️⃣ Lancez le jeu et commencez à jouer immédiatement
                                 </p>
                                 <p style="font-size: 13px; color: #888; margin-bottom: 15px;">
-                                    2️⃣ Partagez ce code par SMS, email ou message
+                                    2️⃣ Progressez à votre rythme à travers 77 niveaux
                                 </p>
                                 <p style="font-size: 13px; color: #888; margin-bottom: 15px;">
-                                    3️⃣ Vos amis entrent le code et c'est parti ! 🎉
+                                    3️⃣ Retrouvez vos amis en ligne et jouez ensemble ! 🎉
                                 </p>
                                 <p style="font-size: 12px; color: #999; margin-top: 15px;">
-                                    💡 Pas d'inscription nécessaire, connexion instantanée !
+                                    💡 Aucune inscription requise, juste du plaisir instantané !
                                 </p>
                             </div>
 
@@ -609,10 +609,9 @@
             </div>
             
             <!-- Header Lobby simplifié -->
-            <div style="padding: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; margin-bottom: 10px; text-align: center;">
-                <div style="font-size: 20px; margin-bottom: 5px;">🌍</div>
-                <div style="font-size: 14px; font-weight: 600;">Joueurs en ligne</div>
-                <div style="font-size: 11px; opacity: 0.9;">✨ Cliquez pour rejoindre (Max 8)</div>
+            <div style="padding: 12px; background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%); color: white; border-radius: 12px; margin-bottom: 12px; text-align: center; box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);">
+                <div style="font-size: 14px; font-weight: 600; letter-spacing: 0.3px; margin-bottom: 4px;">Joueurs connectés</div>
+                <div style="font-size: 11px; opacity: 0.95;">Rejoignez une partie multijoueur</div>
             </div>
             
             <!-- Liste des joueurs connectés - Gérée dynamiquement par lobby-tabs.js -->
