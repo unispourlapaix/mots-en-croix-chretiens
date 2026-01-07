@@ -1217,12 +1217,17 @@ class RoomSystem {
         // Ne jamais écraser le lobby - il gère son propre affichage
         console.log('🔒 Lobby gère son affichage, pas de mise à jour par room-system');
         return;
-        
+    }
+
+    _handleRoomBubbleUpdate(count) {
         // Log seulement si le nombre change
         if (this._lastPlayerCount !== count) {
             console.log('🔄 Mise à jour bulle chat:', count, 'joueurs');
             this._lastPlayerCount = count;
         }
+
+        const bubbleList = document.getElementById('chatBubblePlayerList');
+        if (!bubbleList) return;
 
         if (count === 0) {
             bubbleList.innerHTML = `

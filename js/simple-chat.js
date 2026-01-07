@@ -125,7 +125,10 @@ class SimpleChatSystem {
             
         } catch (error) {
             console.error('❌ Erreur initialisation P2P:', error);
-            this.showMessage('⚠️ Chat en mode local uniquement', 'system');
+            // Ne pas afficher le message d'erreur au chargement initial
+            if (!this.skipWelcomeMessages) {
+                this.showMessage('⚠️ Mode hors ligne - Connexion P2P indisponible', 'system');
+            }
         }
     }
 

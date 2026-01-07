@@ -1,4 +1,11 @@
 // Module principal du jeu de mots croisés
+
+// Vérifier que config est chargé
+if (typeof config === 'undefined') {
+    console.error('❌ ERREUR: config.js non chargé. Rechargez la page (Ctrl+F5).');
+    throw new Error('config.js doit être chargé avant game.js');
+}
+
 class ChristianCrosswordGame {
     constructor() {
         this.clickCount = 0;

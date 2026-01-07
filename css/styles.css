@@ -2149,6 +2149,28 @@ body {
         font-size: 1rem;
     }
 
+    .game-score-display {
+        padding: 15px 30px !important;
+        min-height: 80px !important;
+        height: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        margin: 10px auto 15px !important;
+    }
+
+    .score-value {
+        font-size: 32px !important;
+        margin-bottom: 5px !important;
+        line-height: 1.2 !important;
+    }
+
+    .score-label {
+        font-size: 11px !important;
+        line-height: 1.2 !important;
+    }
+
     .kawaii-modal-content {
         width: 350px;
         padding: 25px;

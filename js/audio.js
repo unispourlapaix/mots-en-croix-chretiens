@@ -248,7 +248,7 @@ class AudioSystem {
         // Chansons thématiques par mode de jeu
         this.themesByMode = {
             'normal': [
-                'Psaumes-27-De-David-LEternel-est-ma-lumiere-et-mon-salut.mp3',
+                'La-voix-de-la-Sagesse.mp3',
                 'La-voix-de-la-Sagesse.mp3',
                 'Jesus-Seul.mp3',
                 'Que-Je-Vive.mp3',
@@ -357,7 +357,6 @@ class AudioSystem {
             'Prends-courage-et-tiens-bon-rmx.mp3',
             'Priez-pour-resister-au-mal.mp3',
             'Psaumes-27-De-David-Il-ne-tabandonnera-pas.mp3',
-            'Psaumes-27-De-David-LEternel-est-ma-lumiere-et-mon-salut.mp3',
             'Psaumes-34-Preserve-tes-mots-du-mal-rmx.mp3',
             'Psaumes-71-Jesus-viens-a-mon-secours.mp3',
             'Quand-tout-semblait-sombrer.mp3',
