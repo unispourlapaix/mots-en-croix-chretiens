@@ -3874,17 +3874,19 @@ body {
     color: white;
     border: none;
     border-radius: 50%;
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-size: 18px;
-    font-weight: bold;
+    font-size: 14px;
+    font-weight: normal;
     padding: 0;
+    padding-left: 2px;
     box-shadow: 0 2px 8px rgba(255, 105, 180, 0.3);
     transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
 .chat-sms-send:hover {
