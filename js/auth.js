@@ -712,7 +712,7 @@ class AuthSystem {
                 
                 if (isSignUpMode) {
                     // Mode inscription
-                    title.textContent = 'Inscription au Chat';
+                    title.textContent = 'Connexion au Nuage';
                     usernameInput.style.display = 'block';
                     usernameInput.required = true;
                     passwordInput.style.display = 'block';
@@ -723,7 +723,7 @@ class AuthSystem {
                     if (forgotPasswordLink) forgotPasswordLink.style.display = 'none';
                 } else {
                     // Mode connexion
-                    title.textContent = 'Connexion au Chat';
+                    title.textContent = 'Connexion au Nuage';
                     usernameInput.style.display = 'none';
                     usernameInput.required = false;
                     passwordInput.style.display = 'block';
@@ -977,13 +977,13 @@ class AuthSystem {
 }
 
 // Instance globale
-const authSystem = new AuthSystem();
+window.authSystem = new AuthSystem();
 
 // Initialiser au chargement
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        authSystem.init();
+        window.authSystem.init();
     });
 } else {
-    authSystem.init();
+    window.authSystem.init();
 }

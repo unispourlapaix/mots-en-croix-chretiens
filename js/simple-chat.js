@@ -93,6 +93,15 @@ class SimpleChatSystem {
 
         console.log('🚀 Initialisation P2P...');
         
+        // Vérifier que PeerJS est disponible
+        if (typeof Peer === 'undefined') {
+            console.error('❌ PeerJS non chargé - Bibliothèque manquante');
+            if (!this.skipWelcomeMessages) {
+                this.showMessage('⚠️ Mode hors ligne - PeerJS non disponible', 'system');
+            }
+            return;
+        }
+        
         // Mettre à jour le username depuis authSystem
         this.updateUsername();
 
@@ -125,6 +134,7 @@ class SimpleChatSystem {
             
         } catch (error) {
             console.error('❌ Erreur initialisation P2P:', error);
+            console.error('❌ Détails erreur:', error.message, error.stack);
             // Ne pas afficher le message d'erreur au chargement initial
             if (!this.skipWelcomeMessages) {
                 this.showMessage('⚠️ Mode hors ligne - Connexion P2P indisponible', 'system');
@@ -174,6 +184,13 @@ class SimpleChatSystem {
                 return;
             }
             
+            // Log détaillé de l'erreur pour les autres cas
+            console.error('❌ Erreur PeerJS:', {
+                type: err.type,
+                message: err.message,
+                error: err
+            });
+            
             // Ignorer les erreurs de connexion à un peer (joueur déconnecté/inexistant)
             if (err.type === 'peer-unavailable' || err.message?.includes('Could not connect to peer')) {
                 console.log('ℹ️ PeerJS: Joueur non disponible ou déconnecté');
@@ -181,8 +198,21 @@ class SimpleChatSystem {
                 return;
             }
             
-            // Erreurs critiques seulement
-            console.error('❌ Erreur PeerJS critique:', err);
+            // Erreur d'ID invalide
+            if (err.type === 'invalid-id') {
+                console.error('❌ PeerJS: ID invalide, régénération...');
+                localStorage.removeItem('peerjs_id'); // Supprimer l'ID sauvegardé
+                this.showMessage('⚠️ Reconnexion en cours...', 'system');
+                // Retry sans ID sauvegardé
+                setTimeout(() => {
+                    if (this.peer) this.peer.destroy();
+                    this.peer = null;
+                    this.initP2P();
+                }, 1000);
+                return;
+            }
+            
+            // Erreurs critiques
             this.showMessage('⚠️ Erreur de connexion P2P', 'system');
             
             // Ne détruire le peer que pour des erreurs vraiment critiques

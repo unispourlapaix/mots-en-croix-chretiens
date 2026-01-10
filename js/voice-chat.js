@@ -36,12 +36,14 @@ class VoiceChatSystem {
         }
 
         // Vérifier si on est dans une room (chatSystem.roomId OU simpleChatSystem.roomCode)
-        const inRoom = this.chatSystem.roomId || 
-                       (window.simpleChatSystem && window.simpleChatSystem.roomCode);
+        const roomCode = this.chatSystem.roomId || 
+                         (window.simpleChatSystem && window.simpleChatSystem.roomCode);
         
-        if (!inRoom) {
-            throw new Error('Vous devez rejoindre un joueur pour activer le vocal');
+        if (!roomCode) {
+            throw new Error('Vous devez rejoindre une salle pour activer le vocal');
         }
+        
+        console.log('🎤 Connexion au salon vocal de la salle:', roomCode);
 
         try {
             // Demander l'accès au microphone
@@ -67,10 +69,11 @@ class VoiceChatSystem {
                 window.simpleChatSystem.showMessage(message, 'system');
             }
 
-            // Établir les connexions vocales avec tous les peers existants
+            // Établir les connexions vocales avec tous les peers dans la salle
             if (connections) {
                 connections.forEach((dataConn, peerId) => {
                     if (dataConn.open) {
+                        console.log('📞 Appel vocal vers:', peerId);
                         this.callPeer(peerId);
                     }
                 });

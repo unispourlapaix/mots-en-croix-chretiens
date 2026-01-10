@@ -56,12 +56,19 @@
             <button id="menuButton" class="menu-button">
                 ☰ Menu
             </button>
-            <button id="audioToggleButton" class="audio-toggle-button" title="Activer/Désactiver le son">
-                🔊
-            </button>
-            <button id="musicToggleButton" class="music-toggle-button" title="Activer/Désactiver la musique">
-                🎵
-            </button>
+            <div id="audioControlCompact" class="audio-control-compact">
+                <button id="audioExpandButton" class="audio-expand-btn" title="Contrôles audio">
+                    🔊
+                </button>
+                <div id="audioControlPanel" class="audio-control-panel" style="display: none;">
+                    <button id="audioToggleButton" class="audio-mini-btn" title="Son">
+                        🔊
+                    </button>
+                    <button id="musicToggleButton" class="audio-mini-btn" title="Musique">
+                        🎵
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- Bandeau Info défilant -->
@@ -110,31 +117,18 @@
                 <button id="chatSmsClose" class="chat-sms-close-btn">✕</button>
             </div>
             
-            <!-- Contrôles vocaux compacts - popup au clic -->
-            <div id="chatSmsVoicePopup" class="chat-sms-voice-popup" style="display: none;">
-                <div class="voice-popup-header">
-                    <span>🎤 Contrôles Vocaux</span>
-                    <button id="voicePopupClose" class="voice-popup-close">✕</button>
-                </div>
-                <div class="voice-popup-content">
-                    <button id="chatSmsMuteBtn" class="voice-popup-btn">
-                        <span class="voice-btn-icon">🎤</span>
-                        <span class="voice-btn-label">Couper/Activer micro</span>
-                    </button>
-                    <button id="chatSmsDeafenBtn" class="voice-popup-btn">
-                        <span class="voice-btn-icon">🔊</span>
-                        <span class="voice-btn-label">Couper/Activer son</span>
-                    </button>
-                    <button id="chatSmsLeaveVoiceBtn" class="voice-popup-btn danger">
-                        <span class="voice-btn-icon">🔇</span>
-                        <span class="voice-btn-label">Quitter le vocal</span>
-                    </button>
+            <!-- Push-to-Talk: Appuyer pour parler -->
+            
+            <!-- Mini liste compacte des connectés (mobile-friendly) -->
+            <div class="compact-online-players" id="compactOnlinePlayers" title="Cliquez sur un joueur pour interagir">
+                <div class="compact-players-list" id="compactPlayersList">
+                    <!-- ☰ Menu + Max 4 joueurs affichés + compteur -->
                 </div>
             </div>
             
             <div class="chat-sms-input-container">
-                <!-- Bouton vocal unique qui ouvre le popup ou rejoint -->
-                <button id="chatSmsVoiceBtn" class="chat-sms-voice-btn-inline" title="Rejoindre le salon vocal" disabled>
+                <!-- Push-to-Talk: Maintenir appuyé pour parler -->
+                <button id="chatSmsVoiceBtn" class="chat-sms-voice-btn-inline push-to-talk" title="Maintenir appuyé pour parler" disabled>
                     🎤
                 </button>
                 <input type="text" id="chatSmsInput" class="chat-sms-input" placeholder="Écrire ici..." maxlength="100">
@@ -301,8 +295,15 @@
                 </div>
 
                 <div class="menu-section">
-                    <h3>🌍 Choisir la langue</h3>
-                    <div id="menuLanguageSelector" class="menu-language-selector"></div>
+                    <div id="languageControlCompact" class="language-control-compact menu-inline menu-centered">
+                        <button id="languageExpandButton" class="language-expand-btn" title="Changer la langue">
+                            <span id="currentLanguageFlag">🇫🇷</span>
+                            <span class="lang-text">Langue</span>
+                        </button>
+                        <div id="languageDropdown" class="language-dropdown" style="display: none;">
+                            <!-- Généré par JS -->
+                        </div>
+                    </div>
                 </div>
 
                 <div class="menu-section">
@@ -735,8 +736,8 @@
                 <span class="kawaii-modal-icon">🔐</span>
             </div>
             <div class="kawaii-modal-body">
-                <h2 id="authModalTitle" style="color: #ff69b4; margin-bottom: 15px;">Inscription au Chat</h2>
-                <p style="color: #666; margin-bottom: 20px;">Créez un compte pour utiliser le chat communautaire</p>
+                <h2 id="authModalTitle" style="color: #ff69b4; margin-bottom: 15px;">Connexion au Nuage</h2>
+                <p style="color: #666; margin-bottom: 20px;">Créez un compte pour sauvegarder le score et pseudo</p>
 
                 <!-- Formulaire de connexion/inscription -->
                 <form id="authForm" style="display: flex; flex-direction: column; gap: 15px;">
@@ -793,11 +794,44 @@
     </div>
 
     <!-- Modules JavaScript -->
+    <!-- ⚠️ config.js doit être chargé EN PREMIER -->
+    <script src="js/config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <!-- Supabase v2 avec bundle UMD pour éviter les erreurs de module -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
     <script src="js/audio.js"></script>
-    <script src="js/config.js"></script>
+    <script>
+        // Gestion de l'expansion du panneau audio compact
+        document.addEventListener('DOMContentLoaded', () => {
+            const expandBtn = document.getElementById('audioExpandButton');
+            const panel = document.getElementById('audioControlPanel');
+            let isExpanded = false;
+            
+            if (expandBtn && panel) {
+                expandBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    isExpanded = !isExpanded;
+                    
+                    if (isExpanded) {
+                        panel.style.display = 'flex';
+                        setTimeout(() => panel.classList.add('expanded'), 10);
+                    } else {
+                        panel.classList.remove('expanded');
+                        setTimeout(() => panel.style.display = 'none', 300);
+                    }
+                });
+                
+                // Fermer au clic ailleurs
+                document.addEventListener('click', (e) => {
+                    if (isExpanded && !e.target.closest('.audio-control-compact')) {
+                        isExpanded = false;
+                        panel.classList.remove('expanded');
+                        setTimeout(() => panel.style.display = 'none', 300);
+                    }
+                });
+            }
+        });
+    </script>
     <script src="js/i18n.js"></script>
     <!-- Modules de traduction par mode -->
     <script src="data/clues-sagesse-fr.js"></script>
@@ -822,6 +856,11 @@
     <script src="js/shareImage.js"></script>
     <script src="js/supabase.js"></script>
     <script src="js/auth.js"></script>
+    <!-- 🔒 Système d'amis privé (sécurité) -->
+    <script src="js/friends-system.js"></script>
+    <script src="js/friends-ui.js"></script>
+    <!-- ✨ Interface ultra-simplifiée -->
+    <script src="js/simple-connect.js"></script>
     <script src="js/simple-chat.js"></script>
     <!-- <script src="js/lobby-system.js"></script> DÉSACTIVÉ - Remplacé par lobby-tabs.js + realtime-lobby -->
     <script src="js/lobby-tabs.js"></script>
@@ -838,6 +877,7 @@
     <script src="js/leaderboard.js"></script>
     <script src="js/menu-tabs.js"></script>
     <script src="js/chat-ui.js"></script>
+    <script src="js/compact-online-display.js"></script>
     <script src="js/voice-chat.js"></script>
     <script src="js/voice-ui.js"></script>
     <script src="js/info-banner.js"></script>

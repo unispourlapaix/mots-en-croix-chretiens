@@ -130,6 +130,11 @@ class RealtimeLobbySystem {
         const username = this.getMyUsername();
         const peerId = window.simpleChatSystem.peer.id;
         
+        // 🔑 Initialiser mon code d'ami
+        if (window.friendsSystem) {
+            window.friendsSystem.setMyFriendCode(peerId);
+        }
+        
         // Vérifier si on est vraiment dans une salle active (avec au moins 2 joueurs)
         const isInActiveRoom = window.roomSystem?.roomInfo?.roomId && 
                                window.roomSystem?.roomInfo?.players?.length > 1;
@@ -167,26 +172,46 @@ class RealtimeLobbySystem {
 
         const state = this.channel.presenceState();
         
-        // Convertir en Map
-        this.onlinePlayers.clear();
+        // Convertir en Map (tous les joueurs en ligne)
+        const allOnlinePlayers = new Map();
         
         Object.keys(state).forEach(peerId => {
             const presences = state[peerId];
             if (presences && presences.length > 0) {
                 const presence = presences[0]; // Prendre la première présence
-                this.onlinePlayers.set(presence.peer_id, presence);
+                allOnlinePlayers.set(presence.peer_id, presence);
             }
         });
 
-        console.log(`👥 ${this.onlinePlayers.size} joueur(s) en ligne`);
+        // 🔒 Filtrer pour ne montrer que les amis
+        if (window.friendsSystem) {
+            this.onlinePlayers = window.friendsSystem.filterOnlinePlayersByFriends(allOnlinePlayers);
+            console.log(`👥 ${this.onlinePlayers.size} ami(s) en ligne sur ${allOnlinePlayers.size} joueur(s) total`);
+        } else {
+            // Fallback sans système d'amis
+            this.onlinePlayers = allOnlinePlayers;
+            console.log(`👥 ${this.onlinePlayers.size} joueur(s) en ligne`);
+        }
+
         this.notifyPresenceUpdate();
     }
 
     // Gérer l'arrivée d'un joueur
     handlePresenceJoin(newPresences) {
         newPresences.forEach(presence => {
-            this.onlinePlayers.set(presence.peer_id, presence);
-            console.log('➕', presence.username, 'a rejoint le lobby');
+            // 🔒 Vérifier si c'est un ami avant d'afficher
+            const isMe = presence.peer_id === this.myPresence?.peer_id;
+            const isFriend = window.friendsSystem?.isFriend(presence.peer_id);
+            
+            if (isMe || isFriend) {
+                this.onlinePlayers.set(presence.peer_id, presence);
+                console.log('➕', presence.username, 'a rejoint le lobby');
+                
+                // Mettre à jour la dernière vue de l'ami
+                if (isFriend && window.friendsSystem) {
+                    window.friendsSystem.updateFriendLastSeen(presence.peer_id, presence.username);
+                }
+            }
         });
 
         this.notifyPresenceUpdate();

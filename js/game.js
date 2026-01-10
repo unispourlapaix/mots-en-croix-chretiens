@@ -1264,30 +1264,94 @@ class ChristianCrosswordGame {
     }
 
     setupMenuLanguageSelector() {
-        const container = document.getElementById('menuLanguageSelector');
-        if (!container) return;
+        const dropdown = document.getElementById('languageDropdown');
+        const expandBtn = document.getElementById('languageExpandButton');
+        const flagSpan = document.getElementById('currentLanguageFlag');
+        
+        if (!dropdown) return;
+
+        const languageFlags = {
+            fr: '🇫🇷', en: '🇬🇧', es: '🇪🇸', de: '🇩🇪',
+            it: '🇮🇹', pt: '🇵🇹', ru: '🇷🇺', zh: '🇨🇳',
+            ko: '🇰🇷', ja: '🇯🇵', ar: '🇸🇦', hi: '🇮🇳',
+            pl: '🇵🇱', sw: '🇰🇪'
+        };
 
         const languages = i18n.getAvailableLanguages();
+        dropdown.innerHTML = '';
+        
         languages.forEach(lang => {
-            const btn = document.createElement('button');
-            btn.className = 'language-btn';
-            btn.textContent = i18n.getLanguageName(lang);
-            btn.dataset.lang = lang;
+            const item = document.createElement('div');
+            item.className = 'language-dropdown-item';
+            item.innerHTML = `
+                <span class="lang-flag">${languageFlags[lang] || '🌍'}</span>
+                <span class="lang-name">${i18n.getLanguageName(lang)}</span>
+            `;
+            item.dataset.lang = lang;
 
             if (lang === i18n.getLanguage()) {
-                btn.classList.add('active');
+                item.classList.add('active');
+                if (flagSpan) flagSpan.textContent = languageFlags[lang] || '🌍';
             }
 
-            btn.addEventListener('click', () => {
+            item.addEventListener('click', () => {
                 this.changeLanguage(lang);
                 this.updateMenuLanguageButtons();
+                if (flagSpan) flagSpan.textContent = languageFlags[lang] || '🌍';
+                
+                // Fermer le dropdown
+                dropdown.style.display = 'none';
+                dropdown.classList.remove('show');
             });
-            container.appendChild(btn);
+            
+            dropdown.appendChild(item);
+        });
+        
+        // Gérer le clic sur le bouton
+        if (expandBtn) {
+            expandBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isVisible = dropdown.style.display === 'flex';
+                
+                if (isVisible) {
+                    dropdown.classList.remove('show');
+                    setTimeout(() => dropdown.style.display = 'none', 200);
+                } else {
+                    dropdown.style.display = 'flex';
+                    setTimeout(() => dropdown.classList.add('show'), 10);
+                }
+            });
+        }
+        
+        // Fermer au clic ailleurs
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.language-control-compact')) {
+                dropdown.classList.remove('show');
+                setTimeout(() => dropdown.style.display = 'none', 200);
+            }
         });
     }
 
     updateMenuLanguageButtons() {
         const currentLang = i18n.getLanguage();
+        const flagSpan = document.getElementById('currentLanguageFlag');
+        
+        const languageFlags = {
+            fr: '🇫🇷', en: '🇬🇧', es: '🇪🇸', de: '🇩🇪',
+            it: '🇮🇹', pt: '🇵🇹', ru: '🇷🇺', zh: '🇨🇳',
+            ko: '🇰🇷', ja: '🇯🇵', ar: '🇸🇦', hi: '🇮🇳',
+            pl: '🇵🇱', sw: '🇰🇪'
+        };
+        
+        if (flagSpan) {
+            flagSpan.textContent = languageFlags[currentLang] || '🌍';
+        }
+        
+        document.querySelectorAll('.language-dropdown-item').forEach(item => {
+            item.classList.toggle('active', item.dataset.lang === currentLang);
+        });
+        
+        // Ancienne compatibilité
         document.querySelectorAll('#menuLanguageSelector .language-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.lang === currentLang);
         });

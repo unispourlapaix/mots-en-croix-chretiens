@@ -122,10 +122,34 @@ class VoiceUI {
         // Bouton deafen
         this.elements.deafenBtn?.addEventListener('click', () => this.handleToggleDeafen());
 
-        // Bouton vocal SMS - rejoint ou ouvre popup selon l'état
-        this.elements.smsVoiceBtn?.addEventListener('click', () => this.handleSmsVoiceClick());
+        // Push-to-Talk: Maintenir appuyé pour parler
+        if (this.elements.smsVoiceBtn) {
+            // Support souris
+            this.elements.smsVoiceBtn.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                this.handlePushToTalkStart();
+            });
+            this.elements.smsVoiceBtn.addEventListener('mouseup', () => {
+                this.handlePushToTalkEnd();
+            });
+            this.elements.smsVoiceBtn.addEventListener('mouseleave', () => {
+                this.handlePushToTalkEnd();
+            });
+            
+            // Support tactile mobile
+            this.elements.smsVoiceBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                this.handlePushToTalkStart();
+            });
+            this.elements.smsVoiceBtn.addEventListener('touchend', () => {
+                this.handlePushToTalkEnd();
+            });
+            this.elements.smsVoiceBtn.addEventListener('touchcancel', () => {
+                this.handlePushToTalkEnd();
+            });
+        }
         
-        // Boutons dans le popup
+        // Boutons dans le popup (garder pour compatibilité)
         this.elements.smsMuteBtn?.addEventListener('click', () => {
             this.handleToggleMute();
             this.updateMuteButton(this.voiceSystem.isMuted);
@@ -198,16 +222,51 @@ class VoiceUI {
         }
     }
 
-    handleSmsVoiceClick() {
-        const inVoice = this.voiceSystem?.isInVoiceRoom;
-        
-        if (inVoice) {
-            // Déjà en vocal - ouvrir le popup de contrôles
-            this.openVoicePopup();
-        } else {
-            // Pas encore en vocal - rejoindre
+    /**
+     * Push-to-Talk: Début (appui sur le bouton)
+     */
+    handlePushToTalkStart() {
+        if (!this.voiceSystem.isInVoiceRoom) {
+            // Si pas encore connecté au vocal, rejoindre d'abord
             this.handleJoinVoice();
+            return;
         }
+        
+        // Activer le micro
+        if (this.voiceSystem.isMuted) {
+            this.voiceSystem.toggleMute();
+        }
+        
+        // Feedback visuel
+        if (this.elements.smsVoiceBtn) {
+            this.elements.smsVoiceBtn.classList.add('speaking');
+        }
+        
+        console.log('🎤 Push-to-Talk: PARLE');
+    }
+    
+    /**
+     * Push-to-Talk: Fin (relâchement du bouton)
+     */
+    handlePushToTalkEnd() {
+        if (!this.voiceSystem.isInVoiceRoom) return;
+        
+        // Couper le micro
+        if (!this.voiceSystem.isMuted) {
+            this.voiceSystem.toggleMute();
+        }
+        
+        // Retirer feedback visuel
+        if (this.elements.smsVoiceBtn) {
+            this.elements.smsVoiceBtn.classList.remove('speaking');
+        }
+        
+        console.log('🔇 Push-to-Talk: MUET');
+    }
+
+    handleSmsVoiceClick() {
+        // Méthode désactivée - utiliser push-to-talk maintenant
+        console.warn('⚠️ handleSmsVoiceClick désactivé - Utiliser push-to-talk');
     }
 
     openVoicePopup() {
@@ -395,17 +454,10 @@ class VoiceUI {
             this.elements.smsMuteBtn.classList.toggle('muted', isMuted);
         }
         
-        // Griser l'icône principale quand muté
+        // Push-to-Talk: Le bouton reste toujours visible et actif
+        // Ne pas griser le bouton SMS car il faut pouvoir appuyer pour parler
         if (this.elements.smsVoiceBtn) {
-            if (isMuted) {
-                this.elements.smsVoiceBtn.style.background = 'linear-gradient(135deg, #95a5a6, #b2bec3)';
-                this.elements.smsVoiceBtn.style.opacity = '0.7';
-                this.elements.smsVoiceBtn.title = 'Micro coupé (cliquer pour les contrôles)';
-            } else {
-                this.elements.smsVoiceBtn.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
-                this.elements.smsVoiceBtn.style.opacity = '1';
-                this.elements.smsVoiceBtn.title = 'Contrôles vocaux (cliquer pour ouvrir)';
-            }
+            this.elements.smsVoiceBtn.title = isMuted ? 'Maintenir appuyé pour parler' : 'Maintenir appuyé pour parler';
         }
     }
 
