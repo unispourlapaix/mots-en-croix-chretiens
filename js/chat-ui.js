@@ -63,9 +63,9 @@ class ChatUI {
 
         // Enter dans l'input SMS
         if (this.chatSmsInput) {
-            this.chatSmsInput.addEventListener('keypress', (e) => {
+            this.chatSmsInput.addEventListener('keypress', async (e) => {
                 if (e.key === 'Enter') {
-                    this.handleSendSms();
+                    await this.handleSendSms();
                 }
             });
         }
@@ -184,7 +184,7 @@ class ChatUI {
         }
     }
 
-    handleSendSms() {
+    async handleSendSms() {
         const message = this.chatSmsInput?.value.trim();
         if (!message) return;
 
@@ -192,13 +192,13 @@ class ChatUI {
             return;
         }
 
+        // Vider l'input IMMÉDIATEMENT pour ne pas afficher le code
+        if (this.chatSmsInput) {
+            this.chatSmsInput.value = '';
+        }
+
         try {
-            this.chatSystem.sendMessage(message);
-            
-            // Vider l'input SMS
-            if (this.chatSmsInput) {
-                this.chatSmsInput.value = '';
-            }
+            await this.chatSystem.sendMessage(message);
         } catch (error) {
             console.error('Erreur envoi SMS:', error);
         }

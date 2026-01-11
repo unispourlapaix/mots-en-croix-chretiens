@@ -318,11 +318,29 @@ class SimpleChatSystem {
                 this.roomCode = roomCode;
                 this.showMessage('✅ Connecté à la partie !', 'system');
                 
+                // Ajouter automatiquement comme ami
+                if (window.friendsSystem && conn.peer) {
+                    const username = conn.metadata?.username || 'Ami';
+                    const result = window.friendsSystem.addFriend(conn.peer, username);
+                    if (result.success) {
+                        console.log('🤝 Ami ajouté automatiquement:', username);
+                    }
+                }
+                
                 // Envoyer un message de bienvenue
                 conn.send({
                     type: 'join',
                     username: this.currentUser
                 });
+                
+                // Démarrer automatiquement la partie après connexion
+                setTimeout(() => {
+                    if (window.game && !window.game.gameStarted) {
+                        console.log('🎮 Démarrage automatique de la partie...');
+                        window.game.startGame();
+                        this.showMessage('🎮 Partie démarrée !', 'system');
+                    }
+                }, 1500); // Attendre 1.5s pour recevoir le mode et la synchro
             });
 
             conn.on('error', (err) => {
@@ -361,6 +379,15 @@ class SimpleChatSystem {
             this.connections.set(conn.peer, conn);
             this.showMessage('✅ Un joueur a rejoint', 'system');
             
+            // Ajouter automatiquement comme ami (quand quelqu'un rejoint ma salle)
+            if (window.friendsSystem && conn.peer) {
+                const username = conn.metadata?.username || 'Ami';
+                const result = window.friendsSystem.addFriend(conn.peer, username);
+                if (result.success) {
+                    console.log('🤝 Ami ajouté automatiquement:', username);
+                }
+            }
+            
             // Notifier aussi le P2PChatSystem avec les métadonnées
             if (window.chatSystem && window.chatSystem.roomId) {
                 window.chatSystem.handleIncomingConnection(conn);
@@ -372,6 +399,34 @@ class SimpleChatSystem {
                 username: this.currentUser,
                 color: conn.metadata.color
             });
+            
+            // Envoyer le mode de jeu actuel au nouveau joueur
+            if (window.game && window.game.gameMode) {
+                conn.send({
+                    type: 'game_action',
+                    username: this.currentUser,
+                    action: {
+                        type: 'current_mode',
+                        mode: window.game.gameMode
+                    },
+                    timestamp: Date.now()
+                });
+                console.log('📤 Mode actuel envoyé au nouveau joueur:', window.game.gameMode);
+            }
+            
+            // Envoyer le niveau actuel au nouveau joueur
+            if (window.game && window.game.currentLevel > 1) {
+                conn.send({
+                    type: 'game_action',
+                    username: this.currentUser,
+                    action: {
+                        type: 'current_level',
+                        level: window.game.currentLevel
+                    },
+                    timestamp: Date.now()
+                });
+                console.log('📤 Niveau actuel envoyé au nouveau joueur:', window.game.currentLevel);
+            }
             
             // Si une course est en cours, envoyer l'état de la course au nouveau joueur
             if (window.multiplayerRace && window.multiplayerRace.isRaceMode) {
@@ -588,6 +643,12 @@ class SimpleChatSystem {
             container.classList.remove('hidden');
         }
 
+        // Masquer les codes de connexion dans le texte (sauf pour les messages système)
+        let displayText = text;
+        if (type !== 'system') {
+            displayText = this.maskConnectionCodes(text);
+        }
+
         // Créer le message
         const messageDiv = document.createElement('div');
         messageDiv.className = `chat-sms-message ${type === 'own' ? 'own' : type === 'ai' ? 'ai' : type === 'system' ? 'system' : 'other'}`;
@@ -596,15 +657,15 @@ class SimpleChatSystem {
         const avatar = this.getUserAvatar(username || this.currentUser);
 
         if (type === 'message' && username) {
-            messageDiv.innerHTML = `<span class="chat-avatar">${avatar}</span><span class="username">${username}:</span> ${text}`;
+            messageDiv.innerHTML = `<span class="chat-avatar">${avatar}</span><span class="username">${username}:</span> ${displayText}`;
         } else if (type === 'own') {
-            messageDiv.innerHTML = `<span class="chat-avatar">${avatar}</span><span class="username">${this.currentUser}:</span> ${text}`;
+            messageDiv.innerHTML = `<span class="chat-avatar">${avatar}</span><span class="username">${this.currentUser}:</span> ${displayText}`;
         } else if (type === 'system') {
-            messageDiv.textContent = `✨ ${text}`;
+            messageDiv.textContent = `✨ ${displayText}`;
         } else if (type === 'ai') {
-            messageDiv.textContent = text;
+            messageDiv.textContent = displayText;
         } else {
-            messageDiv.innerHTML = `<span class="chat-avatar">${avatar}</span><span class="username">${username || 'Anonyme'}:</span> ${text}`;
+            messageDiv.innerHTML = `<span class="chat-avatar">${avatar}</span><span class="username">${username || 'Anonyme'}:</span> ${displayText}`;
         }
 
         messagesDiv.prepend(messageDiv);
@@ -624,10 +685,50 @@ class SimpleChatSystem {
         messagesDiv.scrollTop = 0;
     }
 
+    /**
+     * Masquer les codes de connexion dans le texte
+     */
+    maskConnectionCodes(text) {
+        // Détecter les codes de salle avec préfixe cc- (ex: cc-abc123def456 ou cc-uuid-avec-tirets)
+        const codePattern = /\bcc-[a-zA-Z0-9\-]{8,}\b/g;
+        return text.replace(codePattern, (match) => {
+            // Masquer complètement le code après le préfixe cc-
+            const prefix = 'cc-';
+            const code = match.substring(3); // Retirer "cc-"
+            const masked = '•'.repeat(code.length);
+            return `${prefix}${masked}`;
+        });
+    }
+
     // Envoyer un message à tous
     async sendMessage(text) {
         // Mettre à jour le username depuis authSystem
         this.updateUsername();
+
+        // Vérifier si c'est un code de salle avec préfixe cc- (accepter tirets pour UUID)
+        const roomCodePatternWithPrefix = /^cc-[a-zA-Z0-9\-]{8,}$/;
+        if (roomCodePatternWithPrefix.test(text.trim())) {
+            // Extraire le code réel (sans préfixe cc-)
+            const actualCode = text.trim().substring(3); // Retirer "cc-"
+            
+            console.log('🔍 Code détecté:', text.trim(), '→ Code réel:', actualCode);
+            
+            // Initialiser P2P si nécessaire
+            if (!this.peer) {
+                console.log('🚀 P2P pas initialisé, initialisation...');
+                this.initP2P();
+                // Attendre que le peer soit prêt
+                await new Promise(resolve => setTimeout(resolve, 1500));
+            }
+            
+            // Rejoindre la salle (les messages sont gérés dans joinRoom)
+            try {
+                await this.joinRoom(actualCode);
+            } catch (error) {
+                console.error('❌ Erreur connexion:', error);
+            }
+            return;
+        }
 
         // Vérifier si c'est une commande spéciale
         if (text.startsWith('/')) {
@@ -981,6 +1082,31 @@ class SimpleChatSystem {
                 // Recevoir le résultat du vote
                 this.handleModeChangeResult(action);
                 break;
+                
+            case 'current_mode':
+                // Recevoir le mode actuel d'un autre joueur
+                this.handleCurrentMode(action, username);
+                break;
+                
+            case 'current_level':
+                // Recevoir le niveau actuel d'un autre joueur
+                this.handleCurrentLevel(action, username);
+                break;
+                
+            case 'level_changed':
+                // Un joueur a changé de niveau
+                this.handleLevelChanged(action, username);
+                break;
+                
+            case 'game_completed':
+                // Un joueur a terminé la partie
+                this.handleGameCompleted(action, username);
+                break;
+                
+            case 'letters_count_update':
+                // Mise à jour du nombre de lettres d'un joueur
+                this.handleLettersCountUpdate(action, username);
+                break;
         }
     }
     
@@ -1012,8 +1138,8 @@ class SimpleChatSystem {
                     <p style="font-size: 14px; color: #e74c3c; margin-bottom: 10px; font-weight: 600;">
                         ⚠️ Pas de vote = Refus automatique
                     </p>
-                    <p style="font-size: 12px; color: #999;">
-                        Compte à rebours: 15 secondes
+                    <p id="voteCountdown" style="font-size: 14px; color: #ff69b4; font-weight: bold;">
+                        ⏱️ Temps restant: 30 secondes
                     </p>
                 </div>`,
                 buttons: [
@@ -1033,6 +1159,23 @@ class SimpleChatSystem {
                     }
                 ]
             });
+            
+            // Compte à rebours de 30 secondes
+            let timeLeft = 30;
+            const countdownInterval = setInterval(() => {
+                timeLeft--;
+                const countdownEl = document.getElementById('voteCountdown');
+                if (countdownEl) {
+                    countdownEl.textContent = `⏱️ Temps restant: ${timeLeft} seconde${timeLeft > 1 ? 's' : ''}`;
+                    if (timeLeft <= 10) {
+                        countdownEl.style.color = '#e74c3c'; // Rouge pour les dernières secondes
+                    }
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                }
+            }, 1000);
         }
     }
     
@@ -1094,6 +1237,90 @@ class SimpleChatSystem {
             const previousMode = window.game.gameMode;
             window.game.applyModeChange(previousMode, newMode);
         }
+    }
+    
+    // Gérer la réception du mode actuel
+    handleCurrentMode(action, username) {
+        const { mode } = action;
+        
+        if (!window.game) return;
+        
+        // Si notre mode est différent, s'aligner sur le mode de la salle
+        if (window.game.gameMode !== mode) {
+            console.log(`🔄 Synchronisation du mode: ${window.game.gameMode} → ${mode}`);
+            const previousMode = window.game.gameMode;
+            window.game.applyModeChange(previousMode, mode);
+            
+            const modeIcons = {
+                'normal': '🙏',
+                'couple': '💕',
+                'sagesse': '🕊️',
+                'proverbes': '📖',
+                'disciple': '✝️',
+                'veiller': '👁️',
+                'aimee': '❤️',
+                'couple-solide': '💑',
+                'race': '🏁'
+            };
+            const modeIcon = modeIcons[mode] || '🎯';
+            this.showMessage(`${modeIcon} Mode synchronisé avec la salle`, 'system');
+        }
+    }
+    
+    // Gérer la réception du niveau actuel
+    handleCurrentLevel(action, username) {
+        const { level } = action;
+        
+        if (!window.game) return;
+        
+        // Si notre niveau est différent, s'aligner sur le niveau de la salle
+        if (window.game.currentLevel !== level) {
+            console.log(`🔄 Synchronisation du niveau: ${window.game.currentLevel} → ${level}`);
+            window.game.currentLevel = level;
+            this.showMessage(`📊 Niveau ${level} synchronisé avec la salle`, 'system');
+        }
+    }
+    
+    // Gérer le changement de niveau d'un autre joueur
+    handleLevelChanged(action, username) {
+        const { level, score, correctLetters, totalLevels } = action;
+        
+        if (!window.game) return;
+        
+        this.showMessage(`🎯 ${username} → Niveau ${level} (📝 ${correctLetters || 0} lettres)`, 'system');
+        
+        // Synchroniser le niveau si on est en retard
+        if (window.game.currentLevel < level && window.game.gameStarted) {
+            console.log(`🔄 Synchronisation du niveau: ${window.game.currentLevel} → ${level}`);
+            window.game.currentLevel = level;
+            window.game.setupLevel();
+            document.getElementById('nextLevelButton').style.display = 'none';
+            document.getElementById('shareButton').style.display = 'none';
+            this.showMessage(`⏩ Niveau synchronisé: ${level}/${totalLevels}`, 'system');
+        }
+    }
+    
+    // Gérer la mise à jour du nombre de lettres
+    handleLettersCountUpdate(action, username) {
+        const { correctLetters, level } = action;
+        
+        // Afficher de temps en temps pour ne pas spammer
+        if (correctLetters % 10 === 0) {
+            this.showMessage(`📝 ${username}: ${correctLetters} lettres trouvées`, 'system');
+        }
+    }
+    
+    // Gérer la fin de partie d'un joueur
+    handleGameCompleted(action, username) {
+        const { score, correctLetters } = action;
+        
+        // Stocker les scores pour le classement
+        if (!this.multiplayerScores) {
+            this.multiplayerScores = [];
+        }
+        
+        this.multiplayerScores.push({ username, score, correctLetters: correctLetters || 0 });
+        this.showMessage(`🏁 ${username} a terminé avec ${score} pts (📝 ${correctLetters || 0} lettres) !`, 'system');
     }
     
     // Gérer la réception de l'état du jeu

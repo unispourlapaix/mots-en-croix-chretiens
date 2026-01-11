@@ -199,9 +199,6 @@ class VoiceUI {
         
         // Mettre à jour l'état du bouton SMS dès le départ
         this.updateSmsVoiceButton();
-
-        // Vérifier périodiquement la disponibilité
-        setInterval(() => this.updateVoiceAvailability(), 1000);
     }
 
     async handleJoinVoice() {
@@ -212,6 +209,14 @@ class VoiceUI {
             this.elements.joinBtn.textContent = '🎤 Connexion...';
 
             await this.voiceSystem.joinVoiceRoom();
+            
+            // Push-to-talk : Muter automatiquement après connexion
+            if (!this.voiceSystem.isMuted) {
+                this.voiceSystem.toggleMute();
+            }
+            
+            // Mettre à jour le statut du bouton push-to-talk
+            this.updateSmsVoiceButton();
 
         } catch (error) {
             console.error('❌ Erreur join vocal:', error);
@@ -219,16 +224,34 @@ class VoiceUI {
             
             this.elements.joinBtn.disabled = false;
             this.elements.joinBtn.textContent = '🎤 Rejoindre le vocal';
+            
+            // Mettre à jour le statut du bouton push-to-talk
+            this.updateSmsVoiceButton();
         }
     }
 
     /**
      * Push-to-Talk: Début (appui sur le bouton)
      */
-    handlePushToTalkStart() {
+    async handlePushToTalkStart() {
+        // Vérifier le statut au moment de l'appui
+        this.updateSmsVoiceButton();
+        
         if (!this.voiceSystem.isInVoiceRoom) {
             // Si pas encore connecté au vocal, rejoindre d'abord
-            this.handleJoinVoice();
+            await this.handleJoinVoice();
+            
+            // Après avoir rejoint, démuter pour commencer à parler
+            if (this.voiceSystem.isInVoiceRoom && this.voiceSystem.isMuted) {
+                this.voiceSystem.toggleMute();
+            }
+            
+            // Feedback visuel
+            if (this.elements.smsVoiceBtn) {
+                this.elements.smsVoiceBtn.classList.add('speaking');
+            }
+            
+            console.log('🎤 Push-to-Talk: REJOINT ET PARLE');
             return;
         }
         
@@ -306,6 +329,9 @@ class VoiceUI {
     handleLeaveVoice() {
         if (!this.voiceSystem) return;
         this.voiceSystem.leaveVoiceRoom();
+        
+        // Mettre à jour le statut du bouton push-to-talk
+        this.updateSmsVoiceButton();
     }
 
     handleToggleMute() {

@@ -31,6 +31,20 @@ class CompactOnlineDisplay {
             this.updateDisplay();
         });
         
+        // Écouter les connexions/déconnexions dans SimpleChatSystem
+        window.addEventListener('roomJoined', () => {
+            this.updateDisplay();
+        });
+        window.addEventListener('roomCreated', () => {
+            this.updateDisplay();
+        });
+        window.addEventListener('peerConnected', () => {
+            this.updateDisplay();
+        });
+        window.addEventListener('peerDisconnected', () => {
+            this.updateDisplay();
+        });
+        
         // Écouter les mises à jour de présence
         if (window.realtimeLobbySystem) {
             window.realtimeLobbySystem.onPresenceUpdate(() => {
@@ -43,41 +57,95 @@ class CompactOnlineDisplay {
     
     // Obtenir la liste des joueurs en ligne
     getOnlinePlayers() {
-        const players = [];
+        const playersMap = new Map(); // Map par peerId
+        const usernameSet = new Set(); // Set pour détecter les doublons de username
         
         // Ne pas s'inclure soi-même
         const currentPeerId = window.simpleChatSystem?.peer?.id;
+        const currentUsername = window.simpleChatSystem?.currentUser;
         
-        // Source 1: Realtime Lobby (prioritaire)
+        // Source 1: SimpleChatSystem connections (prioritaire pour la salle actuelle)
+        if (window.simpleChatSystem?.connections) {
+            window.simpleChatSystem.connections.forEach((conn, peerId) => {
+                // Double vérification stricte
+                if (!peerId || peerId === currentPeerId) return;
+                if (!conn || !conn.open) return; // Ignorer les connexions fermées ou invalides
+                
+                // Vérifier que l'username est valide
+                const username = conn.metadata?.username || conn.peer;
+                if (!username || username === 'undefined' || username === 'null' || username.trim() === '') return;
+                if (username === currentUsername) return; // Ne pas s'inclure par username
+                
+                if (!playersMap.has(peerId) && !usernameSet.has(username)) {
+                    playersMap.set(peerId, {
+                        id: peerId,
+                        username: username,
+                        status: 'connected',
+                        inGame: false,
+                        source: 'simpleChatSystem'
+                    });
+                    usernameSet.add(username);
+                }
+            });
+        }
+        
+        // Source 2: Realtime Lobby
         if (window.realtimeLobbySystem?.onlinePlayers) {
             window.realtimeLobbySystem.onlinePlayers.forEach((playerData, peerId) => {
-                // Ne pas inclure soi-même
-                if (peerId === currentPeerId) return;
+                // Double vérification stricte
+                if (!peerId || peerId === currentPeerId) return;
+                if (!playerData || !playerData.username) return;
                 
-                players.push({
-                    id: peerId,
-                    username: playerData.username || 'Joueur',
-                    status: playerData.status || 'available',
-                    inGame: playerData.status === 'in_game'
-                });
+                const username = playerData.username;
+                if (username === 'undefined' || username === 'null' || username.trim() === '') return;
+                if (username === currentUsername) return; // Ne pas s'inclure par username
+                
+                if (!playersMap.has(peerId) && !usernameSet.has(username)) {
+                    playersMap.set(peerId, {
+                        id: peerId,
+                        username: username,
+                        status: playerData.status || 'available',
+                        inGame: playerData.status === 'in_game',
+                        source: 'realtimeLobby'
+                    });
+                    usernameSet.add(username);
+                }
             });
         }
         
-        // Source 2: Room System (fallback)
-        if (players.length === 0 && window.roomSystem?.playersInRoom) {
+        // Source 3: Room System
+        if (window.roomSystem?.playersInRoom) {
             window.roomSystem.playersInRoom.forEach((playerData, peerId) => {
-                if (peerId === currentPeerId) return;
+                // Double vérification stricte
+                if (!peerId || peerId === currentPeerId) return;
+                if (!playerData || !playerData.username) return;
                 
-                players.push({
-                    id: peerId,
-                    username: playerData.username || 'Joueur',
-                    status: 'in_room',
-                    inGame: false
-                });
+                const username = playerData.username;
+                if (username === 'undefined' || username === 'null' || username.trim() === '') return;
+                if (username === currentUsername) return; // Ne pas s'inclure par username
+                
+                if (!playersMap.has(peerId) && !usernameSet.has(username)) {
+                    playersMap.set(peerId, {
+                        id: peerId,
+                        username: username,
+                        status: 'in_room',
+                        inGame: false,
+                        source: 'roomSystem'
+                    });
+                    usernameSet.add(username);
+                }
             });
         }
         
-        return players;
+        // Convertir la Map en array
+        const cleanedPlayers = Array.from(playersMap.values());
+        
+        // Log pour débogage
+        if (cleanedPlayers.length > 0) {
+            console.log('👥 Joueurs connectés:', cleanedPlayers.map(p => p.username).join(', '));
+        }
+        
+        return cleanedPlayers;
     }
     
     // Mettre à jour l'affichage

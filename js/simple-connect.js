@@ -59,9 +59,16 @@ class SimpleConnect {
                     <div class="quick-step-number">1️⃣</div>
                     <h3>Créer une Salle</h3>
                     <p class="quick-help">Partagez ce code avec vos amis/famille</p>
-                    <div class="quick-code-box" onclick="window.simpleConnect?.copyRoomCode()">
+                    <div class="quick-code-box">
                         <div class="quick-code-text" id="quickRoomCode">Créer une salle...</div>
-                        <div class="quick-code-hint">📋 Cliquer pour copier</div>
+                        <div class="quick-code-actions">
+                            <button class="quick-code-btn" onclick="window.simpleConnect?.copyRoomCode()" title="Copier le code">
+                                📋 Copier
+                            </button>
+                            <button class="quick-code-btn" onclick="window.simpleConnect?.shareRoomCode()" title="Partager le code">
+                                📤 Partager
+                            </button>
+                        </div>
                     </div>
                     <button class="quick-create-btn" onclick="window.simpleConnect?.createRoom()">
                         ➕ Créer une Nouvelle Salle
@@ -120,10 +127,12 @@ class SimpleConnect {
     
     displayRoomCode() {
         const codeEl = document.getElementById('quickRoomCode');
-        const roomCode = window.simpleChatSystem?.roomCode || window.simpleChatSystem?.peer?.id;
+        const basePeerId = window.simpleChatSystem?.roomCode || window.simpleChatSystem?.peer?.id;
         
         if (codeEl) {
-            if (roomCode) {
+            if (basePeerId) {
+                // Ajouter le préfixe cc- pour identifier les codes Christian Crossword
+                const roomCode = `cc-${basePeerId}`;
                 // Afficher seulement les premiers caractères pour plus de lisibilité
                 codeEl.textContent = roomCode.substring(0, 20) + '...';
                 codeEl.setAttribute('data-full-code', roomCode);
@@ -141,10 +150,10 @@ class SimpleConnect {
                 return;
             }
             
-            // Le peer ID devient le code de salle
-            const roomCode = window.simpleChatSystem.peer?.id || window.simpleChatSystem.roomCode;
+            // Le peer ID devient le code de salle avec préfixe cc-
+            const basePeerId = window.simpleChatSystem.peer?.id || window.simpleChatSystem.roomCode;
             
-            if (roomCode) {
+            if (basePeerId) {
                 this.showMessage('✅ Salle créée ! Partagez le code ci-dessus', 'success');
                 this.displayRoomCode();
                 this.displayPlayersList();
@@ -202,17 +211,53 @@ class SimpleConnect {
         
         // Copier dans le presse-papier
         navigator.clipboard.writeText(fullCode).then(() => {
-            // Feedback visuel
-            const box = document.querySelector('.quick-code-box');
-            if (box) {
-                box.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
-                box.querySelector('.quick-code-hint').textContent = '✅ Copié !';
-                
-                setTimeout(() => {
-                    box.style.background = '';
-                    box.querySelector('.quick-code-hint').textContent = '📋 Cliquer pour copier';
-                }, 2000);
-            }
+            this.showMessage('✅ Code copié !', 'success');
+        }).catch(() => {
+            this.showMessage('❌ Erreur de copie', 'error');
+        });
+    }
+
+    shareRoomCode() {
+        const codeEl = document.getElementById('quickRoomCode');
+        const fullCode = codeEl?.getAttribute('data-full-code');
+        
+        if (!fullCode) {
+            this.showMessage('Créez d\'abord une salle', 'error');
+            return;
+        }
+        
+        const shareText = `🎮 Rejoins-moi sur Mots En Croix Chrétiens !\n\nCode de salle : ${fullCode}\n\nClique ici : ${window.location.origin}`;
+        
+        // Utiliser l'API Web Share si disponible
+        if (navigator.share) {
+            navigator.share({
+                title: 'Mots En Croix Chrétiens',
+                text: shareText,
+                url: window.location.href
+            }).then(() => {
+                this.showMessage('✅ Partagé !', 'success');
+            }).catch((error) => {
+                if (error.name !== 'AbortError') {
+                    this.fallbackShare(shareText);
+                }
+            });
+        } else {
+            this.fallbackShare(shareText);
+        }
+    }
+    
+    fallbackShare(text) {
+        // Fallback : copier et afficher options
+        navigator.clipboard.writeText(text).then(() => {
+            const options = `
+📱 WhatsApp: https://wa.me/?text=${encodeURIComponent(text)}
+📧 Email: mailto:?subject=Rejoins-moi sur Mots En Croix&body=${encodeURIComponent(text)}
+💬 SMS: sms:?body=${encodeURIComponent(text)}
+
+✅ Le message a été copié dans le presse-papier !
+            `.trim();
+            
+            alert(options);
         });
     }
 
@@ -452,14 +497,8 @@ class SimpleConnect {
                 padding: 20px;
                 border-radius: 12px;
                 text-align: center;
-                cursor: pointer;
                 transition: all 0.3s;
                 border: 2px solid #667eea;
-            }
-            
-            .quick-code-box:hover {
-                transform: scale(1.02);
-                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
             }
             
             .quick-code-text {
@@ -467,13 +506,36 @@ class SimpleConnect {
                 font-size: 16px;
                 font-weight: bold;
                 color: #667eea;
-                margin-bottom: 8px;
+                margin-bottom: 12px;
                 word-break: break-all;
             }
             
-            .quick-code-hint {
-                font-size: 12px;
-                color: #999;
+            .quick-code-actions {
+                display: flex;
+                gap: 10px;
+                justify-content: center;
+            }
+            
+            .quick-code-btn {
+                flex: 1;
+                padding: 10px 15px;
+                border: none;
+                border-radius: 8px;
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+            
+            .quick-code-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            }
+            
+            .quick-code-btn:active {
+                transform: translateY(0);
             }
             
             .quick-input-group {

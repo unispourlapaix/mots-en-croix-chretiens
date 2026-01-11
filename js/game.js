@@ -31,6 +31,9 @@ class ChristianCrosswordGame {
         
         // Tracking des mots révélés avec un indice (ne donnent pas de points)
         this.wordsWithHints = new Set();
+        
+        // Compteur de lettres correctes trouvées
+        this.correctLettersCount = 0;
 
         // Connexion cloud
         this.cloudConnected = false;
@@ -829,6 +832,20 @@ class ChristianCrosswordGame {
                 });
             });
         }
+        
+        // Options de mode dans le menu
+        const modeMenuOptions = document.querySelectorAll('.mode-menu-option');
+        modeMenuOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                const mode = option.dataset.mode;
+                this.switchGameMode(mode);
+                // Fermer le modal menu
+                const menuModal = document.getElementById('menuModal');
+                if (menuModal) {
+                    menuModal.classList.add('hidden');
+                }
+            });
+        });
         
         // Charger le mode sauvegardé
         const savedMode = localStorage.getItem('gameMode');
@@ -1777,10 +1794,10 @@ class ChristianCrosswordGame {
         const newModeName = this.getModeName(newMode);
         window.simpleChatSystem.showMessage(`🗳️ Vote lancé: Changer pour le mode ${newModeIcon} ${newModeName}`, 'system');
         
-        // Timeout de 15 secondes pour le vote
+        // Timeout de 30 secondes pour le vote
         this.modeChangeVote.timeout = setTimeout(() => {
             this.processModeChangeVote();
-        }, 15000);
+        }, 30000);
     }
 
     // Traiter les résultats du vote
@@ -1898,8 +1915,30 @@ class ChristianCrosswordGame {
             
             // Notifier localement le changement de mode (pas de broadcast, déjà fait via mode_change_result)
             if (window.simpleChatSystem) {
-                const modeIcon = mode === 'couple' ? '💕' : '🏆';
-                const modeName = mode === 'couple' ? 'Couple' : 'Normal';
+                const modeIcons = {
+                    'normal': '🙏',
+                    'couple': '💕',
+                    'sagesse': '🕊️',
+                    'proverbes': '📖',
+                    'disciple': '✝️',
+                    'veiller': '👁️',
+                    'aimee': '❤️',
+                    'couple-solide': '💑',
+                    'race': '🏁'
+                };
+                const modeNames = {
+                    'normal': 'Normal',
+                    'couple': 'Couple',
+                    'sagesse': 'Sagesse',
+                    'proverbes': 'Proverbes',
+                    'disciple': 'Disciple',
+                    'veiller': 'Veiller',
+                    'aimee': 'Aimée',
+                    'couple-solide': 'Couple Solide',
+                    'race': 'Course'
+                };
+                const modeIcon = modeIcons[mode] || '🎯';
+                const modeName = modeNames[mode] || mode;
                 window.simpleChatSystem.showMessage(`${modeIcon} Changement de mode : ${modeName} (${gameDataManager.getTotalLevels()} niveaux)`, 'system');
             }
             
@@ -1921,6 +1960,7 @@ class ChristianCrosswordGame {
     updateModeButtons() {
         const dropdownBtn = document.getElementById('modeDropdownBtn');
         const modeOptions = document.querySelectorAll('.mode-option');
+        const modeMenuOptions = document.querySelectorAll('.mode-menu-option');
         
         // Mettre à jour le bouton principal
         if (dropdownBtn) {
@@ -1967,8 +2007,17 @@ class ChristianCrosswordGame {
             }
         }
         
-        // Mettre à jour les options actives
+        // Mettre à jour les options actives du dropdown
         modeOptions.forEach(option => {
+            if (option.dataset.mode === this.gameMode) {
+                option.classList.add('active');
+            } else {
+                option.classList.remove('active');
+            }
+        });
+        
+        // Mettre à jour les options actives du menu
+        modeMenuOptions.forEach(option => {
             if (option.dataset.mode === this.gameMode) {
                 option.classList.add('active');
             } else {
@@ -2536,12 +2585,18 @@ class ChristianCrosswordGame {
                                 
                                 if (this.lettersMatch(inputLetter1 || '', expected1) && this.lettersMatch(inputLetter2 || '', expected2)) {
                                     cell.classList.add('correct');
+                                    this.correctLettersCount += 2; // Deux lettres correctes
+                                    this.broadcastLettersCount();
                                     this.checkCompletedWords();
                                 } else if (currentWord.direction === 'horizontal' && this.lettersMatch(inputLetter1, expected1)) {
                                     // Partiellement correct pour ce mot
+                                    this.correctLettersCount += 1;
+                                    this.broadcastLettersCount();
                                     this.checkCompletedWords();
                                 } else if (currentWord.direction === 'vertical' && this.lettersMatch(inputLetter2, expected2)) {
                                     // Partiellement correct pour ce mot
+                                    this.correctLettersCount += 1;
+                                    this.broadcastLettersCount();
                                     this.checkCompletedWords();
                                 }
                                 
@@ -2577,6 +2632,8 @@ class ChristianCrosswordGame {
                                 
                                 if (this.lettersMatch(letter1, expected1) && this.lettersMatch(letter2, expected2)) {
                                     cell.classList.add('correct');
+                                    this.correctLettersCount += 2;
+                                    this.broadcastLettersCount();
                                     this.checkCompletedWords();
                                 } else {
                                     cell.classList.remove('correct');
@@ -2614,6 +2671,8 @@ class ChristianCrosswordGame {
                                 // Vérifier si correct
                                 if (this.lettersMatch(letter, this.solution[i][j])) {
                                     cell.classList.add('correct');
+                                    this.correctLettersCount += 1;
+                                    this.broadcastLettersCount();
                                     // Vérifier les mots complétés en temps réel
                                     this.checkCompletedWords();
                                 } else {
@@ -3944,6 +4003,18 @@ class ChristianCrosswordGame {
         const totalLevels = gameDataManager.getTotalLevels();
         if (this.currentLevel < totalLevels) {
             this.currentLevel++;
+            
+            // Broadcaster le changement de niveau en multijoueur
+            if (window.simpleChatSystem && window.simpleChatSystem.isInRoom()) {
+                window.simpleChatSystem.broadcastGameAction({
+                    type: 'level_changed',
+                    level: this.currentLevel,
+                    score: this.score,
+                    correctLetters: this.correctLettersCount,
+                    totalLevels: totalLevels
+                });
+            }
+            
             this.setupLevel();
             document.getElementById('nextLevelButton').style.display = 'none';
             document.getElementById('shareButton').style.display = 'none';
@@ -3953,6 +4024,13 @@ class ChristianCrosswordGame {
             await this.saveProgressToCloud();
         } else {
             // Fin du jeu
+            
+            // En multijoueur, comparer les scores
+            if (window.simpleChatSystem && window.simpleChatSystem.isInRoom()) {
+                await this.handleMultiplayerGameEnd();
+                return;
+            }
+            
             // Sauvegarder automatiquement sur le cloud si connecté
             await this.saveScoreToCloud();
 
@@ -3966,6 +4044,84 @@ class ChristianCrosswordGame {
                 // Sinon, proposer de sauvegarder le score
                 this.showScoreModal(this.score);
             }
+        }
+    }
+    
+    // Gérer la fin de partie en multijoueur
+    async handleMultiplayerGameEnd() {
+        // Broadcaster notre score final
+        window.simpleChatSystem.broadcastGameAction({
+            type: 'game_completed',
+            score: this.score,
+            correctLetters: this.correctLettersCount,
+            username: window.simpleChatSystem.currentUser
+        });
+        
+        // Attendre 2 secondes pour recevoir les scores des autres
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Récupérer tous les scores
+        const allScores = [{ 
+            username: window.simpleChatSystem.currentUser, 
+            score: this.score,
+            correctLetters: this.correctLettersCount 
+        }];
+        
+        // Ajouter les scores reçus des autres joueurs
+        if (window.simpleChatSystem.multiplayerScores) {
+            allScores.push(...window.simpleChatSystem.multiplayerScores);
+        }
+        
+        // Trier par score décroissant
+        allScores.sort((a, b) => b.score - a.score);
+        
+        // Déterminer le gagnant
+        const winner = allScores[0];
+        const isWinner = winner.username === window.simpleChatSystem.currentUser;
+        
+        // Afficher le classement
+        let rankingHtml = '<div style="text-align: center; padding: 20px;">';
+        rankingHtml += '<h2 style="color: #ff69b4; margin-bottom: 20px;">🏆 Classement Final</h2>';
+        
+        allScores.forEach((player, index) => {
+            const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '🏅';
+            const color = index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : index === 2 ? '#CD7F32' : '#999';
+            rankingHtml += `<div style="margin: 10px 0; padding: 15px; background: linear-gradient(135deg, ${color}22 0%, ${color}11 100%); border-radius: 10px;">`;
+            rankingHtml += `<span style="font-size: 24px;">${medal}</span> `;
+            rankingHtml += `<strong style="color: ${color};">${player.username}</strong><br>`;
+            rankingHtml += `<span style="font-size: 20px; font-weight: bold; color: #ff69b4;">${player.score} pts</span> `;
+            rankingHtml += `<span style="font-size: 14px; color: #666;">📝 ${player.correctLetters || 0} lettres</span>`;
+            rankingHtml += '</div>';
+        });
+        
+        rankingHtml += '</div>';
+        
+        // Afficher le résultat
+        if (isWinner) {
+            await this.showKawaiiModal(
+                `🎉 VICTOIRE ! 🎉\n\nVous avez gagné avec ${this.score} points !\n📝 ${this.correctLettersCount} lettres trouvées\n\n${rankingHtml}`,
+                '👑'
+            );
+            window.simpleChatSystem.showMessage('🎉 Vous avez gagné la partie !', 'system');
+        } else {
+            await this.showKawaiiModal(
+                `Partie terminée !\n\nVotre score : ${this.score} points\n📝 ${this.correctLettersCount} lettres trouvées\nGagnant : ${winner.username} (${winner.score} pts)\n\n${rankingHtml}`,
+                '🏁'
+            );
+        }
+        
+        // Sauvegarder le score
+        await this.saveScoreToCloud();
+    }
+    
+    // Broadcaster le nombre de lettres trouvées
+    broadcastLettersCount() {
+        if (window.simpleChatSystem && window.simpleChatSystem.isInRoom()) {
+            window.simpleChatSystem.broadcastGameAction({
+                type: 'letters_count_update',
+                correctLetters: this.correctLettersCount,
+                level: this.currentLevel
+            });
         }
     }
 
