@@ -1121,62 +1121,121 @@ class SimpleChatSystem {
         const newModeIcon = window.game?.getModeIcon(newMode) || '🎯';
         const newModeName = window.game?.getModeName(newMode) || newMode;
         
-        this.showMessage(`🗳️ ${requester} propose de changer pour le mode ${newModeIcon} ${newModeName}`, 'system');
+        // Créer un message cliquable pour voter
+        const voteMessageId = `vote-msg-${voteId}`;
+        const voteMessage = document.createElement('div');
+        voteMessage.id = voteMessageId;
+        voteMessage.className = 'chat-message system-message vote-message';
+        voteMessage.style.cssText = `
+            cursor: pointer;
+            padding: 15px;
+            margin: 10px 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            border: 2px solid #fff;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        `;
         
-        // Afficher une modal de vote
-        if (typeof CustomModals !== 'undefined') {
-            CustomModals.show({
-                title: '🗳️ Vote: Changement de Mode',
-                content: `<div style="text-align: center; padding: 20px;">
-                    <div style="font-size: 48px; margin-bottom: 20px;">${newModeIcon}</div>
-                    <p style="font-size: 16px; margin-bottom: 15px;">
-                        <strong>${requester}</strong> propose de changer pour le mode:
-                    </p>
-                    <p style="font-size: 20px; font-weight: bold; color: #667eea; margin-bottom: 20px;">
-                        ${newModeName}
-                    </p>
-                    <p style="font-size: 14px; color: #e74c3c; margin-bottom: 10px; font-weight: 600;">
-                        ⚠️ Pas de vote = Refus automatique
-                    </p>
-                    <p id="voteCountdown" style="font-size: 14px; color: #ff69b4; font-weight: bold;">
-                        ⏱️ Temps restant: 30 secondes
-                    </p>
-                </div>`,
-                buttons: [
-                    {
-                        text: '✅ Accepter',
-                        className: 'btn-primary',
-                        callback: () => {
-                            this.sendModeChangeVote(voteId, true);
-                        }
-                    },
-                    {
-                        text: '❌ Refuser',
-                        className: 'btn-secondary',
-                        callback: () => {
-                            this.sendModeChangeVote(voteId, false);
-                        }
-                    }
-                ]
-            });
-            
-            // Compte à rebours de 30 secondes
-            let timeLeft = 30;
-            const countdownInterval = setInterval(() => {
-                timeLeft--;
-                const countdownEl = document.getElementById('voteCountdown');
-                if (countdownEl) {
-                    countdownEl.textContent = `⏱️ Temps restant: ${timeLeft} seconde${timeLeft > 1 ? 's' : ''}`;
-                    if (timeLeft <= 10) {
-                        countdownEl.style.color = '#e74c3c'; // Rouge pour les dernières secondes
-                    }
-                }
-                
-                if (timeLeft <= 0) {
-                    clearInterval(countdownInterval);
-                }
-            }, 1000);
+        voteMessage.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: space-between; color: white; gap: 15px;">
+                <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                    <div style="font-size: 32px;">${newModeIcon}</div>
+                    <div style="text-align: left;">
+                        <p style="font-size: 14px; margin: 0; opacity: 0.9;">
+                            🗳️ ${requester} propose:
+                        </p>
+                        <p style="font-size: 18px; font-weight: bold; margin: 0;">
+                            ${newModeName}
+                        </p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button class="vote-yes-btn" style="
+                        padding: 8px 16px;
+                        background: #4CAF50;
+                        color: white;
+                        border: none;
+                        border-radius: 5px;
+                        font-size: 14px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        transition: transform 0.2s;
+                        white-space: nowrap;
+                    ">✅ Oui</button>
+                    <button class="vote-no-btn" style="
+                        padding: 8px 16px;
+                        background: #f44336;
+                        color: white;
+                        border: none;
+                        border-radius: 5px;
+                        font-size: 14px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        transition: transform 0.2s;
+                        white-space: nowrap;
+                    ">❌ Non</button>
+                    <span id="vote-countdown-${voteId}" style="font-size: 12px; opacity: 0.8; white-space: nowrap;">
+                        ⏱️ 30s
+                    </span>
+                </div>
+            </div>
+        `;
+        
+        // Ajouter le message au chat
+        const messagesContainer = document.getElementById('chatMessages');
+        if (messagesContainer) {
+            messagesContainer.appendChild(voteMessage);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
+        
+        // Gérer les clics sur les boutons
+        const yesBtn = voteMessage.querySelector('.vote-yes-btn');
+        const noBtn = voteMessage.querySelector('.vote-no-btn');
+        
+        const removeVoteMessage = () => {
+            if (voteMessage.parentNode) {
+                voteMessage.style.opacity = '0';
+                setTimeout(() => voteMessage.remove(), 300);
+            }
+        };
+        
+        yesBtn.onclick = (e) => {
+            e.stopPropagation();
+            this.sendModeChangeVote(voteId, true);
+            removeVoteMessage();
+        };
+        
+        noBtn.onclick = (e) => {
+            e.stopPropagation();
+            this.sendModeChangeVote(voteId, false);
+            removeVoteMessage();
+        };
+        
+        // Effet hover sur les boutons
+        yesBtn.onmouseenter = () => yesBtn.style.transform = 'scale(1.1)';
+        yesBtn.onmouseleave = () => yesBtn.style.transform = 'scale(1)';
+        noBtn.onmouseenter = () => noBtn.style.transform = 'scale(1.1)';
+        noBtn.onmouseleave = () => noBtn.style.transform = 'scale(1)';
+        
+        // Compte à rebours de 30 secondes
+        let timeLeft = 30;
+        const countdownEl = document.getElementById(`vote-countdown-${voteId}`);
+        const countdownInterval = setInterval(() => {
+            timeLeft--;
+            if (countdownEl) {
+                countdownEl.textContent = `⏱️ ${timeLeft}s`;
+                if (timeLeft <= 10) {
+                    countdownEl.style.color = '#ffeb3b';
+                    countdownEl.style.fontWeight = 'bold';
+                }
+            }
+            
+            if (timeLeft <= 0) {
+                clearInterval(countdownInterval);
+                removeVoteMessage();
+            }
+        }, 1000);
     }
     
     // Envoyer un vote pour le changement de mode

@@ -46,7 +46,7 @@ class CompactOnlineDisplay {
         });
         
         // Écouter les mises à jour de présence
-        if (window.realtimeLobbySystem) {
+        if (window.realtimeLobbySystem && typeof window.realtimeLobbySystem.onPresenceUpdate === 'function') {
             window.realtimeLobbySystem.onPresenceUpdate(() => {
                 this.updateDisplay();
             });
