@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#ff69b4">
+    <meta name="description" content="Jeu de mots croisés chrétiens avec un design kawaii rose élégant">
+    <title>💕 Mots En Croix Chrétiens 💕</title>
+    
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff69b4">
+    
+    <!-- iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Mots Croix">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-192x192.png">
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-192x192.png">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/info-banner.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/mode-menu.css">
+</head>
+<body>
+    <!-- Fond animé avec lignes ondulées -->
+    <div class="background-waves">
+        <div class="wave wave-1"></div>
+        <div class="wave wave-2"></div>
+        <div class="wave wave-3"></div>
+        <div class="wave wave-4"></div>
+    </div>
+
+    <!-- Étoiles scintillantes -->
+    <div class="background-stars">
+        <div class="star s1"></div>
+        <div class="star s2"></div>
+        <div class="star s3"></div>
+        <div class="star s4"></div>
+        <div class="star s5"></div>
+    </div>
+
+    <div class="game-container">
+        <div class="header">
+            <h1>🙏 Mots En Croix Chrétiens 🙏</h1>
+            <p>Trouve les mots d'encouragement et les mots bibliques</p>
+            <button id="installButton" class="install-button hidden">
+                📱 Installer l'Application
+            </button>
+            <button id="menuButton" class="menu-button">
+                ☰ Menu
+            </button>
+            <div id="audioControlCompact" class="audio-control-compact">
+                <button id="audioExpandButton" class="audio-expand-btn" title="Contrôles audio">
+                    🔊
+                </button>
+                <div id="audioControlPanel" class="audio-control-panel" style="display: none;">
+                    <button id="audioToggleButton" class="audio-mini-btn" title="Son">
+                        🔊
+                    </button>
+                    <button id="musicToggleButton" class="audio-mini-btn" title="Musique">
+                        🎵
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bandeau Info défilant -->
+        <div class="info-banner" id="infoBanner">
+            <div class="info-banner-content">
+                <!-- Stats fixes (ne défilent pas) -->
+                <div class="info-fixed">
+                    <div class="info-stat">
+                        <span class="info-stat-icon">📊</span>
+                        <span>Niveau <span class="info-stat-value" id="infoBannerLevel">1</span>/<span id="infoBannerMaxLevel">77</span></span>
+                    </div>
+                    <div class="info-stat">
+                        <span class="info-stat-icon">⭐</span>
+                        <span class="info-stat-value" id="infoBannerScore">0</span>
+                    </div>
+                    <div class="info-stat">
+                        <span class="info-stat-icon">🏆</span>
+                        <span>Max: <span class="info-stat-value" id="infoBannerMaxScore">0</span></span>
+                    </div>
+                </div>
+
+                <!-- Messages défilants -->
+                <div class="info-scrolling">
+                    <div class="info-messages" id="infoMessages">
+                        <!-- Messages générés dynamiquement -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Barre de progression (optionnelle) -->
+            <div class="info-progress">
+                <div class="info-progress-bar" id="infoProgressBar" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Interface Chat simplifiée -->
+        <div id="chatSmsContainer" class="chat-sms-container hidden">
+            <!-- En-tête avec participants -->
+            <div class="chat-sms-header">
+                <div class="chat-sms-title">
+                    <span id="voiceStatusIndicator" class="voice-status-indicator" style="display: none;">🎤</span>
+                </div>
+                <div id="chatSmsParticipantsList" class="chat-sms-participants-list">
+                    <!-- Liste générée dynamiquement -->
+                </div>
+                <button id="chatSmsClose" class="chat-sms-close-btn">✕</button>
+            </div>
+            
+            <!-- Push-to-Talk: Appuyer pour parler -->
+            
+            <!-- Mini liste compacte des connectés (mobile-friendly) -->
+            <div class="compact-online-players" id="compactOnlinePlayers" title="Cliquez sur un joueur pour interagir">
+                <div class="compact-players-list" id="compactPlayersList">
+                    <!-- ☰ Menu + Max 4 joueurs affichés + compteur -->
+                </div>
+            </div>
+            
+            <div class="chat-sms-input-container">
+                <!-- Push-to-Talk: Maintenir appuyé pour parler -->
+                <button id="chatSmsVoiceBtn" class="chat-sms-voice-btn-inline push-to-talk" title="Maintenir appuyé pour parler" disabled>
+                    🎤
+                </button>
+                <input type="text" id="chatSmsInput" class="chat-sms-input" placeholder="Écrire ici..." maxlength="100">
+                <button id="chatSmsSend" class="chat-sms-send">▷</button>
+            </div>
+            <div id="chatSmsMessages" class="chat-sms-messages">
+                <!-- Messages apparaissent ici -->
+            </div>
+        </div>
+
+        <div id="startScreen">
+            <button class="play-button" id="playButton">
+                🎮 Jouer (<span id="clickCount">0</span>/7)
+            </button>
+            <div class="encouraging-words" id="encouragingWords"></div>
+        </div>
+
+        <div id="gameScreen" class="hidden">
+            <!-- Boutons de course en haut de la grille -->
+            <div class="race-controls">
+                <!-- Box info points des joueurs -->
+                <div id="raceScoreBox" class="race-score-box" style="display: none;">
+                    <div class="race-score-header">📊 Scores en Direct</div>
+                    <div id="raceScoreList" class="race-score-list">
+                        <!-- Scores générés dynamiquement -->
+                    </div>
+                </div>
+                
+                <button id="startRaceButton" class="race-button" style="display: none;">🏁 Démarrer Course</button>
+                <button id="stopRaceButton" class="race-button stop" style="display: none;">⏹️ Arrêter</button>
+            </div>
+            
+            <!-- Tableau des joueurs en course -->
+            <div id="racePlayersPanel" class="race-players-panel" style="display: none;">
+                <div class="race-players-header">👥 Joueurs en Course</div>
+                <div id="racePlayersList" class="race-players-list">
+                    <!-- Liste des joueurs générée dynamiquement -->
+                </div>
+            </div>
+            
+            <!-- Affichage score au-dessus de la grille -->
+            <div class="game-score-display" id="gameScoreDisplay">
+                <div class="score-value" id="gameScoreValue">0</div>
+                <div class="score-label">points</div>
+            </div>
+            
+            <div class="crossword-grid" id="crosswordGrid"></div>
+            
+            <div class="word-clues">
+                <div class="clue-section">
+                    <h3><span class="arrow-icon arrow-right"></span></h3>
+                    <div id="horizontalClues"></div>
+                </div>
+                <div class="clue-section">
+                    <h3><span class="arrow-icon arrow-down"></span></h3>
+                    <div id="verticalClues"></div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn" id="checkButton">✅ Vérifier</button>
+                <button class="control-btn" id="hintButton">💡 Indice</button>
+                <button class="control-btn" id="shareButton" style="display:none;">📤 Partager</button>
+                <button class="control-btn" id="nextLevelButton" style="display:none;">➡️ Niveau Suivant</button>
+                <button class="control-btn" id="resetButton">🔄 Recommencer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Kawaii pour les notifications -->
+    <div id="kawaiiModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content">
+            <div class="kawaii-modal-header">
+                <span class="kawaii-modal-icon">✨</span>
+            </div>
+            <div class="kawaii-modal-body">
+                <p id="kawaiiModalMessage"></p>
+            </div>
+            <div class="kawaii-modal-footer">
+                <button id="kawaiiModalBtn" class="kawaii-modal-button">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour sauvegarder le score -->
+    <div id="scoreModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content">
+            <div class="kawaii-modal-header">
+                <span class="kawaii-modal-icon">🏆</span>
+            </div>
+            <div class="kawaii-modal-body">
+                <p><strong>Félicitations ! 🎉</strong></p>
+                <p>Votre score: <span id="finalScoreDisplay">0</span> points</p>
+                <p>Sauvegarder votre score en ligne:</p>
+                <form id="scoreForm">
+                    <input type="text" id="playerName" placeholder="Votre nom" required>
+                    <input type="email" id="playerEmail" placeholder="Votre email" required>
+                </form>
+            </div>
+            <div class="kawaii-modal-footer">
+                <button id="saveScoreBtn" class="kawaii-modal-button">💾 Sauvegarder</button>
+                <button id="skipScoreBtn" class="kawaii-modal-button secondary">Passer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de connexion cloud -->
+    <div id="cloudModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content">
+            <div class="kawaii-modal-header">
+                <span class="kawaii-modal-icon">☁️</span>
+            </div>
+            <div class="kawaii-modal-body">
+                <p><strong>Connexion Cloud</strong></p>
+                <p>Connectez-vous pour sauvegarder automatiquement vos scores en ligne</p>
+                <form id="cloudForm">
+                    <input type="text" id="cloudPlayerName" placeholder="Votre nom" required>
+                    <input type="email" id="cloudPlayerEmail" placeholder="Votre email" required>
+                </form>
+            </div>
+            <div class="kawaii-modal-footer">
+                <button id="cloudConnectSubmitBtn" class="kawaii-modal-button">✅ Se connecter</button>
+                <button id="cloudCancelBtn" class="kawaii-modal-button secondary">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de menu -->
+    <div id="menuModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content menu-modal-content">
+            <div class="menu-header">
+                <h2 id="menuTitle">⚙️ Paramètres</h2>
+                <button id="closeMenuBtn" class="close-menu-btn">✕</button>
+            </div>
+
+            <!-- Onglets de navigation -->
+            <div class="menu-tabs">
+                <button class="menu-tab active" data-tab="settings">
+                    ⚙️ Menu
+                </button>
+                <button class="menu-tab" data-tab="connexion">
+                    👤 Connexion
+                </button>
+                <button class="menu-tab" data-tab="leaderboard">
+                    🏆 Score
+                </button>
+            </div>
+
+            <!-- Contenu Onglet Menu -->
+            <div id="settingsTabContent" class="menu-tab-content active">
+                <div class="menu-section">
+                    <h3>👤 Profil</h3>
+                    <div id="profileSection">
+                        <p id="profileUsername" style="font-size: 16px; font-weight: bold; color: #ff1493; margin-bottom: 10px;">Non connecté</p>
+                        <button id="signOutBtn" class="menu-cloud-btn secondary" style="display: none; margin-top: 10px;">
+                            🚪 Déconnexion
+                        </button>
+                    </div>
+                    <p class="menu-description">Gérez votre compte et vos informations</p>
+                </div>
+
+                <div class="menu-section">
+                    <div id="languageControlCompact" class="language-control-compact menu-inline menu-centered">
+                        <button id="languageExpandButton" class="language-expand-btn" title="Changer la langue">
+                            <span id="currentLanguageFlag">🇫🇷</span>
+                            <span class="lang-text">Langue</span>
+                        </button>
+                        <div id="languageDropdown" class="language-dropdown" style="display: none;">
+                            <!-- Généré par JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="menu-section">
+                    <h3>� Mode de Jeu</h3>
+                    <div class="mode-selector-menu">
+                        <button class="mode-menu-option" data-mode="normal">
+                            <span class="mode-icon">🙏</span>
+                            <div class="mode-info">
+                                <span class="mode-name">Normal</span>
+                                <span class="mode-desc">77 niveaux</span>
+                            </div>
+                        </button>
+                        <button class="mode-menu-option" data-mode="couple">
+                            <span class="mode-icon">💕</span>
+                            <div class="mode-info">
+                                <span class="mode-name">Couple</span>
+                                <span class="mode-desc">122 niveaux</span>
+                            </div>
+                        </button>
+                        <button class="mode-menu-option" data-mode="sagesse">
+                            <span class="mode-icon">🕊️</span>
+                            <div class="mode-info">
+                                <span class="mode-name">Sagesse</span>
+                                <span class="mode-desc">88 sagesses</span>
+                            </div>
+                        </button>
+                        <button class="mode-menu-option" data-mode="proverbes">
+                            <span class="mode-icon">📖</span>
+                            <div class="mode-info">
+                                <span class="mode-name">Proverbes</span>
+                                <span class="mode-desc">88 proverbes</span>
+                            </div>
+                        </button>
+                        <button class="mode-menu-option" data-mode="disciple">
+                            <span class="mode-icon">✝️</span>
+                            <div class="mode-info">
+                                <span class="mode-name">Disciple</span>
+                                <span class="mode-desc">88 niveaux</span>
+                            </div>
+                        </button>
+                        <button class="mode-menu-option" data-mode="veiller">
+                            <span class="mode-icon">👁️</span>
+                            <div class="mode-info">
+                                <span class="mode-name">Veiller</span>
+                                <span class="mode-desc">88 vertus</span>
+                            </div>
+                        </button>
+                        <button class="mode-menu-option" data-mode="aimee">
+                            <span class="mode-icon">❤️</span>
+                            <div class="mode-info">
+                                <span class="mode-name">Aimée</span>
+                                <span class="mode-desc">88 niveaux</span>
+                            </div>
+                        </button>
+                        <button class="mode-menu-option" data-mode="couple-solide">
+                            <span class="mode-icon">💑</span>
+                            <div class="mode-info">
+                                <span class="mode-name">Couple Solide</span>
+                                <span class="mode-desc">88 clés</span>
+                            </div>
+                        </button>
+                        <button class="mode-menu-option" data-mode="race">
+                            <span class="mode-icon">🏁</span>
+                            <div class="mode-info">
+                                <span class="mode-name">Course</span>
+                                <span class="mode-desc">5 min chrono</span>
+                            </div>
+                        </button>
+                    </div>
+                    <p class="menu-description">Sélectionnez votre mode de jeu préféré</p>
+                </div>
+
+                <div class="menu-section">
+                    <h3>�🏆 Collection de Médailles</h3>
+                    <button id="achievementsBtn" class="menu-cloud-btn">
+                        🏆 Voir mes médailles
+                    </button>
+                    <p class="menu-description">Consultez vos récompenses et achievements</p>
+                </div>
+
+                <div class="menu-section">
+                    <h3>🔊 Audio</h3>
+                    <div class="audio-controls">
+                        <div class="audio-control-item">
+                            <label for="musicVolume">🎵 Musique</label>
+                            <input type="range" id="musicVolume" min="0" max="100" value="50">
+                            <span id="musicVolumeValue">50%</span>
+                        </div>
+                        <div class="audio-control-item">
+                            <label for="soundVolume">🔔 Effets sonores</label>
+                            <input type="range" id="soundVolume" min="0" max="100" value="50">
+                            <span id="soundVolumeValue">50%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="menu-section">
+                    <h3>🎨 Crédits</h3>
+                    <div class="about-info">
+                        <p class="about-item">
+                            <strong>✨ Mots croisés chrétiens</strong> par Emmanuel Payet
+                        </p>
+                        <p class="about-item">
+                            <a href="#" id="artistLink" class="info-link">🎨 Voir le profil de l'artiste</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenu Onglet Score/Leaderboard -->
+            <div id="leaderboardTabContent" class="menu-tab-content">
+                <div class="leaderboard-header">
+                    <h3>🏆 Tableau des Scores</h3>
+                    <button id="refreshLeaderboardBtn" class="menu-cloud-btn" style="margin: 10px 0;">
+                        🔄 Actualiser
+                    </button>
+                </div>
+                <div id="leaderboardContainer" class="leaderboard-container">
+                    <p style="text-align: center; color: #666;">Chargement des scores...</p>
+                </div>
+                <div style="text-align: center; margin-top: 15px;">
+                    <button id="viewFullLeaderboardBtn" class="menu-cloud-btn secondary">
+                        📊 Voir le classement complet
+                    </button>
+                </div>
+            </div>
+
+            <!-- Contenu Onglet Connexion -->
+            <div id="connexionTabContent" class="menu-tab-content">
+                <div class="connexion-header" style="text-align: center; margin-bottom: 20px;">
+                    <h3>👤 Connexion / Inscription</h3>
+                    <p style="color: #666; font-size: 14px;">Sauvegardez vos scores en ligne</p>
+                </div>
+
+                <div id="connexionSection">
+                    <!-- Formulaire de connexion/inscription -->
+                    <div id="authFormMenu" class="auth-form">
+                        <div class="menu-section">
+                            <p style="color: #666; font-size: 14px; text-align: center; margin-bottom: 15px;">
+                                Créez un compte pour sauvegarder vos scores et discuter avec la communauté
+                            </p>
+                            
+                            <button id="signInBtn" class="menu-cloud-btn" style="width: 100%; margin-bottom: 10px;">
+                                🔓 Se connecter
+                            </button>
+                            <button id="signUpBtn" class="menu-cloud-btn secondary" style="width: 100%; margin-bottom: 10px;">
+                                ✨ Créer un compte
+                            </button>
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #ffe0f0;">
+                            <p style="font-size: 12px; color: #999;">✨ Système intuitif et privé ☁️</p>
+                        </div>
+                    </div>
+
+                    <!-- Section profil (visible quand connecté) -->
+                    <div id="profileInfo" class="profile-info" style="display: none;">
+                        <div class="menu-section" style="text-align: center;">
+                            <!-- Avatar personnalisable -->
+                            <div style="margin-bottom: 15px; position: relative;">
+                                <div id="currentAvatar" style="font-size: 64px; cursor: pointer; display: inline-block; transition: transform 0.2s;" onclick="document.getElementById('avatarSelector').style.display = document.getElementById('avatarSelector').style.display === 'none' ? 'block' : 'none'">👤</div>
+                                <div style="font-size: 11px; color: #999; margin-top: 5px;">✨ Cliquez pour changer</div>
+                            </div>
+                            
+                            <!-- Sélecteur d'avatars -->
+                            <div id="avatarSelector" class="avatar-selector" style="display: none; background: #fff; border: 2px solid #ff69b4; border-radius: 15px; padding: 15px; margin-bottom: 15px; max-height: 300px; overflow-y: auto;">
+                                <p style="font-size: 13px; color: #666; margin-bottom: 10px; font-weight: bold;">Choisissez votre avatar</p>
+                                <div class="avatar-grid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;">
+                                    <!-- Avatars gratuits (0 points) -->
+                                    <div class="avatar-option" data-avatar="😊" data-unlock="0" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">😊</div>
+                                    <div class="avatar-option" data-avatar="😇" data-unlock="0" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">😇</div>
+                                    <div class="avatar-option" data-avatar="🥰" data-unlock="0" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🥰</div>
+                                    <div class="avatar-option" data-avatar="😎" data-unlock="0" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">😎</div>
+                                    <div class="avatar-option" data-avatar="🤗" data-unlock="0" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🤗</div>
+                                    <!-- 100 points -->
+                                    <div class="avatar-option" data-avatar="😍" data-unlock="100" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">😍</div>
+                                    <div class="avatar-option" data-avatar="🤩" data-unlock="100" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🤩</div>
+                                    <div class="avatar-option" data-avatar="😋" data-unlock="100" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">😋</div>
+                                    <div class="avatar-option" data-avatar="😺" data-unlock="100" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">😺</div>
+                                    <div class="avatar-option" data-avatar="🥳" data-unlock="100" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🥳</div>
+                                    <!-- 250 points - Fleurs -->
+                                    <div class="avatar-option" data-avatar="🌸" data-unlock="250" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🌸</div>
+                                    <div class="avatar-option" data-avatar="🌺" data-unlock="250" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🌺</div>
+                                    <div class="avatar-option" data-avatar="🌻" data-unlock="250" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🌻</div>
+                                    <div class="avatar-option" data-avatar="🌷" data-unlock="250" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🌷</div>
+                                    <div class="avatar-option" data-avatar="🌹" data-unlock="250" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🌹</div>
+                                    <!-- 500 points - Étoiles -->
+                                    <div class="avatar-option" data-avatar="🌟" data-unlock="500" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🌟</div>
+                                    <div class="avatar-option" data-avatar="⭐" data-unlock="500" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">⭐</div>
+                                    <div class="avatar-option" data-avatar="✨" data-unlock="500" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">✨</div>
+                                    <div class="avatar-option" data-avatar="💫" data-unlock="500" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">💫</div>
+                                    <div class="avatar-option" data-avatar="🌈" data-unlock="500" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🌈</div>
+                                    <!-- 750 points - Cœurs -->
+                                    <div class="avatar-option" data-avatar="💝" data-unlock="750" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">💝</div>
+                                    <div class="avatar-option" data-avatar="💖" data-unlock="750" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">💖</div>
+                                    <div class="avatar-option" data-avatar="💗" data-unlock="750" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">💗</div>
+                                    <div class="avatar-option" data-avatar="💕" data-unlock="750" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">💕</div>
+                                    <div class="avatar-option" data-avatar="🦋" data-unlock="750" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🦋</div>
+                                    <!-- 1000 points - Animaux premium -->
+                                    <div class="avatar-option" data-avatar="🐰" data-unlock="1000" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐰</div>
+                                    <div class="avatar-option" data-avatar="🐱" data-unlock="1000" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐱</div>
+                                    <div class="avatar-option" data-avatar="🐶" data-unlock="1000" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐶</div>
+                                    <div class="avatar-option" data-avatar="🐼" data-unlock="1000" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐼</div>
+                                    <div class="avatar-option" data-avatar="🦊" data-unlock="1000" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🦊</div>
+                                    <!-- 1500 points - Animaux légendaires -->
+                                    <div class="avatar-option" data-avatar="🐻" data-unlock="1500" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐻</div>
+                                    <div class="avatar-option" data-avatar="🐨" data-unlock="1500" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐨</div>
+                                    <div class="avatar-option" data-avatar="🐯" data-unlock="1500" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐯</div>
+                                    <div class="avatar-option" data-avatar="🦁" data-unlock="1500" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🦁</div>
+                                    <div class="avatar-option" data-avatar="🐵" data-unlock="1500" style="font-size: 32px; cursor: pointer; padding: 8px; border-radius: 10px; transition: all 0.2s;">🐵</div>
+                                </div>
+                            </div>
+                            
+                            <p id="connectedUsername" style="font-size: 18px; font-weight: bold; color: #ff1493; margin-bottom: 5px;">Utilisateur</p>
+                            <p id="connectedEmail" style="font-size: 14px; color: #666; margin-bottom: 20px;">email@example.com</p>
+                            
+                            <div style="background: #fff5f9; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                                <p style="font-size: 14px; color: #666; margin-bottom: 5px;">Meilleur Score</p>
+                                <p id="userMaxScore" style="font-size: 32px; font-weight: bold; color: #ff1493;">0</p>
+                            </div>
+                            
+                            <button id="shareScoreBtn" class="menu-cloud-btn" style="width: 100%; margin-bottom: 10px; background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);">
+                                📤 Partager mon score
+                            </button>
+                            <button id="editProfileBtn" class="menu-cloud-btn" style="width: 100%; margin-bottom: 10px;">
+                                ✏️ Modifier pseudo
+                            </button>
+                            <button id="signOutProfileBtn" class="menu-cloud-btn secondary" style="width: 100%;">
+                                🚪 Déconnexion
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Chat Multijoueur (visible quand connecté) -->
+                <div id="chatMultiplayerSection" class="menu-section" style="display: none; margin-top: 20px; border-top: 2px solid #ffe0f0; padding-top: 20px;">
+                    <div class="menu-chat-header">
+                        <div class="chat-header-info">
+                            <span class="chat-icon">💬</span>
+                            <span class="chat-title">Chat Multijoueur</span>
+                            <span id="chatParticipantCount" class="chat-participant-count">0 👥</span>
+                        </div>
+                    </div>
+
+                    <!-- Interface P2P simplifiée -->
+                    <div id="chatRoomInterface" class="chat-room-interface">
+                        <div class="chat-room-content">
+                            <div class="chat-room-icon">🎮</div>
+                            <h3>Mode Multijoueur</h3>
+                            <p style="margin-bottom: 20px; color: #666; text-align: center;">
+                                Jouez ensemble avec famille et amis ! 🎉
+                            </p>
+
+                            <div style="text-align: center; padding: 20px; background: #fff5f9; border-radius: 12px;">
+                                <p style="font-size: 15px; margin-bottom: 12px; color: #666;">
+                                    ✨ <strong>Bienvenue dans l'aventure !</strong>
+                                </p>
+                                <p style="font-size: 13px; color: #888; margin-bottom: 8px;">
+                                    1️⃣ Lancez le jeu et commencez à jouer immédiatement
+                                </p>
+                                <p style="font-size: 13px; color: #888; margin-bottom: 15px;">
+                                    2️⃣ Progressez à votre rythme à travers 77 niveaux
+                                </p>
+                                <p style="font-size: 13px; color: #888; margin-bottom: 15px;">
+                                    3️⃣ Retrouvez vos amis en ligne et jouez ensemble ! 🎉
+                                </p>
+                                <p style="font-size: 12px; color: #999; margin-top: 15px;">
+                                    💡 Aucune inscription requise, juste du plaisir instantané !
+                                </p>
+                            </div>
+
+                            <p style="font-size: 11px; color: #999; margin-top: 20px; text-align: center;">
+                                💬 Astuce: La bulle de chat à gauche montre tous les joueurs en ligne
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal Multijoueur -->
+    <!-- Bulle de chat flottante avec liste des connectés -->
+    <div id="chatBubble" class="chat-bubble">
+        <div class="chat-bubble-header">
+            <div class="header-title">
+                <span class="pulse-dot"></span>
+                <span>Partage Famille/Amis</span>
+                <span class="online-count" id="onlineCount">0</span>
+            </div>
+            <button class="minimize-btn" id="toggleChatBubble">−</button>
+        </div>
+        <div class="chat-bubble-body" id="chatBubbleBody">
+            <!-- Bouton Connexion -->
+            <div class="room-actions">
+                <button id="chatConnexionBtn" class="room-action-btn connexion-btn">
+                    👤 Connexion
+                </button>
+            </div>
+            
+            <!-- Sélecteur de Mode -->
+            <div class="mode-selector">
+                <button class="mode-dropdown-btn" id="modeDropdownBtn">
+                    <span class="mode-current-icon">🙏</span>
+                    <span class="mode-current-name">Mode Normal</span>
+                    <span class="mode-current-count">(77)</span>
+                    <span class="dropdown-arrow">▼</span>
+                </button>
+                <div class="mode-dropdown-menu" id="modeDropdownMenu">
+                    <button class="mode-option active" data-mode="normal">
+                        <span class="mode-icon">🙏</span>
+                        <span class="mode-name">Normal</span>
+                        <span class="mode-desc">(77 niveaux)</span>
+                    </button>
+                    <button class="mode-option" data-mode="couple">
+                        <span class="mode-icon">💕</span>
+                        <span class="mode-name">Couple</span>
+                        <span class="mode-desc">(122 niveaux)</span>
+                    </button>
+                    <button class="mode-option" data-mode="sagesse">
+                        <span class="mode-icon">🕊️</span>
+                        <span class="mode-name">Sagesse</span>
+                        <span class="mode-desc">(88 sagesses divines)</span>
+                    </button>
+                    <button class="mode-option" data-mode="proverbes">
+                        <span class="mode-icon">📖</span>
+                        <span class="mode-name">Proverbes</span>
+                        <span class="mode-desc">(88 proverbes bibliques)</span>
+                    </button>
+                    <button class="mode-option" data-mode="disciple">
+                        <span class="mode-icon">✝️</span>
+                        <span class="mode-name">Disciple</span>
+                        <span class="mode-desc">(88 vers l'amour vrai)</span>
+                    </button>
+                    <button class="mode-option" data-mode="veiller">
+                        <span class="mode-icon">👁️</span>
+                        <span class="mode-name">Veiller</span>
+                        <span class="mode-desc">(88 vertus vs maux)</span>
+                    </button>
+                    <button class="mode-option" data-mode="aimee">
+                        <span class="mode-icon">❤️</span>
+                        <span class="mode-name">Aimée</span>
+                        <span class="mode-desc">(88 aimer Dieu & autrui)</span>
+                    </button>
+                    <button class="mode-option" data-mode="couple-solide">
+                        <span class="mode-icon">💑</span>
+                        <span class="mode-name">Couple Solide</span>
+                        <span class="mode-desc">(88 clés du couple)</span>
+                    </button>
+                    <button class="mode-option" data-mode="race">
+                        <span class="mode-icon">🏁</span>
+                        <span class="mode-name">Course</span>
+                        <span class="mode-desc">(5 min chrono)</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Actions simplifiées - Plus besoin de CODE -->
+            <div class="room-actions" id="privateRoomActions" style="display: none;">
+                <!-- Masqué - Mode direct via clic sur joueurs -->
+            </div>
+            <!-- Barre de recherche -->
+            <div class="chat-search-bar">
+                <input type="text" id="playerSearchInput" class="player-search-input" placeholder="🔍 Rechercher un joueur...">
+            </div>
+            
+            <!-- Contrôle de statut -->
+            <div style="padding: 8px; margin-bottom: 10px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 12px; color: #666; flex: 1;">Mon statut:</span>
+                <button id="toggleStatusBtn" style="padding: 6px 12px; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; background: #28a745; color: white; transition: all 0.3s;">
+                    🟢 Disponible
+                </button>
+            </div>
+            
+            <!-- Header Lobby simplifié -->
+            <div style="padding: 12px; background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%); color: white; border-radius: 12px; margin-bottom: 12px; text-align: center; box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);">
+                <div style="font-size: 14px; font-weight: 600; letter-spacing: 0.3px; margin-bottom: 4px;">Joueurs connectés</div>
+                <div style="font-size: 11px; opacity: 0.95;">Rejoignez une partie multijoueur</div>
+            </div>
+            
+            <!-- Liste des joueurs connectés - Gérée dynamiquement par lobby-tabs.js -->
+            <div class="connected-players-list" id="connectedPlayersList">
+                <!-- Contenu généré par JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <div id="multiplayerModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content room-system-modal">
+            <div class="kawaii-modal-header">
+                <span class="kawaii-modal-icon">🏠</span>
+            </div>
+            <div class="kawaii-modal-body">
+                <h3>Salles Multijoueur</h3>
+                <p>Chaque joueur a sa propre salle automatique !</p>
+                
+                <!-- Panel de contrôle hôte -->
+                <div id="hostControlPanel" class="host-panel hidden">
+                    <div class="panel-section">
+                        <h4>⚙️ Paramètres de Connexion</h4>
+                        <div class="room-mode-selector">
+                            <label>Statut de connexion:</label>
+                            <select id="acceptModeSelect" class="kawaii-input">
+                                <option value="manual">✋ Manuel (je valide chaque demande hors salle CODE)</option>
+                                <option value="auto">🟢 En ligne (accepte automatiquement hors salle CODE)</option>
+                            </select>
+                        </div>
+                        <div class="room-info">
+                            <span class="room-mode-display" id="roomModeDisplay">✋ Manuel (Auto en salle CODE)</span>
+                            <span class="room-player-count">
+                                Joueurs: <strong id="roomPlayerCount">1/8</strong>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Demandes en attente -->
+                    <div id="pendingRequestsContainer" class="panel-section hidden">
+                        <h4>🔔 Demandes d'Accès</h4>
+                        <div id="pendingRequestsList" class="requests-list"></div>
+                    </div>
+
+                    <!-- Joueurs dans la salle -->
+                    <div class="panel-section">
+                        <h4>👥 Joueurs dans la Salle</h4>
+                        <div id="roomPlayersList" class="room-players-list"></div>
+                    </div>
+                </div>
+
+                <!-- Liste des joueurs disponibles (pour joindre) -->
+                <div id="availablePlayersPanel" class="available-players-panel">
+                    <!-- La liste est générée dynamiquement par room-system.js -->
+                </div>
+            </div>
+            <div class="kawaii-modal-footer">
+                <button id="leaveRoomBtn" class="kawaii-modal-button secondary hidden">👋 Quitter la Salle</button>
+                <button id="closeMultiplayerBtn" class="kawaii-modal-button secondary">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Collection de Médailles -->
+    <div id="achievementsModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content achievements-modal-content">
+            <div class="menu-header">
+                <h2>🏆 Collection de Médailles</h2>
+                <button id="closeAchievementsBtn" class="close-menu-btn">✕</button>
+            </div>
+
+            <!-- Stats globales -->
+            <div class="achievements-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="achievementCount">0/0</div>
+                    <div class="stat-label">Médailles Jeu</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="achievementPoints">0</div>
+                    <div class="stat-label">Points Jeu</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="raceMedalCount">0/112</div>
+                    <div class="stat-label">Médailles Course</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="racePoints">0</div>
+                    <div class="stat-label">Points Course</div>
+                </div>
+            </div>
+
+            <!-- Section Médailles de Course (mise en avant) -->
+            <div class="race-medals-section">
+                <div class="section-header">
+                    <h3>🏃 Médailles de Score Course - Mots Inspirants</h3>
+                    <p class="section-description">Débloquez 112 médailles basées sur des mots chrétiens optimistes en jouant en mode course !</p>
+                </div>
+                <div class="race-medals-grid" id="raceMedalsGrid">
+                    <!-- Généré dynamiquement -->
+                </div>
+            </div>
+
+            <!-- Filtres -->
+            <div class="achievements-filters">
+                <button class="filter-btn active" data-filter="all">Toutes</button>
+                <button class="filter-btn" data-filter="unlocked">Débloquées</button>
+                <button class="filter-btn" data-filter="locked">Verrouillées</button>
+            </div>
+
+            <!-- Liste des achievements -->
+            <div id="achievementsList" class="achievements-list"></div>
+        </div>
+    </div>
+
+    <!-- Modal d'authentification -->
+    <div id="authModal" class="kawaii-modal hidden">
+        <div class="kawaii-modal-overlay"></div>
+        <div class="kawaii-modal-content auth-modal-content">
+            <div class="kawaii-modal-header">
+                <span class="kawaii-modal-icon">🔐</span>
+            </div>
+            <div class="kawaii-modal-body">
+                <h2 id="authModalTitle" style="color: #ff69b4; margin-bottom: 15px;">Connexion au Nuage</h2>
+                <p style="color: #666; margin-bottom: 20px;">Créez un compte pour sauvegarder le score et pseudo</p>
+
+                <!-- Formulaire de connexion/inscription -->
+                <form id="authForm" style="display: flex; flex-direction: column; gap: 15px;">
+                    <input
+                        type="text"
+                        id="authUsername"
+                        placeholder="Nom d'utilisateur"
+                        required
+                        maxlength="20"
+                        style="padding: 12px; border: 2px solid #ffe8f0; border-radius: 10px; font-size: 0.95rem; outline: none;"
+                    >
+                    <input
+                        type="email"
+                        id="authEmail"
+                        placeholder="Votre email"
+                        required
+                        style="padding: 12px; border: 2px solid #ffe8f0; border-radius: 10px; font-size: 0.95rem; outline: none;"
+                    >
+                    <input
+                        type="password"
+                        id="authPassword"
+                        placeholder="Mot de passe (min. 6 caractères)"
+                        required
+                        minlength="6"
+                        style="padding: 12px; border: 2px solid #ffe8f0; border-radius: 10px; font-size: 0.95rem; outline: none;"
+                    >
+
+                    <div id="authMessage" style="padding: 10px; border-radius: 8px; display: none; font-size: 0.9rem;"></div>
+
+                    <button
+                        type="submit"
+                        id="authSubmitBtn"
+                        class="kawaii-modal-button"
+                        style="width: 100%;"
+                    >
+                        🔐 S'inscrire
+                    </button>
+                </form>
+
+                <p style="font-size: 0.85rem; color: #666; margin-top: 15px; text-align: center;">
+                    <span id="authToggleText">Déjà un compte ?</span>
+                    <a href="#" id="authToggleLink" style="color: #ff69b4; font-weight: bold; text-decoration: none; margin-left: 5px;">Se connecter</a>
+                </p>
+                <p id="forgotPasswordLink" style="font-size: 0.9rem; color: #888; margin-top: 12px; text-align: center; display: none;">
+                    <a href="#" id="forgotPasswordBtn" style="color: #667eea; text-decoration: none; font-weight: 500; transition: all 0.3s;">
+                        🔑 Mot de passe oublié ?
+                    </a>
+                </p>
+            </div>
+            <div class="kawaii-modal-footer">
+                <button id="authCancelBtn" class="kawaii-modal-button secondary">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modules JavaScript -->
+    <!-- ⚠️ config.js doit être chargé EN PREMIER -->
+    <script src="js/config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <!-- Supabase v2 avec bundle UMD pour éviter les erreurs de module -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+    <script src="js/audio.js"></script>
+    <script>
+        // Gestion de l'expansion du panneau audio compact
+        document.addEventListener('DOMContentLoaded', () => {
+            const expandBtn = document.getElementById('audioExpandButton');
+            const panel = document.getElementById('audioControlPanel');
+            let isExpanded = false;
+            
+            if (expandBtn && panel) {
+                expandBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    isExpanded = !isExpanded;
+                    
+                    if (isExpanded) {
+                        panel.style.display = 'flex';
+                        setTimeout(() => panel.classList.add('expanded'), 10);
+                    } else {
+                        panel.classList.remove('expanded');
+                        setTimeout(() => panel.style.display = 'none', 300);
+                    }
+                });
+                
+                // Fermer au clic ailleurs
+                document.addEventListener('click', (e) => {
+                    if (isExpanded && !e.target.closest('.audio-control-compact')) {
+                        isExpanded = false;
+                        panel.classList.remove('expanded');
+                        setTimeout(() => panel.style.display = 'none', 300);
+                    }
+                });
+            }
+        });
+    </script>
+    <script src="js/i18n.js"></script>
+    <!-- Modules de traduction par mode -->
+    <script src="data/clues-sagesse-fr.js"></script>
+    <script src="data/clues-proverbes-fr.js"></script>
+    <script src="data/clues-disciple-fr.js"></script>
+    <script src="data/clues-veiller-fr.js"></script>
+    <script src="data/clues-aimee-fr.js"></script>
+    <script src="data/clues-couple-solide-fr.js"></script>
+    <!-- Agrégateur des modules de traduction -->
+    <script src="data/clues-fr.js"></script>
+    <script src="js/gameData.js"></script>
+    <script src="js/coupleChretienData.js"></script>
+    <script src="data/levels-sagesse.js"></script>
+    <script src="data/levels-proverbes.js"></script>
+    <script src="data/levels-disciple.js"></script>
+    <script src="data/levels-veiller.js"></script>
+    <script src="data/levels-aimee.js"></script>
+    <script src="data/levels-couple-solide.js"></script>
+    <script src="js/achievements.js"></script>
+    <script src="js/race-medals.js"></script>
+    <script src="js/biblicalQuotes.js"></script>
+    <script src="js/shareImage.js"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/auth.js"></script>
+    <!-- 🔒 Système d'amis privé (sécurité) -->
+    <script src="js/friends-system.js"></script>
+    <script src="js/friends-ui.js"></script>
+    <!-- ✨ Interface ultra-simplifiée -->
+    <script src="js/simple-connect.js"></script>
+    <script src="js/simple-chat.js"></script>
+    <!-- <script src="js/lobby-system.js"></script> DÉSACTIVÉ - Remplacé par lobby-tabs.js + realtime-lobby -->
+    <script src="js/lobby-tabs.js"></script>
+    <script src="js/realtime-lobby.js"></script>
+    <script src="js/realtime-lobby-ui.js"></script>
+    <script src="js/presence-system.js"></script>
+    <script src="js/room-manager.js"></script>
+    <script src="js/room-system.js"></script>
+    <script src="js/room-ui.js"></script>
+    <script src="js/ai-bots.js"></script>
+    <script src="js/assistant-bots.js"></script>
+    <script src="js/multiplayer-race.js"></script>
+    <script src="js/race-ui.js"></script>
+    <script src="js/leaderboard.js"></script>
+    <script src="js/menu-tabs.js"></script>
+    <script src="js/chat-ui.js"></script>
+    <script src="js/compact-online-display.js"></script>
+    <script src="js/voice-chat.js"></script>
+    <script src="js/voice-ui.js"></script>
+    <script src="js/info-banner.js"></script>
+    <script src="js/multiplayer.js"></script>
+    <script src="js/game.js"></script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        // Service Worker avec logique corrigée anti-boucle
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                // Utiliser le chemin relatif pour GitHub Pages
+                const swPath = window.location.hostname === 'unispourlapaix.github.io' 
+                    ? '/mots-en-croix-chretiens/service-worker.js'
+                    : '/service-worker.js';
+                    
+                navigator.serviceWorker.register(swPath)
+                    .then((registration) => {
+                        console.log('✅ Service Worker enregistré:', registration.scope);
+                        
+                        // Vérifier les mises à jour toutes les 60 secondes
+                        setInterval(() => {
+                            registration.update().catch(() => {});
+                        }, 60000);
+                        
+                        // Détecter une nouvelle version
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            
+                            newWorker.addEventListener('statechange', () => {
+                                // Nouvelle version installée et un ancien SW contrôle la page
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // Demander confirmation avant mise à jour
+                                    if (confirm('🎉 Nouvelle version disponible ! Mettre à jour maintenant ?')) {
+                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch((error) => {
+                        console.log('❌ Erreur Service Worker:', error);
+                    });
+            });
+
+            // Recharger UNIQUEMENT quand un nouveau SW prend le contrôle après confirmation
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    // Attendre un peu avant de recharger pour éviter les boucles
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 100);
+                }
+            });
+        }
+
+        // Gérer l'événement d'installation de la PWA
+        let deferredPrompt;
+        const installButton = document.getElementById('installButton');
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Afficher le bouton d'installation
+            if (installButton) {
+                installButton.classList.remove('hidden');
+                installButton.addEventListener('click', async () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        console.log(`Installation: ${outcome}`);
+                        deferredPrompt = null;
+                        installButton.classList.add('hidden');
+                    }
+                });
+            }
+        });
+
+        // Détecter quand l'app est installée
+        window.addEventListener('appinstalled', () => {
+            console.log('🎉 Application installée avec succès!');
+            if (installButton) {
+                installButton.classList.add('hidden');
+            }
+            deferredPrompt = null;
+        });
+    </script>
+    <script src="js/modals.js"></script>
+    <script src="js/ai-simulator.js"></script>
+    <script src="js/welcome-ai.js"></script>
+    <script src="js/unisona-ai.js"></script>
+    <script src="js/dreamer-ai.js"></script>
+    <script src="js/tutorial-system.js"></script>
+    <script>
+        // Le tutorial sera démarré après l'intro, quand le jeu commence
+        // Message de bienvenue initial d'Unisona (espacé)
+        window.addEventListener('load', () => {
+            // Premier message : Bienvenue d'Unisona uniquement
+            setTimeout(() => {
+                if (window.simpleChatSystem && !localStorage.getItem('tutorialCompleted')) {
+                    window.simpleChatSystem.showMessage(
+                        "👋 Je suis Unisona ! Clique 7 fois sur ▶️ JOUER pour démarrer ! 🎮",
+                        'ai',
+                        'Unisona'
+                    );
+                }
+            }, 3000);
+        });
+        
+        // Message d'info IA APRÈS que le jeu soit démarré (intro terminée)
+        document.addEventListener('gameStarted', () => {
+            setTimeout(() => {
+                if (window.simpleChatSystem && window.unisonaAI && window.unisonaAI.checkIfEnabled()) {
+                    window.simpleChatSystem.showMessage(
+                        "✨ Je suis connectée à l'IA ! Tu peux me parler librement dans le chat ! 💬",
+                        'ai',
+                        'Unisona'
+                    );
+                }
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

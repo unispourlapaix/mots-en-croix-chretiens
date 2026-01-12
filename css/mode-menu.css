@@ -1,0 +1,57 @@
+/* Mode de jeu dans le menu */
+.mode-selector-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 10px 0;
+}
+
+.mode-menu-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    background: white;
+    border: 2px solid #ffe8f0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    width: 100%;
+}
+
+.mode-menu-option:hover {
+    border-color: #ff69b4;
+    background: #fffbfd;
+    transform: translateX(3px);
+}
+
+.mode-menu-option.active {
+    background: linear-gradient(135deg, #fff5f7 0%, #ffe8f0 100%);
+    border-color: #ff69b4;
+    box-shadow: 0 2px 8px rgba(255, 105, 180, 0.2);
+}
+
+.mode-menu-option .mode-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.mode-menu-option .mode-info {
+    flex: 1;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mode-menu-option .mode-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #ff1493;
+}
+
+.mode-menu-option .mode-desc {
+    font-size: 0.75rem;
+    color: #999;
+}

@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mots En Croix Chrétiens</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #4a5568;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+
+        .level-info {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .play-button {
+            background: linear-gradient(45deg, #48bb78, #38a169);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px;
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
+        }
+
+        .play-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
+        }
+
+        .encouraging-words {
+            margin: 20px 0;
+            min-height: 100px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .word-float {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateY(50px);
+            animation: floatIn 1s ease forwards;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        @keyframes floatIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .crossword-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 40px);
+            grid-template-rows: repeat(10, 40px);
+            gap: 2px;
+            justify-content: center;
+            margin: 30px auto;
+            background: #e2e8f0;
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .cell {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #cbd5e0;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 5px;
+        }
+
+        .cell.filled {
+            background: #48bb78;
+            color: white;
+            border-color: #38a169;
+        }
+
+        .cell.correct {
+            background: #68d391;
+            animation: pulse 0.5s ease;
+        }
+
+        .cell.blocked {
+            background: #2d3748;
+            border-color: #1a202c;
+            cursor: not-allowed;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .word-clues {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .clue-section {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 10px;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .clue-section h3 {
+            color: #4a5568;
+            margin-bottom: 15px;
+        }
+
+        .clue {
+            text-align: left;
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: #3182ce;
+            transform: translateY(-2px);
+        }
+
+        .score-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #48bb78;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .crossword-grid {
+                grid-template-columns: repeat(10, 30px);
+                grid-template-rows: repeat(10, 30px);
+            }
+            
+            .cell {
+                width: 30px;
+                height: 30px;
+                font-size: 12px;
+            }
+            
+            .game-container {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🙏 Mots En Croix Chrétiens 🙏</h1>
+            <p>Trouve les mots d'encouragement et les mots bibliques</p>
+        </div>
+
+        <div class="level-info">
+            <div>
+                <strong>Niveau: <span id="currentLevel">1</span>/8</strong>
+            </div>
+            <div class="score-display">
+                Score: <span id="score">0</span> points
+            </div>
+        </div>
+
+        <div id="startScreen">
+            <button class="play-button" id="playButton">
+                🎮 Jouer (<span id="clickCount">0</span>/7)
+            </button>
+            <div class="encouraging-words" id="encouragingWords"></div>
+        </div>
+
+        <div id="gameScreen" class="hidden">
+            <div class="crossword-grid" id="crosswordGrid"></div>
+            
+            <div class="word-clues">
+                <div class="clue-section">
+                    <h3>➡️ Horizontal</h3>
+                    <div id="horizontalClues"></div>
+                </div>
+                <div class="clue-section">
+                    <h3>⬇️ Vertical</h3>
+                    <div id="verticalClues"></div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn" id="checkButton">✅ Vérifier</button>
+                <button class="control-btn" id="hintButton">💡 Indice</button>
+                <button class="control-btn" id="nextLevelButton" style="display:none;">➡️ Niveau Suivant</button>
+                <button class="control-btn" id="resetButton">🔄 Recommencer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class ChristianCrosswordGame {
+            constructor() {
+                this.clickCount = 0;
+                this.currentLevel = 1;
+                this.score = 0;
+                this.grid = Array(10).fill().map(() => Array(10).fill(''));
+                this.solution = Array(10).fill().map(() => Array(10).fill(''));
+                this.blocked = Array(10).fill().map(() => Array(10).fill(false));
+                
+                this.encouragingWords = [
+                    "Jésus t'aime", "Tu es une créature merveilleuse", "Persévère",
+                    "Courage", "Foi", "Force", "Espoir"
+                ];
+
+                this.levelData = [
+                    {
+                        words: [
+                            { word: "JESUS", clue: "Notre Sauveur", start: [2, 2], direction: "horizontal" },
+                            { word: "AMOUR", clue: "Dieu est...", start: [4, 1], direction: "horizontal" },
+                            { word: "FOI", clue: "Croire sans voir", start: [2, 2], direction: "vertical" },
+                            { word: "PAIX", clue: "Ce que Jésus nous donne", start: [6, 3], direction: "horizontal" }
+                        ]
+                    },
+                    {
+                        words: [
+                            { word: "ESPERANCE", clue: "Vertu théologale", start: [1, 1], direction: "horizontal" },
+                            { word: "GRACE", clue: "Faveur divine", start: [3, 4], direction: "vertical" },
+                            { word: "MARIE", clue: "Mère de Jésus", start: [5, 2], direction: "horizontal" },
+                            { word: "CROIX", clue: "Symbole du sacrifice", start: [7, 1], direction: "vertical" }
+                        ]
+                    },
+                    {
+                        words: [
+                            { word: "RESURRECTION", clue: "Victoire sur la mort", start: [1, 3], direction: "horizontal" },
+                            { word: "ETERNITE", clue: "Vie sans fin", start: [4, 1], direction: "vertical" },
+                            { word: "SAINT", clue: "Pur et sanctifié", start: [6, 5], direction: "horizontal" },
+                            { word: "GLOIRE", clue: "Honneur à Dieu", start: [2, 7], direction: "vertical" }
+                        ]
+                    },
+                    {
+                        words: [
+                            { word: "BENEDICTION", clue: "Faveur divine", start: [1, 2], direction: "horizontal" },
+                            { word: "MIRACLE", clue: "Œuvre surnaturelle", start: [3, 1], direction: "vertical" },
+                            { word: "PROPHETE", clue: "Messager de Dieu", start: [5, 4], direction: "horizontal" },
+                            { word: "ALLIANCE", clue: "Pacte avec Dieu", start: [2, 6], direction: "vertical" }
+                        ]
+                    },
+                    {
+                        words: [
+                            { word: "PERSEVERANCE", clue: "Tenir bon dans l'épreuve", start: [1, 1], direction: "horizontal" },
+                            { word: "WISDOM", clue: "Sagesse divine", start: [4, 3], direction: "vertical" },
+                            { word: "REDEMPTION", clue: "Rachat par le sang", start: [6, 2], direction: "horizontal" },
+                            { word: "TRINITY", clue: "Père, Fils, Saint-Esprit", start: [2, 8], direction: "vertical" }
+                        ]
+                    },
+                    {
+                        words: [
+                            { word: "TRANSFORMATION", clue: "Changement par l'Esprit", start: [1, 1], direction: "horizontal" },
+                            { word: "REVELATION", clue: "Vérité révélée", start: [3, 4], direction: "vertical" },
+                            { word: "SANCTIFICATION", clue: "Processus de sainteté", start: [5, 2], direction: "horizontal" },
+                            { word: "INTERCESSION", clue: "Prière pour autrui", start: [7, 6], direction: "vertical" }
+                        ]
+                    },
+                    {
+                        words: [
+                            { word: "OMNIPOTENCE", clue: "Toute-puissance divine", start: [1, 2], direction: "horizontal" },
+                            { word: "MISERICORDE", clue: "Compassion infinie", start: [3, 1], direction: "vertical" },
+                            { word: "PROVIDENCE", clue: "Soin divin", start: [5, 4], direction: "horizontal" },
+                            { word: "GLORIFICATION", clue: "Élévation finale", start: [2, 7], direction: "vertical" }
+                        ]
+                    },
+                    {
+                        words: [
+                            { word: "TRANSFIGURATION", clue: "Révélation de la gloire", start: [1, 1], direction: "horizontal" },
+                            { word: "RECONCILIATION", clue: "Rétablissement de l'union", start: [3, 3], direction: "vertical" },
+                            { word: "REGENERATION", clue: "Nouvelle naissance", start: [5, 2], direction: "horizontal" },
+                            { word: "JUSTIFICATION", clue: "Déclaration de justice", start: [7, 5], direction: "vertical" }
+                        ]
+                    }
+                ];
+
+                this.initializeEventListeners();
+            }
+
+            initializeEventListeners() {
+                document.getElementById('playButton').addEventListener('click', () => this.handlePlayButtonClick());
+                document.getElementById('checkButton').addEventListener('click', () => this.checkAnswers());
+                document.getElementById('hintButton').addEventListener('click', () => this.showHint());
+                document.getElementById('nextLevelButton').addEventListener('click', () => this.nextLevel());
+                document.getElementById('resetButton').addEventListener('click', () => this.resetGame());
+            }
+
+            handlePlayButtonClick() {
+                this.clickCount++;
+                document.getElementById('clickCount').textContent = this.clickCount;
+                
+                if (this.clickCount <= 7) {
+                    this.showEncouragingWord(this.clickCount - 1);
+                }
+                
+                if (this.clickCount === 7) {
+                    setTimeout(() => {
+                        this.startGame();
+                    }, 2000);
+                }
+            }
+
+            showEncouragingWord(index) {
+                if (index < this.encouragingWords.length) {
+                    const wordsContainer = document.getElementById('encouragingWords');
+                    const wordElement = document.createElement('div');
+                    wordElement.className = 'word-float';
+                    wordElement.textContent = this.encouragingWords[index];
+                    wordElement.style.animationDelay = `${index * 0.3}s`;
+                    wordsContainer.appendChild(wordElement);
+                }
+            }
+
+            startGame() {
+                document.getElementById('startScreen').classList.add('hidden');
+                document.getElementById('gameScreen').classList.remove('hidden');
+                this.setupLevel();
+            }
+
+            setupLevel() {
+                this.clearGrid();
+                const levelWords = this.levelData[this.currentLevel - 1];
+                this.placeWords(levelWords.words);
+                this.createGrid();
+                this.displayClues(levelWords.words);
+                document.getElementById('currentLevel').textContent = this.currentLevel;
+            }
+
+            clearGrid() {
+                this.grid = Array(10).fill().map(() => Array(10).fill(''));
+                this.solution = Array(10).fill().map(() => Array(10).fill(''));
+                this.blocked = Array(10).fill().map(() => Array(10).fill(false));
+            }
+
+            placeWords(words) {
+                words.forEach(wordData => {
+                    const { word, start, direction } = wordData;
+                    const [row, col] = start;
+                    
+                    for (let i = 0; i < word.length; i++) {
+                        if (direction === 'horizontal') {
+                            this.solution[row][col + i] = word[i];
+                        } else {
+                            this.solution[row + i][col] = word[i];
+                        }
+                    }
+                });
+
+                // Bloquer les cellules inutilisées
+                for (let i = 0; i < 10; i++) {
+                    for (let j = 0; j < 10; j++) {
+                        if (this.solution[i][j] === '') {
+                            this.blocked[i][j] = true;
+                        }
+                    }
+                }
+            }
+
+            createGrid() {
+                const gridContainer = document.getElementById('crosswordGrid');
+                gridContainer.innerHTML = '';
+
+                for (let i = 0; i < 10; i++) {
+                    for (let j = 0; j < 10; j++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'cell';
+                        cell.dataset.row = i;
+                        cell.dataset.col = j;
+
+                        if (this.blocked[i][j]) {
+                            cell.classList.add('blocked');
+                        } else {
+                            cell.contentEditable = true;
+                            cell.addEventListener('input', (e) => this.handleCellInput(e, i, j));
+                            cell.addEventListener('keydown', (e) => this.handleKeyNavigation(e, i, j));
+                        }
+
+                        gridContainer.appendChild(cell);
+                    }
+                }
+            }
+
+            handleCellInput(event, row, col) {
+                const value = event.target.textContent.toUpperCase();
+                if (value.length > 1) {
+                    event.target.textContent = value.slice(-1);
+                }
+                this.grid[row][col] = event.target.textContent.toUpperCase();
+                
+                if (this.grid[row][col] === this.solution[row][col]) {
+                    event.target.classList.add('correct');
+                }
+            }
+
+            handleKeyNavigation(event, row, col) {
+                const key = event.key;
+                let newRow = row, newCol = col;
+
+                switch(key) {
+                    case 'ArrowUp': newRow = Math.max(0, row - 1); break;
+                    case 'ArrowDown': newRow = Math.min(9, row + 1); break;
+                    case 'ArrowLeft': newCol = Math.max(0, col - 1); break;
+                    case 'ArrowRight': newCol = Math.min(9, col + 1); break;
+                    default: return;
+                }
+
+                event.preventDefault();
+                const nextCell = document.querySelector(`[data-row="${newRow}"][data-col="${newCol}"]`);
+                if (nextCell && !this.blocked[newRow][newCol]) {
+                    nextCell.focus();
+                }
+            }
+
+            displayClues(words) {
+                const horizontalClues = document.getElementById('horizontalClues');
+                const verticalClues = document.getElementById('verticalClues');
+                
+                horizontalClues.innerHTML = '';
+                verticalClues.innerHTML = '';
+
+                words.forEach((wordData, index) => {
+                    const clueElement = document.createElement('div');
+                    clueElement.className = 'clue';
+                    clueElement.innerHTML = `<strong>${index + 1}.</strong> ${wordData.clue} (${wordData.word.length} lettres)`;
+                    
+                    if (wordData.direction === 'horizontal') {
+                        horizontalClues.appendChild(clueElement);
+                    } else {
+                        verticalClues.appendChild(clueElement);
+                    }
+                });
+            }
+
+            checkAnswers() {
+                let correctCells = 0;
+                let totalCells = 0;
+
+                for (let i = 0; i < 10; i++) {
+                    for (let j = 0; j < 10; j++) {
+                        if (!this.blocked[i][j]) {
+                            totalCells++;
+                            if (this.grid[i][j] === this.solution[i][j]) {
+                                correctCells++;
+                            }
+                        }
+                    }
+                }
+
+                const percentage = (correctCells / totalCells) * 100;
+                this.score += Math.round(percentage * this.currentLevel);
+                document.getElementById('score').textContent = this.score;
+
+                if (percentage === 100) {
+                    alert('🎉 Félicitations ! Niveau terminé !');
+                    document.getElementById('nextLevelButton').style.display = 'inline-block';
+                } else {
+                    alert(`Progression: ${Math.round(percentage)}% - Continue !`);
+                }
+            }
+
+            showHint() {
+                // Révéler une lettre aléatoire
+                const emptyCells = [];
+                for (let i = 0; i < 10; i++) {
+                    for (let j = 0; j < 10; j++) {
+                        if (!this.blocked[i][j] && this.grid[i][j] !== this.solution[i][j]) {
+                            emptyCells.push([i, j]);
+                        }
+                    }
+                }
+
+                if (emptyCells.length > 0) {
+                    const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                    const [row, col] = randomCell;
+                    const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                    cell.textContent = this.solution[row][col];
+                    cell.classList.add('correct');
+                    this.grid[row][col] = this.solution[row][col];
+                    this.score -= 5; // Pénalité pour l'indice
+                    document.getElementById('score').textContent = Math.max(0, this.score);
+                }
+            }
+
+            nextLevel() {
+                if (this.currentLevel < 8) {
+                    this.currentLevel++;
+                    this.setupLevel();
+                    document.getElementById('nextLevelButton').style.display = 'none';
+                } else {
+                    alert(`🏆 Félicitations ! Tu as terminé tous les niveaux ! Score final: ${this.score} points`);
+                }
+            }
+
+            resetGame() {
+                this.currentLevel = 1;
+                this.score = 0;
+                this.clickCount = 0;
+                document.getElementById('score').textContent = '0';
+                document.getElementById('clickCount').textContent = '0';
+                document.getElementById('encouragingWords').innerHTML = '';
+                document.getElementById('startScreen').classList.remove('hidden');
+                document.getElementById('gameScreen').classList.add('hidden');
+                document.getElementById('nextLevelButton').style.display = 'none';
+            }
+        }
+
+        // Initialiser le jeu
+        document.addEventListener('DOMContentLoaded', () => {
+            new ChristianCrosswordGame();
+        });
+    </script>
+</body>
+</html>

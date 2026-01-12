@@ -1,0 +1,424 @@
+// Système de Présence Lobby avec Supabase Realtime
+// Remplace le système localStorage/BroadcastChannel par une solution cloud
+
+class RealtimeLobbySystem {
+    constructor() {
+        this.myPresence = null;
+        this.channel = null;
+        this.onlinePlayers = new Map(); // peerId -> playerInfo
+        this.heartbeatInterval = null;
+        this.presenceCallbacks = [];
+        this.isInitialized = false;
+        
+        // 🆕 Écouter les mises à jour du username
+        window.addEventListener('usernameUpdated', (e) => {
+            if (this.isInitialized && e.detail?.username) {
+                console.log('🔄 Lobby: Mise à jour username détectée:', e.detail.username);
+                this.updateMyPresenceUsername(e.detail.username);
+            }
+        });
+    }
+    
+    // 🆕 Obtenir le username authentifié (priorité authSystem)
+    getMyUsername() {
+        // Priorité 1: authSystem (toujours le plus à jour)
+        if (window.authSystem?.isAuthenticated()) {
+            const user = window.authSystem.getCurrentUser();
+            if (user?.username) {
+                return user.username;
+            }
+        }
+        
+        // Priorité 2: simpleChatSystem (fallback)
+        if (window.simpleChatSystem?.currentUser) {
+            return window.simpleChatSystem.currentUser;
+        }
+        
+        // Fallback: pseudo générique
+        return 'Joueur';
+    }
+    
+    // 🆕 Mettre à jour le username de ma présence
+    async updateMyPresenceUsername(newUsername) {
+        if (!this.myPresence || !this.isInitialized) return;
+        
+        console.log('🔄 Mise à jour du username dans le lobby:', newUsername);
+        this.myPresence.username = newUsername;
+        
+        // Mettre à jour dans Supabase
+        await this.updateMyPresence({ username: newUsername });
+    }
+
+    // Initialiser le système Realtime
+    async init() {
+        if (!window.supabaseClient) {
+            console.warn('⚠️ Supabase non configuré, fallback localStorage uniquement');
+            console.log('📊 Debug - window.supabaseClient:', !!window.supabaseClient);
+            return false;
+        }
+
+        console.log('🌐 Initialisation Lobby Realtime Supabase...');
+
+        try {
+            // Créer un channel Realtime pour le lobby
+            this.channel = window.supabaseClient.channel('lobby:public', {
+                config: {
+                    broadcast: { self: true },
+                    presence: { key: '' }
+                }
+            });
+
+            // Écouter les changements de présence
+            this.channel
+                .on('presence', { event: 'sync' }, () => {
+                    this.syncPresence();
+                })
+                .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+                    console.log('👋 Joueur rejoint:', newPresences);
+                    this.handlePresenceJoin(newPresences);
+                })
+                .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+                    console.log('👋 Joueur parti:', leftPresences);
+                    this.handlePresenceLeave(leftPresences);
+                })
+                .subscribe(async (status) => {
+                    if (status === 'SUBSCRIBED') {
+                        console.log('✅ Lobby Realtime connecté');
+                        this.isInitialized = true;
+                        
+                        // Enregistrer ma présence
+                        await this.registerMyPresence();
+                        
+                        // Démarrer le heartbeat (toutes les 30s)
+                        this.startHeartbeat();
+                    }
+                });
+
+            return true;
+        } catch (err) {
+            console.error('❌ Erreur init Lobby Realtime:', err);
+            return false;
+        }
+    }
+
+    // Enregistrer ma présence
+    async registerMyPresence() {
+        // Si peer pas initialisé, l'initialiser maintenant
+        if (!window.simpleChatSystem?.peer?.id) {
+            console.log('🎯 Initialisation automatique du peer pour le lobby...');
+            
+            if (window.simpleChatSystem && typeof window.simpleChatSystem.initP2P === 'function') {
+                window.simpleChatSystem.initP2P();
+                
+                // Attendre que le peer soit prêt (max 5s)
+                let attempts = 0;
+                while (!window.simpleChatSystem?.peer?.id && attempts < 50) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    attempts++;
+                }
+            }
+        }
+        
+        if (!window.simpleChatSystem?.peer?.id) {
+            console.warn('⚠️ Peer non initialisé après 5s, impossible d\'enregistrer la présence');
+            console.log('📊 Debug - simpleChatSystem:', !!window.simpleChatSystem);
+            console.log('📊 Debug - peer:', !!window.simpleChatSystem?.peer);
+            console.log('📊 Debug - peer.id:', window.simpleChatSystem?.peer?.id);
+            return;
+        }
+
+        const username = this.getMyUsername();
+        const peerId = window.simpleChatSystem.peer.id;
+        
+        // 🔑 Initialiser mon code d'ami
+        if (window.friendsSystem) {
+            window.friendsSystem.setMyFriendCode(peerId);
+        }
+        
+        // Vérifier si on est vraiment dans une salle active (avec au moins 2 joueurs)
+        const isInActiveRoom = window.roomSystem?.roomInfo?.roomId && 
+                               window.roomSystem?.roomInfo?.players?.length > 1;
+        
+        // Vérifier si on est en jeu
+        const isInGame = window.game?.gameStarted || false;
+
+        this.myPresence = {
+            peer_id: peerId,
+            username: username,
+            avatar: '😊',
+            room_code: isInActiveRoom ? window.roomSystem.roomInfo.roomId : null,
+            room_mode: window.roomSystem?.acceptMode || 'manual',
+            player_count: 1,
+            max_players: 8,
+            status: isInGame ? 'in_game' : (isInActiveRoom ? 'in_room' : 'available'),
+            last_seen: new Date().toISOString()
+        };
+
+        try {
+            // Track presence dans le channel (source unique de vérité)
+            await this.channel.track(this.myPresence);
+            console.log('✅ Présence enregistrée:', username, peerId);
+
+            // Notifier les callbacks
+            this.notifyPresenceUpdate();
+        } catch (err) {
+            console.error('❌ Erreur enregistrement présence:', err);
+        }
+    }
+
+    // Synchroniser la présence depuis le channel
+    syncPresence() {
+        if (!this.channel) return;
+
+        const state = this.channel.presenceState();
+        
+        // Convertir en Map (tous les joueurs en ligne)
+        const allOnlinePlayers = new Map();
+        
+        Object.keys(state).forEach(peerId => {
+            const presences = state[peerId];
+            if (presences && presences.length > 0) {
+                const presence = presences[0]; // Prendre la première présence
+                allOnlinePlayers.set(presence.peer_id, presence);
+            }
+        });
+
+        // 🔒 Filtrer pour ne montrer que les amis
+        if (window.friendsSystem) {
+            this.onlinePlayers = window.friendsSystem.filterOnlinePlayersByFriends(allOnlinePlayers);
+            console.log(`👥 ${this.onlinePlayers.size} ami(s) en ligne sur ${allOnlinePlayers.size} joueur(s) total`);
+        } else {
+            // Fallback sans système d'amis
+            this.onlinePlayers = allOnlinePlayers;
+            console.log(`👥 ${this.onlinePlayers.size} joueur(s) en ligne`);
+        }
+
+        this.notifyPresenceUpdate();
+    }
+
+    // Gérer l'arrivée d'un joueur
+    handlePresenceJoin(newPresences) {
+        newPresences.forEach(presence => {
+            // 🔒 Vérifier si c'est un ami avant d'afficher
+            const isMe = presence.peer_id === this.myPresence?.peer_id;
+            const isFriend = window.friendsSystem?.isFriend(presence.peer_id);
+            
+            if (isMe || isFriend) {
+                this.onlinePlayers.set(presence.peer_id, presence);
+                console.log('➕', presence.username, 'a rejoint le lobby');
+                
+                // Mettre à jour la dernière vue de l'ami
+                if (isFriend && window.friendsSystem) {
+                    window.friendsSystem.updateFriendLastSeen(presence.peer_id, presence.username);
+                }
+            }
+        });
+
+        this.notifyPresenceUpdate();
+    }
+
+    // Gérer le départ d'un joueur
+    handlePresenceLeave(leftPresences) {
+        leftPresences.forEach(presence => {
+            this.onlinePlayers.delete(presence.peer_id);
+            console.log('➖', presence.username, 'a quitté le lobby');
+        });
+
+        this.notifyPresenceUpdate();
+    }
+
+    // Démarrer le heartbeat
+    startHeartbeat() {
+        // Nettoyer l'ancien interval si existant
+        if (this.heartbeatInterval) {
+            clearInterval(this.heartbeatInterval);
+        }
+
+        // Heartbeat toutes les 30 secondes
+        this.heartbeatInterval = setInterval(async () => {
+            if (this.myPresence && this.channel) {
+                // Vérifier si on est vraiment dans une salle active
+                const isInActiveRoom = window.roomSystem?.roomInfo?.roomId && 
+                                       window.roomSystem?.roomInfo?.players?.length > 1;
+                
+                // Vérifier si on est en jeu
+                const isInGame = window.game?.gameStarted || false;
+                
+                // Mettre à jour last_seen et status
+                this.myPresence.last_seen = new Date().toISOString();
+                this.myPresence.status = isInGame ? 'in_game' : (isInActiveRoom ? 'in_room' : 'available');
+                this.myPresence.room_code = isInActiveRoom ? window.roomSystem.roomInfo.roomId : null;
+                this.myPresence.username = this.getMyUsername(); // 🆕 Garder le username à jour
+                
+                // Update dans le channel uniquement
+                await this.channel.track(this.myPresence);
+            }
+        }, 30000); // 30 secondes
+
+        console.log('💓 Heartbeat démarré (30s)');
+    }
+
+    // Mettre à jour ma présence
+    async updateMyPresence(updates) {
+        if (!this.myPresence) return;
+
+        // Fusionner les updates
+        this.myPresence = {
+            ...this.myPresence,
+            ...updates,
+            last_seen: new Date().toISOString()
+        };
+
+        try {
+            // Update channel uniquement
+            await this.channel.track(this.myPresence);
+
+            console.log('🔄 Présence mise à jour:', updates);
+            this.notifyPresenceUpdate();
+        } catch (err) {
+            console.error('❌ Erreur update présence:', err);
+        }
+    }
+
+    // Mettre à jour le code de salle
+    async updateRoomCode(roomCode) {
+        await this.updateMyPresence({
+            room_code: roomCode,
+            player_count: 1,
+            status: roomCode ? 'in_room' : 'available'
+        });
+    }
+
+    // Mettre à jour le mode d'acceptation
+    async updateAcceptMode(mode) {
+        await this.updateMyPresence({
+            room_mode: mode
+        });
+    }
+
+    // Mettre à jour le statut
+    async updateStatus(status) {
+        await this.updateMyPresence({
+            status: status
+        });
+    }
+
+    // Récupérer les joueurs disponibles
+    getAvailablePlayers() {
+        return Array.from(this.onlinePlayers.values())
+            .filter(player => {
+                // Exclure soi-même et les joueurs en partie
+                return player.peer_id !== this.myPresence?.peer_id && 
+                       player.status === 'lobby';
+            });
+    }
+
+    // Récupérer tous les joueurs (y compris soi-même, mais sans bots)
+    getAllPlayers() {
+        return Array.from(this.onlinePlayers.values())
+            .filter(player => {
+                // Exclure les bots locaux (peer_id commence par 'bot-')
+                return !player.peer_id.startsWith('bot-');
+            });
+    }
+
+    // Récupérer un joueur spécifique
+    getPlayer(peerId) {
+        return this.onlinePlayers.get(peerId);
+    }
+
+    // S'abonner aux changements de présence
+    onPresenceChange(callback) {
+        this.presenceCallbacks.push(callback);
+    }
+
+    // Notifier les callbacks
+    notifyPresenceUpdate() {
+        const players = this.getAvailablePlayers();
+        
+        // Dispatcher un événement global pour mise à jour réactive
+        window.dispatchEvent(new CustomEvent('presence_updated', {
+            detail: { players, count: this.onlinePlayers.size }
+        }));
+        
+        this.presenceCallbacks.forEach(cb => {
+            try {
+                cb(players);
+            } catch (err) {
+                console.error('❌ Erreur callback présence:', err);
+            }
+        });
+    }
+
+    // Nettoyer avant fermeture
+    async cleanup() {
+        console.log('🧹 Nettoyage Lobby Realtime...');
+
+        // Arrêter le heartbeat
+        if (this.heartbeatInterval) {
+            clearInterval(this.heartbeatInterval);
+        }
+
+        // Untrack presence
+        if (this.channel && this.myPresence) {
+            await this.channel.untrack();
+        }
+
+        // Unsubscribe channel
+        if (this.channel) {
+            await this.channel.unsubscribe();
+        }
+
+        console.log('✅ Lobby Realtime nettoyé');
+    }
+
+    // Arrêter le système
+    async stop() {
+        await this.cleanup();
+        this.onlinePlayers.clear();
+        this.myPresence = null;
+        this.isInitialized = false;
+    }
+}
+
+// Instance globale
+window.realtimeLobbySystem = new RealtimeLobbySystem();
+
+// Nettoyer avant fermeture
+window.addEventListener('beforeunload', async () => {
+    await window.realtimeLobbySystem.cleanup();
+});
+
+// Auto-initialiser si Supabase est disponible
+if (typeof window.supabaseClient !== 'undefined' && window.supabaseClient) {
+    console.log('🔵 Supabase détecté, préparation auto-init lobby...');
+    
+    // Écouter l'événement roomCreated émis par simple-chat.js
+    window.addEventListener('roomCreated', async (e) => {
+        if (!window.realtimeLobbySystem.isInitialized) {
+            console.log('🎯 roomCreated event détecté, initialisation du lobby...');
+            await window.realtimeLobbySystem.init();
+        }
+    });
+    
+    // Initialiser immédiatement après chargement de la page
+    window.addEventListener('DOMContentLoaded', async () => {
+        // Attendre que simpleChatSystem soit prêt
+        let attempts = 0;
+        const waitForPeer = setInterval(async () => {
+            attempts++;
+            console.log(`🔍 Tentative ${attempts}/10 - Recherche peer...`);
+            
+            if (window.simpleChatSystem?.peer?.id && !window.realtimeLobbySystem.isInitialized) {
+                clearInterval(waitForPeer);
+                console.log('✅ Peer trouvé:', window.simpleChatSystem.peer.id);
+                await window.realtimeLobbySystem.init();
+            } else if (attempts >= 10) {
+                clearInterval(waitForPeer);
+                console.warn('⚠️ Timeout: Peer non trouvé après 10 tentatives');
+            }
+        }, 500);
+    });
+}
+
+console.log('✅ Realtime Lobby System chargé');
