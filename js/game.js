@@ -6,6 +6,12 @@ if (typeof config === 'undefined') {
     throw new Error('config.js doit être chargé avant game.js');
 }
 
+// Vérifier que gameDataManager est chargé
+if (typeof gameDataManager === 'undefined') {
+    console.error('❌ ERREUR: gameData.js non chargé. Rechargez la page (Ctrl+F5).');
+    throw new Error('gameData.js doit être chargé avant game.js');
+}
+
 class ChristianCrosswordGame {
     constructor() {
         this.clickCount = 0;
@@ -43,8 +49,7 @@ class ChristianCrosswordGame {
         this.multiplayerMode = false;
         this.multiplayerManager = null;
 
-        // Vérifier s'il y a une sauvegarde et demander à l'utilisateur
-        this.checkAndAskForResumeOrRestart();
+        // Charger les paramètres audio
         this.loadAudioSettings();
 
         this.initializeEventListeners();
@@ -2104,6 +2109,12 @@ class ChristianCrosswordGame {
         this.currentWordIndex = null;
         this.lastMoveDirection = null;
 
+        // Vérifier que gameDataManager est disponible
+        if (typeof gameDataManager === 'undefined') {
+            console.error('❌ gameDataManager non disponible');
+            return;
+        }
+
         const levelData = gameDataManager.getLevelData(this.currentLevel);
 
         if (levelData) {
@@ -2143,18 +2154,44 @@ class ChristianCrosswordGame {
         // Initialiser un tableau pour détecter les intersections
         this.intersections = Array(config.gridSize).fill().map(() => Array(config.gridSize).fill(null));
         
+        // 🎯 NOUVEAU: Créer une map des propriétaires de chaque case
+        this.cellOwnerMap = Array(config.gridSize).fill().map(() => 
+            Array(config.gridSize).fill().map(() => [])
+        );
+        
         // Première passe : créer un map des positions utilisées par chaque mot
         const cellUsageMap = Array(config.gridSize).fill().map(() => 
             Array(config.gridSize).fill().map(() => [])
         );
         
+        // Suivre l'ordre de placement des mots
+        const wordOrderMap = Array(config.gridSize).fill().map(() => 
+            Array(config.gridSize).fill().map(() => [])
+        );
+        
+        // Suivre le nombre d'intersections par mot
+        const wordIntersectionCount = new Map();
+        
         words.forEach((wordData, wordIndex) => {
+            wordIntersectionCount.set(wordIndex, 0);
             const { word, path, start, direction } = wordData;
             
             if (path && Array.isArray(path)) {
                 path.forEach(([row, col], letterIndex) => {
                     cellUsageMap[row][col].push({
                         wordIndex,
+                        letterIndex,
+                        letter: word[letterIndex],
+                        direction: direction || 'bent'
+                    });
+                    wordOrderMap[row][col].push({
+                        wordIndex,
+                        letter: word[letterIndex]
+                    });
+                    // 🎯 Ajouter aussi au cellOwnerMap permanent
+                    this.cellOwnerMap[row][col].push({
+                        wordIndex,
+                        word: word,
                         letterIndex,
                         letter: word[letterIndex],
                         direction: direction || 'bent'
@@ -2171,6 +2208,18 @@ class ChristianCrosswordGame {
                         letter: word[i],
                         direction
                     });
+                    wordOrderMap[targetRow][targetCol].push({
+                        wordIndex,
+                        letter: word[i]
+                    });
+                    // 🎯 Ajouter aussi au cellOwnerMap permanent
+                    this.cellOwnerMap[targetRow][targetCol].push({
+                        wordIndex,
+                        word: word,
+                        letterIndex: i,
+                        letter: word[i],
+                        direction
+                    });
                 }
             }
         });
@@ -2178,6 +2227,8 @@ class ChristianCrosswordGame {
         // Deuxième passe : placer les lettres et détecter les vraies intersections
         words.forEach((wordData, wordIndex) => {
             const { word, path, start, direction } = wordData;
+
+            console.log(`📝 Placement mot #${wordIndex} "${word}": path=${path?.length || 0} lettres, start=${start}, direction=${direction}`);
 
             // Support des mots coudés avec path (nouveau système)
             if (path && Array.isArray(path)) {
@@ -2192,37 +2243,98 @@ class ChristianCrosswordGame {
                         const otherUsage = cellUsage.find(u => u.wordIndex !== wordIndex);
                         
                         if (otherUsage) {
+                            // Déterminer les directions AVANT tout traitement
                             const thisDirection = direction || 'bent';
                             const otherDirection = otherUsage.direction;
+                            
+                            // Vérifier si l'un des deux mots a déjà une intersection
+                            const thisWordHasIntersection = wordIntersectionCount.get(wordIndex) > 0;
+                            const otherWordHasIntersection = wordIntersectionCount.get(otherUsage.wordIndex) > 0;
+                            
+                            if (thisWordHasIntersection || otherWordHasIntersection) {
+                                console.warn(`⚠️ Intersection ignorée à [${row},${col}]: au moins un mot a déjà une intersection`);
+                                
+                                // 🎯 QUAND MÊME créer une intersection "technique" pour marquer que deux mots se croisent
+                                const wordsAtThisCell = wordOrderMap[row][col];
+                                if (wordsAtThisCell && wordsAtThisCell.length >= 2) {
+                                    const letter1 = wordsAtThisCell[0].letter;
+                                    const letter2 = wordsAtThisCell[1].letter;
+                                    
+                                    // Créer une intersection technique (sans intersection visuelle)
+                                    this.intersections[row][col] = {
+                                        horizontal: currentLetter,
+                                        vertical: otherUsage.letter,
+                                        letter1: letter1,
+                                        letter2: letter2,
+                                        word1Index: wordsAtThisCell[0].wordIndex,
+                                        word2Index: wordsAtThisCell[1].wordIndex,
+                                        word1Direction: thisDirection,
+                                        word2Direction: otherDirection,
+                                        ignored: true // Marquer comme intersection ignorée
+                                    };
+                                    console.log(`🔧 Intersection technique créée à [${row},${col}]: mot #${wordsAtThisCell[0].wordIndex} + mot #${wordsAtThisCell[1].wordIndex}`);
+                                }
+                                
+                                // Placer les lettres normalement (chaque mot place sa lettre)
+                                if (!this.solution[row][col]) {
+                                    this.solution[row][col] = currentLetter;
+                                }
+                                // Continuer pour placer les autres lettres du mot
+                                continue;
+                            }
                             
                             // Créer une intersection seulement si les directions sont différentes
                             // et qu'aucun des deux n'est un mot coudé
                             if (thisDirection !== 'bent' && otherDirection !== 'bent' && 
                                 thisDirection !== otherDirection) {
                                 
-                                let horizLetter, vertLetter;
-                                if (thisDirection === 'horizontal') {
-                                    horizLetter = currentLetter;
-                                    vertLetter = otherUsage.letter;
-                                } else if (thisDirection === 'vertical') {
-                                    horizLetter = otherUsage.letter;
-                                    vertLetter = currentLetter;
-                                }
+                                // Utiliser l'ordre des mots pour déterminer l'ordre des lettres
+                                const wordsAtThisCell = wordOrderMap[row][col];
+                                const letter1 = wordsAtThisCell[0].letter; // Premier mot posé
+                                const letter2 = wordsAtThisCell[1].letter; // Deuxième mot posé
                                 
-                                // Stocker l'intersection
+                                // Incrémenter les compteurs d'intersection
+                                wordIntersectionCount.set(wordIndex, wordIntersectionCount.get(wordIndex) + 1);
+                                wordIntersectionCount.set(otherUsage.wordIndex, wordIntersectionCount.get(otherUsage.wordIndex) + 1);
+                                
+                                // Stocker l'intersection dans l'ordre de placement
                                 this.intersections[row][col] = {
-                                    horizontal: horizLetter,
-                                    vertical: vertLetter,
-                                    letter1: horizLetter,
-                                    letter2: vertLetter
+                                    horizontal: thisDirection === 'horizontal' ? currentLetter : otherUsage.letter,
+                                    vertical: thisDirection === 'vertical' ? currentLetter : otherUsage.letter,
+                                    letter1: letter1, // Premier mot
+                                    letter2: letter2, // Deuxième mot
+                                    word1Index: wordsAtThisCell[0].wordIndex, // Index du premier mot
+                                    word2Index: wordsAtThisCell[1].wordIndex, // Index du deuxième mot
+                                    word1Direction: thisDirection === 'horizontal' ? thisDirection : otherDirection,
+                                    word2Direction: thisDirection === 'vertical' ? thisDirection : otherDirection
                                 };
-                                this.solution[row][col] = `${horizLetter}/${vertLetter}`;
-                                console.log(`📍 Intersection à [${row},${col}]: H="${horizLetter}" V="${vertLetter}"`);
+                                this.solution[row][col] = `${letter1}/${letter2}`;
+                                console.log(`📍 Intersection à [${row},${col}]: 1er="${letter1}" (mot #${wordsAtThisCell[0].wordIndex}) / 2e="${letter2}" (mot #${wordsAtThisCell[1].wordIndex})`);
                             } else {
-                                // Collision invalide détectée (même direction ou mot coudé)
-                                console.error(`❌ COLLISION INVALIDE à [${row},${col}]: mot1="${word}" (${thisDirection}) avec mot2 (${otherDirection})`);
-                                // Placer quand même la lettre pour l'instant
-                                if (!this.solution[row][col]) {
+                                // Collision détectée (même direction ou mot coudé)
+                                // Créer un carrefour partagé automatiquement
+                                const wordsAtThisCell = wordOrderMap[row][col];
+                                if (wordsAtThisCell && wordsAtThisCell.length >= 2) {
+                                    const letter1 = wordsAtThisCell[0].letter; // Premier mot posé
+                                    const letter2 = wordsAtThisCell[1].letter; // Deuxième mot posé
+                                    
+                                    // Incrémenter les compteurs d'intersection
+                                    wordIntersectionCount.set(wordIndex, wordIntersectionCount.get(wordIndex) + 1);
+                                    wordIntersectionCount.set(otherUsage.wordIndex, wordIntersectionCount.get(otherUsage.wordIndex) + 1);
+                                    
+                                    this.intersections[row][col] = {
+                                        horizontal: currentLetter,
+                                        vertical: otherUsage.letter,
+                                        letter1: letter1, // Premier mot
+                                        letter2: letter2, // Deuxième mot
+                                        word1Index: wordsAtThisCell[0].wordIndex, // Index du premier mot
+                                        word2Index: wordsAtThisCell[1].wordIndex, // Index du deuxième mot
+                                        word1Direction: thisDirection,
+                                        word2Direction: otherDirection
+                                    };
+                                    this.solution[row][col] = `${letter1}/${letter2}`;
+                                    console.log(`🚦 Carrefour partagé à [${row},${col}]: 1er="${letter1}" (mot #${wordsAtThisCell[0].wordIndex}) / 2e="${letter2}" (mot #${wordsAtThisCell[1].wordIndex}) (${thisDirection}/${otherDirection})`);
+                                } else if (!this.solution[row][col]) {
                                     this.solution[row][col] = currentLetter;
                                 }
                             }
@@ -2231,6 +2343,8 @@ class ChristianCrosswordGame {
                         // Case utilisée par un seul mot
                         if (!this.solution[row][col]) {
                             this.solution[row][col] = currentLetter;
+                        } else {
+                            console.warn(`⚠️ Case [${row},${col}] déjà occupée par "${this.solution[row][col]}", tentative de placer "${currentLetter}" du mot #${wordIndex}`);
                         }
                     }
                 }
@@ -2249,26 +2363,68 @@ class ChristianCrosswordGame {
                         const otherUsage = cellUsage.find(u => u.wordIndex !== wordIndex);
                         
                         if (otherUsage && direction !== otherUsage.direction) {
-                            let horizLetter, vertLetter;
-                            if (direction === 'horizontal') {
-                                horizLetter = currentLetter;
-                                vertLetter = otherUsage.letter;
-                            } else {
-                                horizLetter = otherUsage.letter;
-                                vertLetter = currentLetter;
+                            // Vérifier si l'un des deux mots a déjà une intersection
+                            const thisWordHasIntersection = wordIntersectionCount.get(wordIndex) > 0;
+                            const otherWordHasIntersection = wordIntersectionCount.get(otherUsage.wordIndex) > 0;
+                            
+                            if (thisWordHasIntersection || otherWordHasIntersection) {
+                                console.warn(`⚠️ Intersection ignorée à [${targetRow},${targetCol}]: au moins un mot a déjà une intersection`);
+                                if (!this.solution[targetRow][targetCol]) {
+                                    this.solution[targetRow][targetCol] = currentLetter;
+                                }
+                                continue;
                             }
                             
+                            // Utiliser l'ordre des mots pour déterminer l'ordre des lettres
+                            const wordsAtThisCell = wordOrderMap[targetRow][targetCol];
+                            const letter1 = wordsAtThisCell[0].letter; // Premier mot posé
+                            const letter2 = wordsAtThisCell[1].letter; // Deuxième mot posé
+                            
+                            // Incrémenter les compteurs d'intersection
+                            wordIntersectionCount.set(wordIndex, wordIntersectionCount.get(wordIndex) + 1);
+                            wordIntersectionCount.set(otherUsage.wordIndex, wordIntersectionCount.get(otherUsage.wordIndex) + 1);
+                            
                             this.intersections[targetRow][targetCol] = {
-                                horizontal: horizLetter,
-                                vertical: vertLetter,
-                                letter1: horizLetter,
-                                letter2: vertLetter
+                                horizontal: direction === 'horizontal' ? currentLetter : otherUsage.letter,
+                                vertical: direction === 'vertical' ? currentLetter : otherUsage.letter,
+                                letter1: letter1, // Premier mot
+                                letter2: letter2  // Deuxième mot
                             };
-                            this.solution[targetRow][targetCol] = `${horizLetter}/${vertLetter}`;
-                            console.log(`📍 Intersection à [${targetRow},${targetCol}]: H="${horizLetter}" V="${vertLetter}"`);
+                            this.solution[targetRow][targetCol] = `${letter1}/${letter2}`;
+                            console.log(`📍 Intersection à [${targetRow},${targetCol}]: 1er="${letter1}" 2e="${letter2}"`);
                         } else if (otherUsage && direction === otherUsage.direction) {
-                            console.error(`❌ COLLISION INVALIDE à [${targetRow},${targetCol}]: deux mots ${direction}`);
-                            if (!this.solution[targetRow][targetCol]) {
+                            // Vérifier si l'un des deux mots a déjà une intersection
+                            const thisWordHasIntersection = wordIntersectionCount.get(wordIndex) > 0;
+                            const otherWordHasIntersection = wordIntersectionCount.get(otherUsage.wordIndex) > 0;
+                            
+                            if (thisWordHasIntersection || otherWordHasIntersection) {
+                                console.warn(`⚠️ Carrefour ignoré à [${targetRow},${targetCol}]: au moins un mot a déjà une intersection`);
+                                if (!this.solution[targetRow][targetCol]) {
+                                    this.solution[targetRow][targetCol] = currentLetter;
+                                }
+                                continue;
+                            }
+                            
+                            // Collision détectée (même direction)
+                            // Créer un carrefour partagé automatiquement
+                            const wordsAtThisCell = wordOrderMap[targetRow][targetCol];
+                            if (wordsAtThisCell && wordsAtThisCell.length >= 2) {
+                                const letter1 = wordsAtThisCell[0].letter; // Premier mot posé
+                                const letter2 = wordsAtThisCell[1].letter; // Deuxième mot posé
+                                
+                                // Incrémenter les compteurs d'intersection
+                                wordIntersectionCount.set(wordIndex, wordIntersectionCount.get(wordIndex) + 1);
+                                wordIntersectionCount.set(otherUsage.wordIndex, wordIntersectionCount.get(otherUsage.wordIndex) + 1);
+                                
+                                this.intersections[targetRow][targetCol] = {
+                                    horizontal: currentLetter,
+                                    vertical: otherUsage.letter,
+                                    letter1: letter1, // Premier mot
+                                    letter2: letter2  // Deuxième mot
+                                };
+                                this.solution[targetRow][targetCol] = `${letter1}/${letter2}`;
+                                console.log(`🚦 Carrefour partagé à [${targetRow},${targetCol}]: 1er="${letter1}" 2e="${letter2}" (même direction: ${direction})`);
+                            } else if (!this.solution[targetRow][targetCol]) {
                                 this.solution[targetRow][targetCol] = currentLetter;
                             }
                         }
@@ -2470,47 +2626,78 @@ class ChristianCrosswordGame {
                         document.querySelectorAll('.cell.focused').forEach(c => c.classList.remove('focused'));
                         cell.classList.add('focused');
                         
-                        // Déterminer le mot en cours quand on clique sur une case
-                        // Utiliser this.words (version enrichie avec directions) au lieu de levelData.words
-                        if (this.words && this.words.length > 0) {
-                            // Trouver tous les mots contenant cette case
-                            const wordsAtCell = this.words
-                                .map((wordData, index) => ({
-                                    wordData,
-                                    index,
-                                    cellIndex: wordData.path ? wordData.path.findIndex(([r, c]) => r === i && c === j) : -1
-                                }))
-                                .filter(w => w.cellIndex !== -1);
+                        // 🎯 Utiliser cellOwnerMap pour trouver les mots de cette case
+                        const owners = this.cellOwnerMap && this.cellOwnerMap[i] && this.cellOwnerMap[i][j];
+                        
+                        if (owners && owners.length > 0) {
+                            // Convertir en format compatible avec le code existant
+                            const wordsAtCell = owners.map(owner => ({
+                                wordData: this.words[owner.wordIndex],
+                                index: owner.wordIndex,
+                                cellIndex: owner.letterIndex
+                            }));
                             
-                            if (wordsAtCell.length > 0) {
-                                let selectedWord = null;
-                                
-                                // Si lastMoveDirection est défini, privilégier cette direction
-                                if (this.lastMoveDirection) {
-                                    const wordInDirection = wordsAtCell.find(w => w.wordData.direction === this.lastMoveDirection);
-                                    selectedWord = wordInDirection || wordsAtCell[0];
-                                } else {
-                                    // En mode Couple, privilégier le vertical (bleu)
-                                    // En mode Normal/Race, privilégier l'horizontal
-                                    if (this.gameMode === 'couple') {
-                                        const verticalWord = wordsAtCell.find(w => w.wordData.direction === 'vertical');
-                                        selectedWord = verticalWord || wordsAtCell[0];
-                                    } else {
-                                        const horizontalWord = wordsAtCell.find(w => w.wordData.direction === 'horizontal');
-                                        selectedWord = horizontalWord || wordsAtCell[0];
+                            let selectedWord = null;
+                            
+                            console.log(`🖱️ Clic sur [${i},${j}]: ${wordsAtCell.length} mot(s) propriétaire(s):`, wordsAtCell.map(w => `#${w.index} "${w.wordData.word}"`));
+                            
+                            // 🚨 VÉRIFICATION: Si plusieurs mots, ça devrait être une intersection
+                                if (wordsAtCell.length > 1) {
+                                    const isIntersection = this.intersections && this.intersections[i] && this.intersections[i][j];
+                                    if (!isIntersection) {
+                                        console.error(`❌ ERREUR: Case [${i},${j}] utilisée par ${wordsAtCell.length} mots mais PAS d'intersection!`, 
+                                            wordsAtCell.map(w => `#${w.index} "${w.wordData.word}" pos=${w.cellIndex}/${w.wordData.path?.length}`));
                                     }
+                                }
+                                
+                                // 🎯 NOUVEAU: Si le mot actuel ne contient PAS cette case, on DOIT changer de mot
+                                const currentWordContainsThisCell = this.currentWordIndex !== null && 
+                                    wordsAtCell.some(w => w.index === this.currentWordIndex);
+                                
+                                if (!currentWordContainsThisCell && wordsAtCell.length === 1) {
+                                    // Cette case appartient à UN SEUL mot : c'est forcément celui-là
+                                    selectedWord = wordsAtCell[0];
+                                    console.log(`🎯 Auto-switch: case n'appartient qu'au mot #${selectedWord.index} "${selectedWord.wordData.word}"`);
+                                } else if (currentWordContainsThisCell) {
+                                    // Garder le mot actuel si possible
+                                    selectedWord = wordsAtCell.find(w => w.index === this.currentWordIndex);
+                                    console.log(`✅ Garder mot actuel #${this.currentWordIndex}`);
+                                } else {
+                                    // Intersection ou choix multiple : choisir le mot le moins avancé (plus de cases vides)
+                                    let bestWord = wordsAtCell[0];
+                                    let maxEmptyCells = 0;
+                                    
+                                    for (const w of wordsAtCell) {
+                                        let emptyCells = 0;
+                                        if (w.wordData.path) {
+                                            for (const [row, col] of w.wordData.path) {
+                                                const cellValue = this.grid[row][col];
+                                                if (!cellValue || cellValue === '' || 
+                                                    (cellValue.includes('/') && (cellValue === '/' || cellValue.endsWith('/') || cellValue.startsWith('/')))) {
+                                                    emptyCells++;
+                                                }
+                                            }
+                                        }
+                                        
+                                        if (emptyCells > maxEmptyCells) {
+                                            maxEmptyCells = emptyCells;
+                                            bestWord = w;
+                                        }
+                                    }
+                                    
+                                    selectedWord = bestWord;
+                                    console.log(`🎯 Choix intelligent: mot #${selectedWord.index} "${selectedWord.wordData.word}" (${maxEmptyCells} cases vides)`);
                                 }
                                 
                                 // Mettre à jour l'index ET la direction
                                 this.currentWordIndex = selectedWord.index;
                                 this.lastMoveDirection = selectedWord.wordData.direction;
                                 console.log(`🎯 Focus: Mot #${this.currentWordIndex} "${selectedWord.wordData.word}" direction=${this.lastMoveDirection} à [${i},${j}]`);
-                            } else {
-                                // Aucun mot trouvé à cette case (cas rare, probablement une case bloquée)
-                                console.warn('⚠️ Aucun mot trouvé à la case', i, j);
-                                this.currentWordIndex = null;
-                                this.lastMoveDirection = null;
-                            }
+                        } else {
+                            // Aucun propriétaire trouvé (case bloquée ou vide)
+                            console.warn(`⚠️ Aucun mot propriétaire à la case [${i},${j}]`);
+                            this.currentWordIndex = null;
+                            this.lastMoveDirection = null;
                         }
                     });
 
@@ -2523,24 +2710,57 @@ class ChristianCrosswordGame {
                         const value = e.target.value.toUpperCase();
                         const isIntersection = cell.classList.contains('intersection-cell');
                         
+                        console.log(`⌨️ Input [${i},${j}]: "${value}" | intersection=${isIntersection} | currentWordIndex=${this.currentWordIndex}`);
+                        
                         if (isIntersection) {
                             // Gérer intersection avec 2 lettres
-                            // Déterminer quelle lettre saisir en fonction du mot en cours
+                            // 🔒 PRIORITÉ ABSOLUE : garder le mot en cours
                             let currentWord = null;
                             
+                            // 🎯 NOUVEAU: Utiliser les infos de l'intersection pour identifier le mot
+                            const intersectionData = this.intersections && this.intersections[i] && this.intersections[i][j];
+                            
                             if (this.currentWordIndex !== null && this.words && this.words[this.currentWordIndex]) {
+                                // ✅ Mot actuel défini, on le garde
                                 currentWord = this.words[this.currentWordIndex];
-                            } else if (this.words && this.words.length > 0) {
-                                // Fallback : trouver le premier mot à cette intersection
+                                console.log(`✅ Intersection: GARDER mot #${this.currentWordIndex} "${currentWord.word}"`);
+                            } else if (intersectionData && intersectionData.word1Index !== undefined && intersectionData.word2Index !== undefined) {
+                                // Utiliser les infos de l'intersection pour choisir intelligemment
+                                const word1 = this.words[intersectionData.word1Index];
+                                const word2 = this.words[intersectionData.word2Index];
+                                
+                                // Si on a une direction de mouvement, choisir le mot correspondant
+                                if (this.lastMoveDirection === word1.direction) {
+                                    currentWord = word1;
+                                    this.currentWordIndex = intersectionData.word1Index;
+                                    console.log(`🎯 Intersection: utiliser mot #${this.currentWordIndex} "${currentWord.word}" (direction=${this.lastMoveDirection})`);
+                                } else if (this.lastMoveDirection === word2.direction) {
+                                    currentWord = word2;
+                                    this.currentWordIndex = intersectionData.word2Index;
+                                    console.log(`🎯 Intersection: utiliser mot #${this.currentWordIndex} "${currentWord.word}" (direction=${this.lastMoveDirection})`);
+                                } else {
+                                    // Par défaut, prendre le premier mot
+                                    currentWord = word1;
+                                    this.currentWordIndex = intersectionData.word1Index;
+                                    console.log(`⚠️ Intersection: défaut mot #${this.currentWordIndex} "${currentWord.word}"`);
+                                }
+                            } else if (this.lastMoveDirection && this.words && this.words.length > 0) {
+                                // Fallback intelligent : chercher le mot dans la même direction que le mouvement précédent
                                 const wordsAtCell = this.words
                                     .map((wordData, index) => ({ wordData, index }))
                                     .filter(w => w.wordData.path && w.wordData.path.some(([r, c]) => r === i && c === j));
                                 
-                                if (wordsAtCell.length > 0) {
-                                    currentWord = wordsAtCell[0].wordData;
-                                    this.currentWordIndex = wordsAtCell[0].index;
+                                console.log(`🔍 Intersection [${i},${j}]: ${wordsAtCell.length} mot(s) détecté(s):`, wordsAtCell.map(w => `#${w.index} "${w.wordData.word}"`));
+                                
+                                // Privilégier le mot dans la même direction
+                                const wordInSameDirection = wordsAtCell.find(w => w.wordData.direction === this.lastMoveDirection);
+                                const selectedWord = wordInSameDirection || wordsAtCell[0];
+                                
+                                if (selectedWord) {
+                                    currentWord = selectedWord.wordData;
+                                    this.currentWordIndex = selectedWord.index;
                                     this.lastMoveDirection = currentWord.direction;
-                                    console.warn('⚠️ Mot actuel non défini à l\'intersection, utilisation du fallback:', currentWord.word);
+                                    console.warn(`⚠️ Fallback intelligent: mot #${this.currentWordIndex} "${currentWord.word}" (direction=${this.lastMoveDirection})`);
                                 }
                             }
                             
@@ -2550,8 +2770,24 @@ class ChristianCrosswordGame {
                                 const letter1Span = cell.querySelector('.cell-letter-horiz');
                                 const letter2Span = cell.querySelector('.cell-letter-vert');
                                 
+                                console.log(`📝 Saisie intersection: mot #${this.currentWordIndex} "${currentWord.word}" direction=${currentWord.direction}`);
+                                
+                                // 🎯 Utiliser les infos de l'intersection pour savoir quelle lettre modifier
+                                const intersectionData = this.intersections && this.intersections[i] && this.intersections[i][j];
+                                let isWord1 = false;
+                                
+                                if (intersectionData && intersectionData.word1Index !== undefined && intersectionData.word2Index !== undefined) {
+                                    // Utiliser les index sauvegardés dans l'intersection
+                                    isWord1 = (this.currentWordIndex === intersectionData.word1Index);
+                                    console.log(`🔍 Intersection: mot actuel=${this.currentWordIndex}, word1=${intersectionData.word1Index}, word2=${intersectionData.word2Index}, isWord1=${isWord1}`);
+                                } else {
+                                    // Fallback : utiliser la direction
+                                    isWord1 = (currentWord.direction === 'horizontal');
+                                }
+                                
                                 // Mettre à jour seulement la lettre correspondant au mot en cours
-                                if (currentWord.direction === 'horizontal') {
+                                if (isWord1) {
+                                    // On tape le premier mot (letter1)
                                     letter1Span.textContent = letter;
                                     // Garder letter2 tel quel si déjà rempli
                                     const currentValue = this.grid[i][j];
@@ -2562,6 +2798,7 @@ class ChristianCrosswordGame {
                                         this.grid[i][j] = `${letter}/`;
                                     }
                                 } else {
+                                    // On tape le deuxième mot (letter2)
                                     letter2Span.textContent = letter;
                                     // Garder letter1 tel quel si déjà rempli
                                     const currentValue = this.grid[i][j];
@@ -2603,6 +2840,10 @@ class ChristianCrosswordGame {
                                 // Vider l'input et avancer
                                 input.value = '';
                                 setTimeout(() => {
+                                    // 🔒 GARDER le mot actuel pour continuer après l'intersection
+                                    const savedWordIndex = this.currentWordIndex;
+                                    const savedDirection = this.lastMoveDirection;
+                                    console.log(`🔄 Intersection: continuer mot #${savedWordIndex} direction=${savedDirection}`);
                                     this.moveToNextCell(i, j);
                                     this.checkIfLevelComplete();
                                     this.saveGame(); // 💾 Sauvegarde auto
@@ -2616,10 +2857,33 @@ class ChristianCrosswordGame {
                                 const letter1Span = cell.querySelector('.cell-letter-horiz');
                                 const letter2Span = cell.querySelector('.cell-letter-vert');
                                 
-                                letter1Span.textContent = letter1;
-                                letter2Span.textContent = letter2;
+                                // 🎯 Utiliser les infos de l'intersection pour placer les lettres dans le bon ordre
+                                const intersectionData = this.intersections && this.intersections[i] && this.intersections[i][j];
                                 
-                                this.grid[i][j] = `${letter1}/${letter2}`;
+                                if (intersectionData && currentWord) {
+                                    // Déterminer quelle lettre va où selon le mot en cours
+                                    if (this.currentWordIndex === intersectionData.word1Index) {
+                                        // On tape le premier mot : letter1 = notre mot, letter2 = l'autre
+                                        letter1Span.textContent = letter1;
+                                        letter2Span.textContent = letter2 || intersectionData.letter2;
+                                        this.grid[i][j] = `${letter1}/${letter2 || intersectionData.letter2}`;
+                                    } else if (this.currentWordIndex === intersectionData.word2Index) {
+                                        // On tape le deuxième mot : letter2 = notre mot, letter1 = l'autre
+                                        letter1Span.textContent = letter1 || intersectionData.letter1;
+                                        letter2Span.textContent = letter2;
+                                        this.grid[i][j] = `${letter1 || intersectionData.letter1}/${letter2}`;
+                                    } else {
+                                        // Cas par défaut
+                                        letter1Span.textContent = letter1;
+                                        letter2Span.textContent = letter2;
+                                        this.grid[i][j] = `${letter1}/${letter2}`;
+                                    }
+                                } else {
+                                    // Pas d'info intersection, mode classique
+                                    letter1Span.textContent = letter1;
+                                    letter2Span.textContent = letter2;
+                                    this.grid[i][j] = `${letter1}/${letter2}`;
+                                }
                                 
                                 // Son de placement de lettre
                                 if (window.audioSystem) {
@@ -2642,10 +2906,19 @@ class ChristianCrosswordGame {
                                 // Vider l'input et avancer
                                 input.value = '';
                                 setTimeout(() => {
+                                    // 🔒 GARDER le mot actuel pour continuer après l'intersection
+                                    const savedWordIndex = this.currentWordIndex;
+                                    const savedDirection = this.lastMoveDirection;
+                                    console.log(`🔄 Intersection 2 lettres: continuer mot #${savedWordIndex} direction=${savedDirection}`);
                                     this.moveToNextCell(i, j);
                                     this.checkIfLevelComplete();
                                     this.saveGame(); // 💾 Sauvegarde auto
                                 }, 50);
+                            }
+                            else {
+                                // currentWord n'est pas défini ou saisie incorrecte
+                                console.error(`❌ Intersection: impossible de continuer, currentWord=${currentWord}, value="${value}"`);
+                                input.value = '';
                             }
                         } else {
                             // Gérer case normale avec 1 lettre
@@ -2832,45 +3105,46 @@ class ChristianCrosswordGame {
                     this.moveTo(nextRow, nextCol);
                     return;
                 } else if (cellIndex === wordData.path.length - 1) {
-                    // 🎯 Fin du mot actuel - passer au prochain mot non complété
-                    console.log(`🏁 Fin du mot #${this.currentWordIndex} "${wordData.word}"`);
+                    // 🎯 Fin du mot actuel
+                    console.log(`🏁 Fin du mot #${this.currentWordIndex} "${wordData.word}" à [${row},${col}]`);
                     
                     // Vérifier si le mot est maintenant complété
                     const wordKey = `${wordData.word}_${wordData.row}_${wordData.col}`;
                     const isWordCompleted = this.completedWords && this.completedWords.has(wordKey);
                     
-                    if (isWordCompleted) {
-                        // Le mot est complété, passer au suivant (géré par checkCompletedWords)
-                        console.log(`✅ Mot complété, passage au suivant...`);
-                        return;
-                    }
+                    // Vérifier si c'est une intersection
+                    const isIntersection = this.intersections && this.intersections[row] && this.intersections[row][col];
                     
-                    // Le mot n'est pas complété, chercher un autre mot à cette position (intersection)
-                    const otherWords = this.words
-                        .map((w, idx) => ({
-                            wordData: w,
-                            idx: idx,
-                            cellIndex: w.path ? w.path.findIndex(([r, c]) => r === row && c === col) : -1
-                        }))
-                        .filter(w => w.idx !== this.currentWordIndex && w.cellIndex !== -1);
-                    
-                    if (otherWords.length > 0) {
-                        // Prendre le premier autre mot à cette intersection
-                        const nextWord = otherWords[0];
-                        this.currentWordIndex = nextWord.idx;
-                        this.lastMoveDirection = nextWord.wordData.direction;
-                        console.log(`🔄 Switch vers mot #${this.currentWordIndex} à l'intersection`);
+                    if (isIntersection && !isWordCompleted) {
+                        // Mot non complété qui finit sur une intersection : chercher l'autre mot à cette intersection
+                        const otherWords = this.words
+                            .map((w, idx) => ({
+                                wordData: w,
+                                idx: idx,
+                                cellIndex: w.path ? w.path.findIndex(([r, c]) => r === row && c === col) : -1
+                            }))
+                            .filter(w => w.idx !== this.currentWordIndex && w.cellIndex !== -1);
                         
-                        // Continuer sur ce nouveau mot
-                        if (nextWord.cellIndex < nextWord.wordData.path.length - 1) {
-                            const [nextRow, nextCol] = nextWord.wordData.path[nextWord.cellIndex + 1];
-                            this.moveTo(nextRow, nextCol);
-                            return;
+                        if (otherWords.length > 0) {
+                            // Switch vers l'autre mot de l'intersection s'il n'est pas complété
+                            const nextWord = otherWords[0];
+                            const nextWordKey = `${nextWord.wordData.word}_${nextWord.wordData.row}_${nextWord.wordData.col}`;
+                            const isNextWordCompleted = this.completedWords && this.completedWords.has(nextWordKey);
+                            
+                            if (!isNextWordCompleted && nextWord.cellIndex < nextWord.wordData.path.length - 1) {
+                                this.currentWordIndex = nextWord.idx;
+                                this.lastMoveDirection = nextWord.wordData.direction;
+                                console.log(`🔄 Switch vers mot #${this.currentWordIndex} "${nextWord.wordData.word}" à l'intersection`);
+                                
+                                const [nextRow, nextCol] = nextWord.wordData.path[nextWord.cellIndex + 1];
+                                this.moveTo(nextRow, nextCol);
+                                return;
+                            }
                         }
                     }
                     
-                    // Plus de mots à continuer depuis cette position
-                    console.log(`⚠️ Aucun mot à continuer, passage au suivant non complété...`);
+                    // Sinon, passer au mot suivant non complété
+                    console.log(`⏭️ Passage au mot suivant non complété...`);
                     this.moveToNextIncompleteWord(this.currentWordIndex);
                     return;
                 }
@@ -3283,15 +3557,30 @@ class ChristianCrosswordGame {
             if (!this.completedWords.has(wordKey)) {
                 console.log(`➡️ Passage au mot #${nextIndex}: "${nextWord.word}"`);
                 
-                // Aller à la première lettre de ce mot
+                // Aller à la première lettre VIDE de ce mot
                 if (nextWord.path && nextWord.path.length > 0) {
-                    const [firstRow, firstCol] = nextWord.path[0];
+                    // Trouver la première case vide du mot
+                    let firstEmptyIndex = 0;
+                    for (let j = 0; j < nextWord.path.length; j++) {
+                        const [row, col] = nextWord.path[j];
+                        const cellValue = this.grid[row][col];
+                        
+                        // Si la case est vide ou partiellement remplie (intersection)
+                        if (!cellValue || cellValue === '' || 
+                            (cellValue.includes('/') && (cellValue === '/' || cellValue.endsWith('/') || cellValue.startsWith('/')))) {
+                            firstEmptyIndex = j;
+                            break;
+                        }
+                    }
+                    
+                    const [firstRow, firstCol] = nextWord.path[firstEmptyIndex];
+                    console.log(`🎯 Première case vide du mot #${nextIndex}: [${firstRow},${firstCol}] (index ${firstEmptyIndex})`);
                     
                     // Mettre à jour le mot en cours
                     this.currentWordIndex = nextIndex;
                     this.lastMoveDirection = nextWord.direction;
                     
-                    // Se déplacer vers la première case du nouveau mot
+                    // Se déplacer vers la première case vide du nouveau mot
                     setTimeout(() => {
                         this.moveTo(firstRow, firstCol);
                     }, 200); // Petit délai pour que l'animation soit visible
@@ -3341,6 +3630,7 @@ class ChristianCrosswordGame {
         // Vérifier si toutes les cellules sont correctement remplies
         let allCorrect = true;
         let totalCells = 0;
+        let incorrectCells = [];
 
         for (let i = 0; i < config.gridSize; i++) {
             for (let j = 0; j < config.gridSize; j++) {
@@ -3352,7 +3642,8 @@ class ChristianCrosswordGame {
                     // Vérifier si la cellule est remplie
                     if (!cellValue || cellValue === '') {
                         allCorrect = false;
-                        break;
+                        incorrectCells.push(`[${i},${j}] vide`);
+                        continue;
                     }
                     
                     // Vérifier si correcte (gérer les intersections)
@@ -3360,27 +3651,31 @@ class ChristianCrosswordGame {
                         const [letter1, letter2] = solutionValue.split('/');
                         if (cellValue.includes('/')) {
                             const [inputLetter1, inputLetter2] = cellValue.split('/');
-                            if (inputLetter1 !== letter1 || inputLetter2 !== letter2) {
+                            if (!this.lettersMatch(inputLetter1, letter1) || !this.lettersMatch(inputLetter2, letter2)) {
                                 allCorrect = false;
-                                break;
+                                incorrectCells.push(`[${i},${j}] intersection: "${cellValue}" ≠ "${solutionValue}"`);
                             }
                         } else {
                             allCorrect = false;
-                            break;
+                            incorrectCells.push(`[${i},${j}] pas d'intersection: "${cellValue}" ≠ "${solutionValue}"`);
                         }
                     } else {
-                        if (cellValue !== solutionValue) {
+                        if (!this.lettersMatch(cellValue, solutionValue)) {
                             allCorrect = false;
-                            break;
+                            incorrectCells.push(`[${i},${j}] simple: "${cellValue}" ≠ "${solutionValue}"`);
                         }
                     }
                 }
             }
-            if (!allCorrect) break;
+        }
+        
+        if (!allCorrect) {
+            console.log(`❌ Niveau incomplet: ${incorrectCells.length} cellule(s) incorrecte(s):`, incorrectCells.slice(0, 5));
         }
 
         // Si tout est correct, passer au niveau suivant automatiquement
         if (allCorrect && totalCells > 0) {
+            console.log(`✅ Niveau complété! ${totalCells} cellules correctes`);
             // Son de victoire
             if (window.audioSystem) {
                 window.audioSystem.playVictory();
@@ -4428,4 +4723,13 @@ class ChristianCrosswordGame {
 document.addEventListener('DOMContentLoaded', () => {
     window.game = new ChristianCrosswordGame();
     console.log('✅ Jeu initialisé et exposé globalement');
+    
+    // Vérifier la sauvegarde après que tous les scripts soient chargés
+    setTimeout(() => {
+        if (window.game && typeof gameDataManager !== 'undefined') {
+            window.game.checkAndAskForResumeOrRestart();
+        } else {
+            console.warn('⚠️ gameDataManager non chargé, impossible de restaurer');
+        }
+    }, 100);
 });

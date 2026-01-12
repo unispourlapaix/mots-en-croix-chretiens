@@ -4740,7 +4740,8 @@ class GameDataManager {
     hasCollision(path1, path2, options = {}) {
         if (!path1 || !path2) return false;
         
-        const { allowSameLetterIntersection = false, word1 = '', word2 = '' } = options;
+        // Activer automatiquement allowSameLetterIntersection si les mots sont fournis
+        const { allowSameLetterIntersection = true, word1 = '', word2 = '' } = options;
         
         for (let i = 0; i < path1.length; i++) {
             const [row1, col1] = path1[i];
@@ -4758,6 +4759,10 @@ class GameDataManager {
                         if (letter1 === letter2) {
                             console.log(`✅ Intersection valide à [${row1},${col1}]: même lettre "${letter1}"`);
                             continue; // Pas une collision invalide
+                        } else {
+                            // Lettres différentes = créer une intersection avec carrefour partagé
+                            console.log(`🚦 Carrefour partagé créé à [${row1},${col1}]: "${letter1}" / "${letter2}"`);
+                            continue; // Accepter comme intersection valide
                         }
                     }
                     
@@ -4781,9 +4786,19 @@ class GameDataManager {
         if (!path1 || !path2) return false;
         
         const { allowedIntersections = [] } = options;
+        let carrefourCount = 0; // Compter les carrefours/intersections
         
         // Pour chaque case du premier mot
         for (const [row1, col1] of path1) {
+            // Vérifier si c'est une case partagée (collision/carrefour)
+            const isSharedCell = path2.some(([r2, c2]) => r2 === row1 && c2 === col1);
+            
+            if (isSharedCell) {
+                carrefourCount++;
+                console.log(`🚦 Carrefour trouvé à [${row1},${col1}]`);
+                continue; // Accepter cette intersection
+            }
+            
             // Vérifier les cases adjacentes (8 directions)
             const adjacentPositions = [
                 [row1 - 1, col1 - 1], [row1 - 1, col1], [row1 - 1, col1 + 1],
@@ -4796,20 +4811,26 @@ class GameDataManager {
                 const isInPath2 = path2.some(([row2, col2]) => row2 === adjRow && col2 === adjCol);
                 
                 if (isInPath2) {
-                    // Vérifier si c'est une intersection autorisée
                     const isAllowedIntersection = allowedIntersections.some(
                         ([intRow, intCol]) => intRow === adjRow && intCol === adjCol
                     );
                     
-                    // Si ce n'est pas une intersection autorisée, c'est un débordement
-                    if (!isAllowedIntersection) {
-                        console.warn(`⚠️ Débordement adjacent détecté: [${row1},${col1}] touche [${adjRow},${adjCol}]`);
-                        return true;
+                    // Si c'est une intersection autorisée, OK
+                    if (isAllowedIntersection) {
+                        console.log(`✅ Intersection autorisée: [${row1},${col1}] près de [${adjRow},${adjCol}]`);
+                        continue;
+                    }
+                    
+                    // Si on a déjà un carrefour et qu'on trouve un débordement adjacent, refuser
+                    if (carrefourCount > 0) {
+                        console.warn(`⚠️ Débordement adjacent refusé: [${row1},${col1}] touche [${adjRow},${adjCol}] (carrefour déjà présent)`);
+                        return true; // Trop de contacts entre les deux mots
                     }
                 }
             }
         }
         
+        // Accepter si un seul carrefour maximum
         return false;
     }
 
@@ -4882,8 +4903,9 @@ class GameDataManager {
         const strategies = [
             () => this.trySimpleCross(word1, word2),           // Stratégie 1: Croix simple
             () => this.tryLShapePlacement(word1, word2),       // Stratégie 2: Placement en L
-            () => this.tryIsolatedPlacement(word1, word2),     // Stratégie 3: Mots isolés
-            () => this.tryCompactPlacement(word1, word2),      // Stratégie 4: Placement compact
+            () => this.tryMultiBentPlacement(word1, word2),    // Stratégie 3: Placement multi-coudé (évite intersections multiples)
+            () => this.tryIsolatedPlacement(word1, word2),     // Stratégie 4: Mots isolés
+            () => this.tryCompactPlacement(word1, word2),      // Stratégie 5: Placement compact
         ];
         
         for (const strategy of strategies) {
@@ -5114,6 +5136,121 @@ class GameDataManager {
     }
 
     /**
+     * Stratégie 3: Placement multi-coudé (plusieurs virages)
+     * Permet aux mots d'avoir plusieurs virages pour éviter les intersections multiples
+     */
+    tryMultiBentPlacement(word1, word2) {
+        // Générer un path en zigzag/escalier pour word1 (en haut)
+        const word1Path = [];
+        let row = 1, col = 1;
+        let direction = 'horizontal';
+        let segmentLength = 0;
+        const maxSegmentLength = 3;
+        
+        for (let i = 0; i < word1.length; i++) {
+            word1Path.push([row, col]);
+            segmentLength++;
+            
+            if (segmentLength >= maxSegmentLength && i < word1.length - 1) {
+                segmentLength = 0;
+                direction = direction === 'horizontal' ? 'vertical' : 'horizontal';
+            }
+            
+            if (direction === 'horizontal') {
+                col++;
+            } else {
+                row++;
+            }
+            
+            if (col >= 9) { direction = 'vertical'; col--; row++; }
+            if (row >= 8) { break; } // Rester dans la moitié haute
+        }
+        
+        // Si le mot n'est pas complet, invalider
+        if (word1Path.length !== word1.length) return null;
+        
+        // Générer un path en zigzag/escalier pour word2 (en bas, bien séparé)
+        const word2Path = [];
+        row = 6; // Commencer plus bas pour éviter superposition
+        col = 1;
+        direction = 'horizontal';
+        segmentLength = 0;
+        
+        for (let i = 0; i < word2.length; i++) {
+            // Vérifier qu'on ne superpose pas word1 (sauf intersection intentionnelle)
+            let attempts = 0;
+            while (attempts < 10) {
+                const cellOccupied = word1Path.some(([r1, c1]) => r1 === row && c1 === col);
+                
+                if (!cellOccupied) {
+                    break; // Position libre
+                }
+                
+                // Si occupé, sauter cette position
+                attempts++;
+                if (direction === 'horizontal') {
+                    col++;
+                } else {
+                    row++;
+                }
+                
+                if (col >= 9) { direction = 'vertical'; col--; row++; }
+                if (row >= 9) { return null; } // Sortie de grille
+            }
+            
+            if (attempts >= 10) return null; // Impossible de placer sans superposition
+            
+            word2Path.push([row, col]);
+            segmentLength++;
+            
+            if (segmentLength >= maxSegmentLength && i < word2.length - 1) {
+                segmentLength = 0;
+                direction = direction === 'horizontal' ? 'vertical' : 'horizontal';
+            }
+            
+            if (direction === 'horizontal') {
+                col++;
+            } else {
+                row++;
+            }
+            
+            if (col >= 9) { direction = 'vertical'; col--; row++; }
+            if (row >= 9) { break; }
+        }
+        
+        // Si le mot n'est pas complet, invalider
+        if (word2Path.length !== word2.length) return null;
+        
+        // Compter les intersections (superpositions)
+        let intersectionCount = 0;
+        for (const [r1, c1] of word1Path) {
+            for (const [r2, c2] of word2Path) {
+                if (r1 === r2 && c1 === c2) {
+                    intersectionCount++;
+                }
+            }
+        }
+        
+        // Accepter SEULEMENT si 0 ou 1 intersection (pas de superposition multiple)
+        if (intersectionCount > 1) {
+            console.warn(`⚠️ Multi-bent refusé: ${intersectionCount} superpositions détectées`);
+            return null;
+        }
+        
+        if (this.isPlacementValid(word1Path, word2Path, [])) {
+            return {
+                word1Path,
+                word1Direction: 'bent',
+                word2Path,
+                word2Direction: 'bent',
+                strategyName: 'Placement multi-coudé (séparé)'
+            };
+        }
+        
+        return null;
+    }
+
+    /**
      * Stratégie 4: Placement compact optimisé
      * Essaie de maximiser l'utilisation de l'espace tout en évitant les débordements
      */
@@ -5150,7 +5287,7 @@ class GameDataManager {
     }
 
     /**
-     * Vérifie si un placement est valide (pas de collision, pas de débordement adjacent)
+     * Vérifie si un placement est valide (respect des règles de grille)
      * @param {Array} path1 - Chemin du premier mot
      * @param {Array} path2 - Chemin du deuxième mot
      * @param {Array} allowedIntersections - Intersections autorisées [[row, col], ...]
@@ -5160,59 +5297,52 @@ class GameDataManager {
         // Vérifier les limites de la grille
         for (const [row, col] of path1) {
             if (row < 0 || row >= 10 || col < 0 || col >= 10) {
+                console.log(`❌ Hors limites: [${row},${col}]`);
                 return false;
             }
         }
         for (const [row, col] of path2) {
             if (row < 0 || row >= 10 || col < 0 || col >= 10) {
+                console.log(`❌ Hors limites: [${row},${col}]`);
                 return false;
             }
         }
         
-        // Vérifier les collisions non autorisées
+        // Compter les intersections (carrefours)
+        let intersectionCount = 0;
+        const intersections = [];
+        
         for (const [row1, col1] of path1) {
             for (const [row2, col2] of path2) {
                 if (row1 === row2 && col1 === col2) {
-                    // Collision détectée
-                    const isAllowed = allowedIntersections.some(
-                        ([r, c]) => r === row1 && c === col1
-                    );
-                    if (!isAllowed) {
-                        console.log(`❌ Collision non autorisée à [${row1},${col1}]`);
-                        return false;
-                    }
+                    intersectionCount++;
+                    intersections.push([row1, col1]);
                 }
             }
         }
         
-        // Vérifier les débordements adjacents (cases qui se touchent)
-        for (const [row1, col1] of path1) {
-            // 8 directions adjacentes
-            const adjacent = [
-                [row1 - 1, col1 - 1], [row1 - 1, col1], [row1 - 1, col1 + 1],
-                [row1, col1 - 1],                       [row1, col1 + 1],
-                [row1 + 1, col1 - 1], [row1 + 1, col1], [row1 + 1, col1 + 1]
-            ];
-            
-            for (const [adjRow, adjCol] of adjacent) {
-                // Vérifier si cette case adjacente est dans path2
-                const touchesPath2 = path2.some(([r, c]) => r === adjRow && c === adjCol);
-                
-                if (touchesPath2) {
-                    // Vérifier si c'est une intersection autorisée
-                    const isAllowedIntersection = allowedIntersections.some(
-                        ([r, c]) => r === adjRow && c === adjCol
-                    );
-                    
-                    if (!isAllowedIntersection) {
-                        console.log(`❌ Débordement adjacent à [${row1},${col1}] → [${adjRow},${adjCol}]`);
-                        return false;
-                    }
-                }
+        // Règle 1: Maximum 1 carrefour entre deux mots
+        if (intersectionCount > 1) {
+            console.log(`❌ Trop d'intersections: ${intersectionCount} carrefours détectés`);
+            return false;
+        }
+        
+        // Règle 2: Si intersection, vérifier qu'elle n'est pas dans allowedIntersections interdites
+        if (intersectionCount === 1 && allowedIntersections.length > 0) {
+            const [intRow, intCol] = intersections[0];
+            const isAllowed = allowedIntersections.some(
+                ([r, c]) => r === intRow && c === intCol
+            );
+            if (!isAllowed) {
+                console.log(`❌ Intersection non autorisée à [${intRow},${intCol}]`);
+                return false;
             }
         }
         
-        console.log(`✅ Placement valide: ${path1.length} + ${path2.length} cases, ${allowedIntersections.length} intersection(s)`);
+        // Règle 3: Les débordements adjacents sont acceptés (carrefours)
+        // Pas de vérification stricte ici, géré par hasAdjacentOverflow()
+        
+        console.log(`✅ Placement valide: ${intersectionCount} carrefour(s)`);
         return true;
     }
 
