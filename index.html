@@ -145,6 +145,7 @@
                 <div id="privateRoomCodeField">
                     <label for="privateRoomCode">Code d’invitation</label>
                     <input id="privateRoomCode" name="inviteCode" autocapitalize="off" autocomplete="off" spellcheck="false" required>
+                    <button type="button" id="privateRoomPasteCode">Coller le code</button>
                 </div>
                 <label for="privateRoomNickname">Ton pseudo</label>
                 <input id="privateRoomNickname" name="nickname" autocomplete="nickname" maxlength="30" required>
@@ -278,7 +279,7 @@
                     ⚙️ Menu
                 </button>
                 <button class="menu-tab" data-tab="connexion">
-                    👤 Connexion
+                    👤 Profil
                 </button>
                 <button class="menu-tab" data-tab="leaderboard">
                     🏆 Score
@@ -287,14 +288,6 @@
 
             <!-- Contenu Onglet Menu -->
             <div id="settingsTabContent" class="menu-tab-content active">
-                <div class="menu-section">
-                    <h3>👤 Profil</h3>
-                    <div id="profileSection">
-                        <p id="profileUsername" style="font-size: 16px; font-weight: bold; color: #ff1493; margin-bottom: 10px;">Non connecté</p>
-                    </div>
-                    <p class="menu-description">Gérez votre compte et vos informations</p>
-                </div>
-
                 <div class="menu-section">
                     <div id="languageControlCompact" class="language-control-compact menu-inline menu-centered">
                         <button id="languageExpandButton" class="language-expand-btn" title="Changer la langue">
@@ -386,7 +379,7 @@
                 </div>
 
                 <div class="menu-section">
-                    <h3>🔊 Audio</h3>
+                    <h3 id="menuAudioTitle">🔊 Audio</h3>
                     <div class="audio-controls">
                         <div class="audio-control-item">
                             <label for="musicVolume">🎵 Musique</label>
@@ -402,7 +395,7 @@
                 </div>
 
                 <div class="menu-section">
-                    <h3>🎨 Crédits</h3>
+                    <h3 id="menuAboutTitle">🎨 Crédits</h3>
                     <div class="about-info">
                         <p class="about-item">
                             <strong>✨ Mots croisés chrétiens</strong> par Emmanuel Payet
@@ -434,14 +427,10 @@
 
             <!-- Contenu Onglet Connexion -->
             <div id="connexionTabContent" class="menu-tab-content">
-                <div class="connexion-header" style="text-align: center; margin-bottom: 20px;">
-                    <h3>👤 Connexion / Inscription</h3>
-                    <p style="color: #666; font-size: 14px;">Sauvegardez vos scores en ligne</p>
-                </div>
-
                 <div id="connexionSection">
                     <div class="auth-form">
                         <div class="menu-section">
+                            <h3>Sauvegarde Google Drive</h3>
                             <p>Retrouve ton pseudo, ton niveau et tes scores sur un autre appareil.</p>
                             <button type="button" id="googleSignInBtn" class="menu-cloud-btn">Continuer avec Google</button>
                             <div id="googleBackupControls" hidden>
@@ -456,7 +445,7 @@
                         </div>
                     </div>
 
-                    <!-- Section profil (visible quand connecté) -->
+                    <!-- Profil du joueur sur cet appareil -->
                     <div id="profileInfo" class="profile-info">
                         <div class="menu-section" style="text-align: center;">
                             <!-- Avatar personnalisable -->
@@ -589,10 +578,10 @@
             <button class="minimize-btn" id="toggleChatBubble">−</button>
         </div>
         <div class="chat-bubble-body" id="chatBubbleBody">
-            <!-- Bouton Connexion -->
+            <!-- Raccourci vers le profil -->
             <div class="room-actions">
                 <button id="chatConnexionBtn" class="room-action-btn connexion-btn">
-                    👤 Connexion
+                    👤 Profil
                 </button>
             </div>
             

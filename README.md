@@ -25,16 +25,11 @@
 - English 🇬🇧
 - Español 🇪🇸
 
-### 🌍 Multijoueur P2P
+### Multijoueur P2P
 
-- **Découverte automatique** via lobby "LoveJesus" 🙏
-- **100% gratuit** - Serveur PeerJS cloud
-- **Connexion mondiale** - Jouez avec des amis du monde entier
-- **Système accept/refuse** - Contrôlez qui rejoint
-- **Pas de codes** - Les joueurs apparaissent automatiquement
-- **Chat en temps réel** - Communication instantanée
-- **5 bots IA** avec stratégies variées
-- **Mode course** - Qui terminera la grille le premier ?
+- Parties privées par lien ou code d’invitation.
+- Liste d’amis par code et présence entre amis mutuels.
+- Échanges directs entre joueurs via PeerJS.
 
 ### 💕 Design Kawaii
 - Palette rose pastel élégante
@@ -167,23 +162,12 @@ Dans `css/styles.css` :
 - [STRUCTURE.md](STRUCTURE.md) - Architecture modulaire
 - [DESIGN.md](DESIGN.md) - Guide design
 - [PWA-INSTALL.md](PWA-INSTALL.md) - Configuration PWA
-- [LOBBY_SYSTEM.md](LOBBY_SYSTEM.md) - 🙏 Système lobby "LoveJesus"
-- [SYSTEME_PRESENCE.md](SYSTEME_PRESENCE.md) - Découverte automatique
 
-## 🎮 Lobby "LoveJesus"
+## Connexion et sauvegarde
 
-Le jeu utilise un **lobby P2P gratuit** nommé "LoveJesus" qui permet aux joueurs de se découvrir automatiquement :
-
-✅ **Découverte automatique** - Plus besoin de partager des codes  
-✅ **100% gratuit** - Utilise le serveur PeerJS cloud  
-✅ **Mondial** - Connecte les joueurs du monde entier  
-✅ **Fiable** - Infrastructure PeerJS éprouvée  
-
-Pour maintenir le lobby actif 24/7, ouvrez simplement `lobby.html` dans un navigateur.
-
-👉 [Documentation complète du lobby](LOBBY_SYSTEM.md)
-
-## 📚 Documentation
+- Ouvre **Partie privée** pour inviter quelqu’un par code ou par lien. L’hôte approuve la demande et les deux joueurs se connectent via PeerJS.
+- Dans **Menu → Profil → Gérer mes amis**, échangez vos codes d’ami pour voir votre présence mutuelle. Les contacts sont enregistrés sur l’appareil.
+- Les grilles et les records sont enregistrés sur l’appareil. **Continuer avec Google** permet de sauvegarder le pseudo et un point de reprise dans l’espace privé de l’application sur Google Drive. Pour activer cette option, configure un client OAuth Web pour l’origine du jeu, active l’API Drive et renseigne la balise `google-drive-client-id` dans `index.html`.
 
 ## 🤝 Contribuer
 

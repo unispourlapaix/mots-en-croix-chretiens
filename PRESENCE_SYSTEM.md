@@ -1,5 +1,7 @@
 # 🎮 Système de Présence - Documentation Technique
 
+> Archive de l’ancienne architecture. Le [README](README.md#connexion-et-sauvegarde) décrit la version actuelle.
+
 ## 🌐 Architecture Hybride
 
 Le système utilise une approche **hybride** pour maximiser la réactivité locale et permettre la découverte mondiale :
@@ -480,7 +482,6 @@ SELECT cleanup_inactive_players();
 | `Mode LOCAL` au lieu de `Mode ONLINE` | Supabase non chargé | Vérifier `window.supabase` |
 | Ne voit pas autres joueurs | RLS bloque | Vérifier politiques publiques |
 | Joueurs fantômes | Cleanup pas actif | Appeler `cleanup_inactive_players()` |
-| Heartbeat échoue | Fonction SQL manquante | Réexécuter `create_online_players_table.sql` |
 
 ## 📚 Références
 

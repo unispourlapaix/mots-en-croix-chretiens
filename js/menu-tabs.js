@@ -439,7 +439,7 @@ class MenuTabSystem {
                 title.textContent = '🏆 Score';
                 this.loadLeaderboard();
             } else if (tabName === 'connexion') {
-                title.textContent = '👤 Connexion';
+                title.textContent = '👤 Profil';
                 this.updateConnexionTab();
             } else if (tabName === 'chat') {
                 title.textContent = '💬 Chat Communautaire';

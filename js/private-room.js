@@ -18,6 +18,7 @@ class PrivateRoom {
         this.createButton.onclick = () => this.create();
         document.getElementById('privateRoomShare').onclick = () => this.share();
         document.getElementById('privateRoomCopy').onclick = () => this.share(true);
+        document.getElementById('privateRoomPasteCode').onclick = () => this.pasteInviteCode();
         document.getElementById('privateRoomCopyCode').onclick = () => this.copy(this.inviteCode(), 'Code copié.');
         document.getElementById('privateRoomRevoke').onclick = () => this.revoke();
         document.getElementById('privateRoomAccept').onclick = () => this.approve(true);
@@ -77,6 +78,29 @@ class PrivateRoom {
     setCodeField(visible) {
         this.codeField.hidden = !visible;
         this.codeInput.required = visible;
+    }
+
+    async pasteInviteCode() {
+        const previous = this.codeInput.value;
+        const canFill = () => this.dialog.open && !this.active && !this.codeField.hidden && this.codeInput.value === previous;
+        let value;
+        try {
+            value = (await navigator.clipboard.readText()).trim();
+        } catch {
+            if (!canFill()) return;
+            this.codeInput.focus();
+            this.status.textContent = 'Colle le code dans le champ avec le clavier ou le menu de ton téléphone.';
+            return;
+        }
+        if (!canFill()) return;
+        if (!value) {
+            this.codeInput.focus();
+            this.status.textContent = 'Copie le code d’invitation de ton ami, puis colle-le ici.';
+            return;
+        }
+        this.codeInput.value = value;
+        this.form.elements.nickname.focus();
+        this.status.textContent = 'Code collé. Saisis ton pseudo pour demander à rejoindre.';
     }
 
     inviteCode() {

@@ -170,25 +170,9 @@
 }
 ```
 
-### 6. Infrastructure Cloud
+### 6. Sauvegarde
 
-**Supabase Integration** ([js/supabase.js](js/supabase.js))
-- Base de données cloud pour les scores
-- Leaderboard en ligne
-- Sauvegarde automatique des scores
-- Table `mots_croix_scores` avec RLS (Row Level Security)
-
-**[setup-supabase-table.sql](setup-supabase-table.sql)**
-```sql
-CREATE TABLE mots_croix_scores (
-    id BIGSERIAL PRIMARY KEY,
-    game_prefix TEXT DEFAULT 'mots-en-croix-chretiens',
-    player_name TEXT NOT NULL,
-    player_email TEXT NOT NULL,
-    score INTEGER NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
+Consulte le [guide de sauvegarde](SAVE_SYSTEM.md).
 
 ### 7. Outils de Développement
 
@@ -238,8 +222,6 @@ CREATE TABLE mots_croix_scores (
 
 **Fichiers créés:**
 - TRANSLATION_GUIDE.md (guide complet)
-- js/supabase.js (intégration cloud)
-- setup-supabase-table.sql (schéma DB)
 - js/gameDataManager.js (module standalone)
 - js/levels/levels-fr.js (niveaux français)
 - js/levels/levels-es.js (niveaux espagnols)
@@ -399,7 +381,6 @@ Co-Authored-By: Votre Nom <email@example.com>
 - Traductions EN (1-70): Claude Code Pro
 
 **Infrastructure:**
-- Supabase: Cloud database
 - GitHub Pages: Hébergement
 - Service Worker: PWA offline
 

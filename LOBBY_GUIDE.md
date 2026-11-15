@@ -1,5 +1,7 @@
 # 🌐 Lobby Realtime - Guide Utilisateur
 
+> Archive de l’ancienne architecture. Le [README](README.md#connexion-et-sauvegarde) décrit la version actuelle.
+
 ## 🎮 Qu'est-ce que le Lobby Realtime ?
 
 Le **Lobby Realtime** est un espace public où vous pouvez voir tous les joueurs connectés en temps réel et les rejoindre pour jouer ensemble.
@@ -176,7 +178,7 @@ Le lobby est **100% responsive** et fonctionne sur :
 ## 🆘 Support
 
 En cas de problème :
-1. Consultez la [documentation technique](REALTIME_LOBBY_SETUP.md)
+1. Consultez la [documentation de la version actuelle](README.md#connexion-et-sauvegarde)
 2. Vérifiez les [problèmes connus](README.md#troubleshooting)
 3. Ouvrez une issue sur GitHub
 

@@ -1,5 +1,7 @@
 # 🔍 Audit d'Intégration - Chat Volant & Nouveau Système
 
+> Archive de l’ancienne architecture. Le [README](README.md#connexion-et-sauvegarde) décrit la version actuelle.
+
 **Date** : 21 décembre 2025  
 **Statut** : ✅ **UNIFIÉ** - Tous les composants utilisent le nouveau système
 

@@ -1,5 +1,7 @@
 # 🔍 Logique de Découverte des Joueurs
 
+> Archive de l’ancienne architecture. Le [README](README.md#connexion-et-sauvegarde) décrit la version actuelle.
+
 ## 📊 Vue d'ensemble
 
 Le système utilise **deux canaux de découverte** :

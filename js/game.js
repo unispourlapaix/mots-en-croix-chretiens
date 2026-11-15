@@ -1178,39 +1178,18 @@ class ChristianCrosswordGame {
         const menuHeader = document.querySelector('.menu-header h2');
         if (menuHeader) menuHeader.textContent = i18n.t('menuSettings');
 
-        // Section Profil (sections[0])
-        // Déjà gérée ailleurs
-
-        // Section Langue (sections[1])
-        const sections = document.querySelectorAll('.menu-section');
-        if (sections[1]) {
-            const langTitle = sections[1].querySelector('h3');
-            if (langTitle) langTitle.textContent = i18n.t('menuLanguageTitle');
-        }
-
-        // Section Médailles (sections[2])
-        // Pas de traduction nécessaire
-
-        // Section Audio (sections[3])
-        if (sections[3]) {
-            const audioTitle = sections[3].querySelector('h3');
-            if (audioTitle) audioTitle.textContent = i18n.t('menuAudioTitle');
-            const musicLabel = sections[3].querySelector('label[for="musicVolume"]');
-            if (musicLabel) musicLabel.textContent = i18n.t('menuMusicLabel');
-            const soundLabel = sections[3].querySelector('label[for="soundVolume"]');
-            if (soundLabel) soundLabel.textContent = i18n.t('menuSoundLabel');
-        }
-
-        // Section Crédits (sections[4])
-        if (sections[4]) {
-            const aboutTitle = sections[4].querySelector('h3');
-            if (aboutTitle) aboutTitle.textContent = i18n.t('menuAboutTitle');
-
-            const aboutItems = sections[4].querySelectorAll('.about-item strong');
-            if (aboutItems[0]) aboutItems[0].textContent = i18n.t('menuArtistLabel');
-
-            const artistLink = document.getElementById('artistLink');
-            if (artistLink) artistLink.textContent = i18n.t('menuArtistLink');
+        const labels = {
+            '#languageExpandButton .lang-text': 'menuLanguageTitle',
+            '#menuAudioTitle': 'menuAudioTitle',
+            'label[for="musicVolume"]': 'menuMusicLabel',
+            'label[for="soundVolume"]': 'menuSoundLabel',
+            '#menuAboutTitle': 'menuAboutTitle',
+            '#settingsTabContent .about-item strong': 'menuArtistLabel',
+            '#artistLink': 'menuArtistLink'
+        };
+        for (const [selector, key] of Object.entries(labels)) {
+            const element = document.querySelector(selector);
+            if (element) element.textContent = i18n.t(key);
         }
     }
 

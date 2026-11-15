@@ -1,5 +1,7 @@
 # 🔍 Audit Chat Volant - Problèmes & Cohésion
 
+> Archive de l’ancienne architecture. Le [README](README.md#connexion-et-sauvegarde) décrit la version actuelle.
+
 ## ✅ Ce qui fonctionne bien
 
 1. **Structure du chat volant**
