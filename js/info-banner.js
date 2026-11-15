@@ -10,8 +10,7 @@ class InfoBannerManager {
             { icon: '►', text: 'INFO: JEU DE MOTS CROISES CHRETIENS' },
             { icon: '►', text: 'STATUS: PARTIE EN COURS' },
             { icon: '►', text: 'TECH: HTML5 + CSS3 + JAVASCRIPT' },
-            { icon: '►', text: 'ENGINE: SUPABASE DATABASE CLOUD' },
-            { icon: '►', text: 'RANK: CONSULTEZ LE CLASSEMENT', link: 'public/leaderboard.html' }
+            { icon: '►', text: 'SCORES SUR CET APPAREIL', link: 'public/leaderboard.html' }
         ];
         
         this.currentMessageIndex = 0;

@@ -21,70 +21,16 @@ class SimpleChatSystem {
         if (this.isInitialized) return;
         this.isInitialized = true;
 
-        // Récupérer le username depuis authSystem si disponible (TOUJOURS en priorité)
         this.updateUsername();
-        
-        // Forcer une nouvelle mise à jour si authSystem est déjà connecté
-        if (typeof authSystem !== 'undefined' && authSystem.isAuthenticated()) {
-            const user = authSystem.getCurrentUser();
-            if (user && user.username) {
-                this.currentUser = user.username;
-                console.log('✅ Chat initialisé avec le pseudo authentifié:', this.currentUser);
-            }
-        }
-
-        // Écouter les changements d'authentification
-        if (typeof authSystem !== 'undefined') {
-            authSystem.onAuthChange((user) => {
-                this.updateUsername();
-                
-                // Afficher le message seulement si c'est un nouveau user différent du dernier
-                if (user && user.username && !this.skipWelcomeMessages && user.username !== this.lastConnectedUser) {
-                    this.showMessage(`✅ Connecté en tant que ${user.username}`, 'system');
-                    this.lastConnectedUser = user.username;
-                    
-                    // Mettre à jour le système de présence avec le nouveau username
-                    if (window.presenceSystem && window.presenceSystem.myPresence && this.peer?.id) {
-                        console.log('🔄 Mise à jour présence avec nouveau username:', user.username);
-                        window.presenceSystem.start(user.username, this.peer.id);
-                    }
-                    
-                    this.initP2P();
-                }
-                
-                // Réinitialiser le flag après le premier chargement
-                this.skipWelcomeMessages = false;
-            });
-
-            // Si déjà connecté, afficher le message de bienvenue
-            if (this.currentUser && this.currentUser !== 'Joueur' + Math.floor(Math.random() * 1000) && !this.skipWelcomeMessages) {
-                setTimeout(() => {
-                    this.showMessage(`✨ 👋 Bonjour`, 'system');
-                }, 800);
-            }
-        }
-        
-        // Ne pas initialiser P2P automatiquement - le faire à la demande
     }
 
-    // Mettre à jour le username depuis authSystem
     updateUsername() {
-        if (typeof authSystem !== 'undefined' && authSystem.isAuthenticated()) {
-            const user = authSystem.getCurrentUser();
-            if (user && user.username) {
-                this.currentUser = user.username;
-                console.log('✅ Chat utilise le pseudo:', this.currentUser);
-                return;
-            }
-        }
-        
-        // Si pas connecté, générer un pseudo aléatoire
         if (!this.currentUser) {
-            this.currentUser = 'Joueur' + Math.floor(Math.random() * 1000);
+            this.currentUser = localStorage.getItem('mots-croix-google-pseudo') ||
+                'Joueur' + Math.floor(Math.random() * 1000);
         }
     }
 
-    // Initialiser PeerJS
     initP2P() {
         if (this.peer) {
             console.log('✅ P2P déjà initialisé, skip');
@@ -102,7 +48,7 @@ class SimpleChatSystem {
             return;
         }
         
-        // Mettre à jour le username depuis authSystem
+        // Préparer le pseudo local
         this.updateUsername();
 
         try {
@@ -160,12 +106,17 @@ class SimpleChatSystem {
             
             // Sauvegarder le peer ID pour les prochaines sessions
             this.savePeerId(id);
+            window.friendsSystem?.setMyFriendCode(id);
             
             // Notifier l'UI que le peer est prêt
             window.dispatchEvent(new CustomEvent('roomCreated', { detail: { roomCode: id } }));
         });
 
         this.peer.on('connection', (conn) => {
+            if (conn.label === 'friend-presence-v1') {
+                window.realtimeLobbySystem?.handleIncoming(conn);
+                return;
+            }
             // Bloquer les connexions de joueurs bloqués
             if (this.isPlayerBlocked(conn.peer)) {
                 console.log('🚫 Connexion refusée (joueur bloqué):', conn.peer);
@@ -178,6 +129,7 @@ class SimpleChatSystem {
         });
 
         this.peer.on('error', (err) => {
+            if (window.realtimeLobbySystem?.isProbeFailure(err)) return;
             // Ignorer les erreurs de connexion réseau (normales pour localhost)
             if (err.type === 'network' || err.message?.includes('Lost connection')) {
                 console.log('ℹ️ PeerJS: Connexion serveur perdue (normal en localhost)');
@@ -708,7 +660,7 @@ class SimpleChatSystem {
             return;
         }
 
-        // Mettre à jour le username depuis authSystem
+        // Préparer le pseudo local
         this.updateUsername();
 
         // Vérifier si c'est un code de salle avec préfixe cc- (accepter tirets pour UUID)

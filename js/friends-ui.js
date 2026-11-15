@@ -22,6 +22,11 @@ class FriendsUI {
         
         // Créer la modal de gestion des amis
         this.createFriendsModal();
+        document.getElementById('openFriendsMenuBtn')?.addEventListener('click', () => this.openFriendsModal());
+        window.addEventListener('roomCreated', () => this.displayMyCode());
+        window.addEventListener('presence_updated', () => {
+            if (this.isModalOpen) this.refreshFriendsList();
+        });
     }
     
     // Ajouter le bouton dans l'interface
@@ -82,10 +87,10 @@ class FriendsUI {
                         <h3>🔑 Mon Code d'Ami</h3>
                         <p class="info-text">Partagez ce code avec vos amis pour qu'ils puissent vous ajouter :</p>
                         <div class="code-display">
-                            <input type="text" id="my-friend-code-input" readonly>
+                            <input type="text" id="my-friend-code-input" placeholder="En attente de connexion" readonly>
                             <button class="copy-code-btn" onclick="window.friendsUI?.copyMyCode()">📋 Copier</button>
                         </div>
-                        <p class="info-subtext">🔒 Seuls vos amis ajoutés peuvent vous voir en ligne</p>
+                        <p class="info-subtext">🔒 Ajoutez-vous mutuellement pour voir votre statut en ligne.</p>
                     </div>
                     
                     <!-- Ajouter un ami -->
@@ -122,6 +127,8 @@ class FriendsUI {
             modal.style.display = 'flex';
             this.isModalOpen = true;
             
+            if (!window.friendsSystem?.myFriendCode) window.simpleChatSystem?.initP2P();
+
             // Remplir mon code d'ami
             this.displayMyCode();
             
@@ -150,7 +157,7 @@ class FriendsUI {
     // Copier mon code
     copyMyCode() {
         const input = document.getElementById('my-friend-code-input');
-        if (input) {
+        if (input?.value) {
             input.select();
             document.execCommand('copy');
             

@@ -12,41 +12,9 @@ class MenuTabSystem {
             tab.addEventListener('click', () => {
                 const tabName = tab.dataset.tab;
 
-                // Vérifier l'authentification pour l'onglet chat
-                if (tabName === 'chat') {
-                    if (typeof authSystem !== 'undefined' && !authSystem.isAuthenticated()) {
-                        // Fermer le menu et afficher l'auth modal
-                        const menuModal = document.getElementById('menuModal');
-                        if (menuModal) {
-                            menuModal.classList.add('hidden');
-                        }
-                        authSystem.showAuthModal();
-                        return;
-                    }
-                }
-
                 this.switchTab(tabName);
             });
         });
-
-        // Écouter les changements d'authentification
-        if (typeof authSystem !== 'undefined') {
-            authSystem.onAuthChange((user) => {
-                // Rafraîchir le tab connexion quand l'état d'auth change
-                this.updateConnexionTab();
-                
-                // Fermer le menu après connexion réussie
-                if (user && user.username) {
-                    setTimeout(() => {
-                        const menuModal = document.getElementById('menuModal');
-                        if (menuModal) {
-                            menuModal.classList.add('hidden');
-                        }
-                        console.log('✅ Connexion réussie:', user.username);
-                    }, 300);
-                }
-            });
-        }
 
         // Initialiser le système d'avatars
         this.initAvatarSelector();
@@ -60,7 +28,7 @@ class MenuTabSystem {
         document.addEventListener('click', async (e) => {
             if (e.target.classList.contains('avatar-option')) {
                 const unlockScore = parseInt(e.target.dataset.unlock) || 0;
-                const userScore = (authSystem && authSystem.isAuthenticated()) ? (authSystem.getCurrentUser().max_score || 0) : 0;
+                const userScore = Math.max(window.game?.score || 0, window.game?.maxScore || 0, leaderboardManager.getTopScores(1).scores[0]?.max_score || 0);
                 
                 // Vérifier si l'avatar est déverrouillé
                 if (unlockScore > userScore) {
@@ -74,14 +42,8 @@ class MenuTabSystem {
                 
                 if (currentAvatar) {
                     currentAvatar.textContent = avatar;
-                    // Sauvegarder l'avatar dans le profil utilisateur
-                    if (typeof authSystem !== 'undefined' && authSystem.isAuthenticated()) {
-                        const user = authSystem.getCurrentUser();
-                        // Mettre à jour l'avatar dans le système de chat
-                        if (typeof window.simpleChatSystem !== 'undefined' && user) {
-                            window.simpleChatSystem.setUserAvatar(user.username, avatar);
-                        }
-                    }
+                    const chat = window.simpleChatSystem;
+                    if (chat?.currentUser) chat.setUserAvatar(chat.currentUser, avatar);
                 }
                 
                 if (avatarSelector) {
@@ -111,7 +73,7 @@ class MenuTabSystem {
     }
     
     updateAvatarLocks() {
-        const userScore = (authSystem && authSystem.isAuthenticated()) ? (authSystem.getCurrentUser().max_score || 0) : 0;
+        const userScore = Math.max(window.game?.score || 0, window.game?.maxScore || 0, leaderboardManager.getTopScores(1).scores[0]?.max_score || 0);
         const avatarOptions = document.querySelectorAll('.avatar-option');
         
         avatarOptions.forEach(option => {
@@ -146,14 +108,9 @@ class MenuTabSystem {
     }
     
     async shareScore() {
-        if (!authSystem || !authSystem.isAuthenticated()) {
-            await CustomModals.showAlert('🔒 Connexion requise', 'Connectez-vous pour partager votre score !');
-            return;
-        }
-        
-        const user = authSystem.getCurrentUser();
-        const score = user.max_score || 0;
-        const username = user.username || 'Joueur';
+        const username = window.simpleChatSystem?.currentUser || 'Joueur';
+        const score = Math.max(window.game?.score || 0, window.game?.maxScore || 0,
+            leaderboardManager.getTopScores(1).scores[0]?.max_score || 0);
         const avatar = window.simpleChatSystem?.getUserAvatar(username) || '😊';
         
         // Créer un canvas CARRÉ pour l'image
@@ -542,7 +499,7 @@ class MenuTabSystem {
                                 ${medal}
                             </td>
                             <td style="padding: 12px 8px; color: #333;">
-                                ${score.username || 'Anonyme'}
+                                ${leaderboardManager.escapeHtml(score.username || 'Anonyme')}
                             </td>
                             <td style="padding: 12px 8px; text-align: right; font-weight: bold; color: #ff1493;">
                                 ${score.max_score}
@@ -562,47 +519,13 @@ class MenuTabSystem {
 
     // Mettre à jour l'onglet connexion
     updateConnexionTab() {
-        const authForm = document.getElementById('authForm');
-        const authFormMenu = document.getElementById('authFormMenu');
-        const profileInfo = document.getElementById('profileInfo');
-        const chatMultiplayerSection = document.getElementById('chatMultiplayerSection');
-
-        if (!profileInfo) return;
-
-        // Vérifier si l'utilisateur est connecté
-        if (typeof authSystem !== 'undefined' && authSystem.isAuthenticated()) {
-            const user = authSystem.getCurrentUser();
-            if (authForm) authForm.style.display = 'none';
-            if (authFormMenu) authFormMenu.style.display = 'none';
-            profileInfo.style.display = 'block';
-            if (chatMultiplayerSection) chatMultiplayerSection.style.display = 'block';
-
-            // Mettre à jour les infos du profil
-            const usernameEl = document.getElementById('connectedUsername');
-            const emailEl = document.getElementById('connectedEmail');
-            const maxScoreEl = document.getElementById('userMaxScore');
-            const currentAvatar = document.getElementById('currentAvatar');
-
-            if (usernameEl) usernameEl.textContent = user.username || 'Utilisateur';
-            if (emailEl) emailEl.textContent = user.email || '';
-            if (maxScoreEl) maxScoreEl.textContent = user.max_score || 0;
-            
-            // Charger l'avatar personnalisé
-            if (currentAvatar && typeof window.simpleChatSystem !== 'undefined') {
-                const userAvatar = window.simpleChatSystem.getUserAvatar(user.username);
-                if (userAvatar) {
-                    currentAvatar.textContent = userAvatar;
-                }
-            }
-            
-            // Mettre à jour les avatars verrouillés/déverrouillés selon le score
-            this.updateAvatarLocks();
-        } else {
-            if (authForm) authForm.style.display = 'block';
-            if (authFormMenu) authFormMenu.style.display = 'block';
-            profileInfo.style.display = 'none';
-            if (chatMultiplayerSection) chatMultiplayerSection.style.display = 'none';
-        }
+        const chat = window.simpleChatSystem;
+        const username = chat?.currentUser || 'Joueur';
+        document.getElementById('connectedUsername').textContent = username;
+        document.getElementById('userMaxScore').textContent = Math.max(window.game?.score || 0,
+            window.game?.maxScore || 0, leaderboardManager.getTopScores(1).scores[0]?.max_score || 0);
+        document.getElementById('currentAvatar').textContent = chat?.getUserAvatar(username) || '👤';
+        this.updateAvatarLocks();
     }
 }
 

@@ -41,10 +41,6 @@ class ChristianCrosswordGame {
         // Compteur de lettres correctes trouvées
         this.correctLettersCount = 0;
 
-        // Connexion cloud
-        this.cloudConnected = false;
-        this.cloudUser = null;
-
         // Mode multijoueur
         this.multiplayerMode = false;
         this.multiplayerManager = null;
@@ -58,23 +54,6 @@ class ChristianCrosswordGame {
         
         // Mettre à jour le niveau max selon le mode
         this.updateMaxLevelDisplay();
-
-        // Écouter les changements d'authentification pour mettre à jour le bouton cloud
-        if (typeof authSystem !== 'undefined') {
-            authSystem.onAuthChange(async (user) => {
-                this.updateMenuCloudButton();
-                
-                // Charger la progression cloud SEULEMENT lors de la connexion
-                if (user && user.id && !this.saveCleared) {
-                    console.log('🔐 Utilisateur connecté, chargement progression cloud...');
-                    await this.loadProgressFromCloud();
-                } else if (this.saveCleared) {
-                    console.log('⏭️ Sauvegarde effacée, pas de chargement cloud');
-                    this.saveCleared = false; // Réinitialiser le flag
-                }
-            });
-        }
-        this.updateMenuCloudButton();
 
         // Écouter les changements de langue
         window.addEventListener('languageChanged', () => {
@@ -334,6 +313,7 @@ class ChristianCrosswordGame {
                         this.setupLevel();
                         
                         // Restaurer les lettres saisies
+                        if (data.grid) this.grid = data.grid;
                         this.restoreGridLetters();
                         
                         // Compléter automatiquement les mots déjà complétés
@@ -888,50 +868,8 @@ class ChristianCrosswordGame {
             scoreOverlay.addEventListener('click', () => this.closeScoreModal());
         }
 
-        // Modal de connexion cloud
-        document.getElementById('cloudConnectSubmitBtn').addEventListener('click', () => this.handleCloudConnect());
-        document.getElementById('cloudCancelBtn').addEventListener('click', () => this.closeCloudModal());
+        this.setupAudioControls();
 
-        // Permettre de fermer le modal cloud en cliquant sur l'overlay
-        const cloudOverlay = document.querySelector('#cloudModal .kawaii-modal-overlay');
-        if (cloudOverlay) {
-            cloudOverlay.addEventListener('click', () => this.closeCloudModal());
-        }
-
-        // Audio toggle button
-        const audioToggleBtn = document.getElementById('audioToggleButton');
-        if (audioToggleBtn) {
-            audioToggleBtn.addEventListener('click', () => {
-                if (window.audioSystem) {
-                    const enabled = window.audioSystem.toggle();
-                    audioToggleBtn.textContent = enabled ? '🔊' : '🔇';
-                    audioToggleBtn.classList.toggle('disabled', !enabled);
-                }
-            });
-            // Initialiser l'icône selon l'état
-            if (window.audioSystem && !window.audioSystem.isEnabled()) {
-                audioToggleBtn.textContent = '🔇';
-                audioToggleBtn.classList.add('disabled');
-            }
-        }
-        
-        // Music toggle button
-        const musicToggleBtn = document.getElementById('musicToggleButton');
-        if (musicToggleBtn) {
-            musicToggleBtn.addEventListener('click', () => {
-                if (window.audioSystem) {
-                    const enabled = window.audioSystem.toggleMusic();
-                    musicToggleBtn.textContent = enabled ? '🎵' : '🔇';
-                    musicToggleBtn.classList.toggle('disabled', !enabled);
-                }
-            });
-            // Initialiser l'icône selon l'état
-            if (window.audioSystem && !window.audioSystem.musicEnabled) {
-                musicToggleBtn.textContent = '🔇';
-                musicToggleBtn.classList.add('disabled');
-            }
-        }
-        
         // Menu modal
         document.getElementById('menuButton').addEventListener('click', () => this.openMenu());
         document.getElementById('closeMenuBtn').addEventListener('click', () => this.closeMenu());
@@ -967,27 +905,6 @@ class ChristianCrosswordGame {
             viewFullLeaderboardBtn.addEventListener('click', () => {
                 window.open('public/leaderboard.html', '_blank');
             });
-        }
-
-        // Boutons connexion tab
-        const signInBtn = document.getElementById('signInBtn');
-        if (signInBtn) {
-            signInBtn.addEventListener('click', () => this.handleSignIn());
-        }
-
-        const signUpBtn = document.getElementById('signUpBtn');
-        if (signUpBtn) {
-            signUpBtn.addEventListener('click', () => this.handleSignUp());
-        }
-
-        const signOutProfileBtn = document.getElementById('signOutProfileBtn');
-        if (signOutProfileBtn) {
-            signOutProfileBtn.addEventListener('click', () => this.handleSignOut());
-        }
-
-        const editProfileBtn = document.getElementById('editProfileBtn');
-        if (editProfileBtn) {
-            editProfileBtn.addEventListener('click', () => this.handleEditProfile());
         }
 
         // Filtres des achievements
@@ -1042,6 +959,7 @@ class ChristianCrosswordGame {
         const modal = document.getElementById('scoreModal');
         const scoreDisplay = document.getElementById('finalScoreDisplay');
         scoreDisplay.textContent = score;
+        this.scoreToRecord = score;
 
         // Réinitialiser le formulaire
         document.getElementById('scoreForm').reset();
@@ -1056,233 +974,49 @@ class ChristianCrosswordGame {
 
     async handleSaveScore() {
         const name = document.getElementById('playerName').value.trim();
-        const email = document.getElementById('playerEmail').value.trim();
-
-        if (!name || !email) {
-            await this.showKawaiiModal('Veuillez remplir tous les champs', '⚠️');
+        if (!name) {
+            await this.showKawaiiModal('Saisis un pseudo pour enregistrer le score.', '⚠️');
             return;
         }
-
-        // Vérifier si Supabase est configuré
-        if (!supabaseScoreManager.isConfigured()) {
-            await this.showKawaiiModal('Le système de score en ligne n\'est pas encore configuré', '⚠️');
-            this.closeScoreModal();
-            return;
-        }
-
         this.closeScoreModal();
-        await this.showKawaiiModal('Sauvegarde du score en cours...', '💾');
-
-        const result = await supabaseScoreManager.saveScore(name, email, this.score);
-
-        if (result.success) {
-            await this.showKawaiiModal('Score sauvegardé avec succès ! 🎉', '✅');
-        } else {
-            await this.showKawaiiModal('Erreur lors de la sauvegarde du score', '❌');
-        }
+        const success = leaderboardManager.recordScore(name, this.scoreToRecord);
+        await this.showKawaiiModal(success ? 'Score enregistré sur cet appareil.' : 'Impossible d’enregistrer le score.', success ? '✅' : '⚠️');
     }
 
-    loadCloudConnection() {
-        const cloudData = localStorage.getItem('cloudConnection');
-        if (cloudData) {
-            try {
-                const data = JSON.parse(cloudData);
-                this.cloudConnected = true;
-                this.cloudUser = data;
-            } catch (e) {
-                console.error('Erreur chargement connexion cloud:', e);
-            }
-        }
+    savePersonalBest() {
+        const name = window.simpleChatSystem?.currentUser || 'Joueur';
+        leaderboardManager.recordScore(name, Math.max(this.score, this.maxScore));
     }
 
-    saveCloudConnection(name, email) {
-        const cloudData = { name, email, connectedAt: Date.now() };
-        localStorage.setItem('cloudConnection', JSON.stringify(cloudData));
-        this.cloudConnected = true;
-        this.cloudUser = cloudData;
-    }
+    restoreCheckpoint({ mode, level, score, maxScore, raceScore }) {
+        if (window.privateRoom?.active || this.isClearingData) return false;
 
-    disconnectCloud() {
-        localStorage.removeItem('cloudConnection');
-        this.cloudConnected = false;
-        this.cloudUser = null;
-    }
+        const modes = ['normal', 'couple', 'sagesse', 'proverbes', 'disciple', 'veiller', 'aimee', 'couple-solide'];
+        if (!modes.includes(mode) || !Number.isSafeInteger(level) || level < 1 ||
+            ![score, maxScore, raceScore].every(Number.isSafeInteger)) return false;
 
-    updateMenuCloudButton() {
-        const btn = document.getElementById('menuCloudBtn');
-        if (!btn) return;
-
-        // Utiliser l'authentification Supabase au lieu du système cloud local
-        if (typeof authSystem !== 'undefined' && authSystem.isAuthenticated()) {
-            const user = authSystem.getCurrentUser();
-            btn.textContent = `✅ Connecté: ${user.username}`;
-            btn.classList.add('connected');
-        } else {
-            btn.textContent = '☁️ Connexion Cloud';
-            btn.classList.remove('connected');
-        }
-    }
-
-    async handleMenuCloudButton() {
-        // Vérifier si l'utilisateur est connecté via authSystem
-        if (typeof authSystem !== 'undefined' && authSystem.isAuthenticated()) {
-            const user = authSystem.getCurrentUser();
-            await this.showKawaiiModal(
-                `Connecté en tant que ${user.username}\n\nVos scores sont sauvegardés automatiquement.`,
-                '☁️'
-            );
-        } else {
-            // Afficher le modal d'authentification
-            if (typeof authSystem !== 'undefined') {
-                authSystem.showAuthModal();
-            } else {
-                await this.showKawaiiModal('Système d\'authentification non disponible', '⚠️');
-            }
-        }
-    }
-
-    showCloudModal() {
-        const modal = document.getElementById('cloudModal');
-        document.getElementById('cloudForm').reset();
-        modal.classList.remove('hidden');
-    }
-
-    closeCloudModal() {
-        const modal = document.getElementById('cloudModal');
-        modal.classList.add('hidden');
-    }
-
-    async handleCloudConnect() {
-        const name = document.getElementById('cloudPlayerName').value.trim();
-        const email = document.getElementById('cloudPlayerEmail').value.trim();
-
-        if (!name || !email) {
-            await this.showKawaiiModal('Veuillez remplir tous les champs', '⚠️');
-            return;
-        }
-
-        // Vérifier si Supabase est configuré
-        if (!supabaseScoreManager.isConfigured()) {
-            await this.showKawaiiModal('Le système de score en ligne n\'est pas encore configuré', '⚠️');
-            this.closeCloudModal();
-            return;
-        }
-
-        this.closeCloudModal();
-        await this.showKawaiiModal('Connexion au cloud en cours...', '☁️');
-
-        // Sauvegarder la connexion
-        this.saveCloudConnection(name, email);
-        this.updateMenuCloudButton();
-
-        await this.showKawaiiModal(`Connecté avec succès !\n\nVos scores seront automatiquement sauvegardés en ligne.`, '✅');
-    }
-
-    async saveScoreToCloud() {
-        if (!this.cloudConnected || !this.cloudUser) {
-            return;
-        }
-
-        if (!supabaseScoreManager.isConfigured()) {
-            return;
-        }
-
+        this.saveGame();
+        const saveKey = 'christianCrosswordSave_' + mode;
+        let local;
         try {
-            const result = await supabaseScoreManager.saveScore(
-                this.cloudUser.name,
-                this.cloudUser.email,
-                this.score
-            );
-
-            if (result.success) {
-                console.log('✅ Score sauvegardé automatiquement sur le cloud');
-            }
-        } catch (error) {
-            console.error('❌ Erreur sauvegarde cloud:', error);
+            local = JSON.parse(localStorage.getItem(saveKey));
+        } catch {
+            // Un point de reprise valide peut remplacer une sauvegarde illisible.
         }
-    }
-
-    // Nouvelle méthode pour sauvegarder la progression complète
-    async saveProgressToCloud() {
-        // Vérifier si l'utilisateur est authentifié
-        if (typeof authSystem === 'undefined' || !authSystem.currentUser) {
-            return;
-        }
-
-        try {
-            console.log('☁️ Sauvegarde cloud...');
-            const result = await supabaseScoreManager.saveProgress(
-                authSystem.currentUser.id,
-                authSystem.currentUser.username,
-                this.currentLevel,
-                this.score,        // Score actuel
-                this.maxScore,     // Meilleur score
-                this.raceScore     // Score de course
-            );
-
-            if (result.success) {
-                // Mettre à jour maxScore local si le cloud a un meilleur
-                if (result.maxScore && result.maxScore > this.maxScore) {
-                    this.maxScore = result.maxScore;
-                }
-                console.log('✅ Progression sauvegardée dans le cloud');
-            }
-        } catch (error) {
-            console.error('❌ Erreur sauvegarde progression:', error);
-        }
-    }
-
-    // Charger la progression depuis le cloud
-    async loadProgressFromCloud() {
-        if (typeof authSystem === 'undefined' || !authSystem.currentUser) {
-            return false;
-        }
-
-        try {
-            const result = await supabaseScoreManager.loadProgress(authSystem.currentUser.id);
-
-            if (result.success) {
-                // Comparer avec la sauvegarde locale
-                const localSave = localStorage.getItem('christianCrosswordSave');
-                const localData = localSave ? JSON.parse(localSave) : null;
-
-                // Si sauvegarde vient d'être effacée, ne pas charger le cloud
-                if (this.saveCleared) {
-                    console.log('⏭️ Sauvegarde locale effacée, ignorer cloud');
-                    return false;
-                }
-
-                // Utiliser la progression la plus avancée
-                if (!localData || result.level > localData.currentLevel || result.score > localData.score) {
-                    this.currentLevel = result.level;
-                    this.score = result.score;
-                    this.maxScore = Math.max(result.maxScore || 0, localData?.maxScore || 0);
-                    this.raceScore = result.raceScore || 0;
-                    console.log('✅ Progression chargée depuis le cloud:', { 
-                        level: result.level, 
-                        score: result.score,
-                        maxScore: this.maxScore,
-                        raceScore: this.raceScore
-                    });
-                    
-                    // Mettre à jour le localStorage aussi
-                    this.saveGame();
-                    return true;
-                } else {
-                    // Même si on ne charge pas tout, prendre le meilleur maxScore
-                    const cloudMaxScore = result.maxScore || 0;
-                    if (cloudMaxScore > this.maxScore) {
-                        this.maxScore = cloudMaxScore;
-                        console.log('⬆️ maxScore mis à jour depuis le cloud:', this.maxScore);
-                    }
-                    console.log('ℹ️ Sauvegarde locale plus récente, pas de chargement cloud');
-                }
-            }
-        } catch (error) {
-            console.error('❌ Erreur chargement progression:', error);
-        }
-
-        return false;
+        const useLocal = local?.gameStarted && (local.currentLevel > level ||
+            (local.currentLevel === level && local.score >= score));
+        const checkpoint = useLocal ? local : {
+            gameStarted: true, gameMode: mode, currentLevel: level, score, timestamp: Date.now()
+        };
+        checkpoint.maxScore = Math.max(this.maxScore, maxScore, checkpoint.score);
+        checkpoint.raceScore = Math.max(this.raceScore, raceScore);
+        localStorage.setItem(saveKey, JSON.stringify(checkpoint));
+        document.querySelectorAll('.resume-modal').forEach(modal => modal.remove());
+        document.getElementById('menuModal')?.classList.add('hidden');
+        this.loadGameFromData(checkpoint);
+        this.updateModeButtons();
+        this.updateMaxLevelDisplay();
+        return true;
     }
 
     setupMenuLanguageSelector() {
@@ -1501,8 +1235,6 @@ class ChristianCrosswordGame {
         const playerNameInput = document.getElementById('playerName');
         if (playerNameInput) playerNameInput.placeholder = i18n.t('modalNamePlaceholder');
 
-        const playerEmailInput = document.getElementById('playerEmail');
-        if (playerEmailInput) playerEmailInput.placeholder = i18n.t('modalEmailPlaceholder');
 
         const saveScoreBtn = document.getElementById('saveScoreBtn');
         if (saveScoreBtn) saveScoreBtn.textContent = i18n.t('modalSaveButton');
@@ -1510,30 +1242,6 @@ class ChristianCrosswordGame {
         const skipScoreBtn = document.getElementById('skipScoreBtn');
         if (skipScoreBtn) skipScoreBtn.textContent = i18n.t('modalSkipButton');
 
-        // Modal cloud
-        const cloudModal = document.querySelector('#cloudModal .kawaii-modal-body');
-        if (cloudModal) {
-            const paragraphs = cloudModal.querySelectorAll('p');
-            if (paragraphs[0]) {
-                paragraphs[0].innerHTML = `<strong>${i18n.t('modalCloudTitle')}</strong>`;
-            }
-            if (paragraphs[1]) {
-                paragraphs[1].textContent = i18n.t('modalCloudDescription');
-            }
-        }
-
-        // Placeholders et boutons du modal cloud
-        const cloudPlayerNameInput = document.getElementById('cloudPlayerName');
-        if (cloudPlayerNameInput) cloudPlayerNameInput.placeholder = i18n.t('modalNamePlaceholder');
-
-        const cloudPlayerEmailInput = document.getElementById('cloudPlayerEmail');
-        if (cloudPlayerEmailInput) cloudPlayerEmailInput.placeholder = i18n.t('modalEmailPlaceholder');
-
-        const cloudConnectBtn = document.getElementById('cloudConnectSubmitBtn');
-        if (cloudConnectBtn) cloudConnectBtn.textContent = i18n.t('modalConnectButton');
-
-        const cloudCancelBtn = document.getElementById('cloudCancelBtn');
-        if (cloudCancelBtn) cloudCancelBtn.textContent = i18n.t('modalCancelButton');
     }
 
     handlePlayButtonClick() {
@@ -2045,7 +1753,7 @@ class ChristianCrosswordGame {
         // Démarrer la musique d'ambiance selon le mode
         if (window.audioSystem) {
             window.audioSystem.setGameMode(this.gameMode);
-            window.audioSystem.playNextTrack();
+            if (!window.audioSystem.currentAudio) window.audioSystem.playNextTrack();
         }
         
         // Message de bienvenue d'un bot assistant
@@ -3767,8 +3475,7 @@ class ChristianCrosswordGame {
                 window.multiplayerRace.shareLevelCompleted(this.currentLevel, this.score);
             }
 
-            // Sauvegarder automatiquement sur le cloud si connecté
-            await this.saveScoreToCloud();
+            this.savePersonalBest();
 
             // Attendre un peu pour montrer l'animation de complétion
             setTimeout(async () => {
@@ -3867,21 +3574,8 @@ class ChristianCrosswordGame {
                     }
                     
                     // Fin du jeu
-                    if (this.cloudConnected) {
-                        // Sauvegarder le score total sur le cloud
-                        await this.saveScoreToCloud();
-                        
-                        // Si connecté au cloud, juste afficher un message de félicitations
-                        const modeIcon = this.gameMode === 'couple' ? '💕' : '🏆';
-                        const modeName = this.gameMode === 'couple' ? 'Couple' : 'Normal';
-                        await this.showKawaiiModal(
-                            `🎉 Félicitations ! Vous avez terminé le mode ${modeName} !\n\nScore du mode: ${modeScore} points\nScore total: ${this.totalScore} points\n\n✅ Score sauvegardé automatiquement sur le cloud`,
-                            '🏆'
-                        );
-                    } else {
-                        // Sinon, proposer de sauvegarder le score total
-                        this.showScoreModal(this.totalScore);
-                    }
+                                        // Sinon, proposer de sauvegarder le score total
+                    this.showScoreModal(this.totalScore);
                     // Effacer la sauvegarde du mode car il est terminé
                     this.clearSave();
                 }
@@ -4116,41 +3810,70 @@ class ChristianCrosswordGame {
         this.updateAchievementsDisplay(filter);
     }
 
-    // Méthode handleMenuCloudButton maintenant définie plus haut dans la classe
-    // (ligne ~283 - utilise authSystem au lieu de cloudConnected)
 
-    // Audio settings
+    setupAudioControls() {
+        const expand = document.getElementById('audioExpandButton');
+        const panel = document.getElementById('audioControlPanel');
+        const setExpanded = open => {
+            panel.hidden = !open;
+            expand.setAttribute('aria-expanded', String(open));
+        };
+        expand.addEventListener('click', () => setExpanded(panel.hidden));
+        document.addEventListener('click', event => {
+            if (!event.target.closest('#audioControlCompact')) setExpanded(false);
+        });
+        document.getElementById('audioControlCompact').addEventListener('keydown', event => {
+            if (event.key === 'Escape' && !panel.hidden) {
+                setExpanded(false);
+                expand.focus();
+            }
+        });
+
+        document.getElementById('audioToggleButton').addEventListener('click', () => {
+            window.audioSystem.toggle();
+            this.updateAudioControls();
+        });
+        document.getElementById('musicToggleButton').addEventListener('click', () => {
+            window.audioSystem.toggleMusic();
+            this.updateAudioControls();
+        });
+        this.updateAudioControls();
+    }
+
+    updateAudioControls() {
+        const audio = window.audioSystem;
+        const update = (id, label, enabled) => {
+            const button = document.getElementById(id);
+            button.textContent = label + (enabled ? ' · Oui' : ' · Non');
+            button.setAttribute('aria-label', label);
+            button.setAttribute('aria-pressed', String(enabled));
+        };
+        update('audioToggleButton', 'Effets sonores', audio.isEnabled());
+        update('musicToggleButton', 'Musique', audio.musicEnabled);
+
+        const hasSound = audio.isEnabled() && this.soundVolume > 0;
+        const hasMusic = audio.musicEnabled && this.musicVolume > 0;
+        const expand = document.getElementById('audioExpandButton');
+        expand.textContent = hasSound ? '🔊' : hasMusic ? '🎵' : '🔇';
+        expand.setAttribute('aria-label', hasSound || hasMusic ? 'Réglages audio' : 'Réglages audio, son coupé');
+    }
+
     loadAudioSettings() {
-        const audioData = localStorage.getItem('audioSettings');
-        if (audioData) {
-            try {
-                const data = JSON.parse(audioData);
-                this.musicVolume = data.musicVolume !== undefined ? data.musicVolume : 50;
-                this.soundVolume = data.soundVolume !== undefined ? data.soundVolume : 50;
-            } catch (e) {
-                console.error('Erreur chargement audio:', e);
-                this.musicVolume = 50;
-                this.soundVolume = 50;
-            }
-        } else {
-            this.musicVolume = 50;
-            this.soundVolume = 50;
+        const audio = window.audioSystem;
+        let saved;
+        try {
+            saved = JSON.parse(localStorage.getItem('audioSettings'));
+        } catch {
+            saved = null;
         }
-
-        // Mettre à jour les sliders
-        setTimeout(() => {
-            const musicSlider = document.getElementById('musicVolume');
-            const soundSlider = document.getElementById('soundVolume');
-            if (musicSlider) musicSlider.value = this.musicVolume;
-            if (soundSlider) soundSlider.value = this.soundVolume;
-            this.updateVolumeDisplays();
-            
-            // Appliquer les volumes sauvegardés au système audio
-            if (window.audioSystem) {
-                window.audioSystem.setMusicVolume(this.musicVolume / 100);
-                window.audioSystem.setVolume(this.soundVolume / 100);
-            }
-        }, 100);
+        const percent = (value, fallback) => Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : fallback;
+        this.musicVolume = percent(saved?.musicVolume, 8);
+        this.soundVolume = percent(saved?.soundVolume, 18);
+        document.getElementById('musicVolume').value = this.musicVolume;
+        document.getElementById('soundVolume').value = this.soundVolume;
+        audio.setMusicVolume(this.musicVolume / 100);
+        audio.setVolume(this.soundVolume / 100);
+        this.updateVolumeDisplays();
     }
 
     saveAudioSettings() {
@@ -4165,6 +3888,7 @@ class ChristianCrosswordGame {
         this.musicVolume = parseInt(e.target.value);
         this.updateVolumeDisplays();
         this.saveAudioSettings();
+        this.updateAudioControls();
         // Appliquer le volume au système audio
         if (window.audioSystem) {
             window.audioSystem.setMusicVolume(this.musicVolume / 100);
@@ -4175,6 +3899,7 @@ class ChristianCrosswordGame {
         this.soundVolume = parseInt(e.target.value);
         this.updateVolumeDisplays();
         this.saveAudioSettings();
+        this.updateAudioControls();
         // Appliquer le volume au système audio
         if (window.audioSystem) {
             window.audioSystem.setVolume(this.soundVolume / 100);
@@ -4347,8 +4072,6 @@ class ChristianCrosswordGame {
             document.getElementById('shareButton').style.display = 'none';
             // Sauvegarder le progrès localement
             this.saveGame();
-            // Sauvegarder la progression dans le cloud (level + score uniquement)
-            await this.saveProgressToCloud();
         } else {
             // Fin du jeu
             
@@ -4358,19 +4081,10 @@ class ChristianCrosswordGame {
                 return;
             }
             
-            // Sauvegarder automatiquement sur le cloud si connecté
-            await this.saveScoreToCloud();
+            this.savePersonalBest();
 
-            if (this.cloudConnected) {
-                // Si connecté au cloud, juste afficher un message de félicitations
-                await this.showKawaiiModal(
-                    `🎉 Félicitations ! Vous avez terminé tous les niveaux !\n\nScore final: ${this.score} points\n\n✅ Score sauvegardé automatiquement sur le cloud`,
-                    '🏆'
-                );
-            } else {
-                // Sinon, proposer de sauvegarder le score
-                this.showScoreModal(this.score);
-            }
+                        // Sinon, proposer de sauvegarder le score
+            this.showScoreModal(this.score);
         }
     }
     
@@ -4438,7 +4152,7 @@ class ChristianCrosswordGame {
         }
         
         // Sauvegarder le score
-        await this.saveScoreToCloud();
+        this.savePersonalBest();
     }
     
     // Broadcaster le nombre de lettres trouvées
@@ -4698,57 +4412,6 @@ class ChristianCrosswordGame {
     
     /* FIN DES MÉTHODES OBSOLÈTES MULTIJOUEUR */
 
-    // Gestion de la connexion
-    async handleSignIn() {
-        // Ouvrir le modal d'authentification en mode connexion
-        if (typeof authSystem !== 'undefined') {
-            authSystem.showAuthModal();
-            // Basculer vers le mode connexion
-            const toggleLink = document.getElementById('authToggleLink');
-            if (toggleLink && toggleLink.textContent === 'Se connecter') {
-                toggleLink.click();
-            }
-        }
-    }
-
-    async handleSignUp() {
-        // Ouvrir le modal d'authentification en mode inscription
-        if (typeof authSystem !== 'undefined') {
-            authSystem.showAuthModal();
-            // Vérifier que nous sommes bien en mode inscription
-            const toggleLink = document.getElementById('authToggleLink');
-            if (toggleLink && toggleLink.textContent === "S'inscrire") {
-                toggleLink.click();
-            }
-        }
-    }
-
-    async handleSignOut() {
-        if (typeof authSystem !== 'undefined') {
-            const result = await authSystem.signOut();
-            if (result.success) {
-                await this.showKawaiiModal('Déconnexion réussie', '👋');
-                if (typeof menuTabSystem !== 'undefined') {
-                    menuTabSystem.updateConnexionTab();
-                }
-            }
-        }
-    }
-
-    async handleEditProfile() {
-        const newUsername = await CustomModals.showPrompt('✏️ Modifier le pseudo', 'Nouveau pseudo:', '', '', '✓ Valider', '❌ Annuler');
-        if (newUsername && newUsername.trim() && typeof authSystem !== 'undefined') {
-            const result = await authSystem.updateUsername(newUsername.trim());
-            if (result.success) {
-                await this.showKawaiiModal('Pseudo mis à jour ! ✨', '✅');
-                if (typeof menuTabSystem !== 'undefined') {
-                    menuTabSystem.updateConnexionTab();
-                }
-            } else {
-                await this.showKawaiiModal(result.message || 'Erreur lors de la modification', '❌');
-            }
-        }
-    }
 }
 
 // Initialiser le jeu quand le DOM est prêt

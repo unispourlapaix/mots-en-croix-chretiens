@@ -163,9 +163,7 @@ class CompactOnlineDisplay {
         menuIcon.textContent = '☰';
         menuIcon.title = 'Ouvrir menu amis';
         menuIcon.onclick = () => {
-            if (window.simpleConnect) {
-                window.simpleConnect.openQuickConnect();
-            }
+            window.friendsUI?.openFriendsModal();
         };
         this.container.appendChild(menuIcon);
         
@@ -186,7 +184,7 @@ class CompactOnlineDisplay {
                 `;
             } else {
                 // Amis ajoutés mais aucun en ligne
-                this.container.innerHTML = '<span style="color: #999; font-size: 10px; padding: 2px 6px;">Aucun ami en ligne</span>';
+                this.container.insertAdjacentHTML('beforeend', '<span style="color: #999; font-size: 10px; padding: 2px 6px;">Aucun ami en ligne</span>');
             }
             return;
         }
@@ -309,16 +307,7 @@ class CompactOnlineDisplay {
     
     // Ouvrir l'interface de connexion/inscription
     openAuthModal() {
-        console.log('🔑 Ouvrir connexion/inscription');
-        
-        this.closePlayerMenu();
-        
-        // Ouvrir l'interface d'authentification
-        if (window.authSystem) {
-            window.authSystem.showAuthModal();
-        } else {
-            this.showNotification('Système d\'authentification non disponible');
-        }
+        window.menuTabSystem?.openTab('connexion');
     }
     
     // Bloquer un joueur
@@ -344,31 +333,7 @@ class CompactOnlineDisplay {
         this.closePlayerMenu();
         
         // Ouvrir le système d'authentification si disponible
-        if (window.authSystem) {
-            const newUsername = prompt('Nouveau pseudo :', window.authSystem.getCurrentUser()?.username || '');
-            
-            if (newUsername && newUsername.trim()) {
-                // Mettre à jour le username
-                if (window.simpleChatSystem) {
-                    window.simpleChatSystem.currentUser = newUsername.trim();
-                }
-                
-                // Mettre à jour dans authSystem si disponible
-                if (window.authSystem.updateUsername) {
-                    window.authSystem.updateUsername(newUsername.trim());
-                }
-                
-                // Mettre à jour la présence
-                if (window.realtimeLobbySystem) {
-                    window.realtimeLobbySystem.updateMyPresenceUsername(newUsername.trim());
-                }
-                
-                this.showNotification(`Pseudo changé : ${newUsername.trim()}`);
-                this.updateDisplay();
-            }
-        } else {
-            this.showNotification('Système d\'authentification non disponible');
-        }
+        window.menuTabSystem?.openTab('connexion');
     }
     
     // Afficher une notification

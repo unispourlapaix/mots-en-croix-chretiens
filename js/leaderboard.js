@@ -4,11 +4,7 @@
 
 class LeaderboardManager {
     constructor() {
-        this.cache = null;
-        this.cacheTimestamp = null;
-        this.cacheDuration = 10 * 60 * 1000; // Cache de 10 minutes
-        this.isLoading = false;
-        
+        this.storageKey = "mots-croix-scores-locaux";
         // Info artiste
         this.artistInfo = {
             name: "Emmanuel Payet",
@@ -25,65 +21,36 @@ class LeaderboardManager {
         };
     }
 
-    // Charger le top scores avec cache (minimal DB access)
-    async getTopScores(limit = 10, forceRefresh = false) {
-        // Vérifier le cache
-        const now = Date.now();
-        if (!forceRefresh && this.cache && this.cacheTimestamp && (now - this.cacheTimestamp < this.cacheDuration)) {
-            console.log('📦 Top scores depuis le cache');
-            return { success: true, scores: this.cache, fromCache: true };
-        }
-
-        // Éviter les requêtes multiples simultanées
-        if (this.isLoading) {
-            console.log('⏳ Chargement déjà en cours...');
-            return { success: false, error: 'Chargement en cours' };
-        }
-
-        this.isLoading = true;
-
+    readScores() {
         try {
-            if (!supabase) {
-                throw new Error('Supabase non configuré');
-            }
-
-            console.log('☁️ Chargement top scores depuis DB...');
-            
-            // Requête optimisée: seulement username et max_score (2 colonnes)
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('username, max_score')
-                .gt('max_score', 0)  // Filtrer dès la requête
-                .order('max_score', { ascending: false })
-                .limit(limit);
-
-            if (error) throw error;
-
-            // Mettre en cache
-            this.cache = data;
-            this.cacheTimestamp = now;
-
-            console.log(`✅ ${data.length} scores chargés et mis en cache (10 min)`);
-            
-            return { 
-                success: true, 
-                scores: data,
-                fromCache: false 
-            };
-
-        } catch (error) {
-            console.error('❌ Erreur chargement top scores:', error);
-            
-            // En cas d'erreur, retourner le cache s'il existe
-            if (this.cache) {
-                console.log('📦 Utilisation du cache après erreur');
-                return { success: true, scores: this.cache, fromCache: true, error: error.message };
-            }
-            
-            return { success: false, error: error.message };
-        } finally {
-            this.isLoading = false;
+            const scores = JSON.parse(localStorage.getItem(this.storageKey) || '[]');
+            return Array.isArray(scores) ? scores.filter(entry => typeof entry?.username === 'string' &&
+                Number.isSafeInteger(entry.max_score) && entry.max_score > 0) : [];
+        } catch {
+            return [];
         }
+    }
+
+    recordScore(username, score) {
+        if (typeof username !== 'string' || !username.trim() || !Number.isSafeInteger(score) || score <= 0) return false;
+        const name = username.trim().slice(0, 30);
+        const scores = this.readScores();
+        const previous = scores.find(entry => entry.username === name);
+        if (previous && previous.max_score >= score) return true;
+
+        const next = scores.filter(entry => entry.username !== name);
+        next.push({ username: name, max_score: score, created_at: new Date().toISOString() });
+        next.sort((a, b) => b.max_score - a.max_score);
+        try {
+            localStorage.setItem(this.storageKey, JSON.stringify(next.slice(0, 100)));
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    getTopScores(limit = 10) {
+        return { success: true, scores: this.readScores().sort((a, b) => b.max_score - a.max_score).slice(0, limit) };
     }
 
     // Générer le HTML du leaderboard
@@ -92,8 +59,7 @@ class LeaderboardManager {
             return `
                 <div class="leaderboard-empty">
                     <p>🎮 Aucun score enregistré pour le moment</p>
-                    <p>Soyez le premier à jouer et à figurer au classement !</p>
-                </div>
+                    </div>
             `;
         }
 
@@ -261,53 +227,14 @@ class LeaderboardManager {
         return index === -1 ? null : index + 1;
     }
 
-    // Stats globales (sans charger tous les scores)
     async getGlobalStats() {
-        try {
-            if (!supabase) {
-                throw new Error('Supabase non configuré');
-            }
-
-            // Appeler la fonction Postgres optimisée
-            const { data, error } = await supabase
-                .rpc('get_leaderboard_stats');
-
-            if (error) {
-                console.warn('⚠️ Fonction RPC non disponible, calcul depuis cache');
-                // Fallback: calculer depuis le cache
-                if (this.cache && this.cache.length > 0) {
-                    return {
-                        success: true,
-                        totalPlayers: this.cache.length,
-                        topScore: this.cache[0].max_score,
-                        avgScore: Math.round(this.cache.reduce((sum, p) => sum + p.max_score, 0) / this.cache.length)
-                    };
-                }
-                throw error;
-            }
-
-            return { 
-                success: true, 
-                totalPlayers: data.total_players,
-                topScore: data.top_score,
-                avgScore: Math.round(data.avg_score)
-            };
-        } catch (error) {
-            console.error('❌ Erreur stats globales:', error);
-            
-            // Fallback final: retourner depuis le cache si disponible
-            if (this.cache && this.cache.length > 0) {
-                return {
-                    success: true,
-                    totalPlayers: this.cache.length,
-                    topScore: this.cache[0].max_score,
-                    avgScore: Math.round(this.cache.reduce((sum, p) => sum + p.max_score, 0) / this.cache.length),
-                    fromCache: true
-                };
-            }
-            
-            return { success: false, error: error.message };
-        }
+        const scores = this.getTopScores(100).scores;
+        return {
+            success: true,
+            totalPlayers: scores.length,
+            topScore: scores[0]?.max_score || 0,
+            avgScore: scores.length ? Math.round(scores.reduce((sum, player) => sum + player.max_score, 0) / scores.length) : 0
+        };
     }
 }
 

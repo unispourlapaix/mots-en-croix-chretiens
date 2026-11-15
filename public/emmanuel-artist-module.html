@@ -816,7 +816,7 @@
         <div class="leaderboard-section">
             <div class="leaderboard-header">
                 <h2 class="leaderboard-title">🏆 Classement Mots En Croix Chrétiens</h2>
-                <p class="leaderboard-subtitle">Les meilleurs joueurs du jeu de mots croisés chrétiens</p>
+                <p class="leaderboard-subtitle">Scores de mots croisés sur cet appareil</p>
             </div>
 
             <!-- 🕊️ Section Score Dove of Hope -->
@@ -895,32 +895,11 @@
     </div>
 
     <script type="module">
-        // Configuration Supabase - UTILISER LE MÊME QUE LE JEU
-        const SUPABASE_URL = 'https://dmszyxowetilvsanqsxm.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtc3p5eG93ZXRpbHZzYW5xc3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3NzM0NDUsImV4cCI6MjA3NTM0OTQ0NX0.EukDYFVt0sCrDb0_V4ZPMv5B4gkD43V8Cw7CEuvl0C8';
-        
-        // Import Supabase (optionnel - fallback sur scores locaux si échec)
-        let supabaseClient = null;
-        
-        try {
-            if (typeof supabase !== 'undefined' && supabase.createClient) {
-                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                console.log('✅ Supabase chargé avec succès');
-            } else {
-                throw new Error('Supabase UMD bundle not loaded');
-            }
-        } catch (error) {
-            console.warn('⚠️ Supabase non disponible, utilisation scores locaux uniquement:', error);
-            supabaseClient = null;
-        }
-
         let currentPage = 1;
         const perPage = 100;
         let totalScores = 0;
         let allScores = [];
         let loadedCount = 0;
-        const initialLoad = 100;
-        const loadMoreIncrement = 200;
         
         // ⚡ Déclarer currentLang AVANT les fonctions (sera mis à jour après)
         let currentLang = 'fr'; // Valeur par défaut temporaire
@@ -955,42 +934,11 @@
                 const t = translations[currentLang] || translations['fr'];
                 document.getElementById('leaderboardContent').innerHTML = `<div class="loading">${t.loading}</div>`;
 
-                allScores = [];
-
-                // 1️⃣ CHARGER LES SCORES DU JEU MOTS EN CROIX CHRÉTIENS (SUPABASE)
-                if (supabaseClient) {
-                    try {
-                        const { data, error } = await supabaseClient
-                            .from('mots_croix_scores')
-                            .select('*')
-                            .eq('game_prefix', 'mots-en-croix-chretiens')
-                            .order('score', { ascending: false })
-                            .limit(initialLoad);
-
-                        if (!error && data && data.length > 0) {
-                            console.log('🌐 Scores en ligne trouvés:', data.length);
-                            allScores = data.map(entry => ({
-                                id: entry.id,
-                                score: entry.score,
-                                created_at: entry.created_at,
-                                users: {
-                                    pseudo: entry.player_name,
-                                    avatar: '🙏',
-                                    pays: null
-                                },
-                                _email: entry.player_email
-                            }));
-                        }
-                    } catch (err) {
-                        console.warn('⚠️ Erreur chargement scores en ligne:', err);
-                    }
-                }
-
-                // 2️⃣ Si aucun score, créer des données de test
-                if (allScores.length === 0) {
-                    console.log('📝 Aucun score trouvé, utilisation données de test');
-                    allScores = createTestScores();
-                }
+                allScores = leaderboardManager.getTopScores(100).scores.map(entry => ({
+                    score: entry.max_score,
+                    created_at: entry.created_at,
+                    users: { pseudo: entry.username, avatar: '🙏' }
+                }));
 
                 // 3️⃣ Trier par score décroissant
                 allScores.sort((a, b) => b.score - a.score);
@@ -1011,120 +959,6 @@
             } catch (error) {
                 console.error('❌ Erreur chargement scores:', error);
                 document.getElementById('leaderboardContent').innerHTML = `<div class="loading">Erreur de chargement</div>`;
-            }
-        }
-
-        // 💾 Récupérer les scores localStorage (meilleur score uniquement)
-        function getLocalScores() {
-            try {
-                const t = translations[currentLang] || translations['fr'];
-                const data = localStorage.getItem('petit_bateau_local_scores');
-                if (!data) return [];
-
-                const scores = JSON.parse(data);
-                if (!scores || scores.length === 0) return [];
-
-                // Trouver le meilleur score (score le plus élevé)
-                const bestScore = scores.reduce((best, current) => {
-                    return (current.score > best.score) ? current : best;
-                }, scores[0]);
-
-                // Retourner uniquement le meilleur score
-                return [{
-                    score: bestScore.score,
-                    niveau_atteint: bestScore.niveau_atteint,
-                    temps_jeu: bestScore.temps_jeu,
-                    created_at: bestScore.created_at,
-                    donnees_extra: bestScore.donnees_extra,
-                    game_id: bestScore.game_id,
-                    users: {
-                        pseudo: bestScore.user?.pseudo || t.anonymous,
-                        avatar: bestScore.user?.avatar || '👤',
-                        pays: bestScore.user?.pays || null
-                    },
-                    _isLocal: true
-                }];
-            } catch (e) {
-                console.error('❌ Erreur lecture localStorage:', e);
-                return [];
-            }
-        }
-
-        function createTestScores() {
-            const pseudos = ['Marie', 'Pierre', 'Jean', 'Sophie', 'Paul', 'Anne', 'Luc', 'Marthe', 'Thomas', 'Ruth'];
-            const avatars = ['🙏', '✝️', '🕊️', '⛪', '📿', '✨', '💫', '🌟', '🙌', '❤️'];
-
-            // Scores pour un jeu de mots croisés (basé sur 77 niveaux)
-            const maxTestScore = 7700; // 100 points par niveau
-
-            const testScores = [];
-            for (let i = 0; i < 30; i++) {
-                const pseudoIdx = i % pseudos.length;
-                // Score décroissant
-                const score = maxTestScore - (i * 100);
-
-                testScores.push({
-                    id: `test-${i}`,
-                    score: score,
-                    users: {
-                        pseudo: pseudos[pseudoIdx] + (i > 9 ? ` ${Math.floor(i / 10)}` : ''),
-                        avatar: avatars[pseudoIdx],
-                        pays: null
-                    },
-                    created_at: new Date(Date.now() - i * 86400000).toISOString()
-                });
-            }
-            console.log('🧪 Données de test créées:', testScores.length, 'scores (max:', maxTestScore, ')');
-            console.log('📝 Les scores de test sont en secours si Supabase est vide');
-            return testScores;
-        }
-
-        async function loadMoreScores() {
-            try {
-                const t = translations[currentLang] || translations['fr'];
-                const loadMoreBtn = document.getElementById('loadMoreBtn');
-                if (loadMoreBtn) {
-                    loadMoreBtn.disabled = true;
-                    loadMoreBtn.innerHTML = t.loading;
-                }
-
-                const start = loadedCount;
-                const end = Math.min(loadedCount + loadMoreIncrement - 1, totalScores - 1);
-
-                const { data, error } = await supabaseClient
-                    .from('mots_croix_scores')
-                    .select('*')
-                    .eq('game_prefix', 'mots-en-croix-chretiens')
-                    .order('score', { ascending: false })
-                    .range(start, end);
-
-                if (error) throw error;
-
-                const newData = Array.isArray(data) ? data.map(entry => ({
-                    id: entry.id,
-                    score: entry.score,
-                    created_at: entry.created_at,
-                    users: {
-                        pseudo: entry.player_name,
-                        avatar: '🙏',
-                        pays: null
-                    },
-                    _email: entry.player_email
-                })) : [];
-                allScores = [...allScores, ...newData];
-                loadedCount = allScores.length;
-
-                console.log('✅ Chargement progressif:', loadedCount, 'scores');
-                renderPage();
-            } catch (error) {
-                console.error('Erreur chargement supplémentaire:', error);
-                const t = translations[currentLang] || translations['fr'];
-                alert(`❌ ${t.errorLoading}: ${error.message}`);
-                const loadMoreBtn = document.getElementById('loadMoreBtn');
-                if (loadMoreBtn) {
-                    loadMoreBtn.disabled = false;
-                    loadMoreBtn.innerHTML = `📥 ${t.loadMore}`;
-                }
             }
         }
 
@@ -1182,11 +1016,11 @@
                     const titreNiveau = translateWisdomLevel(niveau.key);
                     const enigmesInfo = donnees.enigmes ? ` • ${donnees.enigmes}/18🧩` : '';
                     levelInfo = `
-                        <div class="player-name">${pseudo}</div>
+                        <div class="player-name">${leaderboardManager.escapeHtml(pseudo)}</div>
                         <div class="player-level">${niveau.icone} ${titreNiveau}${enigmesInfo}</div>
                     `;
                 } else {
-                    levelInfo = `<div class="player-name">${pseudo}</div>`;
+                    levelInfo = `<div class="player-name">${leaderboardManager.escapeHtml(pseudo)}</div>`;
                 }
 
                 const badges = getBadges(donnees, globalRank === 1, donnees.enigmes);
@@ -1205,27 +1039,7 @@
             document.getElementById('leaderboardContent').innerHTML = html || `<div class="loading">${t.noResults}</div>`;
             
             // Afficher le bouton "Voir plus" si nécessaire
-            renderLoadMoreButton();
             renderPagination();
-        }
-
-        function renderLoadMoreButton() {
-            const loadMoreContainer = document.getElementById('loadMoreContainer');
-            if (!loadMoreContainer) return;
-
-            if (loadedCount < totalScores) {
-                const remaining = totalScores - loadedCount;
-                const nextLoad = Math.min(loadMoreIncrement, remaining);
-                const t = translations[currentLang] || translations['fr'];
-                loadMoreContainer.innerHTML = `
-                    <button id="loadMoreBtn" class="load-more-btn" onclick="window.loadMoreScores()">
-                        ${t.loadMoreScores} ${nextLoad} ${t.moreScores} (${loadedCount.toLocaleString()} / ${totalScores.toLocaleString()})
-                    </button>
-                `;
-            } else {
-                // Tous les scores chargés - ne rien afficher
-                loadMoreContainer.innerHTML = '';
-            }
         }
 
         function renderPagination() {
@@ -1264,28 +1078,11 @@
             const maxPossiblePages = Math.ceil(loadedCount / perPage);
             if (page < 1 || page > maxPossiblePages) return;
             
-            // Si on essaie d'aller sur une page non chargée, proposer de charger plus
-            const neededScores = page * perPage;
-            if (neededScores > loadedCount && loadedCount < totalScores) {
-                const t = translations[currentLang] || translations['fr'];
-                if (confirm(`${t.confirmLoadMore} ${loadMoreIncrement} ${t.moreScoresQuestion}`)) {
-                    loadMoreScores().then(() => {
-                        if (page <= Math.ceil(loadedCount / perPage)) {
-                            currentPage = page;
-                            renderPage();
-                            document.querySelector('.leaderboard-section').scrollIntoView({ behavior: 'smooth' });
-                        }
-                    });
-                }
-                return;
-            }
-            
             currentPage = page;
             renderPage();
             document.querySelector('.leaderboard-section').scrollIntoView({ behavior: 'smooth' });
         };
 
-        window.loadMoreScores = loadMoreScores;
 
         // Recherche
         document.getElementById('searchInput').addEventListener('input', (e) => {
@@ -1311,11 +1108,11 @@
                         const titreNiveau = translateWisdomLevel(niveau.key);
                         const enigmesInfo = donnees.enigmes ? ` • ${donnees.enigmes}/18🧩` : '';
                         levelInfo = `
-                            <div class="player-name">${pseudo}</div>
+                            <div class="player-name">${leaderboardManager.escapeHtml(pseudo)}</div>
                             <div class="player-level">${niveau.icone} ${titreNiveau}${enigmesInfo}</div>
                         `;
                     } else {
-                        levelInfo = `<div class="player-name">${pseudo}</div>`;
+                        levelInfo = `<div class="player-name">${leaderboardManager.escapeHtml(pseudo)}</div>`;
                     }
 
                     const badges = getBadges(donnees, globalRank === 1, donnees.enigmes);
@@ -1353,46 +1150,12 @@
 
                 let leaderboard = [];
 
-                // 1️⃣ Essayer de charger depuis Supabase en premier
-                if (supabaseClient) {
-                    try {
-                        const { data: leaderboardData, error } = await supabaseClient
-                            .from('dove_leaderboard')
-                            .select('high_score, highest_level_reached, total_clouds_destroyed, star_stock, nickname')
-                            .order('high_score', { ascending: false })
-                            .limit(30);
-
-                        if (!error && leaderboardData && leaderboardData.length > 0) {
-                            console.log(`✅ ${leaderboardData.length} scores Dove chargés depuis Supabase`);
-                            leaderboard = leaderboardData.map(entry => ({
-                                highScore: entry.high_score,
-                                highestLevelReached: entry.highest_level_reached,
-                                totalCloudsDestroyed: entry.total_clouds_destroyed,
-                                starStock: entry.star_stock,
-                                nickname: entry.nickname || 'Anonyme'
-                            }));
-                        } else if (error) {
-                            console.warn('⚠️ Erreur Supabase dove_leaderboard:', error.message);
-                        }
-                    } catch (err) {
-                        console.warn('⚠️ Erreur connexion Supabase Dove:', err);
-                    }
-                }
-
-                // 2️⃣ Fallback sur localStorage si Supabase échoue ou pas de données
-                if (leaderboard.length === 0) {
-                    const doveData = localStorage.getItem('doveGameData');
-                    if (doveData) {
-                        const localData = JSON.parse(doveData);
-                        console.log('📦 Données Dove chargées depuis localStorage:', localData);
-                        leaderboard = [{
-                            highScore: localData.highScore || 0,
-                            highestLevelReached: localData.highestLevelReached || 0,
-                            totalCloudsDestroyed: localData.totalCloudsDestroyed || 0,
-                            starStock: localData.starStock || 0,
-                            nickname: localData.nickname || 'Joueur Local'
-                        }];
-                    }
+                const doveData = localStorage.getItem('doveGameData');
+                if (doveData) {
+                    const data = JSON.parse(doveData);
+                    leaderboard = [{ highScore: data.highScore || 0,
+                        highestLevelReached: data.highestLevelReached || 0,
+                        nickname: data.nickname || 'Joueur' }];
                 }
 
                 // 3️⃣ Afficher le classement
@@ -1404,7 +1167,7 @@
                             <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 15px;background:rgba(255,255,255,0.05);border-radius:8px;margin-bottom:5px;">
                                 <div style="display:flex;align-items:center;gap:10px;flex:1;">
                                     <span style="min-width:35px;font-weight:bold;">${medal}</span>
-                                    <span style="opacity:0.9;">👤 ${entry.nickname}</span>
+                                    <span style="opacity:0.9;">👤 ${leaderboardManager.escapeHtml(entry.nickname)}</span>
                                 </div>
                                 <div style="display:flex;gap:20px;align-items:center;">
                                     <span style="font-weight:bold;">🏆 ${entry.highScore?.toLocaleString() || 0}</span>
@@ -1432,8 +1195,8 @@
         loadDoveScore();
     </script>
 
-    <!-- Supabase Client UMD Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+    <!-- Scores locaux -->
+    <script src="../js/leaderboard.js"></script>
 
     <script>
         // Traductions multilingues
@@ -1452,7 +1215,7 @@
                 quote: "L'art chrétien unit les cœurs au-delà des différences, célébrant la beauté de la création divine dans toute sa diversité.",
                 credits: "Codé par Claude • Idée originale Emmanuel Payet",
                 leaderboardTitle: "🏆 Classement Mots En Croix Chrétiens",
-                leaderboardSubtitle: "Les meilleurs joueurs du jeu de mots croisés chrétiens",
+                leaderboardSubtitle: "Scores de mots croisés sur cet appareil",
                 searchPlaceholder: "🔍 Rechercher un joueur...",
                 statPlayers: "Joueurs",
                 statTopScore: "Meilleur Score",
@@ -1500,7 +1263,7 @@
                 quote: "Christian art unites hearts beyond differences, celebrating the beauty of divine creation in all its diversity.",
                 credits: "Coded by Claude • Original idea Emmanuel Payet",
                 leaderboardTitle: "🏆 Christian Crossword Ranking",
-                leaderboardSubtitle: "Best players of the Christian crossword game",
+                leaderboardSubtitle: "Christian crossword scores on this device",
                 searchPlaceholder: "🔍 Search for a player...",
                 statPlayers: "Players",
                 statTopScore: "Top Score",
@@ -2241,7 +2004,6 @@
             if (leaderboardContent && leaderboardContent.children.length > 0) {
                 console.log('🔄 Redessiner leaderboard avec langue:', lang);
                 if (typeof renderPage === 'function') renderPage();
-                if (typeof renderLoadMoreButton === 'function') renderLoadMoreButton();
             }
         }
 
@@ -2257,7 +2019,6 @@
             // 2. Rafraîchir le leaderboard avec la langue détectée
             if (typeof allScores !== 'undefined' && allScores && allScores.length > 0) {
                 if (typeof renderPage === 'function') renderPage();
-                if (typeof renderLoadMoreButton === 'function') renderLoadMoreButton();
             }
             
             // 3. Initialiser le sélecteur de langue

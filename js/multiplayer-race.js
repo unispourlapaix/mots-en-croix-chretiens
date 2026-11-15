@@ -18,17 +18,8 @@ class MultiplayerRace {
         this.hasStoppedRace = false; // Pour savoir si j'ai arrêté ma course
     }
 
-    // Récupérer le vrai username authentifié
     getMyUsername() {
-        // Priorité au username authentifié
-        if (typeof authSystem !== 'undefined' && authSystem.isAuthenticated()) {
-            const user = authSystem.getCurrentUser();
-            if (user && user.username) {
-                return user.username;
-            }
-        }
-        // Fallback sur chatSystem
-        return this.chatSystem?.currentUser || 'Joueur';
+        return window.privateRoom?.active ? window.privateRoom.name : this.chatSystem?.currentUser || 'Joueur';
     }
 
     // Démarrer une course
@@ -441,7 +432,7 @@ les yeux fixés sur Jésus." - Hébreux 12:1-2
 
     // Diffuser la progression via P2P
     broadcastProgress(type, data = {}) {
-        if (!this.chatSystem || !this.chatSystem.connections) return;
+        if (!this.chatSystem || !this.chatSystem.gameConnections) return;
 
         const message = {
             type: 'race',
@@ -451,7 +442,7 @@ les yeux fixés sur Jésus." - Hébreux 12:1-2
             timestamp: Date.now()
         };
 
-        this.chatSystem.connections.forEach((conn) => {
+        this.chatSystem.gameConnections.forEach((conn) => {
             if (conn.open) {
                 conn.send(message);
             }

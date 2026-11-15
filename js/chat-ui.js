@@ -6,7 +6,6 @@
 class ChatUI {
     constructor() {
         this.chatSystem = window.simpleChatSystem;
-        this.authSystem = window.authSystem;
         
         // Éléments DOM - Menu
         this.chatUsername = document.getElementById('chatUsername');
@@ -70,12 +69,7 @@ class ChatUI {
             });
         }
 
-        // Écouter les changements d'authentification
-        if (this.authSystem) {
-            this.authSystem.onAuthChange(() => {
-                this.updateUI();
-            });
-        }
+        window.addEventListener('usernameUpdated', () => this.updateUI());
 
         // Écouter les changements de connexion P2P
         if (this.chatSystem) {
@@ -229,16 +223,7 @@ class ChatUI {
 
     updateUI() {
         // Mettre à jour le nom d'utilisateur
-        if (this.chatUsername) {
-            if (this.authSystem && this.authSystem.isAuthenticated()) {
-                const username = this.authSystem.currentUser?.username || 'Utilisateur';
-                this.chatUsername.textContent = `Connecté: ${username}`;
-                this.chatUsername.style.color = '#4caf50';
-            } else {
-                this.chatUsername.textContent = 'Non connecté';
-                this.chatUsername.style.color = '#666';
-            }
-        }
+        if (this.chatUsername) this.chatUsername.textContent = this.chatSystem?.currentUser || 'Joueur';
 
         // Mettre à jour le compteur de participants
         this.updateParticipantCount();

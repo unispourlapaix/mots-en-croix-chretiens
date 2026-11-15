@@ -1,14 +1,17 @@
 // Service Worker pour Mots En Croix Chrétiens
-const CACHE_NAME = 'mots-croix-v1.0.2';
+const CACHE_NAME = 'mots-croix-v1.1.0';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/css/styles.css',
-  '/js/config.js',
-  '/js/i18n.js',
-  '/js/gameData.js',
-  '/js/game.js',
-  '/manifest.json'
+  './',
+  'index.html',
+  'css/styles.css',
+  'js/config.js',
+  'js/i18n.js',
+  'js/gameData.js',
+  'js/game.js',
+  'js/google-drive-save.js',
+  'js/private-room.js',
+  'js/realtime-lobby.js',
+  'manifest.json'
 ];
 
 // Installation du Service Worker
@@ -44,19 +47,7 @@ self.addEventListener('activate', (event) => {
 
 // Stratégie de cache: Network First, fallback to Cache
 self.addEventListener('fetch', (event) => {
-  // Ne pas intercepter les requêtes vers PeerJS, Heroku, Supabase, ou CDN externes
-  const url = new URL(event.request.url);
-  if (url.hostname.includes('peerjs.com') || 
-      url.hostname.includes('peerjs-server.herokuapp.com') ||
-      url.hostname.includes('herokuapp.com') ||
-      url.hostname.includes('supabase.co') ||
-      url.hostname.includes('supabase.in') ||
-      url.hostname.includes('jsdelivr.net') ||  // CDN Y.js, y-webrtc, etc.
-      url.hostname.includes('unpkg.com') ||      // CDN alternatif
-      url.hostname.includes('cdnjs.cloudflare.com')) { // CDN Cloudflare
-    // Laisser passer directement sans cache
-    return;
-  }
+  if (event.request.method !== 'GET' || new URL(event.request.url).origin !== self.location.origin) return;
 
   event.respondWith(
     fetch(event.request)
@@ -80,7 +71,7 @@ self.addEventListener('fetch', (event) => {
             }
             // Si pas dans le cache, retourne une page offline simple
             if (event.request.mode === 'navigate') {
-              return caches.match('/index.html');
+              return caches.match(new URL('index.html', self.registration.scope).href);
             }
           });
       })

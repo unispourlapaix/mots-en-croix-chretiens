@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <meta name="google-drive-client-id" content="">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#ff69b4">
@@ -58,16 +59,11 @@
                 ☰ Menu
             </button>
             <div id="audioControlCompact" class="audio-control-compact">
-                <button id="audioExpandButton" class="audio-expand-btn" title="Contrôles audio">
-                    🔊
-                </button>
-                <div id="audioControlPanel" class="audio-control-panel" style="display: none;">
-                    <button id="audioToggleButton" class="audio-mini-btn" title="Son">
-                        🔊
-                    </button>
-                    <button id="musicToggleButton" class="audio-mini-btn" title="Musique">
-                        🎵
-                    </button>
+                <button type="button" id="audioExpandButton" class="audio-expand-btn"
+                        aria-label="Réglages audio" aria-controls="audioControlPanel" aria-expanded="false">🔊</button>
+                <div id="audioControlPanel" class="audio-control-panel" hidden>
+                    <button type="button" id="audioToggleButton" class="audio-mini-btn" aria-pressed="true">Effets sonores</button>
+                    <button type="button" id="musicToggleButton" class="audio-mini-btn" aria-pressed="true">Musique</button>
                 </div>
             </div>
         </div>
@@ -143,9 +139,13 @@
         <button type="button" id="privateRoomOpen" class="kawaii-modal-button">Partie privée</button>
         <dialog id="privateRoomDialog" aria-labelledby="privateRoomTitle">
             <h2 id="privateRoomTitle">Partie privée</h2>
-            <p id="privateRoomStatus" role="status">Invite un ami à jouer.</p>
+            <p id="privateRoomStatus" role="status">Crée une partie ou rejoins un ami avec son code.</p>
             <button type="button" id="privateRoomCreate">Créer une partie</button>
-            <form id="privateRoomJoin" hidden>
+            <form id="privateRoomJoin">
+                <div id="privateRoomCodeField">
+                    <label for="privateRoomCode">Code d’invitation</label>
+                    <input id="privateRoomCode" name="inviteCode" autocapitalize="off" autocomplete="off" spellcheck="false" required>
+                </div>
                 <label for="privateRoomNickname">Ton pseudo</label>
                 <input id="privateRoomNickname" name="nickname" autocomplete="nickname" maxlength="30" required>
                 <button type="submit">Demander à rejoindre</button>
@@ -153,8 +153,9 @@
             <div id="privateRoomHost" hidden>
                 <button type="button" id="privateRoomShare">Partager le lien</button>
                 <button type="button" id="privateRoomCopy">Copier le lien</button>
-                <button type="button" id="privateRoomRevoke">Révoquer le lien</button>
-                <input id="privateRoomLink" aria-label="Lien d’invitation à copier" readonly hidden>
+                <button type="button" id="privateRoomCopyCode">Copier le code</button>
+                <button type="button" id="privateRoomRevoke">Révoquer l’invitation</button>
+                <input id="privateRoomLink" aria-label="Invitation à copier" readonly hidden>
             </div>
             <div id="privateRoomApproval" hidden>
                 <p id="privateRoomGuest"></p>
@@ -253,34 +254,11 @@
                 <p>Sauvegarder votre score en ligne:</p>
                 <form id="scoreForm">
                     <input type="text" id="playerName" placeholder="Votre nom" required>
-                    <input type="email" id="playerEmail" placeholder="Votre email" required>
                 </form>
             </div>
             <div class="kawaii-modal-footer">
                 <button id="saveScoreBtn" class="kawaii-modal-button">💾 Sauvegarder</button>
                 <button id="skipScoreBtn" class="kawaii-modal-button secondary">Passer</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de connexion cloud -->
-    <div id="cloudModal" class="kawaii-modal hidden">
-        <div class="kawaii-modal-overlay"></div>
-        <div class="kawaii-modal-content">
-            <div class="kawaii-modal-header">
-                <span class="kawaii-modal-icon">☁️</span>
-            </div>
-            <div class="kawaii-modal-body">
-                <p><strong>Connexion Cloud</strong></p>
-                <p>Connectez-vous pour sauvegarder automatiquement vos scores en ligne</p>
-                <form id="cloudForm">
-                    <input type="text" id="cloudPlayerName" placeholder="Votre nom" required>
-                    <input type="email" id="cloudPlayerEmail" placeholder="Votre email" required>
-                </form>
-            </div>
-            <div class="kawaii-modal-footer">
-                <button id="cloudConnectSubmitBtn" class="kawaii-modal-button">✅ Se connecter</button>
-                <button id="cloudCancelBtn" class="kawaii-modal-button secondary">Annuler</button>
             </div>
         </div>
     </div>
@@ -313,9 +291,6 @@
                     <h3>👤 Profil</h3>
                     <div id="profileSection">
                         <p id="profileUsername" style="font-size: 16px; font-weight: bold; color: #ff1493; margin-bottom: 10px;">Non connecté</p>
-                        <button id="signOutBtn" class="menu-cloud-btn secondary" style="display: none; margin-top: 10px;">
-                            🚪 Déconnexion
-                        </button>
                     </div>
                     <p class="menu-description">Gérez votre compte et vos informations</p>
                 </div>
@@ -415,13 +390,13 @@
                     <div class="audio-controls">
                         <div class="audio-control-item">
                             <label for="musicVolume">🎵 Musique</label>
-                            <input type="range" id="musicVolume" min="0" max="100" value="50">
-                            <span id="musicVolumeValue">50%</span>
+                            <input type="range" id="musicVolume" min="0" max="100" value="8">
+                            <span id="musicVolumeValue">8%</span>
                         </div>
                         <div class="audio-control-item">
                             <label for="soundVolume">🔔 Effets sonores</label>
-                            <input type="range" id="soundVolume" min="0" max="100" value="50">
-                            <span id="soundVolumeValue">50%</span>
+                            <input type="range" id="soundVolume" min="0" max="100" value="18">
+                            <span id="soundVolumeValue">18%</span>
                         </div>
                     </div>
                 </div>
@@ -452,7 +427,7 @@
                 </div>
                 <div style="text-align: center; margin-top: 15px;">
                     <button id="viewFullLeaderboardBtn" class="menu-cloud-btn secondary">
-                        📊 Voir le classement complet
+                        📊 Voir les records de cet appareil
                     </button>
                 </div>
             </div>
@@ -465,28 +440,24 @@
                 </div>
 
                 <div id="connexionSection">
-                    <!-- Formulaire de connexion/inscription -->
-                    <div id="authFormMenu" class="auth-form">
+                    <div class="auth-form">
                         <div class="menu-section">
-                            <p style="color: #666; font-size: 14px; text-align: center; margin-bottom: 15px;">
-                                Créez un compte pour sauvegarder vos scores et discuter avec la communauté
-                            </p>
-                            
-                            <button id="signInBtn" class="menu-cloud-btn" style="width: 100%; margin-bottom: 10px;">
-                                🔓 Se connecter
-                            </button>
-                            <button id="signUpBtn" class="menu-cloud-btn secondary" style="width: 100%; margin-bottom: 10px;">
-                                ✨ Créer un compte
-                            </button>
-                        </div>
-                        
-                        <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #ffe0f0;">
-                            <p style="font-size: 12px; color: #999;">✨ Système intuitif et privé ☁️</p>
+                            <p>Retrouve ton pseudo, ton niveau et tes scores sur un autre appareil.</p>
+                            <button type="button" id="googleSignInBtn" class="menu-cloud-btn">Continuer avec Google</button>
+                            <div id="googleBackupControls" hidden>
+                                <label for="googleBackupNickname">Ton pseudo</label>
+                                <input id="googleBackupNickname" autocomplete="nickname" maxlength="30">
+                                <button type="button" id="googleBackupSave" class="menu-cloud-btn">Sauvegarder</button>
+                                <button type="button" id="googleBackupRestore" class="menu-cloud-btn secondary" disabled>Reprendre la sauvegarde</button>
+                                <button type="button" id="googleBackupSignOut" class="menu-cloud-btn secondary">Déconnecter Google</button>
+                            </div>
+                            <p id="googleSignInStatus" role="status"></p>
+                            <button type="button" id="openFriendsMenuBtn" class="menu-cloud-btn secondary">Gérer mes amis</button>
                         </div>
                     </div>
 
                     <!-- Section profil (visible quand connecté) -->
-                    <div id="profileInfo" class="profile-info" style="display: none;">
+                    <div id="profileInfo" class="profile-info">
                         <div class="menu-section" style="text-align: center;">
                             <!-- Avatar personnalisable -->
                             <div style="margin-bottom: 15px; position: relative;">
@@ -544,7 +515,6 @@
                             </div>
                             
                             <p id="connectedUsername" style="font-size: 18px; font-weight: bold; color: #ff1493; margin-bottom: 5px;">Utilisateur</p>
-                            <p id="connectedEmail" style="font-size: 14px; color: #666; margin-bottom: 20px;">email@example.com</p>
                             
                             <div style="background: #fff5f9; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
                                 <p style="font-size: 14px; color: #666; margin-bottom: 5px;">Meilleur Score</p>
@@ -554,12 +524,7 @@
                             <button id="shareScoreBtn" class="menu-cloud-btn" style="width: 100%; margin-bottom: 10px; background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);">
                                 📤 Partager mon score
                             </button>
-                            <button id="editProfileBtn" class="menu-cloud-btn" style="width: 100%; margin-bottom: 10px;">
-                                ✏️ Modifier pseudo
-                            </button>
-                            <button id="signOutProfileBtn" class="menu-cloud-btn secondary" style="width: 100%;">
-                                🚪 Déconnexion
-                            </button>
+
                         </div>
                     </div>
                 </div>
@@ -824,110 +789,11 @@
         </div>
     </div>
 
-    <!-- Modal d'authentification -->
-    <div id="authModal" class="kawaii-modal hidden">
-        <div class="kawaii-modal-overlay"></div>
-        <div class="kawaii-modal-content auth-modal-content">
-            <div class="kawaii-modal-header">
-                <span class="kawaii-modal-icon">🔐</span>
-            </div>
-            <div class="kawaii-modal-body">
-                <h2 id="authModalTitle" style="color: #ff69b4; margin-bottom: 15px;">Connexion au Nuage</h2>
-                <p style="color: #666; margin-bottom: 20px;">Créez un compte pour sauvegarder le score et pseudo</p>
-
-                <!-- Formulaire de connexion/inscription -->
-                <form id="authForm" style="display: flex; flex-direction: column; gap: 15px;">
-                    <input
-                        type="text"
-                        id="authUsername"
-                        placeholder="Nom d'utilisateur"
-                        required
-                        maxlength="20"
-                        style="padding: 12px; border: 2px solid #ffe8f0; border-radius: 10px; font-size: 0.95rem; outline: none;"
-                    >
-                    <input
-                        type="email"
-                        id="authEmail"
-                        placeholder="Votre email"
-                        required
-                        style="padding: 12px; border: 2px solid #ffe8f0; border-radius: 10px; font-size: 0.95rem; outline: none;"
-                    >
-                    <input
-                        type="password"
-                        id="authPassword"
-                        placeholder="Mot de passe (min. 6 caractères)"
-                        required
-                        minlength="6"
-                        style="padding: 12px; border: 2px solid #ffe8f0; border-radius: 10px; font-size: 0.95rem; outline: none;"
-                    >
-
-                    <div id="authMessage" style="padding: 10px; border-radius: 8px; display: none; font-size: 0.9rem;"></div>
-
-                    <button
-                        type="submit"
-                        id="authSubmitBtn"
-                        class="kawaii-modal-button"
-                        style="width: 100%;"
-                    >
-                        🔐 S'inscrire
-                    </button>
-                </form>
-
-                <p style="font-size: 0.85rem; color: #666; margin-top: 15px; text-align: center;">
-                    <span id="authToggleText">Déjà un compte ?</span>
-                    <a href="#" id="authToggleLink" style="color: #ff69b4; font-weight: bold; text-decoration: none; margin-left: 5px;">Se connecter</a>
-                </p>
-                <p id="forgotPasswordLink" style="font-size: 0.9rem; color: #888; margin-top: 12px; text-align: center; display: none;">
-                    <a href="#" id="forgotPasswordBtn" style="color: #667eea; text-decoration: none; font-weight: 500; transition: all 0.3s;">
-                        🔑 Mot de passe oublié ?
-                    </a>
-                </p>
-            </div>
-            <div class="kawaii-modal-footer">
-                <button id="authCancelBtn" class="kawaii-modal-button secondary">Annuler</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Modules JavaScript -->
     <!-- ⚠️ config.js doit être chargé EN PREMIER -->
     <script src="js/config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <!-- Supabase v2 avec bundle UMD pour éviter les erreurs de module -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
     <script src="js/audio.js"></script>
-    <script>
-        // Gestion de l'expansion du panneau audio compact
-        document.addEventListener('DOMContentLoaded', () => {
-            const expandBtn = document.getElementById('audioExpandButton');
-            const panel = document.getElementById('audioControlPanel');
-            let isExpanded = false;
-            
-            if (expandBtn && panel) {
-                expandBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    isExpanded = !isExpanded;
-                    
-                    if (isExpanded) {
-                        panel.style.display = 'flex';
-                        setTimeout(() => panel.classList.add('expanded'), 10);
-                    } else {
-                        panel.classList.remove('expanded');
-                        setTimeout(() => panel.style.display = 'none', 300);
-                    }
-                });
-                
-                // Fermer au clic ailleurs
-                document.addEventListener('click', (e) => {
-                    if (isExpanded && !e.target.closest('.audio-control-compact')) {
-                        isExpanded = false;
-                        panel.classList.remove('expanded');
-                        setTimeout(() => panel.style.display = 'none', 300);
-                    }
-                });
-            }
-        });
-    </script>
     <script src="js/i18n.js"></script>
     <!-- Modules de traduction par mode -->
     <script src="data/clues-sagesse-fr.js"></script>
@@ -950,8 +816,6 @@
     <script src="js/race-medals.js"></script>
     <script src="js/biblicalQuotes.js"></script>
     <script src="js/shareImage.js"></script>
-    <script src="js/supabase.js"></script>
-    <script src="js/auth.js"></script>
     <!-- 🔒 Système d'amis privé (sécurité) -->
     <script src="js/friends-system.js"></script>
     <script src="js/friends-ui.js"></script>
@@ -961,9 +825,6 @@
     <!-- <script src="js/lobby-system.js"></script> DÉSACTIVÉ - Remplacé par lobby-tabs.js + realtime-lobby -->
     <script src="js/lobby-tabs.js"></script>
     <script src="js/realtime-lobby.js"></script>
-    <script src="js/realtime-lobby-ui.js"></script>
-    <script src="js/presence-system.js"></script>
-    <script src="js/room-manager.js"></script>
     <script src="js/room-system.js"></script>
     <script src="js/room-ui.js"></script>
     <script src="js/ai-bots.js"></script>
@@ -980,6 +841,9 @@
     <script src="js/multiplayer.js"></script>
     <script src="js/game.js"></script>
     <script src="js/private-room.js"></script>
+    <!-- ID client OAuth Web public. Configurer les origines du site dans Google Cloud. -->
+    <script src="js/google-drive-save.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async></script>
 
     <!-- Service Worker Registration -->
     <script>

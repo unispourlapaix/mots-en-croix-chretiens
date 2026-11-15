@@ -24,7 +24,10 @@ class FriendsSystem {
     
     // Ajouter un ami par son code
     addFriend(friendCode, username = 'Ami') {
-        if (!friendCode) {
+        if (/^[a-f0-9]{32}-[a-f0-9]{32}$/i.test(friendCode)) {
+            return { success: false, message: 'Ce code sert à rejoindre une partie privée. Demande le code d’ami.' };
+        }
+        if (typeof friendCode !== 'string' || !/^[a-z0-9]+(?:[ _-][a-z0-9]+)*$/i.test(friendCode)) {
             return { success: false, message: 'Code invalide' };
         }
         

@@ -6,12 +6,12 @@
 class AudioSystem {
     constructor() {
         this.audioContext = null;
-        this.masterVolume = 0.3; // Volume général subtil
+        this.masterVolume = 0.18; // Volume général subtil
         this.enabled = true;
         
         // Système de playlist musicale
         this.musicEnabled = true;
-        this.musicVolume = 0.15; // Volume musique (plus faible que les effets)
+        this.musicVolume = 0.08; // Volume musique (plus faible que les effets)
         this.currentTrack = null;
         this.currentAudio = null;
         this.playlist = [];
@@ -37,8 +37,8 @@ class AudioSystem {
         // Créer le contexte audio et démarrer la musique lors de la première interaction utilisateur
         const startAudio = () => {
             this.ensureAudioContext();
-            // Démarrer la musique dès le premier clic
-            if (this.musicEnabled && !this.currentAudio) {
+            // Une partie reprise peut démarrer avant le premier geste.
+            if (window.game?.gameStarted && this.musicEnabled && !this.currentAudio) {
                 this.playNextTrack();
             }
         };
@@ -49,7 +49,9 @@ class AudioSystem {
     
     ensureAudioContext() {
         if (!this.audioContext) {
-            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const Context = window.AudioContext || window.webkitAudioContext;
+            if (!Context) return;
+            this.audioContext = new Context();
         }
         if (this.audioContext.state === 'suspended') {
             this.audioContext.resume();
@@ -208,8 +210,7 @@ class AudioSystem {
         localStorage.setItem('music_enabled', this.musicEnabled.toString());
         
         if (!this.musicEnabled && this.currentAudio) {
-            this.currentAudio.pause();
-            this.currentAudio = null;
+            this.stopMusic();
         } else if (this.musicEnabled && !this.currentAudio) {
             this.playNextTrack();
         }
@@ -237,7 +238,8 @@ class AudioSystem {
     setMusicVolume(volume) {
         this.musicVolume = Math.max(0, Math.min(1, volume));
         if (this.currentAudio) {
-            this.currentAudio.volume = this.musicVolume;
+            if (this.musicGain) this.musicGain.gain.value = this.musicVolume;
+            else this.currentAudio.volume = this.musicVolume;
         }
     }
     
@@ -392,8 +394,7 @@ class AudioSystem {
         
         // Arrêter la musique actuelle et démarrer avec le nouveau thème
         if (this.currentAudio) {
-            this.currentAudio.pause();
-            this.currentAudio = null;
+            this.stopMusic();
         }
         
         if (this.musicEnabled) {
@@ -443,8 +444,7 @@ class AudioSystem {
         
         // Arrêter la piste actuelle si elle existe
         if (this.currentAudio) {
-            this.currentAudio.pause();
-            this.currentAudio = null;
+            this.stopMusic();
         }
         
         this.currentTrack = trackName;
@@ -456,11 +456,23 @@ class AudioSystem {
             : '/public/gospel/';
         
         const audio = new Audio(`${basePath}${trackName}`);
-        audio.volume = this.musicVolume;
+        this.ensureAudioContext();
+        if (this.audioContext?.createMediaElementSource) {
+            const source = this.audioContext.createMediaElementSource(audio);
+            const gain = this.audioContext.createGain();
+            gain.gain.value = this.musicVolume;
+            source.connect(gain);
+            gain.connect(this.audioContext.destination);
+            this.musicSource = source;
+            this.musicGain = gain;
+        } else {
+            audio.volume = this.musicVolume;
+        }
+        this.currentAudio = audio;
         
         // Quand la piste se termine, jouer la suivante
         audio.addEventListener('ended', () => {
-            this.playNextTrack();
+            if (this.currentAudio === audio) this.playNextTrack();
         });
         
         // Gestion des erreurs - Éviter la boucle infinie
@@ -472,7 +484,7 @@ class AudioSystem {
             console.warn(`⚠️ Erreur de chargement: ${trackName}`, e);
             // Attendre avant de passer à la suivante pour éviter la boucle
             setTimeout(() => {
-                this.playNextTrack();
+                if (this.currentAudio === audio) this.playNextTrack();
             }, 1000);
         });
         
@@ -483,11 +495,9 @@ class AudioSystem {
             console.warn(`⚠️ Impossible de jouer: ${trackName}`, err);
             // Attendre avant de passer à la suivante
             setTimeout(() => {
-                this.playNextTrack();
+                if (this.currentAudio === audio) this.playNextTrack();
             }, 1000);
         });
-        
-        this.currentAudio = audio;
     }
     
     /**
@@ -496,6 +506,9 @@ class AudioSystem {
     stopMusic() {
         if (this.currentAudio) {
             this.currentAudio.pause();
+            this.musicSource?.disconnect();
+            this.musicGain?.disconnect();
+            this.musicSource = this.musicGain = null;
             this.currentAudio = null;
             this.currentTrack = null;
         }
@@ -508,19 +521,6 @@ class AudioSystem {
         this.playNextTrack();
     }
     
-    /**
-     * Vérifier si les sons sont activés
-     */
-    isEnabled() {
-        return this.enabled;
-    }
-    
-    /**
-     * Définir le volume principal
-     */
-    setVolume(volume) {
-        this.masterVolume = Math.max(0, Math.min(1, volume));
-    }
 }
 
 // Instance globale

@@ -8,6 +8,7 @@ class LobbyTabsManager {
         console.log('📑 Lobby Manager simplifié initialisé');
         this.setupPresenceListeners();
         this.setupStatusButton();
+        this.setupConnectButton();
         
         // Affichage initial
         this.renderLobbyView();
@@ -31,7 +32,7 @@ class LobbyTabsManager {
                 btn.innerHTML = '🟢 Disponible';
             }
             
-            // Mettre à jour dans Supabase
+            // Mettre à jour le statut visible par les amis
             if (window.realtimeLobbySystem?.isInitialized) {
                 await window.realtimeLobbySystem.updateMyPresence({ status: newStatus });
                 console.log('✅ Statut mis à jour:', newStatus);
@@ -125,12 +126,12 @@ class LobbyTabsManager {
             list.innerHTML = `
                 <div class="lobby-header" style="padding: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; margin-bottom: 10px; text-align: center;">
                     <div style="font-size: 20px; margin-bottom: 5px;">🌍</div>
-                    <div style="font-size: 13px; font-weight: 600;">Lobby Public</div>
+                    <div style="font-size: 13px; font-weight: 600;">Amis</div>
                     <div style="font-size: 11px; opacity: 0.9;">Non connecté</div>
                 </div>
                 <div class="empty-room-message">
                     <p>⚡ Connexion requise</p>
-                    <p style="font-size: 0.9rem; color: #999;">Cliquez sur "Se connecter" pour rejoindre le lobby</p>
+                    <p style="font-size: 0.9rem; color: #999;">Connecte-toi pour afficher les amis qui t’ont aussi ajouté</p>
                 </div>
             `;
             return;
@@ -149,7 +150,7 @@ class LobbyTabsManager {
                 <div class="empty-room-message" style="text-align: center; padding: 20px; color: #999;">
                     <p style="font-size: 24px; margin-bottom: 10px;">🌟</p>
                     <p style="font-weight: 600;">Aucun joueur en ligne</p>
-                    <p style="font-size: 0.9rem;">Soyez le premier connecté !</p>
+                    <p style="font-size: 0.9rem;">Échangez vos codes d’ami pour vous retrouver ici.</p>
                 </div>
             `;
             return;
@@ -202,7 +203,7 @@ class LobbyTabsManager {
                                 isConnected ? '✅ Connecté' : 
                                 player.status === 'in_game' ? '🎮 Rejoindre' : 
                                 player.status === 'in_room' ? '🚪 Rejoindre' : 
-                                '📨 Inviter';
+                                'Partie privée';
             
             html += `
                 <div class="player-item ${isSelf ? 'self' : ''}" data-peer-id="${player.peer_id}" 
@@ -267,147 +268,11 @@ class LobbyTabsManager {
     }
     
     // Inviter un joueur (créer une salle unifiée chat + jeu)
-    async invitePlayer(peerId) {
-        console.log('📨 Invitation joueur:', peerId);
-        
-        const player = window.realtimeLobbySystem?.getPlayer(peerId);
-        if (!player) {
-            console.error('❌ Joueur introuvable');
-            return;
-        }
-        
-        // Vérifier que P2P est prêt
-        if (!window.simpleChatSystem?.peer?.id) {
-            console.log('🎯 Initialisation P2P avant invitation...');
-            window.simpleChatSystem?.initP2P();
-            
-            // Attendre que le peer soit prêt
-            let attempts = 0;
-            while (!window.simpleChatSystem?.peer?.id && attempts < 50) {
-                await new Promise(resolve => setTimeout(resolve, 100));
-                attempts++;
-            }
-            
-            if (!window.simpleChatSystem?.peer?.id) {
-                console.error('❌ Timeout: P2P non initialisé');
-                return;
-            }
-        }
-        
-        console.log('✅ P2P prêt, envoi invitation...');
-        
-        try {
-            // Vérifier si je suis déjà dans une salle
-            const existingRoomId = window.simpleChatSystem.roomCode;
-            const isAlreadyInRoom = !!existingRoomId;
-            
-            // Utiliser la salle existante ou créer une nouvelle
-            const roomId = existingRoomId || window.simpleChatSystem.peer.id;
-            
-            if (isAlreadyInRoom) {
-                console.log('🏠 Invitation à rejoindre ma salle existante:', roomId);
-            } else {
-                console.log('🏠 Création nouvelle salle:', roomId);
-            }
-            
-            // Connexion P2P (invitation envoyée via conn.send après ouverture)
-            const conn = window.simpleChatSystem.peer.connect(peerId, {
-                reliable: true,
-                metadata: {
-                    from: window.simpleChatSystem.currentUser,
-                    roomId: roomId
-                }
-            });
-            
-            conn.on('open', () => {
-                console.log('✅ Connexion P2P établie avec', player.username);
-                
-                // Initialiser structures si nécessaire
-                if (!window.simpleChatSystem.connections) {
-                    window.simpleChatSystem.connections = new Map();
-                }
-                if (!window.simpleChatSystem.roomPlayers) {
-                    window.simpleChatSystem.roomPlayers = new Map();
-                }
-                
-                // Enregistrer la connexion
-                window.simpleChatSystem.connections.set(peerId, conn);
-                
-                // Définir la salle (si nouvelle)
-                if (!isAlreadyInRoom) {
-                    window.simpleChatSystem.roomCode = roomId;
-                    window.simpleChatSystem.isHost = true;
-                }
-                
-                // Ajouter le nouveau joueur à la salle
-                window.simpleChatSystem.roomPlayers.set(peerId, {
-                    username: player.username,
-                    peer_id: peerId,
-                    isHost: false
-                });
-                
-                // Message système (seulement si nouvelle salle créée)
-                if (!isAlreadyInRoom) {
-                    window.simpleChatSystem.showMessage(`🏠 Salle créée avec ${player.username}`, 'system');
-                }
-                
-                // Notifier les autres joueurs déjà connectés
-                if (isAlreadyInRoom) {
-                    window.simpleChatSystem.connections.forEach((existingConn, existingPeerId) => {
-                        if (existingPeerId !== peerId) {
-                            existingConn.send({
-                                type: 'player_joined_room',
-                                username: player.username,
-                                peer_id: peerId
-                            });
-                        }
-                    });
-                }
-                
-                // Déclencher événement pour activer le vocal
-                if (window.voiceUI) {
-                    window.voiceUI.updateSmsVoiceButton();
-                }
-                
-                // Envoyer invitation avec info de la salle
-                conn.send({
-                    type: 'game_invite',
-                    from: window.simpleChatSystem.currentUser,
-                    roomId: roomId,
-                    existingPlayers: Array.from(window.simpleChatSystem.roomPlayers.values())
-                        .filter(p => p.peer_id !== peerId)
-                        .map(p => ({ username: p.username, peer_id: p.peer_id })),
-                    message: isAlreadyInRoom ?
-                        `${window.simpleChatSystem.currentUser} vous invite à rejoindre sa salle !` :
-                        `${window.simpleChatSystem.currentUser} vous invite dans sa salle !`
-                });
-                
-                console.log('📨 Invitation envoyée');
-                
-                // Écouter les messages du joueur
-                conn.on('data', (data) => {
-                    console.log('📨 Message reçu:', data);
-                    this.handleInviteResponse(peerId, player.username, data);
-                });
-            });
-            
-            conn.on('error', (err) => {
-                console.error('❌ Erreur connexion:', err);
-            });
-            
-            conn.on('close', () => {
-                console.log('🔌 Connexion fermée avec', player.username);
-                // Retirer de la salle
-                window.simpleChatSystem.roomPlayers?.delete(peerId);
-                window.simpleChatSystem.connections?.delete(peerId);
-            });
-            
-        } catch (err) {
-            console.error('❌ Erreur invitation:', err);
-        }
+    async invitePlayer() {
+        window.privateRoom?.show();
+        if (window.privateRoom && !window.privateRoom.active) window.privateRoom.create();
     }
-    
-    // Gérer la réponse à l'invitation
+
     handleInviteResponse(peerId, username, data) {
         if (data.type === 'invite_accepted') {
             console.log('✅ Invitation acceptée par', username);

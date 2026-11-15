@@ -16,21 +16,6 @@ class RoomSystem {
         // Auto-créer ma salle au démarrage
         this.createMyRoom();
         
-        // Écouter les changements d'authentification pour mettre à jour la bulle
-        if (typeof authSystem !== 'undefined') {
-            authSystem.onAuthChange((user) => {
-                console.log('🔐 Auth changed dans RoomSystem:', user?.username);
-                // Mettre à jour le username dans availablePlayers
-                if (user && user.username && this.availablePlayers.has('me')) {
-                    const myInfo = this.availablePlayers.get('me');
-                    myInfo.username = user.username;
-                    this.availablePlayers.set('me', myInfo);
-                    console.log('✅ Username mis à jour dans availablePlayers:', user.username);
-                    this.updateChatBubble();
-                }
-            });
-        }
-        
         // Écouter les événements vocaux pour mettre à jour l'indicateur
         window.addEventListener('voicejoined', () => {
             console.log('🎤 Vocal rejoint - Mise à jour bulle');
@@ -105,16 +90,6 @@ class RoomSystem {
             return;
         }
         
-        // NOUVEAU: Attendre que l'authentification soit vérifiée
-        if (typeof authSystem !== 'undefined' && authSystem.isCheckingAuth) {
-            console.log('⏳ Attente vérification authentification... (currentUser:', this.chatSystem.currentUser + ')');
-            setTimeout(() => this.createMyRoom(), 300);
-            return;
-        }
-
-        console.log('✅ Username OK, création de la room pour:', this.chatSystem.currentUser);
-        console.log('🔍 Auth status - isCheckingAuth:', authSystem?.isCheckingAuth, 'isAuthenticated:', authSystem?.isAuthenticated());
-
         // Initialiser P2P avec mon username comme ID de base
         if (!this.chatSystem.peer) {
             console.log('📡 Initialisation P2P...');
@@ -147,12 +122,6 @@ class RoomSystem {
                 });
                 
                 console.log('👥 Ajouté à playersInRoom');
-                
-                // Notifier le lobby Realtime de mon peer ID (= roomCode)
-                if (window.realtimeLobbySystem?.isInitialized) {
-                    window.realtimeLobbySystem.updateRoomCode(this.myRoomInfo.roomId);
-                    console.log('✅ RoomCode mis à jour dans Realtime Lobby');
-                }
                 
                 // M'ajouter aussi à la liste des joueurs disponibles
                 this.availablePlayers.set('me', {
@@ -420,10 +389,6 @@ class RoomSystem {
         }
         
         // Notifier le lobby Realtime du changement de mode
-        if (window.realtimeLobbySystem?.isInitialized) {
-            window.realtimeLobbySystem.updateAcceptMode(mode);
-            console.log('✅ AcceptMode mis à jour dans Realtime Lobby:', mode);
-        }
 
         // Notifier tous les joueurs du changement
         this.broadcastToRoom({
@@ -950,13 +915,6 @@ class RoomSystem {
 
     // Configurer les écouteurs d'événements
     setupEventListeners() {
-        // Écouter les connexions entrantes
-        if (this.chatSystem.peer) {
-            this.chatSystem.peer.on('connection', (conn) => {
-                this.chatSystem.handleConnection(conn);
-            });
-        }
-
         // Gestion du bouton de minimisation de la bulle
         const toggleBtn = document.getElementById('toggleChatBubble');
         const chatBubble = document.getElementById('chatBubble');

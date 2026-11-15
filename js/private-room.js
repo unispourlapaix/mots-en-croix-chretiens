@@ -6,6 +6,8 @@ class PrivateRoom {
         this.dialog = document.getElementById('privateRoomDialog');
         this.status = document.getElementById('privateRoomStatus');
         this.form = document.getElementById('privateRoomJoin');
+        this.codeField = document.getElementById('privateRoomCodeField');
+        this.codeInput = document.getElementById('privateRoomCode');
         this.hostControls = document.getElementById('privateRoomHost');
         this.leaveButton = document.getElementById('privateRoomLeave');
         this.approval = document.getElementById('privateRoomApproval');
@@ -16,6 +18,7 @@ class PrivateRoom {
         this.createButton.onclick = () => this.create();
         document.getElementById('privateRoomShare').onclick = () => this.share();
         document.getElementById('privateRoomCopy').onclick = () => this.share(true);
+        document.getElementById('privateRoomCopyCode').onclick = () => this.copy(this.inviteCode(), 'Code copié.');
         document.getElementById('privateRoomRevoke').onclick = () => this.revoke();
         document.getElementById('privateRoomAccept').onclick = () => this.approve(true);
         document.getElementById('privateRoomRefuse').onclick = () => this.approve(false);
@@ -24,6 +27,16 @@ class PrivateRoom {
             event.preventDefault();
             const name = this.form.elements.nickname.value.trim();
             if (!name || this.active) return;
+            if (!this.codeField.hidden) {
+                const match = /^([a-f0-9]{32})-([a-f0-9]{32})$/i.exec(this.codeInput.value.trim());
+                if (!match) {
+                    this.status.textContent = 'Code invalide. Colle le code complet envoyé par ton ami.';
+                    this.codeInput.focus();
+                    return;
+                }
+                this.invite = { host: match[1].toLowerCase(), token: match[2].toLowerCase() };
+            }
+            this.createButton.hidden = true;
             this.active = true;
             this.name = name;
             this.resumeKey = this.newToken();
@@ -49,6 +62,7 @@ class PrivateRoom {
         const token = fragment.get('invitation');
         if (/^[a-z0-9-]{1,80}$/i.test(host || '') && /^[a-f0-9]{32}$/.test(token || '')) {
             this.invite = { host, token };
+            this.setCodeField(false);
             fragment.delete('partie');
             fragment.delete('invitation');
             url.hash = fragment.toString();
@@ -58,6 +72,15 @@ class PrivateRoom {
             this.status.textContent = 'Choisis ton pseudo pour demander à rejoindre.';
             this.show();
         }
+    }
+
+    setCodeField(visible) {
+        this.codeField.hidden = !visible;
+        this.codeInput.required = visible;
+    }
+
+    inviteCode() {
+        return this.invite.host + '-' + this.invite.token;
     }
 
     show() {
@@ -75,6 +98,7 @@ class PrivateRoom {
         this.isHost = true;
         this.name = this.chat.currentUser || 'Hôte';
         this.invite = { host: this.newToken(), token: this.newToken() };
+        this.form.hidden = true;
         this.createButton.hidden = true;
         this.leaveButton.hidden = false;
         this.retry();
@@ -122,7 +146,7 @@ class PrivateRoom {
             this.peer.reconnect();
         } else if (this.peer.open && this.isHost && this.hostControls.hidden) {
             this.hostControls.hidden = false;
-            this.status.textContent = 'Partage le lien avec ton invité.';
+            this.status.textContent = 'Partage le lien ou le code avec ton invité.';
         } else if (this.peer.open && !this.isHost && !this.attempt && !this.connection) {
             this.status.textContent = this.approved ? 'Reconnexion à la partie…' : 'Connexion à l’hôte…';
             this.attempt = this.peer.connect(this.invite.host, { label: 'private-room-v1', reliable: true });
@@ -144,24 +168,36 @@ class PrivateRoom {
             if (!copyOnly && navigator.share) {
                 await navigator.share({ title: 'Mots En Croix Chrétiens', url: link });
             } else {
-                await navigator.clipboard.writeText(link);
-                this.status.textContent = 'Lien copié.';
+                await this.copy(link, 'Lien copié.');
             }
         } catch (error) {
             if (error.name !== 'AbortError') {
-                const input = document.getElementById('privateRoomLink');
-                input.value = link;
-                input.hidden = false;
-                input.select();
+                this.showCopyValue(link);
             }
         }
+    }
+
+    async copy(value, message) {
+        try {
+            await navigator.clipboard.writeText(value);
+            this.status.textContent = message;
+        } catch {
+            this.showCopyValue(value);
+        }
+    }
+
+    showCopyValue(value) {
+        const input = document.getElementById('privateRoomLink');
+        input.value = value;
+        input.hidden = false;
+        input.select();
     }
 
     revoke() {
         this.invite.token = this.newToken();
         this.approve(false);
         document.getElementById('privateRoomLink').hidden = true;
-        this.status.textContent = 'Ancien lien désactivé. Tu peux partager le nouveau.';
+        this.status.textContent = 'Ancien lien et ancien code désactivés.';
     }
 
     watch(conn) {
@@ -318,6 +354,11 @@ class PrivateRoom {
             case 'private-grid':
                 if (!this.isHost) window.game?.restorePrivateGrid(message);
                 break;
+            case 'race':
+                if (typeof message.action === 'string' && message.data && typeof message.data === 'object') {
+                    window.multiplayerRace?.receiveProgress(this.remoteName, message.action, message.data);
+                }
+                break;
             case 'game_action':
                 if (message.action && typeof message.action.type === 'string') {
                     const action = { ...message.action, requester: this.remoteName };
@@ -359,9 +400,11 @@ class PrivateRoom {
         this.connections.clear();
         if (sendEnd) setTimeout(() => peer?.destroy(), 250);
         else peer?.destroy();
-        if (!retryInvite) this.invite = null;
-        this.createButton.hidden = retryInvite;
-        this.form.hidden = !retryInvite;
+        this.codeInput.value = retryInvite && this.invite ? this.inviteCode() : '';
+        this.setCodeField(true);
+        this.invite = null;
+        this.createButton.hidden = false;
+        this.form.hidden = false;
         this.hostControls.hidden = true;
         this.approval.hidden = true;
         this.leaveButton.hidden = true;
