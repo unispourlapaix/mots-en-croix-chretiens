@@ -6385,3 +6385,41 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
 }
+#privateRoomDialog {
+    width: min(28rem, calc(100% - 2rem));
+    max-height: calc(100% - 2rem);
+    margin: auto;
+    padding: 1.25rem;
+    border: 1px solid #e9b6cc;
+    border-radius: 1rem;
+    background: #fff8fb;
+    color: #412536;
+    box-sizing: border-box;
+}
+
+#privateRoomDialog::backdrop {
+    background: rgb(36 22 31 / 55%);
+}
+
+#privateRoomDialog button,
+#privateRoomDialog input {
+    min-height: 44px;
+    max-width: 100%;
+    margin: 0.25rem 0;
+    padding: 0.45rem 0.65rem;
+    border: 1px solid #b87292;
+    border-radius: 0.5rem;
+    font: inherit;
+    box-sizing: border-box;
+}
+
+#privateRoomDialog button {
+    color: #412536;
+    background: #ffe0ef;
+    cursor: pointer;
+}
+
+#privateRoomDialog input {
+    width: 100%;
+    font-size: 16px;
+}

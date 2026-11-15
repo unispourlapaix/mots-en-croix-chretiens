@@ -140,6 +140,31 @@
             </div>
         </div>
 
+        <button type="button" id="privateRoomOpen" class="kawaii-modal-button">Partie privée</button>
+        <dialog id="privateRoomDialog" aria-labelledby="privateRoomTitle">
+            <h2 id="privateRoomTitle">Partie privée</h2>
+            <p id="privateRoomStatus" role="status">Invite un ami à jouer.</p>
+            <button type="button" id="privateRoomCreate">Créer une partie</button>
+            <form id="privateRoomJoin" hidden>
+                <label for="privateRoomNickname">Ton pseudo</label>
+                <input id="privateRoomNickname" name="nickname" autocomplete="nickname" maxlength="30" required>
+                <button type="submit">Demander à rejoindre</button>
+            </form>
+            <div id="privateRoomHost" hidden>
+                <button type="button" id="privateRoomShare">Partager le lien</button>
+                <button type="button" id="privateRoomCopy">Copier le lien</button>
+                <button type="button" id="privateRoomRevoke">Révoquer le lien</button>
+                <input id="privateRoomLink" aria-label="Lien d’invitation à copier" readonly hidden>
+            </div>
+            <div id="privateRoomApproval" hidden>
+                <p id="privateRoomGuest"></p>
+                <button type="button" id="privateRoomAccept">Accepter</button>
+                <button type="button" id="privateRoomRefuse">Refuser</button>
+            </div>
+            <button type="button" id="privateRoomLeave" hidden>Quitter la partie</button>
+            <button type="button" id="privateRoomDismiss">Fermer</button>
+        </dialog>
+
         <div id="startScreen">
             <button class="play-button" id="playButton">
                 🎮 Jouer (<span id="clickCount">0</span>/7)
@@ -954,6 +979,7 @@
     <script src="js/info-banner.js"></script>
     <script src="js/multiplayer.js"></script>
     <script src="js/game.js"></script>
+    <script src="js/private-room.js"></script>
 
     <!-- Service Worker Registration -->
     <script>

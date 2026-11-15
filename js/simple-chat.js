@@ -489,6 +489,7 @@ class SimpleChatSystem {
 
     // Gérer les messages reçus
     handleMessage(data, conn) {
+        if (window.privateRoom?.active && ['game_action', 'game_state', 'game_sync', 'game_update', 'race'].includes(data.type)) return;
         // Router les messages du P2PChatSystem (chat communautaire)
         if (window.chatSystem && ['message', 'history', 'system'].includes(data.type)) {
             window.chatSystem.handleIncomingMessage(data, conn.peer);
@@ -656,16 +657,16 @@ class SimpleChatSystem {
         // Générer avatar pour les messages utilisateurs
         const avatar = this.getUserAvatar(username || this.currentUser);
 
-        if (type === 'message' && username) {
-            messageDiv.innerHTML = `<span class="chat-avatar">${avatar}</span><span class="username">${username}:</span> ${displayText}`;
-        } else if (type === 'own') {
-            messageDiv.innerHTML = `<span class="chat-avatar">${avatar}</span><span class="username">${this.currentUser}:</span> ${displayText}`;
-        } else if (type === 'system') {
-            messageDiv.textContent = `✨ ${displayText}`;
-        } else if (type === 'ai') {
-            messageDiv.textContent = displayText;
+        if (type === 'system' || type === 'ai') {
+            messageDiv.textContent = type === 'system' ? `✨ ${displayText}` : displayText;
         } else {
-            messageDiv.innerHTML = `<span class="chat-avatar">${avatar}</span><span class="username">${username || 'Anonyme'}:</span> ${displayText}`;
+            const avatarElement = document.createElement('span');
+            avatarElement.className = 'chat-avatar';
+            avatarElement.textContent = avatar;
+            const nameElement = document.createElement('span');
+            nameElement.className = 'username';
+            nameElement.textContent = (type === 'own' ? this.currentUser : username || 'Anonyme') + ':';
+            messageDiv.append(avatarElement, nameElement, ' ' + displayText);
         }
 
         messagesDiv.prepend(messageDiv);
@@ -702,6 +703,11 @@ class SimpleChatSystem {
 
     // Envoyer un message à tous
     async sendMessage(text) {
+        if (window.privateRoom?.active) {
+            window.privateRoom.sendChat(text);
+            return;
+        }
+
         // Mettre à jour le username depuis authSystem
         this.updateUsername();
 
@@ -931,8 +937,12 @@ class SimpleChatSystem {
     }
     
     // Diffuser une action de jeu à tous les joueurs connectés
+    get gameConnections() {
+        return window.privateRoom?.active ? window.privateRoom.connections : this.connections;
+    }
+
     broadcastGameAction(action) {
-        if (this.connections.size === 0) {
+        if (this.gameConnections.size === 0) {
             console.log('⚠️ Aucune connexion pour broadcaster:', action.type);
             return;
         }
@@ -947,7 +957,7 @@ class SimpleChatSystem {
         let sentCount = 0;
         let failedCount = 0;
         
-        this.connections.forEach((conn, peerId) => {
+        this.gameConnections.forEach((conn, peerId) => {
             if (conn.open) {
                 try {
                     conn.send(message);
@@ -963,7 +973,7 @@ class SimpleChatSystem {
             }
         });
         
-        console.log(`📊 Broadcast ${action.type}: ${sentCount} envoyés, ${failedCount} échoués sur ${this.connections.size} connexions`);
+        console.log(`📊 Broadcast ${action.type}: ${sentCount} envoyés, ${failedCount} échoués sur ${this.gameConnections.size} connexions`);
     }
     
     // Gérer une action de jeu reçue
@@ -1056,7 +1066,7 @@ class SimpleChatSystem {
             case 'mode_changed':
                 // Un joueur a changé de mode (UNIQUEMENT si seul, pas de vote)
                 // En multijoueur, le changement se fait via mode_change_result après vote
-                if (this.connections.size > 0) {
+                if (this.gameConnections.size > 0) {
                     console.warn('⚠️ Ignoré: mode_changed reçu en multijoueur (devrait utiliser le vote)');
                     break;
                 }
@@ -1140,13 +1150,13 @@ class SimpleChatSystem {
         voteMessage.innerHTML = `
             <div style="display: flex; align-items: center; justify-content: space-between; color: white; gap: 15px;">
                 <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-                    <div style="font-size: 32px;">${newModeIcon}</div>
+                    <div style="font-size: 32px;"><span class="vote-mode-icon"></span></div>
                     <div style="text-align: left;">
                         <p style="font-size: 14px; margin: 0; opacity: 0.9;">
-                            🗳️ ${requester} propose:
+                            <span class="vote-requester"></span>
                         </p>
                         <p style="font-size: 18px; font-weight: bold; margin: 0;">
-                            ${newModeName}
+                            <span class="vote-mode-name"></span>
                         </p>
                     </div>
                 </div>
@@ -1190,6 +1200,9 @@ class SimpleChatSystem {
         }
         
         // Gérer les clics sur les boutons
+        voteMessage.querySelector('.vote-mode-icon').textContent = newModeIcon;
+        voteMessage.querySelector('.vote-requester').textContent = `🗳️ ${requester} propose :`;
+        voteMessage.querySelector('.vote-mode-name').textContent = newModeName;
         const yesBtn = voteMessage.querySelector('.vote-yes-btn');
         const noBtn = voteMessage.querySelector('.vote-no-btn');
         
@@ -1253,7 +1266,7 @@ class SimpleChatSystem {
             timestamp: Date.now()
         };
         
-        this.connections.forEach((conn) => {
+        this.gameConnections.forEach((conn) => {
             if (conn.open) {
                 conn.send(message);
             }
@@ -1277,7 +1290,7 @@ class SimpleChatSystem {
         console.log(`🗳️ Vote reçu de ${username}: ${vote ? 'OUI' : 'NON'}`);
         
         // Vérifier si tous les joueurs ont voté
-        const totalPlayers = this.connections.size + 1;
+        const totalPlayers = this.gameConnections.size + 1;
         const votesReceived = window.game.modeChangeVote.votes.size;
         
         if (votesReceived >= totalPlayers) {
@@ -1723,7 +1736,7 @@ class SimpleChatSystem {
 
     // Vérifier si en mode P2P
     isInRoom() {
-        return this.roomCode !== null;
+        return Boolean(window.privateRoom?.active) || this.roomCode !== null;
     }
 
     // === Système de blocage ===

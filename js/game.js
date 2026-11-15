@@ -1751,7 +1751,7 @@ class ChristianCrosswordGame {
         const previousMode = this.gameMode;
         
         // 🗳️ Si des joueurs sont connectés, demander l'approbation par vote
-        if (window.simpleChatSystem && window.simpleChatSystem.connections.size > 0) {
+        if (window.simpleChatSystem && window.simpleChatSystem.gameConnections.size > 0) {
             // Lancer un vote pour le changement de mode
             this.requestModeChangeVote(previousMode, mode);
             return;
@@ -1791,7 +1791,7 @@ class ChristianCrosswordGame {
             previousMode: previousMode,
             newMode: newMode,
             requester: username,
-            totalPlayers: window.simpleChatSystem.connections.size + 1 // +1 pour soi-même
+            totalPlayers: window.simpleChatSystem.gameConnections.size + 1 // +1 pour soi-même
         });
         
         // Notifier localement
@@ -1810,7 +1810,7 @@ class ChristianCrosswordGame {
         if (!this.modeChangeVote) return;
         
         const { votes, previousMode, newMode, requester } = this.modeChangeVote;
-        const totalPlayers = window.simpleChatSystem.connections.size + 1;
+        const totalPlayers = window.simpleChatSystem.gameConnections.size + 1;
         const votesReceived = votes.size;
         
         // Compter les votes OUI explicites
@@ -2070,7 +2070,7 @@ class ChristianCrosswordGame {
         }
         
         // 🌐 Partager le démarrage du jeu avec les autres joueurs
-        if (window.simpleChatSystem && window.simpleChatSystem.connections.size > 0) {
+        if (window.simpleChatSystem && window.simpleChatSystem.gameConnections.size > 0) {
             window.simpleChatSystem.broadcastGameAction({
                 type: 'game_started',
                 gameMode: this.gameMode,
@@ -2079,6 +2079,7 @@ class ChristianCrosswordGame {
         }
         
         this.setupLevel();
+        window.privateRoom?.sendGrid();
         this.saveGame();
         
         // Démarrer le tutorial APRÈS l'intro, quand la grille est visible
@@ -2090,6 +2091,37 @@ class ChristianCrosswordGame {
                     tutorialSystem.start();
                 }
             }, 1000);
+        }
+    }
+
+    restorePrivateGrid({ mode, level, grid, score }) {
+        const modes = ['normal', 'couple', 'race', 'sagesse', 'proverbes', 'disciple', 'veiller', 'aimee', 'couple-solide'];
+        if (!modes.includes(mode) || !Number.isInteger(level) || level < 1 || !Number.isFinite(score) ||
+            !Array.isArray(grid) || grid.length !== config.gridSize ||
+            !grid.every(row => Array.isArray(row) && row.length === config.gridSize &&
+                row.every(cell => typeof cell === 'string' && cell.length <= 12))) return;
+
+        const previousMode = this.gameMode;
+        this.gameMode = mode;
+        if (level > gameDataManager.getTotalLevels()) {
+            this.gameMode = previousMode;
+            return;
+        }
+        this.updateModeButtons();
+        this.updateMaxLevelDisplay();
+        this.currentLevel = level;
+        this.score = score;
+        this.gameStarted = true;
+        this.setupLevel();
+        this.grid = grid;
+        this.restoreGridLetters();
+        this.restoreCompletedWords();
+
+        document.getElementById('startScreen').classList.add('hidden');
+        document.getElementById('gameScreen').classList.remove('hidden');
+        for (const id of ['infoBannerScore', 'gameScoreValue']) {
+            const scoreElement = document.getElementById(id);
+            if (scoreElement) scoreElement.textContent = this.score;
         }
     }
 
@@ -3513,10 +3545,10 @@ class ChristianCrosswordGame {
                 }
                 
                 // 🌐 TOUJOURS partager avec les autres joueurs en multijoueur (APRÈS mise à jour du score)
-                if (window.simpleChatSystem && window.simpleChatSystem.connections && window.simpleChatSystem.connections.size > 0) {
+                if (window.simpleChatSystem && window.simpleChatSystem.gameConnections && window.simpleChatSystem.gameConnections.size > 0) {
                     const totalWords = this.words.length;
                     const wordsCompleted = this.completedWords.size;
-                    console.log(`📢 Broadcast mot complété: "${wordData.word}" aux ${window.simpleChatSystem.connections.size} joueurs`);
+                    console.log(`📢 Broadcast mot complété: "${wordData.word}" aux ${window.simpleChatSystem.gameConnections.size} joueurs`);
                     window.simpleChatSystem.broadcastGameAction({
                         type: 'word_completed',
                         word: wordData.word,
@@ -3719,7 +3751,7 @@ class ChristianCrosswordGame {
                 window.simpleChatSystem.showMessage(`🏆 Niveau ${this.currentLevel} terminé ! +${bonusPoints} points bonus`, 'system');
                 
                 // Partager la complétion du niveau avec les autres joueurs
-                if (window.simpleChatSystem.connections.size > 0) {
+                if (window.simpleChatSystem.gameConnections.size > 0) {
                     window.simpleChatSystem.broadcastGameAction({
                         type: 'level_completed',
                         level: this.currentLevel,
@@ -3743,7 +3775,7 @@ class ChristianCrosswordGame {
                 const totalLevels = gameDataManager.getTotalLevels();
                 if (this.currentLevel < totalLevels) {
                     // Si des joueurs sont connectés, attendre tout le monde
-                    if (window.simpleChatSystem && window.simpleChatSystem.connections.size > 0) {
+                    if (window.simpleChatSystem && window.simpleChatSystem.gameConnections.size > 0) {
                         // Initialiser le système de classement si nécessaire
                         if (!this.levelFinishers) {
                             this.levelFinishers = [];
@@ -3822,7 +3854,7 @@ class ChristianCrosswordGame {
                     localStorage.setItem('christianCrosswordTotalScore', this.totalScore.toString());
                     
                     // Notifier les autres joueurs
-                    if (window.simpleChatSystem && window.simpleChatSystem.connections.size > 0) {
+                    if (window.simpleChatSystem && window.simpleChatSystem.gameConnections.size > 0) {
                         const modeIcon = this.gameMode === 'couple' ? '💕' : '🏆';
                         const modeName = this.gameMode === 'couple' ? 'Couple' : 'Normal';
                         window.simpleChatSystem.broadcastGameAction({
@@ -4208,7 +4240,7 @@ class ChristianCrosswordGame {
             this.hintsUsedThisLevel++;
             
             // Notifier les autres joueurs de l'utilisation d'un indice
-            if (window.simpleChatSystem && window.simpleChatSystem.connections.size > 0) {
+            if (window.simpleChatSystem && window.simpleChatSystem.gameConnections.size > 0) {
                 window.simpleChatSystem.broadcastGameAction({
                     type: 'hint_used',
                     level: this.currentLevel,
