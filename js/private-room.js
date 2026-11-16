@@ -100,7 +100,7 @@ class PrivateRoom {
         }
         this.codeInput.value = value;
         this.form.elements.nickname.focus();
-        this.status.textContent = 'Code collé. Saisis ton pseudo pour demander à rejoindre.';
+        this.status.textContent = 'Code collé. Vérifie ton pseudo et demande à rejoindre.';
     }
 
     inviteCode() {
@@ -108,7 +108,13 @@ class PrivateRoom {
     }
 
     show() {
-        if (!this.dialog.open) this.dialog.showModal();
+        if (this.dialog.open) return;
+        const nickname = this.form.elements.nickname;
+        if (!nickname.value.trim() || nickname.value === nickname.defaultValue) {
+            nickname.defaultValue = this.chat.getSavedNickname() || '';
+            nickname.value = nickname.defaultValue;
+        }
+        this.dialog.showModal();
     }
 
     newToken() {

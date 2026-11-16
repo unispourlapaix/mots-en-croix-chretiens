@@ -16,6 +16,27 @@ class MenuTabSystem {
             });
         });
 
+        document.getElementById('chatConnexionBtn').addEventListener('click', () => this.openTab('connexion'));
+        document.getElementById('localProfileForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const input = document.getElementById('localProfileNickname');
+            const status = document.getElementById('localProfileStatus');
+            const name = input.value.trim();
+            if (!/^[\p{L}\p{N}_ -]{1,30}$/u.test(name)) {
+                status.textContent = 'Saisis 1 à 30 caractères (lettres, chiffres, espaces, tirets ou tirets bas).';
+                input.focus();
+                return;
+            }
+            try {
+                window.simpleChatSystem.setNickname(name);
+            } catch {
+                status.textContent = 'Impossible d’enregistrer ton pseudo sur cet appareil.';
+                return;
+            }
+            this.updateConnexionTab();
+            status.textContent = 'Pseudo enregistré sur cet appareil.';
+        });
+
         // Initialiser le système d'avatars
         this.initAvatarSelector();
     }
@@ -521,6 +542,8 @@ class MenuTabSystem {
     updateConnexionTab() {
         const chat = window.simpleChatSystem;
         const username = chat?.currentUser || 'Joueur';
+        document.getElementById('localProfileNickname').value = chat?.getSavedNickname() || '';
+        document.getElementById('localProfileStatus').textContent = '';
         document.getElementById('connectedUsername').textContent = username;
         document.getElementById('userMaxScore').textContent = Math.max(window.game?.score || 0,
             window.game?.maxScore || 0, leaderboardManager.getTopScores(1).scores[0]?.max_score || 0);

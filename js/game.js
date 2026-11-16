@@ -988,37 +988,6 @@ class ChristianCrosswordGame {
         leaderboardManager.recordScore(name, Math.max(this.score, this.maxScore));
     }
 
-    restoreCheckpoint({ mode, level, score, maxScore, raceScore }) {
-        if (window.privateRoom?.active || this.isClearingData) return false;
-
-        const modes = ['normal', 'couple', 'sagesse', 'proverbes', 'disciple', 'veiller', 'aimee', 'couple-solide'];
-        if (!modes.includes(mode) || !Number.isSafeInteger(level) || level < 1 ||
-            ![score, maxScore, raceScore].every(Number.isSafeInteger)) return false;
-
-        this.saveGame();
-        const saveKey = 'christianCrosswordSave_' + mode;
-        let local;
-        try {
-            local = JSON.parse(localStorage.getItem(saveKey));
-        } catch {
-            // Un point de reprise valide peut remplacer une sauvegarde illisible.
-        }
-        const useLocal = local?.gameStarted && (local.currentLevel > level ||
-            (local.currentLevel === level && local.score >= score));
-        const checkpoint = useLocal ? local : {
-            gameStarted: true, gameMode: mode, currentLevel: level, score, timestamp: Date.now()
-        };
-        checkpoint.maxScore = Math.max(this.maxScore, maxScore, checkpoint.score);
-        checkpoint.raceScore = Math.max(this.raceScore, raceScore);
-        localStorage.setItem(saveKey, JSON.stringify(checkpoint));
-        document.querySelectorAll('.resume-modal').forEach(modal => modal.remove());
-        document.getElementById('menuModal')?.classList.add('hidden');
-        this.loadGameFromData(checkpoint);
-        this.updateModeButtons();
-        this.updateMaxLevelDisplay();
-        return true;
-    }
-
     setupMenuLanguageSelector() {
         const dropdown = document.getElementById('languageDropdown');
         const expandBtn = document.getElementById('languageExpandButton');

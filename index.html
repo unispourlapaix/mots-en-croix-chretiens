@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta name="google-drive-client-id" content="">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#ff69b4">
@@ -430,17 +429,12 @@
                 <div id="connexionSection">
                     <div class="auth-form">
                         <div class="menu-section">
-                            <h3>Sauvegarde Google Drive</h3>
-                            <p>Retrouve ton pseudo, ton niveau et tes scores sur un autre appareil.</p>
-                            <button type="button" id="googleSignInBtn" class="menu-cloud-btn">Continuer avec Google</button>
-                            <div id="googleBackupControls" hidden>
-                                <label for="googleBackupNickname">Ton pseudo</label>
-                                <input id="googleBackupNickname" autocomplete="nickname" maxlength="30">
-                                <button type="button" id="googleBackupSave" class="menu-cloud-btn">Sauvegarder</button>
-                                <button type="button" id="googleBackupRestore" class="menu-cloud-btn secondary" disabled>Reprendre la sauvegarde</button>
-                                <button type="button" id="googleBackupSignOut" class="menu-cloud-btn secondary">Déconnecter Google</button>
-                            </div>
-                            <p id="googleSignInStatus" role="status"></p>
+                            <form id="localProfileForm">
+                                <label for="localProfileNickname">Ton pseudo</label>
+                                <input id="localProfileNickname" autocomplete="nickname" maxlength="30" required>
+                                <button type="submit" class="menu-cloud-btn">Enregistrer</button>
+                            </form>
+                            <p id="localProfileStatus" role="status"></p>
                             <button type="button" id="openFriendsMenuBtn" class="menu-cloud-btn secondary">Gérer mes amis</button>
                         </div>
                     </div>
@@ -830,9 +824,6 @@
     <script src="js/multiplayer.js"></script>
     <script src="js/game.js"></script>
     <script src="js/private-room.js"></script>
-    <!-- ID client OAuth Web public. Configurer les origines du site dans Google Cloud. -->
-    <script src="js/google-drive-save.js"></script>
-    <script src="https://accounts.google.com/gsi/client" async></script>
 
     <!-- Service Worker Registration -->
     <script>

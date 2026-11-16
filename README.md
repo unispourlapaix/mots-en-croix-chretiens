@@ -167,7 +167,7 @@ Dans `css/styles.css` :
 
 - Ouvre **Partie privée** pour inviter quelqu’un par code ou par lien. L’hôte approuve la demande et les deux joueurs se connectent via PeerJS.
 - Dans **Menu → Profil → Gérer mes amis**, échangez vos codes d’ami pour voir votre présence mutuelle. Les contacts sont enregistrés sur l’appareil.
-- Les grilles et les records sont enregistrés sur l’appareil. **Continuer avec Google** permet de sauvegarder le pseudo et un point de reprise dans l’espace privé de l’application sur Google Drive. Pour activer cette option, configure un client OAuth Web pour l’origine du jeu, active l’API Drive et renseigne la balise `google-drive-client-id` dans `index.html`.
+- Dans **Menu → Profil**, tu peux choisir ton pseudo. Le navigateur conserve ton pseudo, ta progression et tes records sur cet appareil.
 
 ## 🤝 Contribuer
 

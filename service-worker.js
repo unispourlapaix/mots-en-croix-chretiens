@@ -1,5 +1,5 @@
 // Service Worker pour Mots En Croix Chrétiens
-const CACHE_NAME = 'mots-croix-v1.1.0';
+const CACHE_NAME = 'mots-croix-v1.2.0';
 const urlsToCache = [
   './',
   'index.html',
@@ -8,7 +8,8 @@ const urlsToCache = [
   'js/i18n.js',
   'js/gameData.js',
   'js/game.js',
-  'js/google-drive-save.js',
+  'js/menu-tabs.js',
+  'js/simple-chat.js',
   'js/private-room.js',
   'js/realtime-lobby.js',
   'manifest.json'

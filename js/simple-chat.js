@@ -1,4 +1,6 @@
 // Système de chat P2P unifié - interface SMS compacte avec WebRTC
+const localNicknameKey = 'mots-croix-pseudo';
+
 class SimpleChatSystem {
     constructor() {
         this.currentUser = null;
@@ -26,9 +28,24 @@ class SimpleChatSystem {
 
     updateUsername() {
         if (!this.currentUser) {
-            this.currentUser = localStorage.getItem('mots-croix-google-pseudo') ||
+            this.currentUser = this.getSavedNickname() ||
                 'Joueur' + Math.floor(Math.random() * 1000);
         }
+    }
+
+    getSavedNickname() {
+        try {
+            return localStorage.getItem(localNicknameKey) || localStorage.getItem('mots-croix-google-pseudo');
+        } catch {
+            return null;
+        }
+    }
+
+    setNickname(name) {
+        localStorage.setItem(localNicknameKey, name);
+        this.currentUser = name;
+        window.roomSystem?.updateUsername(name);
+        window.dispatchEvent(new CustomEvent('usernameUpdated', { detail: { username: name } }));
     }
 
     initP2P() {
