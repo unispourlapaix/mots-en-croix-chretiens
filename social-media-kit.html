@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UNITYQUEST Chroniques de l'Amour - Kit Réseaux Sociaux</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #1a1a2e;
+      color: white;
+      padding: 40px 20px;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(135deg, #667eea, #f093fb);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      color: #888;
+      font-size: 1.1rem;
+    }
+    
+    .formats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 30px;
+      margin-bottom: 60px;
+    }
+    
+    .format-card {
+      background: #16213e;
+      border-radius: 20px;
+      padding: 30px;
+      border: 2px solid #667eea;
+      transition: transform 0.3s;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .format-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+    }
+    
+    .format-card h2 {
+      color: #667eea;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .format-info {
+      color: #aaa;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+    
+    .preview-container {
+      background: white;
+      border-radius: 12px;
+      padding: 10px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 300px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .preview-container canvas {
+      max-width: 100%;
+      max-height: 280px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+    }
+    
+    .language-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .lang-btn {
+      padding: 8px 16px;
+      background: #667eea;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    
+    .lang-btn:hover {
+      background: #764ba2;
+      transform: scale(1.05);
+    }
+    
+    .lang-btn.active {
+      background: #f093fb;
+    }
+    
+    .download-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .download-btn {
+      flex: 1;
+      padding: 15px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .download-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+    }
+    
+    .download-btn.jpg {
+      background: linear-gradient(135deg, #f093fb, #f5576c);
+    }
+    
+    .caption-box {
+      background: #1a1a2e;
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 10px;
+      border-left: 4px solid #667eea;
+    }
+    
+    .caption-box h4 {
+      color: #f093fb;
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .caption-text {
+      color: #ccc;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      font-style: italic;
+    }
+    
+    .copy-caption-btn {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: #667eea;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .copy-caption-btn:hover {
+      background: #764ba2;
+      transform: scale(1.05);
+    }
+    
+    .hashtags-section {
+      background: #16213e;
+      border-radius: 20px;
+      padding: 30px;
+      margin-top: 40px;
+    }
+    
+    .hashtags-section h2 {
+      color: #667eea;
+      margin-bottom: 20px;
+    }
+    
+    .hashtags-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    
+    .hashtag-card {
+      background: #1a1a2e;
+      padding: 20px;
+      border-radius: 12px;
+      border-left: 4px solid #667eea;
+    }
+    
+    .hashtag-card h3 {
+      color: #f093fb;
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+    
+    .hashtag-list {
+      color: #aaa;
+      font-size: 0.9rem;
+      line-height: 1.8;
+    }
+    
+    /* Animations pour le canvas */
+    @keyframes pulse {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📱 UNITYQUEST Chroniques de l'Amour - Kit Réseaux Sociaux</h1>
+      <p class="subtitle">Logos animés avec philosophie traduite en 17 langues</p>
+    </header>
+
+    <div class="formats-grid">
+      <!-- Instagram Post -->
+      <div class="format-card">
+        <h2>📸 Instagram Post</h2>
+        <div class="format-info">1080×1080px • Format carré</div>
+        <div class="preview-container">
+          <canvas id="instagram-canvas" width="1080" height="1080"></canvas>
+        </div>
+        <div class="language-selector" id="instagram-langs"></div>
+        <div class="download-buttons">
+          <button class="download-btn" onclick="downloadFormat('instagram', 'png')">
+            �️ PNG
+          </button>
+          <button class="download-btn jpg" onclick="downloadFormat('instagram', 'jpg')">
+            📷 JPG
+          </button>
+        </div>
+        <div class="caption-box">
+          <h4>✍️ Texte d'accroche</h4>
+          <div class="caption-text" id="instagram-caption"></div>
+          <button class="copy-caption-btn" onclick="copyCaptions('instagram')">
+            📋 Copier le texte
+          </button>
+        </div>
+      </div>
+
+      <!-- Instagram Story -->
+      <div class="format-card">
+        <h2>📱 Instagram Story</h2>
+        <div class="format-info">1080×1920px • Format vertical</div>
+        <div class="preview-container">
+          <canvas id="story-canvas" width="1080" height="1920"></canvas>
+        </div>
+        <div class="language-selector" id="story-langs"></div>
+        <div class="download-buttons">
+          <button class="download-btn" onclick="downloadFormat('story', 'png')">
+            �️ PNG
+          </button>
+          <button class="download-btn jpg" onclick="downloadFormat('story', 'jpg')">
+            📷 JPG
+          </button>
+        </div>
+        <div class="caption-box">
+          <h4>✍️ Texte d'accroche</h4>
+          <div class="caption-text" id="story-caption"></div>
+          <button class="copy-caption-btn" onclick="copyCaptions('story')">
+            📋 Copier le texte
+          </button>
+        </div>
+      </div>
+
+      <!-- Twitter/X -->
+      <div class="format-card">
+        <h2>🐦 Twitter/X Post</h2>
+        <div class="format-info">1200×675px • Format 16:9</div>
+        <div class="preview-container">
+          <canvas id="twitter-canvas" width="1200" height="675"></canvas>
+        </div>
+        <div class="language-selector" id="twitter-langs"></div>
+        <div class="download-buttons">
+          <button class="download-btn" onclick="downloadFormat('twitter', 'png')">
+            �️ PNG
+          </button>
+          <button class="download-btn jpg" onclick="downloadFormat('twitter', 'jpg')">
+            📷 JPG
+          </button>
+        </div>
+        <div class="caption-box">
+          <h4>✍️ Texte d'accroche</h4>
+          <div class="caption-text" id="twitter-caption"></div>
+          <button class="copy-caption-btn" onclick="copyCaptions('twitter')">
+            📋 Copier le texte
+          </button>
+        </div>
+      </div>
+
+      <!-- Facebook -->
+      <div class="format-card">
+        <h2>📘 Facebook Post</h2>
+        <div class="format-info">1200×630px • Format Open Graph</div>
+        <div class="preview-container">
+          <canvas id="facebook-canvas" width="1200" height="630"></canvas>
+        </div>
+        <div class="language-selector" id="facebook-langs"></div>
+        <div class="download-buttons">
+          <button class="download-btn" onclick="downloadFormat('facebook', 'png')">
+            �️ PNG
+          </button>
+          <button class="download-btn jpg" onclick="downloadFormat('facebook', 'jpg')">
+            📷 JPG
+          </button>
+        </div>
+        <div class="caption-box">
+          <h4>✍️ Texte d'accroche</h4>
+          <div class="caption-text" id="facebook-caption"></div>
+          <button class="copy-caption-btn" onclick="copyCaptions('facebook')">
+            📋 Copier le texte
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Hashtags -->
+    <div class="hashtags-section">
+      <h2>🏷️ Hashtags Recommandés</h2>
+      <div class="hashtags-grid">
+        <div class="hashtag-card">
+          <h3>🌍 Unité & Paix</h3>
+          <div class="hashtag-list">
+            #Unity #Peace #Love<br>
+            #Interfaith #OneLove<br>
+            #WorldPeace #Harmony
+          </div>
+        </div>
+        
+        <div class="hashtag-card">
+          <h3>🙏 Spiritualité</h3>
+          <div class="hashtag-list">
+            #Faith #Spirituality<br>
+            #Religion #Wisdom<br>
+            #Meditation #Prayer
+          </div>
+        </div>
+        
+        <div class="hashtag-card">
+          <h3>📚 Éducation</h3>
+          <div class="hashtag-list">
+            #Education #Learning<br>
+            #Knowledge #Inspiration<br>
+            #Wisdom #Truth
+          </div>
+        </div>
+        
+        <div class="hashtag-card">
+          <h3>💜 UNITYQUEST</h3>
+          <div class="hashtag-list">
+            #UNITYQUEST<br>
+            #ChroniclesOfLove<br>
+            #UnityQuest
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Traductions de la philosophie dans toutes les langues
+    const philosophyTranslations = {
+      fr: {
+        title: "UNITYQUEST",
+        subtitle: "Chroniques de l'Amour",
+        quote: "L'unité qui produit la paix",
+        hashtag: "#UnityQuestCOL #Peace #Love",
+        caption: "🙏 Découvrez UNITYQUEST Chroniques de l'Amour, un jeu biblique interactif qui célèbre l'unité et la paix à travers la foi.\n\n✨ Testez vos connaissances avec 91 questions couvrant toute la Bible\n📖 Explorez l'Évangile de Jean avec concordance Strong\n🌍 Disponible en 17 langues\n\n💜 Parce que l'unité produit la paix\n\n🎮 Jouez maintenant : emmanuel.gallery"
+      },
+      en: {
+        title: "UNITYQUEST",
+        subtitle: "Chroniques de l'Amour",
+        quote: "Unity that produces peace",
+        hashtag: "#UnityQuestCOL #Peace #Love",
+        caption: "🙏 Discover UNITYQUEST Chroniques de l'Amour, an interactive biblical game celebrating unity and peace through faith.\n\n✨ Test your knowledge with 91 questions covering the entire Bible\n📖 Explore the Gospel of John with Strong's Concordance\n🌍 Available in 17 languages\n\n💜 Because unity produces peace\n\n🎮 Play now: emmanuel.gallery"
+      },
+      es: {
+        title: "UNITYQUEST",
+        subtitle: "Chroniques de l'Amour",
+        quote: "La unidad que produce la paz",
+        hashtag: "#UnityQuestCOL #Paz #Amor",
+        caption: "🙏 Descubre UNITYQUEST Chroniques de l'Amour, un juego bíblico interactivo que celebra la unidad y la paz a través de la fe.\n\n✨ Pon a prueba tus conocimientos con 91 preguntas de toda la Biblia\n📖 Explora el Evangelio de Juan con concordancia Strong\n🌍 Disponible en 17 idiomas\n\n💜 Porque la unidad produce paz\n\n🎮 Juega ahora: emmanuel.gallery"
+      },
+      de: {
+        title: "UNITYQUEST",
+        subtitle: "Chroniques de l'Amour",
+        quote: "Einheit, die Frieden schafft",
+        hashtag: "#UnityQuestCOL #Frieden #Liebe",
+        caption: "🙏 Entdecke UNITYQUEST Chroniques de l'Amour, ein interaktives Bibelspiel, das Einheit und Frieden durch Glauben feiert.\n\n✨ Teste dein Wissen mit 91 Fragen zur gesamten Bibel\n📖 Erkunde das Johannes-Evangelium mit Strong-Konkordanz\n🌍 Verfügbar in 17 Sprachen\n\n💜 Weil Einheit Frieden schafft\n\n🎮 Jetzt spielen: emmanuel.gallery"
+      },
+      it: {
+        title: "UNITYQUEST",
+        subtitle: "Chroniques de l'Amour",
+        quote: "L'unità che produce pace",
+        hashtag: "#UnityQuestCOL #Pace #Amore",
+        caption: "🙏 Scopri UNITYQUEST Chroniques de l'Amour, un gioco biblico interattivo che celebra l'unità e la pace attraverso la fede.\n\n✨ Metti alla prova le tue conoscenze con 91 domande su tutta la Bibbia\n📖 Esplora il Vangelo di Giovanni con concordanza Strong\n🌍 Disponibile in 17 lingue\n\n💜 Perché l'unità produce pace\n\n🎮 Gioca ora: emmanuel.gallery"
+      },
+      pt: {
+        title: "UNITYQUEST",
+        subtitle: "Chroniques de l'Amour",
+        quote: "A unidade que produz paz",
+        hashtag: "#UnityQuestCOL #Paz #Amor",
+        caption: "🙏 Descubra UNITYQUEST Chroniques de l'Amour, um jogo bíblico interativo que celebra a unidade e a paz através da fé.\n\n✨ Teste seus conhecimentos com 91 perguntas cobrindo toda a Bíblia\n📖 Explore o Evangelho de João com concordância Strong\n🌍 Disponível em 17 idiomas\n\n💜 Porque a unidade produz paz\n\n🎮 Jogue agora: emmanuel.gallery"
+      },
+      ru: {
+        title: "UNITYQUEST",
+        subtitle: "Chroniques de l'Amour",
+        quote: "Единство, рождающее мир",
+        hashtag: "#UnityQuestCOL #Мир #Любовь",
+        caption: "🙏 Откройте для себя UNITYQUEST, интерактивную библейскую игру, прославляющую единство и мир через веру.\n\n✨ Проверьте свои знания с 91 вопросом по всей Библии\n📖 Изучите Евангелие от Иоанна с симфонией Стронга\n🌍 Доступно на 17 языках\n\n💜 Потому что единство рождает мир\n\n🎮 Играйте сейчас: emmanuel.gallery"
+      },
+      uk: {
+        title: "UNITYQUEST",
+        subtitle: "Chroniques de l'Amour",
+        quote: "Єдність, що породжує мир",
+        hashtag: "#UnityQuestCOL #Мир #Любов",
+        caption: "🙏 Відкрийте для себе UNITYQUEST, інтерактивну біблійну гру, що прославляє єдність і мир через віру.\n\n✨ Перевірте свої знання з 91 питанням по всій Біблії\n📖 Вивчайте Євангеліє від Іоана з симфонією Стронга\n🌍 Доступно 17 мовами\n\n💜 Тому що єдність породжує мир\n\n🎮 Грайте зараз: emmanuel.gallery"
+      },
+      zh: {
+        title: "UNITYQUEST",
+        subtitle: "Chroniques de l'Amour",
+        quote: "产生和平的团结",
+        hashtag: "#UnityQuestCOL #和平 #爱",
+        caption: "🙏 发现FaithChronicles，一个通过信仰庆祝团结与和平的互动圣经游戏。\n\n✨ 通过91个涵盖整本圣经的问题测试您的知识\n📖 使用Strong词典探索约翰福音\n🌍 支持17种语言\n\n💜 因为团结产生和平\n\n🎮 现在玩: emmanuel.gallery"
+      },
+      ar: {
+        title: "UNITYQUEST",
+        subtitle: "Chroniques de l'Amour",
+        quote: "الوحدة التي تنتج السلام",
+        hashtag: "#UnityQuestCOL #السلام #الحب",
+        caption: "🙏 اكتشف FaithChronicles، لعبة كتابية تفاعلية تحتفل بالوحدة والسلام من خلال الإيمان.\n\n✨ اختبر معرفتك مع 91 سؤالاً يغطي الكتاب المقدس بأكمله\n📖 استكشف إنجيل يوحنا مع قاموس سترونج\n🌍 متاح بـ 17 لغة\n\n💜 لأن الوحدة تنتج السلام\n\n🎮 العب الآن: emmanuel.gallery"
+      },
+      he: {
+        title: "UNITYQUEST",
+        subtitle: "Chroniques de l'Amour",
+        quote: "האחדות היוצרת שלום",
+        hashtag: "#UnityQuestCOL #שלום #אהבה",
+        caption: "🙏 גלה את UNITYQUEST, משחק תנ\"כי אינטראקטיבי החוגג אחדות ושלום דרך אמונה.\n\n✨ בדוק את הידע שלך עם 91 שאלות המכסות את כל התנ\"ך\n📖 חקור את בשורת יוחנן עם קונקורדנציה של סטרונג\n🌍 זמין ב-17 שפות\n\n💜 כי אחדות יוצרת שלום\n\n🎮 שחק עכשיו: emmanuel.gallery"
+      },
+      jp: {
+        title: "UNITYQUEST",
+        subtitle: "Chroniques de l'Amour",
+        quote: "平和を生み出す統一",
+        hashtag: "#UnityQuestCOL #平和 #愛",
+        caption: "🙏 信仰を通じて統一と平和を祝うインタラクティブな聖書ゲーム、FaithChroniclesを発見してください。\n\n✨ 聖書全体をカバーする91の質問で知識をテスト\n📖 ストロング辞典でヨハネの福音書を探索\n🌍 17言語で利用可能\n\n💜 統一が平和を生み出すから\n\n🎮 今すぐプレイ: emmanuel.gallery"
+      },
+      ko: {
+        title: "UNITYQUEST",
+        subtitle: "Chroniques de l'Amour",
+        quote: "평화를 만드는 통일",
+        hashtag: "#UnityQuestCOL #평화 #사랑",
+        caption: "🙏 믿음을 통해 통일과 평화를 축하하는 인터랙티브 성경 게임, FaithChronicles를 발견하세요.\n\n✨ 전체 성경을 다루는 91개의 질문으로 지식을 테스트\n📖 스트롱 사전으로 요한복음 탐색\n🌍 17개 언어로 이용 가능\n\n💜 통일이 평화를 만들기 때문에\n\n🎮 지금 플레이: emmanuel.gallery"
+      },
+      hi: {
+        title: "UNITYQUEST",
+        subtitle: "Chroniques de l'Amour",
+        quote: "एकता जो शांति उत्पन्न करती है",
+        hashtag: "#UnityQuestCOL #शांति #प्रेम",
+        caption: "🙏 FaithChronicles की खोज करें, एक इंटरैक्टिव बाइबिल गेम जो विश्वास के माध्यम से एकता और शांति का जश्न मनाता है।\n\n✨ संपूर्ण बाइबिल को कवर करने वाले 91 प्रश्नों के साथ अपने ज्ञान का परीक्षण करें\n📖 स्ट्रॉन्ग कॉनकॉर्डेंस के साथ यूहन्ना के सुसमाचार का अन्वेषण करें\n🌍 17 भाषाओं में उपलब्ध\n\n💜 क्योंकि एकता शांति उत्पन्न करती है\n\n🎮 अभी खेलें: emmanuel.gallery"
+      },
+      sw: {
+        title: "UNITYQUEST",
+        subtitle: "Chroniques de l'Amour",
+        quote: "Umoja unao zaa amani",
+        hashtag: "#UnityQuestCOL #Amani #Upendo",
+        caption: "🙏 Gundua UNITYQUEST, mchezo wa interaktivo wa Biblia unaosherehekea umoja na amani kupitia imani.\n\n✨ Jaribu maarifa yako na maswali 91 yanayoshughulikia Biblia nzima\n📖 Chunguza Injili ya Yohana na Strong's Concordance\n🌍 Inapatikana kwa lugha 17\n\n💜 Kwa sababu umoja unazaa amani\n\n🎮 Cheza sasa: emmanuel.gallery"
+      },
+      pl: {
+        title: "UNITYQUEST",
+        subtitle: "Chroniques de l'Amour",
+        quote: "Jedność rodząca pokój",
+        hashtag: "#UnityQuestCOL #Pokój #Miłość",
+        caption: "🙏 Odkryj UNITYQUEST, interaktywną grę biblijną celebrującą jedność i pokój przez wiarę.\n\n✨ Sprawdź swoją wiedzę z 91 pytaniami obejmującymi całą Biblię\n📖 Poznaj Ewangelię Jana z konkordancją Stronga\n🌍 Dostępna w 17 językach\n\n💜 Bo jedność rodzi pokój\n\n🎮 Zagraj teraz: emmanuel.gallery"
+      },
+      rc: {
+        title: "UNITYQUEST",
+        subtitle: "Chroniques de l'Amour",
+        quote: "Lisángá oyo ebimisaka kimya",
+        hashtag: "#UnityQuestCOL #Kimya #Bolingo",
+        caption: "🙏 Yeba UNITYQUEST, lisano ya interaktif ya Biblia oyo esepelaka na lisángá mpe kimya na nzela ya kondima.\n\n✨ Meka boyebi na yo na mituna 91 oyo ezali kolobela Biblia mobimba\n📖 Luká Nsango Malamu ya Yoane na Strong's Concordance\n🌍 Ezali na bilóko 17\n\n💜 Mpo lisángá ebimisaka kimya\n\n🎮 Sakana sik'oyo: emmanuel.gallery"
+      }
+    };
+
+    // État actuel pour chaque format
+    const currentLang = {
+      instagram: 'fr',
+      story: 'en',
+      twitter: 'es',
+      facebook: 'de'
+    };
+
+    // Générer les boutons de langue pour chaque format
+    function initLanguageButtons() {
+      const formats = ['instagram', 'story', 'twitter', 'facebook'];
+      const langCodes = Object.keys(philosophyTranslations);
+      const langFlags = {
+        fr: '🇫🇷', en: '🇬🇧', es: '🇪🇸', de: '🇩🇪',
+        it: '🇮🇹', pt: '🇵🇹', ru: '🇷🇺', uk: '🇺🇦',
+        zh: '🇨🇳', ar: '🇸🇦', he: '🇮🇱', jp: '🇯🇵',
+        ko: '🇰🇷', hi: '🇮🇳', sw: '🇰🇪', pl: '🇵🇱', rc: '🇨🇩'
+      };
+
+      formats.forEach(format => {
+        const container = document.getElementById(`${format}-langs`);
+        langCodes.forEach(code => {
+          const btn = document.createElement('button');
+          btn.className = 'lang-btn' + (currentLang[format] === code ? ' active' : '');
+          btn.textContent = `${langFlags[code]} ${code.toUpperCase()}`;
+          btn.onclick = () => selectLanguage(format, code);
+          container.appendChild(btn);
+        });
+      });
+    }
+
+    // Sélectionner une langue
+    function selectLanguage(format, lang) {
+      currentLang[format] = lang;
+      
+      // Mettre à jour les boutons
+      const container = document.getElementById(`${format}-langs`);
+      const buttons = container.querySelectorAll('.lang-btn');
+      buttons.forEach((btn, i) => {
+        btn.classList.toggle('active', Object.keys(philosophyTranslations)[i] === lang);
+      });
+      
+      // Redessiner le canvas
+      drawFormat(format);
+      
+      // Mettre à jour le caption
+      updateCaption(format);
+    }
+    
+    // Mettre à jour le caption
+    function updateCaption(format) {
+      const lang = currentLang[format];
+      const trans = philosophyTranslations[lang];
+      const captionElement = document.getElementById(`${format}-caption`);
+      
+      if (captionElement) {
+        // Formater le caption avec emoji et hashtags
+        const formattedCaption = trans.caption.replace(/\n\n/g, '\n\n');
+        captionElement.textContent = formattedCaption;
+      }
+    }
+    
+    // Copier le caption dans le presse-papier
+    function copyCaptions(format) {
+      const lang = currentLang[format];
+      const trans = philosophyTranslations[lang];
+      
+      navigator.clipboard.writeText(trans.caption + '\n\n' + trans.hashtag).then(() => {
+        alert(`✅ Texte copié dans le presse-papier!\n\nLangue: ${lang.toUpperCase()}\n\nVous pouvez maintenant le coller dans votre post ${format} 📱`);
+      }).catch(err => {
+        console.error('Erreur copie:', err);
+        alert('❌ Erreur lors de la copie. Sélectionnez manuellement le texte.');
+      });
+    }
+
+    // Dessiner le logo avec texte
+    function drawLogo(ctx, x, y, size) {
+      const centerX = x;
+      const centerY = y;
+      const radius = size / 2;
+      
+      // Fond gradient circulaire
+      const bgGradient = ctx.createLinearGradient(x - radius, y - radius, x + radius, y + radius);
+      bgGradient.addColorStop(0, '#667eea');
+      bgGradient.addColorStop(0.5, '#764ba2');
+      bgGradient.addColorStop(1, '#f093fb');
+      
+      ctx.fillStyle = bgGradient;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Glow
+      const glowGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius * 0.55);
+      glowGradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+      glowGradient.addColorStop(0.7, 'rgba(255, 255, 255, 0.2)');
+      glowGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      
+      ctx.fillStyle = glowGradient;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius * 0.55, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Ombre pour la croix
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+      ctx.shadowBlur = size * 0.02;
+      ctx.shadowOffsetY = size * 0.008;
+      
+      // Gradient pour la croix
+      const crossGradient = ctx.createLinearGradient(x - radius, y - radius, x + radius, y + radius);
+      crossGradient.addColorStop(0, '#ffffff');
+      crossGradient.addColorStop(1, '#f3f4f6');
+      ctx.fillStyle = crossGradient;
+      
+      // Barres de la croix
+      const barWidth = size * 0.47;
+      const barHeight = size * 0.078;
+      
+      // Horizontale
+      ctx.beginPath();
+      ctx.roundRect(centerX - barWidth / 2, centerY - barHeight / 2, barWidth, barHeight, barHeight / 2);
+      ctx.fill();
+      
+      // Verticale
+      ctx.beginPath();
+      ctx.roundRect(centerX - barHeight / 2, centerY - barWidth / 2, barHeight, barWidth, barHeight / 2);
+      ctx.fill();
+      
+      ctx.shadowColor = 'transparent';
+      
+      // Point central
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, size * 0.049, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Particules
+      const particles = [
+        { x: 0.33, y: 0.33 }, { x: 0.67, y: 0.33 },
+        { x: 0.5, y: 0.27 }, { x: 0.67, y: 0.67 }, { x: 0.33, y: 0.67 }
+      ];
+      
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      particles.forEach(pos => {
+        ctx.beginPath();
+        ctx.arc(x + (pos.x - 0.5) * size, y + (pos.y - 0.5) * size, size * 0.012, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    // Polyfill roundRect
+    if (!CanvasRenderingContext2D.prototype.roundRect) {
+      CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+        this.moveTo(x + r, y);
+        this.lineTo(x + w - r, y);
+        this.quadraticCurveTo(x + w, y, x + w, y + r);
+        this.lineTo(x + w, y + h - r);
+        this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        this.lineTo(x + r, y + h);
+        this.quadraticCurveTo(x, y + h, x, y + h - r);
+        this.lineTo(x, y + r);
+        this.quadraticCurveTo(x, y, x + r, y);
+        this.closePath();
+      };
+    }
+
+    // Dessiner chaque format
+    function drawFormat(format) {
+      const canvas = document.getElementById(`${format}-canvas`);
+      const ctx = canvas.getContext('2d');
+      const trans = philosophyTranslations[currentLang[format]];
+      
+      // Fond gradient
+      const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      bgGradient.addColorStop(0, '#667eea');
+      bgGradient.addColorStop(0.5, '#764ba2');
+      bgGradient.addColorStop(1, '#f093fb');
+      ctx.fillStyle = bgGradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Configuration selon le format
+      let logoSize, logoY, titleY, subtitleY, quoteY, quoteSize;
+      
+      if (format === 'instagram') {
+        logoSize = 300;
+        logoY = 350;
+        titleY = 580;
+        subtitleY = 640;
+        quoteY = 780;
+        quoteSize = 32;
+      } else if (format === 'story') {
+        logoSize = 350;
+        logoY = 600;
+        titleY = 900;
+        subtitleY = 970;
+        quoteY = 1200;
+        quoteSize = 36;
+      } else if (format === 'twitter') {
+        logoSize = 250;
+        logoY = 260;
+        titleY = 420;
+        subtitleY = 470;
+        quoteY = 560;
+        quoteSize = 28;
+      } else { // facebook
+        logoSize = 220;
+        logoY = 240;
+        titleY = 380;
+        subtitleY = 425;
+        quoteY = 520;
+        quoteSize = 26;
+      }
+      
+      // Dessiner le logo
+      drawLogo(ctx, canvas.width / 2, logoY, logoSize);
+      
+      // Textes
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+      ctx.shadowBlur = 20;
+      ctx.shadowOffsetY = 5;
+      
+      // Titre
+      ctx.fillStyle = 'white';
+      ctx.font = `bold ${logoSize * 0.2}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.fillText(trans.title, canvas.width / 2, titleY);
+      
+      // Sous-titre
+      ctx.font = `${logoSize * 0.13}px Arial`;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.fillText(trans.subtitle, canvas.width / 2, subtitleY);
+      
+      // Citation
+      ctx.font = `italic ${quoteSize}px Arial`;
+      ctx.fillStyle = 'white';
+      ctx.fillText(`"${trans.quote}"`, canvas.width / 2, quoteY);
+      
+      // Hashtag
+      ctx.shadowBlur = 10;
+      ctx.font = `${quoteSize * 0.75}px Arial`;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.fillText(trans.hashtag, canvas.width / 2, quoteY + 50);
+    }
+
+    // Télécharger un format
+    function downloadFormat(format, imageFormat = 'png') {
+      const canvas = document.getElementById(`${format}-canvas`);
+      const lang = currentLang[format];
+      
+      // Définir le type MIME et l'extension
+      const mimeType = imageFormat === 'jpg' ? 'image/jpeg' : 'image/png';
+      const extension = imageFormat === 'jpg' ? 'jpg' : 'png';
+      const quality = imageFormat === 'jpg' ? 0.95 : undefined; // Qualité JPG haute
+      
+      // Créer le lien de téléchargement
+      const link = document.createElement('a');
+      link.download = `faithchronicles-${format}-${lang}.${extension}`;
+      link.href = canvas.toDataURL(mimeType, quality);
+      link.click();
+      
+      // Message avec emoji selon le format d'image
+      const formatEmoji = imageFormat === 'jpg' ? '📷' : '🖼️';
+      const formatName = imageFormat.toUpperCase();
+      const trans = philosophyTranslations[lang];
+      
+      alert(`✅ Image téléchargée!\n\n${formatEmoji} Format: ${formatName}\n📱 Réseau: ${format}\n🌍 Langue: ${lang.toUpperCase()}\n\n💡 N'oubliez pas d'ajouter le texte d'accroche et:\n${trans.hashtag}`);
+    }
+
+    // Initialiser
+    initLanguageButtons();
+    ['instagram', 'story', 'twitter', 'facebook'].forEach(format => {
+      drawFormat(format);
+      updateCaption(format);
+    });
+  </script>
+</body>
+</html>

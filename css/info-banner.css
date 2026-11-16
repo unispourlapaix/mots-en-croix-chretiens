@@ -1,0 +1,426 @@
+/* Bandeau Info - Style Panneau LED Aéroport */
+.info-banner {
+    background: transparent;
+    color: #000000;
+    padding: 8px 15px;
+    box-shadow: none;
+    position: relative;
+    overflow: hidden;
+    min-height: 45px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-family: 'Courier New', 'Monaco', 'Consolas', monospace;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.info-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+}
+
+/* Scores et progression fixes (ne défilent pas) */
+.info-fixed {
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+    align-items: center;
+}
+
+.info-stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    color: #000000;
+    padding: 4px 10px;
+    border-radius: 2px;
+    font-weight: 900;
+    font-size: 0.75em;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    box-shadow: none;
+}
+
+.info-stat-icon {
+    font-size: 0.9em;
+    font-style: normal;
+}
+
+.info-stat-value {
+    font-weight: 900;
+    font-family: 'Courier New', monospace;
+}
+
+/* Messages avec apparition/disparition (style aéroport) */
+.info-scrolling {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    height: 25px;
+    margin-left: auto;
+    padding-left: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.info-messages {
+    display: flex;
+    position: relative;
+    height: 100%;
+}
+
+.info-message {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75em;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #000000;
+    white-space: nowrap;
+}
+
+.info-messages {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100%;
+}
+
+.info-message-icon {
+    font-size: 1em;
+    font-weight: 900;
+    color: #000000;
+}
+
+/* Pause au survol */
+.info-scrolling:hover .info-message {
+    animation-play-state: paused;
+}
+
+/* Variante: mode compact (mobile vertical) */
+@media (max-width: 768px) {
+    .info-banner {
+        flex-direction: column;
+        gap: 6px;
+        padding: 6px 8px;
+        min-height: 40px;
+    }
+
+    .info-banner-content {
+        flex-direction: column;
+        gap: 6px;
+        position: relative;
+        min-height: 30px;
+        width: 100%;
+    }
+
+    /* Stats et messages alternent - par défaut on affiche les stats */
+    .info-fixed {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        min-height: 30px;
+        align-items: center;
+    }
+
+    .info-scrolling {
+        width: 100%;
+        height: auto;
+        min-height: 30px;
+        margin-left: 0;
+        padding-left: 0;
+        padding-top: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .info-messages {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 30px;
+    }
+
+    /* Mode alternance: masquer stats, afficher messages */
+    .info-banner.mobile-show-messages .info-fixed {
+        display: none;
+    }
+
+    .info-banner.mobile-show-messages .info-scrolling {
+        display: flex;
+    }
+
+    /* Masquer MaxScore et Clicks sur mobile */
+    .info-stat:nth-child(3),
+    .info-stat:nth-child(4) {
+        display: none;
+    }
+
+    .info-stat {
+        padding: 4px 8px;
+        font-size: 0.7em;
+        letter-spacing: 0.5px;
+        justify-content: center;
+        border-radius: 4px;
+    }
+
+    .info-stat-icon {
+        font-size: 0.9em;
+    }
+
+    .info-messages {
+        justify-content: center;
+    }
+
+    .info-message {
+    .info-message {
+        font-size: 0.65em;
+        letter-spacing: 1px;
+    }
+
+    @keyframes led-flash {
+        0% {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(-50%) translateY(5px);
+        }
+        2% {
+            visibility: visible;
+        }
+        5%, 85% {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+        90% {
+            opacity: 0;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-5px);
+        }
+        92%, 100% {
+            opacity: 0;
+            visibility: hidden;
+        }
+    }   }
+        5%, 85% {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+        90% {
+            opacity: 0;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-5px);
+        }
+        92%, 100% {
+            opacity: 0;
+            visibility: hidden;
+        }
+    }
+
+    .info-progress {
+        height: 3px;
+    }
+}
+
+@media (max-width: 480px) {
+    .info-banner {
+        padding: 5px 6px;
+        gap: 5px;
+    }
+
+    .info-fixed {
+        gap: 6px;
+    }
+
+    .info-stat {
+        padding: 3px 6px;
+        font-size: 0.65em;
+        gap: 3px;
+        letter-spacing: 0.3px;
+    }
+
+    .info-stat-icon {
+        font-size: 0.85em;
+    }
+
+    .info-scrolling {
+        height: 18px;
+    }
+
+    .info-message {
+        font-size: 0.6em;
+        gap: 3px;
+        letter-spacing: 0.8px;
+    }
+
+    .info-progress {
+        height: 2px;
+    }
+}
+
+/* Thème alternatif: Inversé */
+.info-banner.inverted {
+    background: #000000;
+    color: #ffffff;
+}
+
+.info-banner.inverted .info-stat {
+    background: #ffffff;
+    color: #000000;
+    box-shadow: 2px 2px 0 rgba(255, 255, 255, 0.2);
+}
+
+.info-banner.inverted .info-message {
+    color: #ffffff;
+}
+
+.info-banner.inverted .info-message-icon {
+    color: #ffffff;
+}
+
+/* Notifications importantes (LED clignotant) */
+.info-message.important {
+    animation: led-blink 1s ease-in-out infinite;
+    font-weight: 900;
+    color: #000000;
+    background: #ffeb3b;
+    padding: 2px 8px;
+}
+
+@keyframes led-blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Pas de séparateur entre messages (ils apparaissent un par un) */
+.info-message::after {
+    display: none;
+}
+
+/* Style pour les liens dans les messages */
+.info-message a {
+    color: #000000;
+    text-decoration: none;
+    font-weight: 900;
+    border-bottom: 2px solid #000000;
+    transition: all 0.2s ease;
+}
+
+.info-message a:hover {
+    background: #000000;
+    color: #ffffff;
+    padding: 0 4px;
+}
+
+/* Indicateur de progression visuel */
+.info-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: transparent;
+}
+
+.info-progress-bar {
+    height: 100%;
+    background: #000000;
+    transition: width 0.3s ease;
+    box-shadow: none;
+}
+
+/* Notifications importantes (fond jaune clignotant) */
+.info-message.important {
+    animation: led-blink 1s ease-in-out infinite;
+    font-weight: 900;
+    color: #ff9800;
+    background: transparent;
+    padding: 2px 8px;
+}
+
+@keyframes led-blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Thème alternatif: Inversé (noir/blanc) */
+.info-banner.inverted {
+    background: #000000;
+    color: #ffffff;
+}
+
+.info-banner.inverted .info-stat {
+    background: #ffffff;
+    color: #000000;
+    box-shadow: 2px 2px 0 rgba(255, 255, 255, 0.2);
+}
+
+.info-banner.inverted .info-message {
+    color: #ffffff;
+}
+
+.info-banner.inverted .info-message-icon {
+    color: #ffffff;
+}
+
+.info-banner.inverted .info-message a {
+    color: #ffffff;
+    border-bottom-color: #ffffff;
+}
+
+.info-banner.inverted .info-message a:hover {
+    background: #ffffff;
+    color: #000000;
+}info-message a:hover {
+    background: #000000;
+    color: #ffffff;
+    padding: 0 4px;
+}
+
+/* Indicateur de progression visuel */
+.info-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: #e0e0e0;
+    transition: width 0.3s ease;
+}
+
+.info-progress-bar {
+    height: 100%;
+    background: #000000;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 8px rgba(0,0,0,0.3);
+}   left: 0;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.3);
+    transition: width 0.3s ease;
+}
+
+.info-progress-bar {
+    height: 100%;
+    background: white;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}

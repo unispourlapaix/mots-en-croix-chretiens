@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🙏 Lobby "LoveJesus" - Serveur de Présence</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .status {
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .status.connecting {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .stats {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            color: #666;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .players-list {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .player-item {
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .player-avatar {
+            font-size: 24px;
+        }
+        
+        .player-info {
+            flex: 1;
+        }
+        
+        .player-name {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .player-id {
+            font-size: 12px;
+            color: #999;
+            font-family: monospace;
+        }
+        
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .info-box p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🙏 Lobby "LoveJesus"</h1>
+        <p class="subtitle">Serveur de Présence P2P Gratuit</p>
+        
+        <div id="status" class="status connecting pulse">
+            🔄 Connexion au réseau...
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-label">👥 Joueurs connectés</span>
+                <span class="stat-value" id="playerCount">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">🔗 Connexions actives</span>
+                <span class="stat-value" id="connectionCount">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">⏱️ Uptime</span>
+                <span class="stat-value" id="uptime">0s</span>
+            </div>
+        </div>
+        
+        <div class="players-list" id="playersList">
+            <p style="text-align: center; color: #999;">Aucun joueur pour le moment</p>
+        </div>
+        
+        <div class="info-box">
+            <p>💡 <strong>Ce lobby permet aux joueurs de se découvrir automatiquement !</strong></p>
+            <p>🌍 Laissez cette page ouverte pour maintenir le lobby actif</p>
+            <p>🔧 100% gratuit grâce au serveur PeerJS cloud</p>
+        </div>
+    </div>
+
+    <script src="js/lobby-server.js"></script>
+    <script>
+        // Mise à jour de l'interface
+        const statusDiv = document.getElementById('status');
+        const playerCountSpan = document.getElementById('playerCount');
+        const connectionCountSpan = document.getElementById('connectionCount');
+        const uptimeSpan = document.getElementById('uptime');
+        const playersListDiv = document.getElementById('playersList');
+        
+        let startTime = Date.now();
+        
+        // Écouter les événements du lobby
+        if (window.lobbyServer) {
+            const lobby = window.lobbyServer;
+            
+            // Mettre à jour le statut
+            lobby.peer.on('open', () => {
+                statusDiv.className = 'status connected';
+                statusDiv.innerHTML = '✅ Lobby "LoveJesus" actif !';
+            });
+            
+            lobby.peer.on('error', (err) => {
+                if (err.type === 'unavailable-id') {
+                    statusDiv.className = 'status connected';
+                    statusDiv.innerHTML = '✅ Lobby "LoveJesus" déjà actif ailleurs (OK)';
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.innerHTML = '❌ Erreur: ' + err.message;
+                }
+            });
+            
+            // Rafraîchir les stats toutes les secondes
+            setInterval(() => {
+                const stats = lobby.getStats();
+                
+                playerCountSpan.textContent = stats.players;
+                connectionCountSpan.textContent = stats.connections;
+                
+                // Uptime
+                const uptime = Math.floor((Date.now() - startTime) / 1000);
+                const hours = Math.floor(uptime / 3600);
+                const minutes = Math.floor((uptime % 3600) / 60);
+                const seconds = uptime % 60;
+                uptimeSpan.textContent = `${hours}h ${minutes}m ${seconds}s`;
+                
+                // Liste des joueurs
+                if (stats.playerList.length > 0) {
+                    playersListDiv.innerHTML = stats.playerList.map(player => `
+                        <div class="player-item">
+                            <span class="player-avatar">${player.avatar || '👤'}</span>
+                            <div class="player-info">
+                                <div class="player-name">${player.username || 'Anonyme'}</div>
+                                <div class="player-id">${player.peerId}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    playersListDiv.innerHTML = '<p style="text-align: center; color: #999;">Aucun joueur pour le moment</p>';
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
